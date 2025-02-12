@@ -1,0 +1,185 @@
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  .containerblue p, .containerblack p {
+    /* hyphens: auto;
+    -webkit-hyphens: auto;  */
+    text-align: left;
+    text-align-last: left;
+  }
+  .containerblue, .containerblack {
+      background-color: #2255FF; /* Blue background for both initially */
+      color: white;
+      padding-top: 2%;
+      padding-left: 5%;
+      padding-right: 9%;
+      padding-bottom: 2%;
+      box-sizing: border-box;
+      border-radius: 15px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-left: -5%;
+      height: calc(59%*15/26);
+      width: 59%;
+  }
+  .containerblack {
+      background-color: #17161c; /* Specific background for black container */
+      z-index: 1;
+      margin-left: 46%;
+      padding-left: 11%;
+      padding-right: 3%;
+  }
+  .heading {
+    margin: 0;
+    font-weight: bold;
+    color: #fafafa;
+    width: 101%;
+  }
+  .secondcontainer {
+    margin-top:-7%;
+    position: relative;
+    z-index:0;
+  }
+  @media screen and (max-width: 1050px) {
+    .containerblue, .containerblack {
+      width: auto;
+      height: auto;
+      margin-left: auto;
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+    .containerblue {
+      margin-top: 3%!important;
+    }
+    .containerblack {
+      margin-top: -3%!important;
+    }
+    .secondcontainer {
+      margin-top: 3%;
+    }
+  }
+  
+{%- endstyle -%}
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="containerblue" id="firstContainer">
+      <h2 class="heading">{{ section.settings.heading1 | newline_to_br }}</h2>
+      {{ section.settings.text1 | newline_to_br }}
+  </div>
+  <div class="containerblack" style="margin-top: -12%;">
+      {{ section.settings.text2 | newline_to_br }}
+  </div>
+  
+  <div class="secondcontainer">
+      <div class="containerblue">
+          <h2 class="heading">{{ section.settings.heading2 | newline_to_br }}</h2>
+          {{ section.settings.text3 | newline_to_br }}
+      </div>
+      <div class="containerblack" style="margin-top:-13%">
+          {{ section.settings.text4 | newline_to_br }}
+      </div>
+  </div>
+</div>
+<script>
+    function equalContainer() {
+        var allContainers = document.querySelectorAll('.containerblue, .containerblack');
+        var tallestContainerHeight = 0;
+        
+        // Find the height of the tallest container
+        allContainers.forEach(function(container) {
+            if (container.offsetHeight > tallestContainerHeight) {
+                tallestContainerHeight = container.offsetHeight;
+            }
+        });
+        
+        // Set the height of all containers to match the tallest container
+        allContainers.forEach(function(container) {
+            container.style.height = tallestContainerHeight + 'px';
+        });
+    };
+  window.onload = equalContainer();
+  window.addEventListener('resize', equalContainer);
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.text-with-text-ladder.name",
+  "class": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "heading1",
+      "default": "Packaging: Waste & Impact",
+      "label": "Heading 1"
+    },
+    {
+      "type": "richtext",
+      "id": "text1",
+      "default": "<p> Imagine the countless products we consume daily. Now, visualize the packaging that encases them. The magnitude of packaging waste generated annually is staggering. With the rise of EPR packaging, non-biodegradable materials, especially plastics, are being addressed more proactively. These materials previously found their way into our oceans, forests, and urban landscapes, disrupting ecosystems. </p>",
+      "label": "Text 1"
+    },
+    {
+      "type": "richtext",
+      "id": "text2",
+      "default": "<p>Packaging waste management initiatives are now curbing this trend, reducing the environmental challenges posed. Beyond waste, the production of these packaging materials consumes vast resources. Water, minerals, and energy are expended, leaving behind a significant environmental footprint. Packaging reporting has highlighted how the processes involved in packaging production contribute to global carbon emissions, amplifying the greenhouse effect.</p>",
+      "label": "Text 2"
+    },
+    {
+      "type": "textarea",
+      "id": "heading2",
+      "default": "Sustainable Packaging Evolution",
+      "label": "Heading 2"
+    },
+    {
+      "type": "textarea",
+      "id": "text3",
+      "default": "<p>The global call for sustainable packaging solutions, backed by effective packaging waste management, is not just a trend; it's a necessity. EPR packaging is leading this revolution, emphasizing the adoption of materials that are biodegradable, compostable, or recyclable. Modern design philosophies, often highlighted in packaging reporting, emphasize minimalism without compromising aesthetics or functionality. </p>",
+      "label": "Text 3"
+    },
+    {
+      "type": "richtext",
+      "id": "text4",
+      "default": "<p>emphasize minimalism without compromising aesthetics or functionality. By using less material and ensuring that what's used is recyclable or reusable, brands can make a profound impact. Additionally, a holistic perspective is essential. This means considering the entire lifecycle of packaging, from the sourcing of raw materials to production, consumption, and eventual disposal or recycling.</p>",
+      "label": "Text 4"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.text-with-text-ladder.presets.name"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,43 @@
+<style type="text/css">
+  .template-404 .title + * {
+    margin-top: 1rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .template-404 .title + * {
+      margin-top: 2rem;
+    }
+  }
+</style>
+<script type="text/javascript">
+  // Change the urls for en-nl
+  window.onload = function() {
+    var referrer = window.location.href;
+
+    if (referrer.includes('en-nl/')) {
+      referrer = referrer.replace('en-nl/', '');
+      window.location.href = referrer
+    }
+    else if (referrer.includes('en-nl')) { //might not have a trailing /
+      referrer = referrer.replace('en-nl', '');
+      window.location.href = referrer
+    }
+    else if (referrer.includes('products/')) {
+      window.location.href = '/pages/pricing'
+    }
+    else if (referrer.includes('collections/')) {
+      window.location.href = '/pages/pricing'
+    }
+  };
+</script>
+<div class="template-404 page-width page-margin center">
+  <p>
+    {{ 'templates.404.subtext' | t }}
+  </p>
+  <h1 class="title">
+    {{ 'templates.404.title' | t }}
+  </h1>
+  <a href="{{ routes.all_products_collection_url }}" class="button">
+    {{ 'general.continue_shopping' | t }}
+  </a>
+</div>

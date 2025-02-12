@@ -1,0 +1,58 @@
+{% schema %}
+  {
+    "name": "t:sections.nocurenopay.name",
+    "settings": [],
+      "presets": [
+    {
+      "name": "t:sections.nocurenopay.presets.name"
+    }
+    ]
+  }
+{% endschema %}
+
+<style>
+  .no-cure-no-pay {
+  position: fixed;
+    bottom: 10%;
+    right: 8%;
+    background-color: #2255ff;
+    color: #fafafa;
+    border-radius: 50%;
+    width: 14rem;
+    height: 14rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    text-align: center;
+    z-index: 2;
+    transform: rotate(25deg);
+  }
+
+  @media (max-width: 1199px) {
+    .no-cure-no-pay {
+      display: none;
+    }
+  }
+</style>
+
+<div class="no-cure-no-pay h3">
+  NO CURE<br>NO PAY 
+</div>
+<script>
+  window.onscroll = function() {
+    var noCureNoPay = document.querySelector('.no-cure-no-pay');
+    var newshub = document.getElementById('newshub');
+
+    var newshubOffset = newshub.getBoundingClientRect().top + window.scrollY - window.innerHeight;
+    var scrollPosition = window.scrollY + noCureNoPay.offsetHeight - 150;
+
+    if (scrollPosition > newshubOffset) {
+      // Adjust the bottom position of noCureNoPay to prevent overlap
+      noCureNoPay.style.bottom = (scrollPosition - newshubOffset + 100) + 'px';
+    } else {
+      // Return to the original position when not near newshub
+      noCureNoPay.style.bottom = '10%';
+    }
+  };
+</script>

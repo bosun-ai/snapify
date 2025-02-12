@@ -1,0 +1,121 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom_new | times: 0.75 | round: 0 }}px;
+  }
+  .hero-gradient {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: linear-gradient(110deg, #2c2b30 60%, #2255ff);
+    height: auto;
+    min-height: 89dvh;
+    width: 100%;
+    position: relative;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom_new }}px;
+    }
+  }
+{%- endstyle -%}
+<script>
+  var thisPage = new URL(window.location.href);
+  const lang = thisPage.searchParams.get('lang');
+  var setLanguage = thisPage.pathname.split('/')[1].toLowerCase();
+  if (lang !== null && lang.toLowerCase() !== setLanguage) {
+    var newUrl = `${thisPage.origin}/${lang.toLowerCase()}${thisPage.pathname}${thisPage.search}`;
+    window.location.href = newUrl;
+  }
+
+  async function unsubscribe() {
+    var server = 'https://server.for-sure.net:4195/unsubscribe';
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const unsubId = urlParams.get('id');
+    if (unsubId == null) {
+      console.log("Invalid Id, ignoring it");
+      return;
+    }
+    console.log(unsubId);
+    var serverUrl = `${server}/${unsubId}`;
+    fetch(serverUrl)
+    .then(response => {
+      if (response.ok) {
+        return response.text();
+      }
+    })
+    .then(data => {
+      console.log(data);
+    })
+    .catch(error => {
+    });
+  }
+</script>
+<div class="hero-gradient">
+  <div class="page-width" style="width:50%">
+    <div style="border-radius: 2.5rem;    overflow: hidden;">
+    <div style="background: #fafafa;">
+      <div id="title" style='background: #2255ff; padding: 3rem;'>
+        <h1 class="h3" style="color:#fafafa;margin:0;text-align: center;text-align: center;">{{ 'customer.unsubscribe.title' | t }}</h1>
+      </div>
+        <div class="customer activate section-{{ section.id }}-padding">
+          <svg style="display: none">
+            <symbol id="icon-error" viewBox="0 0 13 13">
+              <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
+              <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
+              <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"/>
+              <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7">
+            </symbol>
+          </svg>
+            <a href="https://imgflip.com/i/8ooouu" target='_blank'><img alt="Crying cat meme giving a thumbs-up with the text IS OKAY..." height="200vh" src="https://i.imgflip.com/8ooouu.jpg" title="made at imgflip.com"/></a><div style='margin-top: -20px;'><a href="https://imgflip.com/memegenerator" style="font-size: 10px">from Imgflip Meme Generator</a></div>
+              <button class="button" onclick="unsubscribe()">{{ 'customer.unsubscribe.button' | t }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.unsubscribe.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_new",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.unsubscribe.presets.name"
+    }
+  ]
+}
+{% endschema %}

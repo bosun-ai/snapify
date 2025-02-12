@@ -1,0 +1,116 @@
+{% schema %}
+    {
+      "name": "t:sections.sventhnewhomepage.name",
+      "settings": [
+          {
+          "type": "image_picker",
+          "id": "teampic",
+          "label": "Teampic"
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "default": "Engage with Us",
+            "label": "Title"
+          },
+          {
+            "type": "text",
+            "id": "text",
+            "default": "Delve deeper into the features of ForSURE, book a personalized demo, or explore our resourceful EPR education page to understand better the landscape of Extended Producer Responsibility. Your journey towards effortless compliance and sustainable retailing begins here. ",
+            "label": "Text"
+          },
+          {
+            "type": "text",
+            "id": "button_label",
+            "default": "Contact Us",
+            "label": "Button"
+          }, {
+            "type": "url",
+            "id": "button_link",
+            "label": "Button Link"
+          }
+  
+  ],
+        "presets": [
+      {
+        "name": "t:sections.sventhnewhomepage.presets.name"
+      }
+      ]
+    }
+  {% endschema %}
+  
+  {%- style -%}
+   .background2 {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: #1c3180;
+    padding-top: 10%;
+    padding-bottom: 10%;
+    width: 100%;
+    position: relative;
+    align-items: flex-start;
+  }
+  .teamimg {
+    width: 100%;
+  }
+  .teamimgcontainer {
+    margin-right: 5%;
+  }
+  .section7text p {
+    /* hyphens: auto;
+    -webkit-hyphens: auto;  */
+    text-align: left;
+    text-align-last: left;
+  }
+  @media(max-width: 1200px) {
+    .section7 {
+      flex-direction: column; /* Items will now be laid out in a column */
+      padding: 0;
+      margin-right: 0;
+    }
+    .teamimg {
+        width: 70%;
+        margin: auto;
+        margin-top: 2rem;
+    }
+    .teamimgcontainer {
+      margin-right: 0;
+    }
+    .section7text {
+        width: 70%;
+        margin: auto;
+        margin-bottom: 2rem;
+    }
+  }
+    @media(max-width: 750px) {
+      .teamimg {
+        width: 90%;
+    }
+    }
+  {%- endstyle -%}
+  
+  <div style="position: relative;" class="background2">
+    <div style="display: flex" class="page-width section7">
+     
+             <div class="teamimgcontainer" style="border-radius: var(--text-boxes-radius);">
+              <img class="teamimg" style="object-fit: contain; height: 100%;display: flex;border-radius: var(--text-boxes-radius);"
+              src="{{ section.settings.teampic | image_url }}"
+              alt="{{ section.settings.teampic.alt | escape }}"
+              loading="lazy">
+           
+          </div>
+      <div class="section7text" style="margin-top: 2%;">
+        <h2 style="color:#fafafa">{{ section.settings.title }}</h2>
+        <p style="color:#fafafa">{{ section.settings.text }}</p>
+        <a href="{{ section.settings.button_link }}" class="button button--primary" style="font-size: 1em; font-weight: bold; z-index:1;">{{ section.settings.button_label }}</a> 
+      </div>
+    
+    </div>
+  </div>
+  
+  
+  
+  <script>
+  </script>

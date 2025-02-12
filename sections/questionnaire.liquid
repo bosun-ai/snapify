@@ -1,0 +1,212 @@
+{% schema %}
+    {
+      "name": "t:sections.questionnaire.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "query_param",
+          "label": "Query Param",
+          "default": "from_linkedin"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "question",
+          "name": "Question",
+          "settings": [
+            {
+              "type": "text",
+              "id": "question",
+              "label": "Question"
+            },
+            {
+              "type": "text",
+              "id": "answer1",
+              "label": "Answer 1"
+            },
+            {
+                "type": "url",
+                "id": "link1",
+                "label": "Link 1"
+            },
+            {
+              "type": "text",
+              "id": "answer2",
+              "label": "Answer 2"
+            },
+            {
+              "type": "url",
+              "id": "link2",
+              "label": "Link 2"
+            },
+            {
+              "type": "text",
+              "id": "answer3",
+              "label": "Answer 3"
+            },
+            {
+              "type": "url",
+              "id": "link3",
+              "label": "Link 3"
+            },
+            {
+              "type": "text",
+              "id": "answer4",
+              "label": "Answer 4"
+            },
+            {
+                "type": "url",
+                "id": "link4",
+                "label": "Link 4"
+            }
+          ]
+        }
+      ],
+      "presets": [
+        {
+          "name": "t:sections.questionnaire.presets.name"
+        }
+      ]
+    }
+  {% endschema %}
+  
+  {%- style -%}
+    .question-title {
+        margin-bottom: 1rem;
+        color: #fafafa;
+        padding: 1rem;
+        text-align: center;
+    }
+    .answer {
+        border: 0.2rem solid #fafafa;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        margin: 2rem auto;
+        color: #fafafa;
+        cursor: pointer;
+        text-align: center;
+    }
+    .answer:hover {
+        background-color: #fafafa;
+        color: #17161c;
+    }
+    .questionnaire {
+        /* Show the questionnaire over the entire page */
+        display: none;
+        justify-content: center; /* Horizontally center */
+        align-items: center; /* Vertically center */
+        flex-direction: column; /* Stack children vertically */
+        background: linear-gradient(110deg, #2c2b30 60%, #2255ff);
+        overflow-y: auto; /* Enable vertical scrolling when needed */
+        min-height: calc(100vh - 11rem);
+        width: 100%;
+        position: fixed;
+        z-index: 3;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    #questionnaire-content {
+        position: absolute;
+        top: 50%;
+        transform: translateY(calc(-50% + 5.5rem));
+        width: 100%;
+    }
+    .disable-scroll {
+        overflow: hidden;
+    }
+{%- endstyle -%}
+<script src="{{ 'cookie-handler.js' | asset_url }}" defer></script>
+
+<div id="questionnaire" class="questionnaire">
+    <div class="page-width page-width--narrow" id="questionnaire-content">
+        {% for block in section.blocks %}
+            <div class="question" id="question-{{ forloop.index }}" style="display: none">
+                <h2 class="question-title" name="{{ block.settings.question | replace: " ", "_" }}">{{ block.settings.question }}</h2>
+                {% assign answer1 = block.settings.answer1 | replace: "'", "" %}
+                {% assign answer2 = block.settings.answer2 | replace: "'", "" %}
+                {% assign answer3 = block.settings.answer3 | replace: "'", "" %}
+                {% assign answer4 = block.settings.answer4 | replace: "'", "" %}
+                <p class="answer" onclick="saveAnswer({{ forloop.index }}, '{{ answer1 }}', '{{ block.settings.link1 }}')">{{ block.settings.answer1 }}</p>
+                <p class="answer" onclick="saveAnswer({{ forloop.index }}, '{{ answer2 }}', '{{ block.settings.link2 }}')">{{ block.settings.answer2 }}</p>
+                <p class="answer" onclick="saveAnswer({{ forloop.index }}, '{{ answer3 }}', '{{ block.settings.link3 }}')">{{ block.settings.answer3 }}</p>
+                <p class="answer" onclick="saveAnswer({{ forloop.index }}, '{{ answer4 }}', '{{ block.settings.link4 }}')">{{ block.settings.answer4 }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TN3P2D6506"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+  dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-TN3P2D6506');
+    function showQuestionnaireQuestion(number) {
+        const question = document.getElementById('question-' + number);
+        question.style.display = 'block';
+    }
+    function saveAnswer(number, answer, link) {
+        question = document.getElementById('question-' + number).querySelector('.question-title').getAttribute('name');
+        setCookie('questionnaire-answer-' + number, JSON.stringify({question: question, answer: answer}), 30);
+        nextQuestion = document.getElementById('question-' + (number + 1));
+        if (nextQuestion != null) {
+            document.getElementById('question-' + number).style.display = "none";
+            nextQuestion.style.display = "block";
+            return;
+        }
+        gtag('event', 'button_click', {
+          'event_category': 'engagement',
+          'event_label': 'Questionnaire',
+          'event_link': link
+        });
+        window.location.href = link;
+        return;
+    }
+
+    function alignWidthQuestions() {
+        const questions = document.querySelectorAll('.question');
+        
+        // Store original display values and make elements temporarily visible
+        const originalDisplays = Array.from(questions).map(q => q.style.display);
+        questions.forEach(q => {
+            q.style.position = 'absolute';
+            q.style.visibility = 'hidden';
+            q.style.display = 'block';
+        });
+        
+        // Now we can measure them
+        const maxWidth = Math.max(...Array.from(questions).map(question => question.offsetWidth)) *0.75;
+        
+        answers = document.querySelectorAll('.answer');
+        questions.forEach((q, i) => {
+            q.style.position = '';
+            q.style.visibility = '';
+            q.style.display = originalDisplays[i];
+        });
+        // Restore original display values
+        answers.forEach((q, i) => {
+            // q.style.position = '';
+            // q.style.visibility = '';
+            // q.style.display = originalDisplays[i];
+            q.style.width = `${maxWidth}px`;
+            // q.style.maxWidth = '100%';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // url = https://for-sure.net/pages/demo?from_linkedin
+        if (window.location.search.includes('{{ section.settings.query_param }}')) {
+            document.getElementById('questionnaire').style.display = "flex";
+            showQuestionnaireQuestion(1);
+            document.getElementsByClassName('header__inline-menu')[0].style.display = "none";
+            document.getElementsByClassName('header__icons')[0].style.display = "none";
+            document.getElementById('Details-menu-drawer-container').style.display = "none";
+            document.getElementsByClassName('header__heading-link')[0].style.pointerEvents = "none";
+            document.body.classList.add('disable-scroll');
+            alignWidthQuestions();
+        }
+    });
+</script>

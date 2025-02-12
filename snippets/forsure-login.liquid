@@ -1,0 +1,11 @@
+{% comment %}
+Renders login for statistics
+
+Usage:
+{% render 'forsure-login' %}
+{% endcomment %}
+<script>
+  var customerId = "{{ customer.id }}";
+  var customerKey = "{{ customer.metafields.custom.forsurekey }}";
+  login(customerId, customerKey);
+</script>

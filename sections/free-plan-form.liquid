@@ -1,0 +1,748 @@
+{{ 'countrySelect.css' | asset_url | stylesheet_tag }}
+{% schema %}
+  {
+    "name": "t:sections.freeplan.name",
+    "settings": [
+      {
+        "type": "text",
+        "id": "leftbar_contact",
+        "default": "Contact",
+        "label": "Leftside First"
+      },
+      {
+        "type": "text",
+        "id": "leftbar_address",
+        "default": "Address",
+        "label": "Leftside Second"
+      },
+      {
+        "type": "text",
+        "id": "leftbar_company",
+        "default": "Company",
+        "label": "Leftside Third"
+      },
+      {
+        "type": "text",
+        "id": "leftbar_finance",
+        "default": "Finance",
+        "label": "Leftside Fourth"
+      },
+      {
+        "type": "text",
+        "id": "leftbar_submit",
+        "default": "Submit",
+        "label": "Leftside Fifth"
+      },
+      {
+        "type": "text",
+        "id": "next",
+        "default": "Next",
+        "label": "Next Button"
+      },
+      {
+        "type": "text",
+        "id": "back",
+        "default": "Back",
+        "label": "Back Button"
+      },
+      {
+        "type": "text",
+        "id": "submit",
+        "default": "Submit",
+        "label": "Submit Button"
+      },
+      {
+        "type": "text",
+        "id": "demo",
+        "default": "Schedule Demo",
+        "label": "Schedule Demo Button"
+      },
+      {
+        "type": "text",
+        "id": "job_title",
+        "default": "Job Title",
+        "label": "Job Title"
+      },
+      {
+        "type": "text",
+        "id": "street",
+        "default": "Street",
+        "label": "Street"
+      },
+      {
+        "type": "text",
+        "id": "vat",
+        "default": "VAT",
+        "label": "VAT"
+      },
+      {
+        "type": "text",
+        "id": "website",
+        "default": "Website URL",
+        "label": "Website"
+      },
+      {
+        "type": "text",
+        "id": "linkedin",
+        "default": "Company LinkedIn/Xing Profile",
+        "label": "LinkedIn"
+      },
+      {
+        "type": "text",
+        "id": "finance_title",
+        "default": "Annual Revenue Confirmation",
+        "label": "Finance Title"
+      },
+      {
+        "type": "text",
+        "id": "finance_question",
+        "default": "Does your company have an annual revenue of more or less than €500,000?",
+        "label": "Finance Question"
+      },
+      {
+        "type": "text",
+        "id": "finance_option1",
+        "default": "More than €500,000",
+        "label": "Finance Option 1"
+      },
+      {
+        "type": "text",
+        "id": "finance_option2",
+        "default": "Equal or less than €500,000",
+        "label": "Finance Option 2"
+      },
+      {
+        "type": "text",
+        "id": "finance_note",
+        "default": "Please note: In cases where we have reason to believe that a company's revenue exceeds €500,000, we reserve the right to request additional financial documentation, such as Profit and Loss (P&L) statement, to verify the provided information.",
+        "label": "Finance Note"
+      },
+      {
+        "type": "text",
+        "id": "submit_title",
+        "default": "Disclaimer",
+        "label": "Submit Title"
+      },
+      {
+        "type": "text",
+        "id": "submit_text",
+        "default": "By providing information in this form, you affirm that all details are accurate and truthful. In the event of submitting incorrect or misleading information, we reserve the right to impose a charge of €4,000. This measure is to ensure compliance and fairness in the licensing process. We urge you to thoroughly verify all information before submission to avoid any unnecessary charges.",
+        "label": "Submit Text"
+      },
+      {
+        "type": "text",
+        "id": "demo_title",
+        "default": "Schedule Demo",
+        "label": "Demo Title"
+      },
+      {
+        "type": "text",
+        "id": "demo_text",
+        "default": "We regret to inform you that you do not qualify for our free plan. However, we would be delighted to arrange a personalized demonstration for you to explore the various options we offer and find the ones that best suit your needs.",
+        "label": "Demo Text"
+      },
+      
+      {
+        "type": "text",
+        "id": "error_job",
+        "default": "Please use a valid job title.",
+        "label": "Error Message job"
+      },
+      {
+        "type": "text",
+        "id": "error_phone",
+        "default": "Please use a valid phone number.",
+        "label": "Error Message phone"
+      },
+      {
+        "type": "text",
+        "id": "error_phone2",
+        "default": "Please use only numbers for the phone number.",
+        "label": "Error Message phone invalid symbol"
+      },
+      {
+        "type": "text",
+        "id": "error_street",
+        "default": "Please use a valid address.",
+        "label": "Error Street"
+      },
+      {
+        "type": "text",
+        "id": "error_postcode",
+        "default": "Please use a valid postcode.",
+        "label": "Error Postcode"
+      },
+      {
+        "type": "text",
+        "id": "error_city",
+        "default": "Please use a valid city.",
+        "label": "Error City"
+      },
+      {
+        "type": "text",
+        "id": "error_country",
+        "default": "Please use a valid country.",
+        "label": "Error Country"
+      },
+      {
+        "type": "text",
+        "id": "error_company",
+        "default": "Please use a valid company name.",
+        "label": "Error Company"
+      },
+      {
+        "type": "text",
+        "id": "error_vat",
+        "default": "Please use a valid VAT number.",
+        "label": "Error VAT"
+      },
+      {
+        "type": "text",
+        "id": "error_website",
+        "default": "Please use a valid website URL.",
+        "label": "Error Website"
+      },
+      {
+        "type": "text",
+        "id": "error_linkedin",
+        "default": "Please use a valid LinkedIn/Xing URL.",
+        "label": "Error Linkedin"
+      }
+    ],
+      "presets": [
+    {
+      "name": "t:sections.freeplan.presets.name"
+    }
+    ]
+  }
+{% endschema %}
+{% if customer.tags contains 'member' %}
+    {% comment %} logged in but already a member {% endcomment %}
+  <script>
+      window.location.href = '{{ pages['forsure-statistics'].url }}';
+  </script>
+{% elsif customer.tags contains 'free-plan' %}
+  <script>
+  if ("{{ customer.metafields.custom.acceptedconditions }}" === "true") {
+    console.log("Already filled in free-plan application");
+    window.location.href = '{{ pages['thank-you-for-registering'].url }}';
+  }
+  </script>
+{{ 'section-free-plan-form.css' | asset_url | stylesheet_tag }}
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="{{ 'countrySelect.js' | asset_url }}" defer="defer"></script>
+<div class="hero-gradient">
+  <div class="page-width">
+    <div style="border-radius: 2.5rem;    overflow: hidden;">
+    <div style="background: #fafafa;">
+      <div class="container" style="background: #fafafa;margin:auto;padding:3%;display:flex;width: 90%;position:relative">
+        <div class="buttonList">
+          <div style="justify-content: center;padding-top:5%">
+            <a id="leftButtonContact" class="buttonleft button button--primary" disabled>{{ section.settings.leftbar_contact }}</a> 
+          </div>
+          <div style="justify-content: center;padding-top:5%">
+            <a id="leftButtonAddress" class="buttonleft button button--secondary" disabled>{{ section.settings.leftbar_address }}</a> 
+          </div>
+          <div style="justify-content: center;padding-top:5%">
+            <a id="leftButtonCompany" class="buttonleft button button--secondary" disabled>{{ section.settings.leftbar_company }}</a> 
+          </div>
+          <div style="justify-content: center;padding-top:5%">
+            <a id="leftButtonFinance" class="buttonleft button button--secondary" disabled>{{ section.settings.leftbar_finance }}</a> 
+          </div>
+          <div style="justify-content: center;padding-top:5%">
+            <a id="leftButtonSubmit" class="buttonleft button button--secondary" disabled>{{ section.settings.leftbar_submit }}</a> 
+          </div>
+        </div>
+        <div style='border-left: 4px solid #17161c;display: block!important;padding-right: 5%;'></div>
+        <div class="contentContainer">
+          <div id="contentContact" class='content customer'>
+            <div class='field'>
+              <input id="firstName" class="inputText" type="text" name="firstName" placeholder="{{ 'customer.register.first_name' | t }}" value='{{ customer.first_name }}' onblur="checkFieldContact('firstName', '{{ 'customer.register.error_first_name' | t }}', true)" required>
+              <label for="firstName">
+                {{ 'customer.register.first_name' | t }}
+              </label>
+            </div>
+            <div id="error-firstName" class="errorMessage"></div>
+            <div class='field'>
+              <input id="lastName" class="inputText" type="text" name="lastName" placeholder="{{ 'customer.register.last_name' | t }}" value='{{ customer.last_name }}' onblur="checkFieldContact('lastName', '{{ 'customer.register.last_name' | t }}', true)" required>
+              <label for="lastName">
+                {{ 'customer.register.last_name' | t }}
+              </label>
+            </div>
+            <div id="error-lastName" class="errorMessage"></div>
+            <div class='field'>
+              <input id="job" class="inputText" type="text" name="job" placeholder="{{ section.settings.job_title }}" value='{{ customer.metafields.custom.job_title }}' onblur="checkFieldContact('job', '{{ section.settings.error_job }}', true)" required>
+              <label for="job">
+                {{ section.settings.job_title }}
+              </label>
+            </div>
+            <div id="error-job" class="errorMessage"></div>
+            <div class='field'>
+              <input id="phone" class="inputText" type="tel" name="phone" placeholder="{{ 'customer.addresses.phone' | t }}" value='{{ customer.phone }}' onblur="checkFieldContact('phone', '{{ section.settings.error_phone }}', true)" required>
+              <label for="phone">
+                {{ 'customer.addresses.phone' | t }}
+              </label>
+            </div>
+            <div id="error-phone" class="errorMessage"></div>
+            <div id="error-contact" class="errorMessage" style="margin-top: -3rem;"></div>
+            <div class="navButtons">
+                <button id="nextButtonContact" class="nextButton button" onclick="nextStepAddress('{{ customer.id }}')">{{ section.settings.next }}</button>
+            </div>
+          </div>
+          <div id="contentAddress" class='content customer' style="display: none">
+            <div class='field'>
+              <input id="street" class="inputText" type="text" name="street" placeholder="{{ section.settings.street }}" value='{{ customer.default_address.address1 }}' onblur="checkFieldAddress('street', '{{ section.settings.error_street }}', true)" required>
+              <label for="street">
+                {{ section.settings.street }}
+              </label>
+            </div>
+            <div id="error-street" class="errorMessage"></div>
+            <div class='field'>
+              <input id="postcode" class="inputText" type="text" name="postcode" placeholder="{{ 'customer.addresses.zip' | t }}" value='{{ customer.default_address.zip }}' onblur="checkFieldAddress('postcode', '{{ section.settings.error_postcode }}', true)" required>
+              <label for="postcode">
+                {{ 'customer.addresses.zip' | t }}
+              </label>
+            </div>
+            <div id="error-postcode" class="errorMessage"></div>
+            <div class='field'>
+              <input id="city" class="inputText" type="text" name="city" placeholder="{{ 'customer.addresses.city' | t }}" value='{{ customer.default_address.city }}' onblur="checkFieldAddress('city', '{{ section.settings.error_city }}', true)" required>
+              <label for="city">
+                {{ 'customer.addresses.city' | t }}
+              </label>
+            </div>
+            <div id="error-city" class="errorMessage"></div>
+            <div class='field'>
+              <input type="hidden" id="country_code" />
+              <input id="country" class="inputText" type="text" name="country" placeholder="{{ 'customer.addresses.country' | t }}" value='{{ customer.default_address.country }}' onblur="checkFieldAddress('country', '{{ section.settings.error_country }}', true)" required>
+              <label for="country">
+                {{ 'customer.addresses.country' | t }}
+              </label>
+            </div>
+            <div id="error-country" class="errorMessage"></div>
+            <div id="error-address" class="errorMessage" style="margin-top: -3rem;"></div>
+            <div class="navButtons">
+                <button class="prevButton button offbutton" onclick="nextStep('Contact')">{{ section.settings.back }}</button>
+                <button id="nextButtonAddress" class="nextButton button" onclick="nextStepCompany('{{ customer.id }}')">{{ section.settings.next }}</button>
+            </div>
+          </div>
+          <div id="contentCompany" class='content customer' style="display: none">
+            <div class='field'>
+              <input id="company" class="inputText" type="text" name="company" placeholder="{{ 'customer.addresses.company' | t }}" value='{{ customer.default_address.company }}' onblur="checkFieldCompany('company', '{{ section.settings.error_company }}', true)" required>
+              <label for="company">
+                {{ 'customer.addresses.company' | t }}
+              </label>
+            </div>
+            <div id="error-company" class="errorMessage"></div>
+            <div class='field'>
+              <input id="vat" class="inputText" type="text" name="vat" placeholder="VAT" value='{{ customer.metafields.custom.vat }}' onblur="checkFieldCompany('vat', '{{ section.settings.error_vat }}', true)" required>
+              <label for="vat">
+                {{ section.settings.vat }}
+              </label>
+            </div>
+            <div id="error-vat" class="errorMessage"></div>
+            <div class='field'>
+              <input id="url" class="inputText" type="text" name="url" placeholder="Website URL" value='{{ customer.metafields.custom.website }}' onblur="checkFieldCompany('url', '{{ section.settings.error_website }}', true)" required>
+              <label for="url">
+                {{ section.settings.website }}
+              </label>
+            </div>
+            <div id="error-url" class="errorMessage"></div>
+            <div class='field'>
+              <input id="linkedin" class="inputText" type="text" name="linkedin" placeholder="Company LinkedIn/Xing Profile" value='{{ customer.metafields.custom.linkedin }}' onblur="checkFieldCompany('linkedin', '{{ section.settings.error_linkedin }}', true)" required> 
+              <label for="linkedin">
+                {{ section.settings.linkedin }}
+              </label>
+            </div>
+            <div id="error-linkedin" class="errorMessage"></div>
+            <div id="error-companypage" class="errorMessage" style="margin-top: -3rem;"></div>
+            <div class="navButtons">
+                <button class="prevButton button offbutton" onclick="nextStep('Address')">{{ section.settings.back }}</button>
+                <button id="nextButtonCompany" class="nextButton button" onclick="nextStepFinance('{{ customer.id }}')">{{ section.settings.next }}</button>
+            </div>
+          </div>
+          <div id="contentFinance" class='content' style="display: none">
+            <h3 style='margin-top: 0;'>{{ section.settings.finance_title }}</h3>
+            {{ section.settings.finance_question }}
+            <br>
+            <div style="padding: 2rem">
+              <input type="radio" id="moreRevenue" name="revenue" value="false" onchange="checkFieldFinance()">
+                <label for="moreRevenue">{{ section.settings.finance_option1 }}</label><br>
+          
+              <input type="radio" id="lessRevenue" name="revenue" value="true" onchange="checkFieldFinance()">
+              <label for="lessRevenue">{{ section.settings.finance_option2 }}</label><br>
+            </div>
+            {{ section.settings.finance_note }}
+            <div id="error-finance" class="errorMessage"></div>
+            <div class="navButtons">
+                <button class="prevButton button offbutton" onclick="nextStep('Company')">{{ section.settings.back }}</button>
+                <button id="nextButtonFinance" class="nextButton button" onclick="nextStepSubmit('{{ customer.id }}')" disabled>{{ section.settings.next }}</button>
+            </div>
+          </div>
+          <div id="contentSubmit" class='content' style="display: none">
+            <h3 style='margin-top: 0;'>{{ section.settings.submit_title }}</h3>
+            <div>
+              {{ section.settings.submit_text }}
+            </div>
+            <input type="hidden" required id="source" class="field__input" autocapitalize="off">
+            <div class="customer" style="display: grid;grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+              <div class="field">
+                  <select id="sourceSelect" required class="contactGrey" onchange="handleSelection(this.value)">
+                    <option value="" selected disabled>{{ 'templates.contact.form.source_question' | t }}</option>
+                    <option value="Partner">{{ 'templates.contact.form.source_partner' | t }}</option>
+                    <option value="Social Media">{{ 'templates.contact.form.source_social_media' | t }}</option>
+                    <option value="Search">{{ 'templates.contact.form.source_search' | t }}</option>
+                    <option value="Friend">{{ 'templates.contact.form.source_friend' | t }}</option>
+                    <option value="Other">{{ 'templates.contact.form.source_other' | t }}</option>
+                  </select>
+              </div>
+              <div class="field" id="partnerSelect" style="display:none;">
+                  <select id="partnerDetails" class="contactGrey" onchange="showCustomPartnerInput(this.value)">
+                    <option value="" selected disabled>{{ 'templates.contact.form.source_partner_selection' | t }}</option>
+                    {% render 'partner' %}
+
+                    <option value="Other">{{ 'templates.contact.form.source_partner_other' | t }}</option>
+                  </select>
+              </div>
+              <div class="field" id="customPartnerInput" style="display:none;grid-area: 2 / 2 / auto / 3;">
+                <input class="field__input" type="text" id="customPartner" placeholder="{{ 'templates.contact.form.source_partner_other_text' | t }}">
+                <label class="field__label" for="customPartner">{{ 'templates.contact.form.source_other_text' | t }} <span aria-hidden="true">*</span></label>
+              </div>
+              <div class="field" id="otherInput" style="display:none;">
+                <input class="field__input" type="text" id="otherDetails" placeholder="{{ 'templates.contact.form.source_other_text' | t }}">
+                <label class="field__label" for="otherDetails">{{ 'templates.contact.form.source_other_text' | t }} <span aria-hidden="true">*</span></label>
+              </div>
+            </div>
+            <div id="error-submit" class="errorMessage"></div>
+            <div class="navButtons">
+                <button class="prevButton button offbutton" onclick="nextStep('Finance')">{{ section.settings.back }}</button>
+                <button id="nextButtonSubmit" class="nextButton button" onclick="submit('{{ customer.id }}')">{{ section.settings.submit }}</button>
+            </div>
+          </div>
+          <div id="contentDemo" class='content' style="display: none">
+            <h3 style='margin-top: 0;'>{{ section.settings.demo_title }}</h3>
+            <div style='font-weight: bold;'>
+              {{ section.settings.demo_text }}
+            </div>
+            <div class="navButtons">
+                <button class="prevButton button offbutton" onclick="nextStep('Finance')">{{ section.settings.back }}</button>
+                <button id="nextButtonSubmit" class="nextButton button" onclick="scheduleDemo()">{{ section.settings.demo }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+    function hideContent() {
+    var allContent = document.getElementsByClassName('content');
+     for(var i = 0; i < allContent.length; i++) {
+          allContent[i].style.display = 'none';
+      }
+  }
+  function resetActiveButton() {
+    var buttons = document.querySelectorAll('.buttonleft');
+    buttons.forEach(function(button) {
+        // Remove the class 'button--primary'
+        button.classList.remove('button--primary');
+    
+        // Add the class 'button--secondary'
+        button.classList.add('button--secondary');
+    });
+  }
+
+  function updateSourceValue(value) {
+    document.getElementById('source').value = value; // Update the source input field's value
+}
+  
+function handleSelection(value) {
+  var partnerSelect = document.getElementById('partnerSelect');
+  var otherInput = document.getElementById('otherInput');
+  
+  // Hide both fields initially
+  partnerSelect.style.display = 'none';
+  otherInput.style.display = 'none';
+  
+  // Reset partner dropdown in case it was changed to custom input before
+  document.getElementById('customPartnerInput').style.display = 'none';
+  document.getElementById('partnerDetails').value = '';
+  
+  // Display the appropriate field based on selection
+  if(value === "Partner") {
+      partnerSelect.style.display = 'block';
+  } else if(value === "Other") {
+      otherInput.style.display = 'block';
+  }
+  updateSourceValue(value);
+}
+
+function showCustomPartnerInput(value) {
+    var customInput = document.getElementById('customPartnerInput');
+    customInput.style.display = value === "Other" ? 'block' : 'none';
+    if(value !== "Other") {
+        updateSourceValue(value);
+    }
+}
+document.getElementById('customPartner').addEventListener('input', function() {
+    updateSourceValue(this.value); // Update the source input with the custom partner input
+});
+
+document.getElementById('otherDetails').addEventListener('input', function() {
+    updateSourceValue(this.value); // Update the source input with the other details input
+});
+
+const keys = ['firstName', 'lastName', 'job', 'phone', 'street', 'postcode', 'city', 'country', 'company', 'vat', 'url', 'linkedin'];
+const defaultValue = false;
+
+const valuesOk = Object.fromEntries(keys.map(key => [key, defaultValue]));
+
+function checkFieldContact(id, name, setError) {
+  console.log(`Checking Field ${id}`);
+  document.getElementById('error-contact').textContent = "";
+  var fieldOk = checkField(id, name, setError);
+  valuesOk[id] = fieldOk;
+  if (fieldOk) {
+    if (valuesOk['firstName'] && valuesOk['lastName'] && valuesOk['job'] && valuesOk['phone']) {
+      document.getElementById('nextButtonContact').disabled = false;
+    }
+  } else {
+    document.getElementById('nextButtonContact').disabled = true;
+  }
+}
+  
+function checkFieldAddress(id, name, setError) {
+  console.log(`Checking Field ${id}`);
+  document.getElementById('error-address').textContent = "";
+  var fieldOk = checkField(id, name, setError);
+  valuesOk[id] = fieldOk;
+  if (fieldOk) {
+    if (valuesOk['street'] && valuesOk['postcode'] && valuesOk['city'] && valuesOk['country']) {
+      document.getElementById('nextButtonAddress').disabled = false;
+    }
+  } else {
+    document.getElementById('nextButtonAddress').disabled = true;
+  }
+}
+
+function checkFieldCompany(id, name, setError) {
+  console.log(`Checking Field ${id}`);
+  document.getElementById('error-companypage').textContent = "";
+  var fieldOk = checkField(id, name, setError);
+  valuesOk[id] = fieldOk;
+  if (fieldOk) {
+    if (valuesOk['company'] && valuesOk['vat'] && valuesOk['url'] && valuesOk['linkedin']) {
+      document.getElementById('nextButtonCompany').disabled = false;
+    }
+  } else {
+    document.getElementById('nextButtonCompany').disabled = true;
+  }
+}
+
+function checkFieldFinance(id, name, setError) {
+  console.log(`Checking Field ${id}`);
+  document.getElementById('error-finance').textContent = "";
+  if (document.getElementById('moreRevenue').checked || document.getElementById('lessRevenue').checked) {
+      document.getElementById('nextButtonFinance').disabled = false;
+  } else {
+    document.getElementById('nextButtonFinance').disabled = true;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  checkFieldContact('firstName', 'first name', false);
+  checkFieldContact('lastName', 'last name', false);
+  checkFieldContact('job', 'job title', false);
+  checkFieldContact('phone', 'phone number', false);
+  checkFieldAddress('street', 'street', false);
+  checkFieldAddress('postcode', 'postcode', false);
+  checkFieldAddress('city', 'city', false);
+  checkFieldAddress('country', 'country', false);
+  checkFieldCompany('company', 'company name', false);
+  checkFieldCompany('vat', 'VAT number', false);
+  checkFieldCompany('url', 'Website URL', false);
+  checkFieldCompany('linkedin', 'URL', false);
+})
+
+function checkField(id, name, setError) {
+    var fieldvalue = document.getElementById(id).value.toLowerCase();
+    fieldvalue = fieldvalue.replace(/\s+/g, ''); // remove spaces
+    if (fieldvalue.length < 2) {
+      if(setError) {
+         document.getElementById(`error-${id}`).textContent = name; 
+      }
+      return false;
+    }
+    if(id === 'phone') {
+      var phoneRegex = /^[+]?[0-9]+$/;
+      if (!phoneRegex.test(fieldvalue)) {
+        if(setError) {
+          document.getElementById(`error-${id}`).textContent = '{{ section.settings.error_phone2 }}';
+        }
+        return false;
+      }
+    }
+    if (id === 'url' || id === 'linkedin') {
+      var urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/;
+      if (!urlRegex.test(fieldvalue)) {
+        if(setError) {
+          document.getElementById(`error-${id}`).textContent = '{{ section.settings.error_website }}';
+        }
+        return false;
+      }
+    }
+    document.getElementById(`error-${id}`).textContent = '';
+    return true;
+  }
+
+var serverUrl = 'https://automations.for-sure.net:4190/';
+async function updateCustomer(endpoint, formData) {
+  var response = await fetch(serverUrl + endpoint, {
+        method: 'POST',
+        body: formData
+      });
+  if (response.status > 399){
+      console.error('Failed to store data on server');
+      var responseJson = await response.json();
+      return responseJson['detail'];
+  }
+  return true;
+}
+  
+async function nextStepAddress(customer_id) {
+  $("#country").countrySelect({
+    defaultCountry: "nl",
+    preferredCountries: ['nl', 'de', 'be', 'en'],
+    excludeCountries: ["bq"]
+  });
+  var endpoint = 'register/add_contact';
+  var formData = new FormData();
+  formData.append('customer_id', customer_id);
+  formData.append('first_name', document.getElementById('firstName').value);
+  formData.append('last_name', document.getElementById('lastName').value);
+  formData.append('job_title', document.getElementById('job').value);
+  formData.append('phone', document.getElementById('phone').value);
+  var updated = await updateCustomer(endpoint, formData);
+  if (updated === true) {
+    nextStep('Address');
+    document.getElementById('error-contact').textContent = "";
+  } else {
+    document.getElementById('error-contact').textContent = updated;
+  }
+}
+
+async function nextStepCompany(customer_id) {
+  var endpoint = 'register/add_address';
+  var formData = new FormData();
+  formData.append('customer_id', customer_id);
+  formData.append('address', document.getElementById('street').value);
+  formData.append('postal_code', document.getElementById('postcode').value);
+  formData.append('city', document.getElementById('city').value);
+  formData.append('country_code', document.getElementById('country_code').value);
+  var updated = await updateCustomer(endpoint, formData);
+  if (updated === true) {
+    nextStep('Company');
+    document.getElementById('error-address').textContent = "";
+  } else {
+    document.getElementById('error-address').textContent = updated;
+  }
+}
+
+async function nextStepFinance(customer_id) {
+  var endpoint = 'register/add_company';
+  var formData = new FormData();
+  formData.append('customer_id', customer_id);
+  formData.append('company', document.getElementById('company').value);
+  formData.append('vat', document.getElementById('vat').value);
+  formData.append('website', document.getElementById('url').value);
+  formData.append('linkedin', document.getElementById('linkedin').value);
+  var updated = await updateCustomer(endpoint, formData);
+  if (updated === true) {
+    nextStep('Finance');
+    document.getElementById('error-companypage').textContent = "";
+  } else {
+    document.getElementById('error-companypage').textContent = updated;
+  }
+}
+async function nextStepSubmit(customer_id) {
+  var endpoint = 'register/add_finance';
+  var formData = new FormData();
+  formData.append('customer_id', customer_id);
+  var revenueRadios = document.querySelectorAll('input[name="revenue"]');
+  var selectedValue;
+  revenueRadios.forEach(function(radio) {
+      if (radio.checked) {
+          selectedValue = radio.value;
+      }
+  });
+  formData.append('less_than_500k', selectedValue);
+  var updated = await updateCustomer(endpoint, formData);
+  if (updated === true) {
+    if (selectedValue === "true") {
+     nextStep('Submit'); 
+    } else {
+      nextStep('Demo', 'Submit');
+    }
+    document.getElementById('error-finance').textContent = "";
+  } else {
+    document.getElementById('error-finance').textContent = updated;
+  }
+}
+
+async function submit(customer_id) {
+  var endpoint = 'register/submit';
+  var formData = new FormData();
+  formData.append('customer_id', customer_id);
+  var dropdown = document.getElementById('source').value;
+  if (dropdown !== '') {
+    formData.append('partner', dropdown);
+    var updated = await updateCustomer(endpoint, formData);
+    if (updated === true) {
+      document.getElementById('error-submit').textContent = "";
+      setCookieShort('recentlyApplied', "true", 300);
+      window.location.href = "{{ pages['thank-you-for-registering'].url }}";
+    } else {
+      document.getElementById('error-submit').textContent = updated;
+    }
+  }
+  else {
+    document.getElementById('error-submit').textContent = "Please select an option";
+  }
+}
+
+function scheduleDemo() {
+  window.location.href = "{{ pages['demo'].url }}";
+}
+
+function nextStep(nextName, btnName=null) {
+  display(nextName, btnName);
+}
+
+function display(displayOption, btnName=null) {
+  hideContent();
+  resetActiveButton();
+  var content = document.getElementById(`content${displayOption}`);
+  var leftButton;
+  if (btnName !== null){
+    leftButton = document.getElementById(`leftButton${btnName}`);
+  } else {
+    leftButton = document.getElementById(`leftButton${displayOption}`);
+  }
+  content.style.display = 'block';
+  leftButton.classList.remove('button--secondary');
+  leftButton.classList.add('button--primary');
+  leftButton.style.border = 'none';
+}
+</script>
+{% elsif customer.id %}
+  {% comment %} logged in but no free plan (maybe declined) {% endcomment %}
+  <script>
+      window.location.href = '{{ routes.root_url }}';
+  </script>
+{% else %}
+  <script>
+    window.location.href = '{{ routes.account_login_url }}';
+  </script>
+{% endif %}

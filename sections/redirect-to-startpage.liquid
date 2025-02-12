@@ -1,0 +1,26 @@
+{% schema %}
+  {
+    "name": "t:sections.redirect-to-startpage.presets.name",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "redirect_always",
+        "default": true,
+        "label": "Redirect to login"
+      }
+    ],
+    "presets": [{
+      "name": "t:sections.redirect-to-startpage.presets.name"
+    }]
+  }
+{% endschema %}
+{% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
+{% elsif customer.id or section.settings.redirect_always %}
+    <script>
+  window.location.href = '{{ routes.root_url }}';
+  </script>
+{% else %}
+  <script>
+  window.location.href = '{{ routes.account_login_url }}';
+  </script>
+{% endif %}

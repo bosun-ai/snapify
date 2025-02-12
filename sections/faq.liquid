@@ -1,0 +1,590 @@
+{{ 'section-multicolumn.css' | asset_url | stylesheet_tag }}
+<link rel="stylesheet" href="{{ 'component-slider.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'component-slider.css' | asset_url | stylesheet_tag }}</noscript>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  .border-big-only {
+      /* border-top: 0.2rem solid #17161c;
+      border-bottom: 0.2rem solid #17161c; */
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+    .border-big-only {
+      border: 0.2rem solid #17161c;
+      border-radius:1rem;
+    }
+  }
+  .multicolumn-card__info p {
+    text-align: left;
+    /* hyphens: auto;
+    -webkit-hyphens: auto;  */
+    }
+  .anchor {
+    padding-top: 10%; 
+    margin-top: -10%;
+  }
+  .centertext p {
+    text-align: center;
+  }
+  .left-top-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) calc(100vw/6.5) 0 0;
+    border-color: #2255ff transparent transparent transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .right-top-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+   border-width: 0 calc(100vw/6.5) calc(100vw/8) 0;
+    border-color: transparent #2255ff transparent transparent;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .left-bottom-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) 0 0 calc(100vw/6.5);
+    border-color: transparent transparent transparent #2255ff;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .right-bottom-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 calc(100vw/8) calc(100vw/6.5);
+    border-color: transparent transparent #2255ff transparent;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+
+  .multicolumn-card__image {
+    max-width: 100%;
+    max-height: 100%;
+    padding: 10px;
+  }
+  .svg-arrow {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease; /* Smooth transition for rotation */
+  }
+
+  .collapsed {
+    transform: rotate(0deg); /* Rotate arrow 90 degrees when collapsed */
+  }
+
+  .faq_questions:not(:last-of-type) {
+    border-bottom: 0.2rem solid #17161c;
+}
+{%- endstyle -%}
+
+{%- liquid
+  assign columns_mobile_int = section.settings.columns_mobile | plus: 0
+  assign show_mobile_slider = false
+  if section.settings.swipe_on_mobile and section.blocks.size > columns_mobile_int
+    assign show_mobile_slider = true
+  endif
+-%}
+
+<div {% if section.settings.anchor_wanted %}id="{{ section.settings.anchor_id }}"{% endif %} class="{% if section.settings.full_size %}hero-sizing{% endif %} {% if section.settings.anchor_wanted %}anchor {% endif %}multicolumn {% if section.settings.background_color == blank %} color-{{ section.settings.color_scheme }} gradient{% unless section.settings.background_style == 'none' and settings.text_boxes_border_thickness > 0 or settings.text_boxes_shadow_opacity > 0 %} background-{{ section.settings.background_style }}{% endunless %}{% endif %}{% if section.settings.title == blank %} no-heading{% endif %}"
+  style="position: relative; {% if section.settings.background_color != "" %}background-color:{{section.settings.background_color}}{% endif %}">
+    {% if section.settings.bluecorner_upper_left %}
+      <div class="left-top-triangle"></div>
+    {% endif %}
+    {% if section.settings.bluecorner_upper_right %}
+      <div class="right-top-triangle"></div>
+    {% endif %}
+    {% if section.settings.bluecorner_lower_left %}
+      <div class="left-bottom-triangle"></div>
+    {% endif %}
+    {% if section.settings.bluecorner_lower_right %}
+      <div class="right-bottom-triangle"></div>
+    {% endif %}
+    <div class="page-width section-{{ section.id }}-padding">
+    {%- unless section.settings.title == blank -%}
+        <div class="title-wrapper-with-link title-wrapper--self-padded-mobile title-wrapper--no-top-margin">
+            <h2 class="title h2" style="">{{ section.settings.title | escape }}
+            </h2>
+          </div>
+      <div style="margin-bottom: 3rem">{{section.settings.subtitle}}</div>
+    {%- endunless -%}
+    <slider-component class="slider-mobile-gutter">
+      <ul class="multicolumn-list contains-content-container grid grid--1-col-tablet-down grid--1-col-desktop border-big-only"
+        id="Slider-{{ section.id }}" style="{% if section.settings.center_columns %}justify-content: center;{% endif %}row-gap:0"
+        role="list"
+      >    
+        {%- liquid
+          assign highest_ratio = 0
+          for block in section.blocks
+            if block.settings.image.aspect_ratio > highest_ratio
+              assign highest_ratio = block.settings.image.aspect_ratio
+            endif
+          endfor
+        -%}
+        {%- for block in section.blocks -%}
+          {%- assign empty_column = '' -%}
+          {%- if block.settings.image == blank and block.settings.title == blank and block.settings.text == blank and block.settings.link_label == blank -%}
+            {%- assign empty_column = ' multicolumn-list__item--empty' -%}
+          {%- endif -%}
+
+          <li id="Slide-{{ section.id }}-{{ forloop.index }}" class="faq_questions multicolumn-list__item grid__item{% if section.settings.swipe_on_mobile %} slider__slide{% endif %}{% if section.settings.column_alignment == 'center' %} center{% endif %}{{ empty_column }}" {{ block.shopify_attributes }}>
+            <div style="margin: auto;width: {{ section.settings.container_width }}%;">
+              {%- if block.settings.image != blank -%}
+                  <!-- Existing icon on the left -->
+                  <div
+                    class="iconhomepage"
+                    style="
+                      background-color:#fafafa; border-radius: 10%;
+                      box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);width: 10rem; height: 10rem;margin: auto;
+                    "
+                  >
+                {%- capture sizes -%}(min-width: 990px) {% if section.blocks.size <= 2 %}710px{% else %}550px{% endif %}, (min-width: 750px) {% if section.blocks.size == 1 %}710px{% else %}550px{% endif %}, calc(100vw - 30px){%- endcapture -%}
+                  {{ block.settings.image | image_url: width: 1420 | image_tag:
+                    loading: 'lazy',
+                    sizes: sizes,
+                    widths: '275, 550, 710, 1420',
+                    class: 'multicolumn-card__image'
+                  }}
+                </div>
+              {%- endif -%}
+              <div class="multicolumn-card__info">
+                <div style="display: flex;cursor: pointer;z-index: 1;position: relative" onclick="toggleTextFAQ('{{ section.id }}-{{forloop.index}}-text', 'arrow-{{ section.id }}-{{forloop.index}}')">
+                    {%- if block.settings.title != blank %}
+                    <h3 class="{{section.settings.question_size}}" style="{% if block.settings.center_title %}text-align: center{% endif %} margin: auto 0;width: 90%">{{ block.settings.title | escape }}</h3>
+                    {%- endif -%}
+                    {% if block.settings.make_hidden %}
+                    <div
+                        class="iconhomepage"
+                        style="
+                        background-color:#fafafa; border-radius: 30%;
+                        box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);width: 5rem; height: 5rem;margin-left: auto;margin-bottom: 1rem;cursor:pointer
+                        "
+                    >
+                      <div id="arrow-{{ section.id }}-{{forloop.index}}" style="width:100%;height:100%;padding:10px;z-index: 100;position: relative;" class="svg-arrow collapsed">
+                        {% render 'icon-arrow-rounded' %}
+                      </div>
+                        <!-- <svg onclick="toggleText('{{forloop.index}}-text', 'arrow-{{ section.id }}-{{forloop.index}}')" id="arrow-{{ section.id }}-{{forloop.index}}" style="width:100%;height:100%;padding:5px" class="svg-arrow collapsed" width="20.593" height="22.88" viewBox="0 0 80.593 122.88"><polygon style="fill:#2255ff;" points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0"></polygon></svg> -->
+                    </div>
+                    {% endif %}
+                </div>
+                {%- if block.settings.text != blank -%}
+                  <div id="{{ section.id }}-{{forloop.index}}-text" class="rte {% if block.settings.center_text %}centertext{% endif %}" style="{% if block.settings.make_hidden %}display: none{% endif %};">{{ block.settings.text }}</div>
+                {%- endif -%}
+                {%- if block.settings.link_label != blank -%}
+                  <a class="link animate-arrow" {% if block.settings.link == blank %}role="link" aria-disabled="true"{% else %}href="{{ block.settings.link }}"{% endif %}>{{ block.settings.link_label | escape }}<span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span></a>
+                {%- endif -%}
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </slider-component>
+</div>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {%- for block in section.blocks -%}
+      {
+        "@type": "Question",
+        "name": "{{ block.settings.title | escape }}",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "{{ block.settings.text | strip_html }}"
+        }
+      }{%- if forloop.last == false -%},{%- endif -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+  
+<script>
+  function toggleTextFAQ(textId, arrowId) {
+    if (typeof arrowOpened !== "undefined" && typeof toggleTextProduct !== "undefined") {
+      if(arrowOpened !== null) {
+        toggleTextProduct(sectionIdOpened, '', arrowOpened);
+      }
+    }
+    const text = document.getElementById(textId);
+    const arrow = document.getElementById(arrowId);
+    arrow.classList.toggle('collapsed');
+    if (text.style.display == 'none') {
+      text.style.display = 'block';
+    } else {
+      text.style.display = 'none';
+    }
+  }
+</script>
+{% schema %}
+{
+  "name": "t:sections.faq.name",
+  "class": "section",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "default": "Multicolumn",
+      "label": "t:sections.multicolumn.settings.title.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_center",
+      "default": false,
+      "label": "Center Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "default": "<p>Subtitle</p>",
+      "label": "Subtitle"
+    },
+    {
+      "type": "richtext",
+      "id": "bottom_text",
+      "default": "<p>Text below</p>",
+      "label": "Bottom Text"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h3",
+          "label": "Tiny"
+        },
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "select",
+      "id": "question_size",
+      "options": [
+        {
+          "value": "h3",
+          "label": "Tiny"
+        },
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h2",
+      "label": "Question Title size"
+    },
+    {
+      "type": "select",
+      "id": "heading_size_google",
+      "options": [
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size_google.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size_google.options__2.label"
+        },
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size_google.options__3.label"
+        },
+        {
+          "value": "h3",
+          "label": "t:sections.all.heading_size_google.options__4.label"
+        },
+        {
+          "value": "h4",
+          "label": "t:sections.all.heading_size_google.options__5.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size_google.label"
+    },
+    {
+      "type": "select",
+      "id": "column_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.multicolumn.settings.column_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.multicolumn.settings.column_alignment.options__2.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.multicolumn.settings.column_alignment.label"
+    },
+    {
+      "type": "select",
+      "id": "background_style",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:sections.multicolumn.settings.background_style.options__1.label"
+        },
+        {
+          "value": "primary",
+          "label": "t:sections.multicolumn.settings.background_style.options__2.label"
+        }
+      ],
+      "default": "primary",
+      "label": "t:sections.multicolumn.settings.background_style.label"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "default": "multicolumn",
+      "label": "t:sections.multicolumn.settings.anchor_id.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "anchor_wanted",
+      "default": false,
+      "label": "t:sections.multicolumn.settings.anchor_wanted.label"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "default": "Button label",
+      "label": "t:sections.multicolumn.settings.button_label.label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:sections.multicolumn.settings.button_link.label"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_upper_left",
+      "default": false,
+      "label": "Blue Corner Upper Left"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_upper_right",
+      "default": false,
+      "label": "Blue Corner Upper Right"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_lower_left",
+      "default": false,
+      "label": "Blue Corner Lower Left"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_lower_right",
+      "default": false,
+      "label": "Blue Corner Lower Right"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_size",
+      "default": true,
+      "label": "Full Size"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+          "value": "accent-2",
+          "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+          "value": "background-1",
+          "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+          "value": "background-2",
+          "label": "t:sections.all.colors.background_2.label"
+        },
+        {
+          "value": "inverse",
+          "label": "t:sections.all.colors.inverse.label"
+        }
+      ],
+      "default": "background-1",
+      "label": "t:sections.all.colors.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.multicolumn.settings.header_mobile.content"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.multicolumn.settings.columns_mobile.options__1.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.multicolumn.settings.columns_mobile.options__2.label"
+        }
+      ],
+      "default": "1",
+      "label": "t:sections.multicolumn.settings.columns_mobile.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "default": false,
+      "label": "t:sections.multicolumn.settings.swipe_on_mobile.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_columns",
+      "default": false,
+      "label": "Center the columns"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Container Width in %",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "t:sections.multicolumn.blocks.column.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "default": "Column",
+          "label": "t:sections.multicolumn.blocks.column.settings.title.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "center_title",
+          "default": false,
+          "label": "Center the Title"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
+          "label": "t:sections.multicolumn.blocks.column.settings.text.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "center_text",
+          "default": false,
+          "label": "Center the Text"
+        },
+        {
+          "type": "checkbox",
+          "id": "make_hidden",
+          "default": true,
+          "label": "Make the text hidden by default"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.faq.presets.name",
+      "blocks": [
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

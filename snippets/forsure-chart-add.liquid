@@ -1,0 +1,227 @@
+{% comment %}
+Renders popup for statistics for adding new chart
+
+Usage:
+{% render 'forsure-chart-add' %}
+{% endcomment %}
+<div id="overlayAdd"></div>
+<div id="allCharts" style="display: none">
+  <div id="widgetContainerAdd"></div>
+</div>
+<script>
+
+  function showAllCharts() {
+    document.getElementById('overlayAdd').style.display = 'block';
+    document.getElementById('allCharts').style.display = 'block';
+    drawAllCharts();
+  }
+
+  function createAddButton() {
+    const existingWidgetDiv = document.getElementById('widgetEnd');
+    if (existingWidgetDiv) { // If the element already exists, return it
+      return existingWidgetDiv;
+    }
+    const mainDiv = document.createElement('div');
+    mainDiv.id = 'widgetEnd';
+    mainDiv.className = 'widget';
+    mainDiv.style.order = 99999;
+
+    const chartDiv = document.createElement('div');
+    chartDiv.id = 'chartEnd';
+    chartDiv.className = 'chart';
+    chartDiv.style = "text-align: center; justify-content: center; font-weight: bold; margin-top: auto";
+    chartDiv.innerHTML = "<h2>Add more widgets</h2>";
+
+    const addButton = document.createElement('div');
+    addButton.innerHTML = "<h1 style='cursor: pointer;'>+</h1>"; // Big plus sign
+    addButton.addEventListener('click', showAllCharts);
+
+    chartDiv.appendChild(addButton);
+    mainDiv.appendChild(chartDiv);
+    document.getElementById('widgetContainer').appendChild(mainDiv);
+  }
+
+  function hideModalAdd() {
+    document.getElementById('overlayAdd').style.display = 'none';
+    document.getElementById('allCharts').style.display = 'none';
+    redraw(true);
+  }
+
+
+  async function drawAllCharts() {
+    let containerId = 'widgetContainerAdd';
+
+// Clear the contents of widgetContainer
+    let container = document.getElementById(containerId);
+    container.innerHTML = '';{% comment %}let filterFormData = new FormData();
+      let formDataStat = new FormData();
+
+      for (let [key, value] of filterFormData.entries()) {
+        formDataStat.append(key, value);
+      }
+    {% endcomment %}
+
+    let availableCharts = await getAvailableCharts();
+
+    let pinnedCharts = [];
+    try {
+      pinnedCharts = await unifiedSendRequest(GETPINNEDCHARTS, {method: 'GET'});
+    } catch (error) {
+      console.error(error.message);
+    }
+    if (! pinnedCharts || pinnedCharts.length == 0) {
+      pinnedCharts = ["xfdKfjo1XUkDlZRJ"];
+    }
+    let requestPromises = [];
+    console.log(availableCharts);
+    const categoriesDicts = {};
+
+    Object.keys(availableCharts).forEach(key => {
+        const item = availableCharts[key];
+        const category = item.category || 'Other'; // Default category if none is provided
+
+        // Initialize the category array if it doesn't exist
+        if (!categoriesDicts[category]) {
+          categoriesDicts[category] = {};
+        }
+
+        // Add the item to its respective category
+        categoriesDicts[category][key] = item;
+    });
+    console.log(categoriesDicts);
+    let categories = categoriesDicts;
+    for (let chartCategory in categories) {
+      let chartCategoryName = chartCategory.replace(' ', '');
+      let chartCategoryData = categories[chartCategory];
+      console.log(chartCategoryData);
+
+// remove already added ones
+      possibleCharts = Object.entries(chartCategoryData).filter(([key, val]) => ! pinnedCharts.includes(key)).reduce((acc, [key, val]) => {
+        acc[key] = val;
+        return acc;
+      }, {});
+      let endpoints = Object.values(possibleCharts);
+      console.log(endpoints.length);
+      if (endpoints.length == 0) {
+        continue;
+      }
+      let heading = document.createElement('h2');
+      heading.innerText = chartCategory;
+      const mainDiv = document.createElement('div');
+      const containerIdCategory = `widgetContainerAdd${chartCategoryName}`;
+      mainDiv.id = containerIdCategory;
+      mainDiv.className = 'widgetContainer';
+      container.appendChild(heading);
+      container.appendChild(mainDiv);
+
+      await getAndDrawCharts(endpoints, containerIdCategory, `add${chartCategoryName}`);
+    }
+    createCustomPlot(chartTypes, metric);
+  }
+
+
+  function createCustomPlot(chartTypes, metrics) {
+    const mainDiv = document.createElement('div');
+    mainDiv.id = 'widgetCustom';
+    mainDiv.className = 'widget';
+
+    const chartDiv = document.createElement('div');
+    chartDiv.id = 'chartEnd';
+    chartDiv.className = 'chart';
+    chartDiv.style = "text-align: center; justify-content: center; font-weight: bold; margin-top: auto";
+    chartDiv.innerHTML = "<h2>Add custom widgets</h2>";
+
+// Create the div and input fields
+    let div = document.createElement('div');
+
+// Input for title
+    let titleLabel = document.createElement('label');
+    titleLabel.textContent = "Title: ";
+    let titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.placeholder = 'Enter title';
+    div.appendChild(titleLabel);
+    div.appendChild(titleInput);
+    div.appendChild(document.createElement('br'));
+
+// Line break for better formatting
+
+// Dropdown for metrics
+    let metricLabel = document.createElement('label');
+    metricLabel.textContent = "Metric: ";
+    let metricDropdown = document.createElement('select');
+    metrics.forEach(metric => {
+      let option = document.createElement('option');
+      option.value = metric;
+      option.textContent = metric;
+      metricDropdown.appendChild(option);
+    });
+    div.appendChild(metricLabel);
+    div.appendChild(metricDropdown);
+    div.appendChild(document.createElement('br'));
+
+// Dropdown for metrics
+    let aggregationLabel = document.createElement('label');
+    aggregationLabel.textContent = "Aggregation: ";
+    let aggregationDropdown = document.createElement('select');
+    ["Category", "Country"].forEach(agg => {
+      let option = document.createElement('option');
+      option.value = agg;
+      option.textContent = agg;
+      aggregationDropdown.appendChild(option);
+    });
+    div.appendChild(aggregationLabel);
+    div.appendChild(aggregationDropdown);
+    div.appendChild(document.createElement('br'));
+
+// Line break for better formatting
+
+// Dropdown for chart types
+    let chartTypeLabel = document.createElement('label');
+    chartTypeLabel.textContent = "Chart Type: ";
+    let chartTypeDropdown = document.createElement('select');
+    for (let chartType in chartTypes) {
+      let option = document.createElement('option');
+      option.value = chartType;
+      option.textContent = chartType;
+      chartTypeDropdown.appendChild(option);
+    }
+    div.appendChild(chartTypeLabel);
+    div.appendChild(chartTypeDropdown);
+
+// Save button
+    let saveButton = document.createElement('button');
+    saveButton.textContent = 'Save';
+    saveButton.addEventListener('click', function() {
+      createNewPlot(titleInput, metricDropdown, aggregationDropdown, chartTypeDropdown)
+    });
+    div.appendChild(document.createElement('br')); // Line break for better formatting
+    div.appendChild(saveButton);
+
+    mainDiv.appendChild(div);
+
+
+    document.getElementById('widgetContainerAdd').appendChild(mainDiv);
+  }
+
+
+  function createNewPlot(titleInput, metricDropdown, aggregationDropdown, chartTypeDropdown) {
+    if (metricDropdown.value != null && titleInput.value != null && chartTypeDropdown.value != null && aggregationDropdown.value != null) {
+      let formDataNewChart = new FormData();
+      formDataNewChart.append('column_name', metricDropdown.value);
+      formDataNewChart.append('chart_type', chartTypeDropdown.value);
+      formDataNewChart.append('title', titleInput.value);
+      formDataNewChart.append('aggregation', aggregationDropdown.value);
+      unifiedSendRequest(CREATENEWPLOT, {formData: formDataNewChart});
+    }
+  }
+
+  document.getElementById('overlayAdd').addEventListener('click', hideModalAdd);
+  document.addEventListener('keydown', function(event) {
+    if (document.getElementById('overlayAdd').style.display === 'block' && document.getElementById('overlay').style.display !== 'block') {
+      if (event.key === 'Escape') {
+        hideModalAdd();
+      }
+    }
+  });
+</script>

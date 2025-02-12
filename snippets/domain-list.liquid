@@ -1,0 +1,12 @@
+<script> var domainlist;
+fetch('https://raw.githubusercontent.com/Kikobeats/free-email-domains/master/domains.json')
+  .then(response => response.json())
+  .then(data => {
+        console.log(data); // This will log the JSON data to the console
+    domainlist = data;
+  })
+  .catch(error => {
+    console.error('Error fetching data: ', error);
+  });
+  
+</script>

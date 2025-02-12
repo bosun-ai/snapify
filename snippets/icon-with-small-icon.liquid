@@ -1,0 +1,31 @@
+<div id="{{id}}" style="position:absolute;  top: {{ top }}; left: {{ left }};right: {{ right }}; z-index: 2;{% if padding %} padding: {{ padding  }}px; {% endif %}">
+
+  <div class="iconEPR" style="display: flex;
+                    justify-content: center; /* Horizontally center */
+                    align-items: center; /* Vertically center */
+                    background-color: #fafafa;
+                    border-radius: 10%;
+                    height: 130px;
+                    width: 130px;
+                  position: relative;
+                    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);border-radius:2rem
+                    ">
+    <svg
+      style="position: absolute; top: -15%; left: 80%; z-index:11;box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.5);border-radius:50%"
+      width="45"
+      height="45">
+      <circle cx="22.5"
+        cy="22.5"
+        r="25"
+        stroke-width="3"
+        fill="#fafafa" />
+      <!-- Your SVG content embedded -->
+      {{ smallIcon }}
+    </svg>
+    {% if bigIconText %}
+      <p class="eprText h1" style="color:#2255ff">{{ bigIconText }}</p>
+    {% else %}
+      {{ bigIcon }}
+    {% endif %}
+  </div>
+</div>

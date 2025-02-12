@@ -1,0 +1,222 @@
+{% comment %}
+Renders the notifications block
+
+Usage:
+{% render 'forsure-notifications' %}
+{% endcomment %}
+<style>
+#notificationBox {
+    width: 30%;
+    height: 100%;
+    position: fixed;
+    right: 0;
+    top: 0;
+    background-color: #fafafa;
+    /* transform: translate(-50%, -50%); */
+    /* left: 50%; */
+    /* margin-left: -5px; */
+    z-index: 102;
+    overflow: hidden;
+    border: 0.1rem solid #17161c;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+#notificationBoxBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 101;
+    display: none;
+}
+#notificationBoxHeader {
+      background-color: #2255ff;
+      color: white;
+      padding: 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+
+  #notificationBoxHeader span {
+      cursor: pointer;
+      font-size: 1.2rem;
+  }
+
+  /* Scrollable content area */
+  #notificationBoxContent {
+      padding: 1rem;
+      height: calc(100% - 3.5rem);
+      overflow-y: auto;
+  }
+
+  /* Notification card styling */
+  .notificationCard {
+      background-color: #f9f9f9;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+  }
+
+  .notificationDetails {
+      max-width: 85%;
+  }
+
+  .notificationDetails h4 {
+      margin: 0 0 0.5rem 0;
+  }
+
+  .notificationDetails p {
+      margin: 0 0 0.5rem 0;
+  }
+
+  .notificationDetails .date {
+      text-align: right;
+  }
+
+  .removeButton {
+      background-color: transparent;
+      border: none;
+      color: #ff4d4f;
+      font-size: 1.2rem;
+      cursor: pointer;
+  }
+
+  .removeButton:hover {
+      color: #ff0000;
+  }
+
+  .icon-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .icon {
+      width: 50px;
+      height: 50px;
+    }
+
+    .badgeNotification {
+      position: absolute;
+      top: 10px;
+      right: -2px;
+      background-color: #a80000;
+      color: white;
+      border-radius: 50%;
+      font-size: 12px;
+      min-width: 20px;
+      height: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    .badgeNotification.hidden {
+      display: none;
+    }
+</style>
+<div id="notificationBox" style="display: none">
+    <div id="notificationBoxHeader">
+      Notifications
+      <span onclick="closeNotificationBox()">✖</span>
+  </div>
+  <div id="notificationBoxContent">
+      <!-- Notification cards will be inserted here -->
+  </div>
+</div>
+<div id="notificationBoxBackground" style="display: none"></div>
+<script>
+var notifications = [];
+
+function updateNotificationBadge(messageList) {
+    const badge = document.getElementById('notification-badge');
+
+    const count = messageList.length;
+    if (count > 0) {
+      badge.textContent = count > 9 ? '9+' : count;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+
+async function getNotifications() {
+    try {
+        notifications = await unifiedSendRequest(NOTIFICATIONS, {method: 'GET'});
+        console.log(notifications);
+        updateNotificationBadge(notifications);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    getNotifications();
+    setInterval(getNotifications, 5000); // fetch notifications every 30seconda
+});
+
+function createNotificationCards() {
+    const contentBox = document.getElementById("notificationBoxContent");
+    contentBox.innerHTML = ""; // Clear existing content
+
+    notifications.forEach((notification, index) => {
+        const card = document.createElement("div");
+        card.className = "notificationCard";
+
+        card.innerHTML = `
+            <div class="notificationDetails">
+                <h4>${notification.title}</h4>
+                <p><strong>Company:</strong> ${notification.user}</p>
+                <p><strong>Type of Report:</strong> ${notification.type_of_report}</p>
+                <p><strong>Error:</strong> ${notification.error_message}</p>
+                <div class="date">${notification.date_of_notification}</div>
+            </div>
+            <button class="removeButton" onclick="removeNotification(${notification.id})">✖</button>
+        `;
+
+        contentBox.appendChild(card);
+    });
+}
+
+async function removeNotification(notificationId) {
+    try {
+        const response = await unifiedSendRequest(NOTIFICATIONS + `/${notificationId}/resolve`, {method: 'PUT'});
+        console.log(response);
+        await getNotifications();
+        createNotificationCards(); // Re-render the cards
+        showMessage('Resolved notification', true);
+    } catch (error) {
+        console.error("Failed to resolve notification:", error);
+        showMessage('Failed to resolve notification ' + error.message, false);
+    }
+}
+
+function closeNotificationBox() {
+    const notificationBox = document.getElementById("notificationBox");
+    notificationBox.style.display = "none";
+    var notificationBoxBackground = document.getElementById('notificationBoxBackground');
+    notificationBoxBackground.style.display = 'none';
+}
+
+  // Initialize the notification cards
+
+function displayNotificationBox() {
+    var notificationBox = document.getElementById('notificationBox');
+    var notificationBoxBackground = document.getElementById('notificationBoxBackground');
+
+    notificationBox.style.display = 'block';
+    notificationBoxBackground.style.display = 'block';
+    createNotificationCards();
+
+    // Close the notification box when the background is clicked
+    notificationBoxBackground.onclick = closeNotificationBox;
+}
+</script>

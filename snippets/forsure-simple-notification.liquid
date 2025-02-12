@@ -1,0 +1,41 @@
+{% comment %}
+Renders a simple success/fail message
+
+Usage:
+{% render 'forsure-simple-notification' %}
+{% endcomment %}
+<style>
+#tooltip {
+  content: " ";
+  position: fixed;
+  top: 14rem;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  margin-left: -5px;
+  color: #fafafa;
+  z-index: 102;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+</style>
+<div id="tooltip"></div>
+<script>
+function showMessage(message, isSuccess) {
+  var tooltip = document.getElementById('tooltip');
+  var delay = 2000;
+  if (!isSuccess) {
+    delay = 5000;
+    tooltip.style.backgroundColor = "red"; // Different background for error
+  } else {
+    tooltip.style.backgroundColor = "#2255ff";
+  }
+  tooltip.textContent = message;
+
+  setTimeout(() => {
+    tooltip.style.display = 'block';
+    setTimeout(() => {
+      tooltip.style.display = 'none';
+    }, delay); // Show for 2 seconds
+  }, 10); // Minor delay to ensure transition effect
+}
+</script>

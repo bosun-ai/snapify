@@ -1,0 +1,594 @@
+{% schema %}
+{
+  "name": "t:sections.productpage1st.name",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "mainpicutre",
+      "label": "Mainpicture"
+    },
+    {
+      "type": "url",
+      "id": "button_link_left",
+      "label": "Left Button"
+    },
+    {
+      "type": "text",
+      "id": "button_link_left_text",
+      "default": "FREE PLAN",
+      "label": "Left Button"
+    },
+    {
+      "type": "url",
+      "id": "button_link_right",
+      "label": "Right Button"
+    },
+    {
+      "type": "text",
+      "id": "button_link_right_text",
+      "default": "DEMO",
+      "label": "Right button"
+    },
+    {
+      "type": "checkbox",
+      "id": "background_gradient",
+      "default": true,
+      "label": "Background as gradient"
+    },
+    {
+        "type": "select",
+        "id": "heading_size_google",
+        "options": [
+            {
+            "value": "h3",
+            "label": "Tiny"
+            },
+            {
+            "value": "h2",
+            "label": "t:sections.all.heading_size.options__1.label"
+            },
+            {
+            "value": "h1",
+            "label": "t:sections.all.heading_size.options__2.label"
+            },
+            {
+            "value": "h0",
+            "label": "t:sections.all.heading_size.options__3.label"
+            }
+        ],
+        "default": "h1",
+        "label": "Heading Size Google"
+    },
+    {
+      "type": "text",
+      "id": "title1",
+      "default": "Tailored",
+      "label": "Title Part 1"
+    },
+    {
+      "type": "text",
+      "id": "titlebluedefault",
+      "default": "EPR Software",
+      "label": "Title blue default text"
+    },
+    {
+      "type": "text",
+      "id": "dynamicTitle",
+      "default": "EPR Analysing,EPR Processes,Data Managing,EPR Software",
+      "label": "Dynamic Title, split with , without space"
+    },
+    {
+      "type": "text",
+      "id": "title2",
+      "default": "for Modern Retailers",
+      "label": "Title part 2"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "default": "<p>ForSURE offers tailored EPR software for modern retailers, simplifying compliance with user-centric design for efficient EPR processes.</p>",
+      "label": "Subtitle"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_class",
+      "default": "h3",
+      "label": "Subtitle class"
+    },
+    {
+      "type": "text",
+      "id": "image_as_snippet",
+      "default": "icon-goods-categories",
+      "label": "Icon"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_icon",
+      "label": "Icon Image"
+    },
+    {
+      "type": "text",
+      "id": "alt_text",
+      "label": "Alt text"
+    },    
+    {
+      "type": "checkbox",
+      "id": "fullscreen",
+      "default": false,
+      "label": "Full Screen"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_upper_left",
+      "default": false,
+      "label": "Blue Corner Upper Left"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_upper_right",
+      "default": false,
+      "label": "Blue Corner Upper Right"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_lower_left",
+      "default": false,
+      "label": "Blue Corner Lower Left"
+    },
+    {
+      "type": "checkbox",
+      "id": "bluecorner_lower_right",
+      "default": false,
+      "label": "Blue Corner Lower Right"
+    },
+    {
+      "type": "checkbox",
+      "id": "blueline_bottom",
+      "default": false,
+      "label": "Blue Line at bottom"
+    },
+        {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.productpage1st.presets.name"
+    }
+  ]
+}
+{% endschema %}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  
+  .background-triangle {
+    position: relative;
+  }
+  .productpageicon {
+    height: 100%;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .full-screen {
+    min-height: calc(100vh - 11rem);
+  }
+
+  .hero-sizing-product {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    height: auto;
+    width: 100%;
+    position: relative;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(110deg, #2c2b30 60%, #2255ff);
+  }
+  .left-bottom-triangle-transparent {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw / 8) 0 0 calc(100vw / 6.5);
+    border-color: transparent transparent transparent #2255ff99;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: block !important;
+  }
+  .left-top-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) calc(100vw/6.5) 0 0;
+    border-color: #2255ff transparent transparent transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .right-top-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 calc(100vw/6.5) calc(100vw/8) 0;
+    border-color: transparent #2255ff transparent transparent;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .left-bottom-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) 0 0 calc(100vw/6.5);
+    border-color: transparent transparent transparent #2255ff;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .right-bottom-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 calc(100vw/8) calc(100vw/6.5);
+    border-color: transparent transparent #2255ff transparent;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  h1 {
+    text-align: left;
+  }
+  #subtitle {
+    text-align: left;
+    width: 83%;
+  }
+
+  .arrow img {
+    transform: rotate(-90deg); /* This will rotate the image 45 degrees */
+  }
+  .flex-container {
+    display: flex;
+    align-items: center; /* This vertically centers the children */
+  }
+
+  #namewordings:after {
+    content: '|';
+    animation: blink 1s infinite;
+  }
+
+  .button-free-plan:hover {
+    color: #2255ff !important;
+    border: none !important;
+  }
+
+  .svg-default {
+    display: block;
+  }
+
+  .svg-hover {
+    display: none;
+  }
+
+  /* When hovering over the anchor tag, hide the default SVG and show the hover SVG */
+  .button-free-plan:hover .svg-default {
+    display: none;
+  }
+
+  .button-free-plan:hover .svg-hover {
+    display: block !important;
+  }
+  .title-column-product1st {
+    flex-direction: row; /* Items will now be laid out in a row */
+    margin-top: 3rem;
+  }
+  .imgright {
+    width: 40rem;
+    height: 40rem;
+  }
+  .iconhomepage {
+    height: 130px;
+    width: 130px;
+  }
+  .titlehomepage {
+    font-size: 4rem;
+  }
+  .title-left-first {
+    position: relative;
+  }
+  @media screen and (min-width: 1199px) {
+    .title-column-product1st {
+      padding-right: 100px;
+    }
+  }
+  @media (max-width: 1200px) {
+    .title-column-product1st {
+      flex-direction: column; /* Items will now be laid out in a column */
+      margin: auto;
+    }
+    .imgContainerRight {
+      padding-top: 5rem;
+      margin: auto;
+      margin-bottom: 110px; /* To account for the svgs at the bottom*/
+    }
+    .title-left-first {
+      margin-left: auto !important;
+      margin-left: 10%;
+    }
+    .buttons-left {
+      justify-content: center;
+    }
+    #subtitle {
+      width: 100%;
+    }
+  }
+  @media (max-height: 700px) {
+    .imgright {
+      width: 30rem;
+      height: 30rem;
+    }
+    .iconEPR {
+      width: 100px !important;
+      height: 100px !important;
+    }
+    .eprText {
+      font-size: ;
+    }
+    .iconGovernment {
+      width: 80px;
+    }
+    .iconGoods {
+      width: 80px;
+    }
+    .iconhomepage {
+      height: 100px;
+      width: 100px;
+    }
+    .iconAgency {
+      width: 80px;
+    }
+    .iconData {
+      width: 80px;
+    }
+    .subtitle {
+      font-size: 2rem;
+    }
+  }
+
+  /* @media(max-width: 1300px) {
+      .title-left-first {
+        margin-left: 10%;
+        }
+    } */
+  @media (max-width: 600px) {
+    /* .title-column-product1st {
+      padding: 3rem
+    } */
+    .imgright {
+      width: 65%;
+      height: 25rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .imgright {
+      width: 25rem;
+      height: 25rem;
+    }
+    .iconEPR {
+      width: 100px !important;
+      height: 100px !important;
+    }
+    .eprText {
+      font-size: ;
+    }
+    .iconGovernment {
+      width: 80px;
+    }
+    .iconGoods {
+      width: 80px;
+    }
+    .iconhomepage {
+      height: 100px;
+      width: 100px;
+    }
+    .iconAgency {
+      width: 80px;
+    }
+    .iconData {
+      width: 80px;
+    }
+    .titlehomepage {
+      font-size: 4rem;
+    }
+    .subtitle {
+      font-size: 2rem;
+    }
+  }
+  @keyframes blink {
+    0,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .connector {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+{%- endstyle -%}
+
+<div
+  style="position: relative; {% if section.settings.blueline_bottom %}border-bottom: .25rem solid #2255ff{% endif %}"
+  class="hero-sizing-product {% if section.settings.background_gradient %}hero-gradient{% endif %} {% if section.settings.fullscreen %}full-screen {% endif %}section-{{ section.id }}-padding"
+>
+  <div style="display: flex;" class="title-column-product1st page-width">
+    {% if section.settings.bluecorner_upper_left %}
+      <div class="left-top-triangle"></div>
+    {% endif %}
+    {% if section.settings.bluecorner_upper_right %}
+    <div class="right-top-triangle"></div>
+    {% endif %}
+    {% if section.settings.bluecorner_lower_left %}
+    <div class="left-bottom-triangle"></div>
+    {% endif %}
+    {% if section.settings.bluecorner_lower_right %}
+    <div class="right-bottom-triangle"></div>
+    {% endif %}
+    <div class="title-left-first">
+      <{{ section.settings.heading_size_google }} class="titlehomepage" style="{% if section.settings.background_gradient %}color: #fafafa;{% endif %}">
+        {{ section.settings.title1 }}
+        {% if section.settings.titlebluedefault != blank %}
+          <span id="namewordings" style="color: #2255ff">{{ section.settings.titlebluedefault }}</span>
+        {% endif %}
+        <br>
+        {{ section.settings.title2 }}
+      </{{ section.settings.heading_size_google }}>
+      <div id="subtitle" class="{{ section.settings.subtitle_class }}">
+        {{ section.settings.subtitle }}
+      </div>
+      <div class="buttons-left" style="display: flex;position: relative;">
+        {% if section.settings.button_link_left != blank %}
+          <a
+            style="
+              font-size: 1em;
+              font-weight: bold;z-index: 1
+            "
+            href="{{ section.settings.button_link_left }}"
+            class="button"
+          >
+            {{- section.settings.button_link_left_text -}}
+          </a>
+        {% endif %}
+        {% if section.settings.button_link_right != blank %}
+          <div class="flex-container">
+            <a
+              href="{{ section.settings.button_link_right }}"
+              class="button-free-plan"
+              style="display: inline-flex; color: white; text-decoration: none; font-size: 1.17em; font-weight: bold; margin-left: 4rem;"
+            >
+              {{- section.settings.button_link_right_text }}
+              <svg
+                version="1.1"
+                style="margin: auto; margin-left: 0.6rem;"
+                class="svg-default"
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="20.593px"
+                height="22.88px"
+                viewBox="0 0 80.593 122.88"
+                xml:space="preserve"
+              >
+                <g>
+                  <polygon style="fill: #fafafa " points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0" />
+                </g>
+              </svg>
+              <!-- The hover SVG is initially hidden with inline style "display: none;" -->
+              <svg
+                version="1.1"
+                style="margin: auto; margin-left: 0.6rem;"
+                class="svg-hover"
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="20.593px"
+                height="22.88px"
+                viewBox="0 0 80.593 122.88"
+                xml:space="preserve"
+                style="display: none;"
+              >
+                <g>
+                  <polygon style="fill: #2255ff" points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0" />
+                </g>
+              </svg>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="imgContainerRight" style="position: relative;">
+      <div class="imgright" style="position:relative;">
+        <img
+          style="border-radius: 10%; object-fit: cover; object-position: 65% center;"
+          width="100%"
+          height="100%"
+          src="{{ section.settings.mainpicutre | image_url }}"
+          alt="{{ section.settings.mainpicutre.alt | escape }}"
+          loading="lazy"
+        >
+
+        <!-- Existing div for icons and the connecting line between them -->
+        <div style="position: absolute; top: 71%; left: -11%; width: 115%; height: 130px; display: flex; justify-content: space-between; align-items: center;">
+          <!-- Existing icon on the left -->
+          <div
+            id="goodsContainerSection1"
+            class="iconhomepage"
+            style="
+              background-color:#fafafa; border-radius: 10%; display: flex;
+              justify-content: center; align-items: center;z-index: 2;
+              position: absolute; left:0%;box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);
+            "
+          >
+            {% if section.settings.image_icon != blank %}
+              {%- capture sizes -%}(min-width: 990px) {% if section.blocks.size <= 2 %}710px{% else %}550px{% endif %}, (min-width: 750px) {% if section.blocks.size == 1 %}710px{% else %}550px{% endif %}, calc(100vw - 30px){%- endcapture -%}
+                    {{ section.settings.image_icon | image_url: width: 1420 | image_tag:
+                      loading: 'lazy',
+                      sizes: sizes,
+                      widths: '275, 550, 710, 1420',
+                      class: 'productpageicon',
+                      alt: section.settings.alt_text
+                    }}
+            {% else %}
+              {% render 'icon-renderer', icon_to_render: section.settings.image_as_snippet %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

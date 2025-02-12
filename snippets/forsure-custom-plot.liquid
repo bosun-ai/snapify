@@ -1,0 +1,880 @@
+{% comment %}
+Renders popup for statistics for adding new custom chart
+
+Usage:
+{% render 'forsure-custom-plot' %}
+{% endcomment %}
+
+{%  style  %} 
+.dragContainer {
+  display: block;
+  border: 2px dashed #17161c;
+  border-radius: 2rem;
+}
+
+.dragYContainer {
+  height: 7rem;
+  margin-top: auto;
+  margin-bottom: auto;
+  align-items: center;
+  /* overflow-x: auto; */
+  /* display: flex; */
+  /* flex-direction: row-reverse; */
+  /* margin-left: 1rem; */
+  margin-right: 1rem;
+  /* padding: 0 5rem; */
+  /* width: 5rem; */
+  /* width: auto; */
+  white-space: nowrap;
+  transform: rotate(-90deg) translateX(0%);
+  transform-origin: top right;
+  position: absolute;
+  /* left: -5%; */
+  display: none;
+  /* margin-left: -5%; */
+  top: 0;
+  width: 60vh;
+}
+.dragYList {
+  align-items: center;
+  flex-direction: row-reverse;
+  display: flex;
+  scrollbar-width: thin;
+  scrollbar-color: #2255ff #fafafa;
+  overflow-x: auto;
+  padding: 0 5rem;
+  height: 5rem;
+  margin: auto;
+  background-color: #fafafa;
+}
+
+.dragYContainer li, .dragYContainer p {
+  /* transform: rotate(-90deg); */
+  transform-origin: center;
+  margin: auto 2rem;
+}
+.dragYContainer .colItems .textBorder {
+  text-orientation: sideways;
+}
+.dragXContainer {
+  height:5rem;
+  align-items: center;
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 5rem;
+  width: fit-content;
+  background-color: #fafafa;
+  position: relative;
+}
+.dragXContainer li {
+  margin: auto 2rem;
+}
+.chosenYContainerPlaceholder {
+  /* align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly; */
+  text-align: center;
+}
+.chosenXContainerPlaceholder {
+  text-align: center;
+}
+#chosenYPlaceholder {
+  text-align: center;
+  width: 100%;
+}
+#chosenXPlaceholder {
+  margin: auto;
+}
+#trashIconContainer {
+  position: absolute;
+  top:50%;
+  left:50%;
+  display: none;
+  transform: translate(-2rem, -2rem);
+}
+#chartTitle {
+  padding: 2rem;
+  margin: auto;
+  text-align: center;
+  display: block;
+}
+#columnsContentLeft {
+  padding-left: 1rem;
+  padding-right: 2rem;
+}
+.columnsLeftContent {
+  padding-left: 0rem;
+  margin: 1rem 0;
+  margin-left: 1rem;
+}
+.columnsLeftContent li {
+  overflow-x: auto; /* Need this to hide the corners of the blue element around the dots */
+}
+.svg-arrow {
+  transform: rotate(90deg); 
+  transition: transform 0.3s ease; /* Smooth transition for rotation */
+}
+
+.collapsed {
+  transform: rotate(180deg); /* Rotate arrow 90 degrees when collapsed */
+}
+.colItems {
+  /* padding: 0.5rem; */
+  cursor: pointer;
+  list-style: none;
+  /* border: 0.2rem solid #17161c;
+  border-radius: 2rem; */
+  text-align: center;
+  margin: 0.5rem 0.5rem 0.5rem 0;
+  display: flex; /* Establishes a flex container */
+  /* align-items: center; Vertically centers the flex items */
+  /* overflow-x: auto; */
+  height: auto;
+}
+.colItemContainer {
+    overflow-x: auto;
+    overflow-y: hidden;
+    cursor: pointer;
+    list-style: none;
+    text-align: center;
+    display: flex;
+    border: 2px solid #000;
+    border-radius: 8px;
+    height: auto;
+}
+.dotscontainer {
+  background-color: #2255ff; /* Fill the background of the dots with blue */
+  display: flex; /* Ensure the SVG is centered if needed */
+  align-items: center; /* Center SVG vertically */
+  justify-content: center;
+  width: 10px;
+  position: relative;
+}
+
+.textBorder {
+  border-left: .2rem solid #17161c; /* Creates a border between the SVG and the text */
+  text-align: left;
+  padding: 0 1rem;
+  background-color: #fafafa;
+}
+.dots {
+    transform: rotate(-90deg);
+    color: #839FFF;
+    margin: auto; /* vertically align dots */
+}
+#titleInput {
+  width: fit-content;
+  margin: auto;
+  justify-content: center;
+  display: flex;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  cursor: text;
+}
+.columnsLeftContentList {
+  width: 80%;
+  overflow: hidden;
+  margin-left: 2rem;
+  transition: max-height 0.5s ease-out;
+}
+.columnsLeftContentListHidden {
+  max-height: 0;
+  overflow: hidden;
+}
+.icon {
+  padding: 0 2rem;
+  cursor: pointer;
+}
+.iconContainer {
+  position:absolute;
+  top:4%;
+  right:2%;
+  display:flex;
+  background-color: #fafafa;
+}
+#chartSelectionContainer {
+  display: none; /* Start hidden */
+  position: absolute; /* Position it below the icon or wherever it fits */
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  z-index: 1; /* Make sure it's above other content */
+  border-radius: 1rem;
+}
+
+#chartSelectionContainer ul {
+  list-style: none; /* Remove default list styling */
+  margin: 0;
+  padding: 0;
+}
+
+#chartSelectionContainer li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer; /* Change cursor on hover */
+}
+
+#chartSelectionContainer li:hover {
+  background-color: #f6f6f6;
+}
+
+#chartSelectionContainer li:last-child {
+  border-bottom: none;
+}
+.selected-chart-option {
+  background-color: #2255ff;
+  color: #fafafa;
+}
+.selected-chart-option:hover {
+  background-color: #2255ff!important;
+  color: #fafafa;
+}
+.tooltipSave {
+  position: absolute;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  z-index: 1;
+  top: 10%;
+  left: 50%;
+  margin-left: -60px;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+}
+
+/* .tooltip::after {
+  content: " ";
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+} */
+
+
+.dragYList, #columnsLeft {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: #2255ff #fafafa; /* thumb and track color */
+}
+
+.columnsTitle {
+  cursor: pointer;
+}
+
+{% endstyle %}
+
+{% comment %} <div id="overlayCustom"></div>
+<div id="customChart" style="display: none"> {% endcomment %}
+  <div id="chartSelectionContainer" style="margin: auto;width:fit-content"></div>
+  <div style="display:flex;position:relative">
+    <div id="columnsLeft" style="width: fit-content;overflow: auto;height: 60vh;position: relative;
+            margin-right: 11rem;overflow-y: auto;overflow-x: clip;min-width:300px">
+        <!-- <img width="20px" src="{{ trashcan | image_url }}" alt="{{ trashcan.alt | escape }}" loading="lazy"> TODO replace svg with image above once possible -->
+        <div id="trashIconContainer"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="4rem" height="4rem" viewBox="0 0 108.294 122.88" enable-background="new 0 0 108.294 122.88" xml:space="preserve"><g><path fill="#17161c" d="M4.873,9.058h33.35V6.2V6.187c0-0.095,0.002-0.186,0.014-0.279c0.075-1.592,0.762-3.037,1.816-4.086l-0.007-0.007 c1.104-1.104,2.637-1.79,4.325-1.806l0.023,0.002V0h0.031h19.884h0.016c0.106,0,0.207,0.009,0.309,0.022 c1.583,0.084,3.019,0.76,4.064,1.81c1.102,1.104,1.786,2.635,1.803,4.315l-0.003,0.021h0.014V6.2v2.857h32.909h0.017 c0.138,0,0.268,0.014,0.401,0.034c1.182,0.106,2.254,0.625,3.034,1.41l0.004,0.007l0.005-0.007 c0.851,0.857,1.386,2.048,1.401,3.368l-0.002,0.032h0.014v0.032v10.829c0,1.472-1.195,2.665-2.667,2.665h-0.07H2.667 C1.195,27.426,0,26.233,0,24.762v-0.063V13.933v-0.014c0-0.106,0.004-0.211,0.018-0.315v-0.021 c0.089-1.207,0.624-2.304,1.422-3.098l-0.007-0.002C2.295,9.622,3.49,9.087,4.81,9.069l0.032,0.002V9.058H4.873L4.873,9.058z M77.79,49.097h-5.945v56.093h5.945V49.097L77.79,49.097z M58.46,49.097h-5.948v56.093h5.948V49.097L58.46,49.097z M39.13,49.097 h-5.946v56.093h5.946V49.097L39.13,49.097z M10.837,31.569h87.385l0.279,0.018l0.127,0.007l0.134,0.011h0.009l0.163,0.023 c1.363,0.163,2.638,0.789,3.572,1.708c1.04,1.025,1.705,2.415,1.705,3.964c0,0.098-0.009,0.193-0.019,0.286l-0.002,0.068 l-0.014,0.154l-7.393,79.335l-0.007,0.043h0.007l-0.016,0.139l-0.051,0.283l-0.002,0.005l-0.002,0.018 c-0.055,0.331-0.12,0.646-0.209,0.928l-0.007,0.022l-0.002,0.005l-0.009,0.018l-0.023,0.062l-0.004,0.021 c-0.118,0.354-0.264,0.698-0.432,1.009c-1.009,1.88-2.879,3.187-5.204,3.187H18.13l-0.247-0.014v0.003l-0.011-0.003l-0.032-0.004 c-0.46-0.023-0.889-0.091-1.288-0.202c-0.415-0.116-0.818-0.286-1.197-0.495l-0.009-0.002l-0.002,0.002 c-1.785-0.977-2.975-2.882-3.17-5.022L4.88,37.79l-0.011-0.125l-0.011-0.247l-0.004-0.116H4.849c0-1.553,0.664-2.946,1.707-3.971 c0.976-0.955,2.32-1.599,3.756-1.726l0.122-0.004v-0.007l0.3-0.013l0.104,0.002V31.569L10.837,31.569z M98.223,36.903H10.837 v-0.007l-0.116,0.004c-0.163,0.022-0.322,0.106-0.438,0.222c-0.063,0.063-0.104,0.132-0.104,0.179h-0.007l0.007,0.118l7.282,79.244 h-0.002l0.002,0.012c0.032,0.376,0.202,0.691,0.447,0.825l-0.002,0.004l0.084,0.032l0.063,0.012h0.077h72.695 c0.207,0,0.399-0.157,0.518-0.377l0.084-0.197l0.054-0.216l0.014-0.138h0.005l7.384-79.21L98.881,37.3 c0-0.045-0.041-0.111-0.103-0.172c-0.12-0.118-0.286-0.202-0.451-0.227L98.223,36.903L98.223,36.903z M98.334,36.901h-0.016H98.334 L98.334,36.901z M98.883,37.413v-0.004V37.413L98.883,37.413z M104.18,37.79l-0.002,0.018L104.18,37.79L104.18,37.79z M40.887,14.389H5.332v7.706h97.63v-7.706H67.907h-0.063c-1.472,0-2.664-1.192-2.664-2.664V6.2V6.168h0.007 c-0.007-0.22-0.106-0.433-0.259-0.585c-0.137-0.141-0.324-0.229-0.521-0.252h-0.082h-0.016H44.425h-0.031V5.325 c-0.213,0.007-0.422,0.104-0.576,0.259l-0.004-0.004l-0.007,0.004c-0.131,0.134-0.231,0.313-0.259,0.501l0.007,0.102V6.2v5.524 C43.554,13.196,42.359,14.389,40.887,14.389L40.887,14.389z"/></g></svg></div>
+        <div id="columnsContentLeft"></div>
+    </div>
+    <div id="chosenYContainer" class="dragYContainer">
+      <ul id="chosenY" class="dragContainer chosenYContainerPlaceholder dragYList"><p id="chosenYPlaceholder">Drop items here</p></ul>
+    </div>
+    {% comment %} <ul id="chosenY" class="dragYContainer dragContainer chosenYContainerPlaceholder"><p id="chosenYPlaceholder">Drop items here</p></ul> {% endcomment %}
+    <div style="width: 75%;position:relative">
+      <div id='tooltip' class="tooltipSave"></div>
+      <div id="widgetContainerCustom" style="">
+        <h4 id="chartTitle">Chart Title</h4>
+        <canvas id="widgetCustom" style="width:100%;height:45vh"></canvas>
+      </div>
+      <ul id="chosenX" class="dragXContainer dragContainer chosenXContainerPlaceholder"><p id="chosenXPlaceholder">Drop items here</p></ul>
+      <div class="iconContainer">
+        <div class="icon" id="changeChartIcon" onclick="changeChart(this)">
+          <svg version="1.1" height="4rem" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 120.5" style="enable-background:new 0 0 122.88 120.5" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M64.82,68.27l48.4,0.8c0,17.19-8.55,33.26-22.81,42.86L64.82,68.27L64.82,68.27z M59.99,59.92L59.44,3.63 L59.41,0l3.61,0.25h0.01h0.01c4.56,0.32,8.98,1.12,13.21,2.33c4.23,1.21,8.29,2.86,12.13,4.87c19.67,10.34,33.27,30.56,34.34,54.02 l0.16,3.61l-3.61-0.11l-56.02-1.72l-3.23-0.1L59.99,59.92L59.99,59.92z M66.19,7.33l0.48,49.31l49.06,1.5 c-2.1-19.45-13.88-36.02-30.48-44.74c-3.41-1.79-7.04-3.26-10.84-4.35C71.74,8.28,69,7.71,66.19,7.33L66.19,7.33z M55.19,65.31 l27.6,47.8c-8.38,4.84-17.92,7.39-27.6,7.39C24.71,120.5,0,95.78,0,65.31c0-29.57,23.31-53.9,52.86-55.14L55.19,65.31L55.19,65.31z"></path></g></svg>
+        </div>
+        <div class="icon" onclick="showPopup('widgetCustom')">
+          <svg xmlns="http://www.w3.org/2000/svg" height="4rem" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path fill="#17161c" d="M32 32C14.3 32 0 46.3 0 64v96c0 17.7 14.3 32 32 32s32-14.3 32-32V96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V352zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h64v64c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H320zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32v64H320c-17.7 0-32 14.3-32 32s14.3 32 32 32h96c17.7 0 32-14.3 32-32V352z"></path></svg>
+        </div>
+        <div class="icon" onclick="saveChart()">
+          <svg xmlns="http://www.w3.org/2000/svg" height="4rem" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#17161c" d="M32 32C32 14.3 46.3 0 64 0H320c17.7 0 32 14.3 32 32s-14.3 32-32 32H290.5l11.4 148.2c36.7 19.9 65.7 53.2 79.5 94.7l1 3c3.3 9.8 1.6 20.5-4.4 28.8s-15.7 13.3-26 13.3H32c-10.3 0-19.9-4.9-26-13.3s-7.7-19.1-4.4-28.8l1-3c13.8-41.5 42.8-74.8 79.5-94.7L93.5 64H64C46.3 64 32 49.7 32 32zM160 384h64v96c0 17.7-14.3 32-32 32s-32-14.3-32-32V384z"/></svg>
+        </div>
+      </div>
+      {% comment %} <button style="position:absolute;top:2%;right:5%;" class="button" onclick="saveChart()">Save</button> {% endcomment %}
+    </div>
+    <div id="tooltip" style="display: none; position: absolute;"></div>
+  </div>
+  {% comment %} <button onclick="createPlot()">Create plot</button> {% endcomment %}
+{% comment %} </div> {% endcomment %}
+<script>
+  function hashCode(str) {
+    let hash = 0;
+    for (let i = 0, len = str.length; i < len; i++) {
+        let chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+  var title = '';
+  // var chartData = null;
+  var chart = null;
+
+  // function showCustomChartContainer() {
+  //   document.getElementById('overlayCustom').style.display = 'block';
+  //   document.getElementById('customChart').style.display = 'block';
+  //   getColumns();
+  //   // createEmptyChart();
+  // }
+
+  function hideModalCustom() {
+    document.getElementById('overlayCustom').style.display = 'none';
+    document.getElementById('customChart').style.display = 'none';
+  }
+  
+
+  const name_mapper = {
+    'amount_total': 'Amount Total',
+    'amount_b2b': 'Amount B2B',
+    'amount_b2c': 'Amount B2C',
+    'weight_total': 'Weight Total (kg)',
+    'weight_b2b': 'Weight B2B (kg)',
+    'weight_b2c': 'Weight B2C (kg)',
+    'sku': 'SKU',
+    'orderid': 'OrderID',
+    'b2b': 'B2B'
+  };
+
+  function convertStringFormat(s) {
+    if (name_mapper.hasOwnProperty(s)) {
+      return name_mapper[s];
+    }
+    return s.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+
+  async function getColumnsCustom() {
+    var data = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, {method: 'GET'});
+    var columnsDiv = document.getElementById('columnsContentLeft');
+    columnsDiv.innerHTML = ``;
+    console.log(data);
+    var table = document.createElement('table');
+    for(var key in data) {
+        // Check if the key is actually a property of the data object
+        if (data.hasOwnProperty(key)) {
+          var tableRow = document.createElement('tr');
+          var headerListCell = document.createElement('td');
+          var columnHeader = document.createElement('h2');
+          columnHeader.textContent = key;
+          columnHeader.classList.add('columnsLeftContent', 'columnsLeftContentHeader', 'columnsTitle');
+          headerListCell.append(columnHeader);
+
+          var columnList = document.createElement('ul');
+          columnList.classList.add('columnsLeftContent', 'columnsLeftContentList');
+          columnList.id = `draggableList${key}`;
+          data[key].forEach(function(col) {
+            var listItem = createLiElement(col);
+            columnList.appendChild(listItem); // Append the list item to the unordered list
+          });
+          headerListCell.appendChild(columnList);
+
+          var arrowCell = document.createElement('td');
+          var svgArrow = createSvgArrow();
+          arrowCell.classList.add('columnsTitle');
+          arrowCell.appendChild(svgArrow);
+
+          tableRow.appendChild(headerListCell);
+          tableRow.appendChild(arrowCell);
+
+          columnsDiv.appendChild(tableRow);
+          columnList.style.maxHeight = columnList.scrollHeight + "px";
+          // Create a closure to capture the current columnList and svgArrow
+          (function (list, arrow) {
+                columnHeader.addEventListener('click', function () {
+                    toggleCollapse(list, arrow);
+                });
+                svgArrow.addEventListener('click', function () {
+                    toggleCollapse(list, arrow);
+                });
+            })(columnList, svgArrow); // Immediately invoke the function with current columnList and svgArrow
+        }
+    }
+    updateYAxisPosition();
+  }
+
+  function createSvgArrow() {
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttributeNS(null, "style", "margin:auto;");
+    svg.setAttributeNS(null, "class", "svg-arrow");
+    svg.setAttributeNS(null, "width", "20.593");
+    svg.setAttributeNS(null, "height", "22.88");
+    svg.setAttributeNS(null, "viewBox", "0 0 80.593 122.88");
+    
+    var polygon = document.createElementNS(svgNS, "polygon");
+    polygon.setAttributeNS(null, "style", "fill:#17161c;");
+    polygon.setAttributeNS(null, "points", "0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0");
+    svg.appendChild(polygon);
+    
+    return svg;
+  }
+
+  function createLiElement(col) {
+      var listItem = document.createElement('li');
+      listItem.id = `col${hashCode(col)}`;
+      listItem.draggable = "true";
+      listItem.name = col;
+      listItem.setAttribute('data-name', col);
+      listItem.classList.add('colItems');
+      listItem.addEventListener('dragstart', handleDragStart);
+      var itemContainer = document.createElement('div');
+      itemContainer.classList.add('colItemContainer');
+      var dotscontainer = document.createElement('div');
+      dotscontainer.classList.add('dotscontainer');
+      var dots = document.createElement('div');
+      dots.classList.add('dots');
+      dots.textContent = '•••';
+      dotscontainer.appendChild(dots);
+      var textContainer = document.createElement('span');
+      textContainer.classList.add('textBorder', 'h4');
+      textContainer.textContent = convertStringFormat(col);
+      itemContainer.appendChild(dotscontainer);
+      itemContainer.appendChild(textContainer);
+      listItem.appendChild(itemContainer);
+      return listItem
+  }
+
+  function toggleCollapse(listElement, arrowElement) {
+    // Find the next sibling UL element
+    // listElement.style.display = listElement.style.display === 'none' ? '' : 'none';
+    listElement.classList.toggle('columnsLeftContentListHidden');
+    if (listElement.classList.contains('columnsLeftContentListHidden')) {
+      listElement.style.maxHeight = 0;
+    } else {
+      listElement.style.maxHeight = listElement.scrollHeight + "px";
+    }
+
+    arrowElement.classList.toggle('collapsed');
+  }
+
+  function changeChart() {
+    let container = document.getElementById('chartSelectionContainer');
+    const svg = document.querySelector('#changeChartIcon svg');
+    if (container.style.display === 'none' || !container.style.display) {
+      getChartTypes(); // Populate the list only when showing the container
+      const rect = svg.getBoundingClientRect();
+      container.style.position = 'absolute'; // Ensure the container is positioned absolutely
+      container.style.left = (rect.left + window.scrollX) + 'px';
+      container.style.top = (rect.bottom + window.scrollY) + 'px';
+      container.style.display = 'block';
+      // Add event listener to document after a short delay to prevent immediate trigger
+      setTimeout(() => document.addEventListener('click', handleClickOutside), 0);
+    } else {
+      container.style.display = 'none';
+      // It's safe to attempt to remove the listener even if it might not be added yet
+      document.removeEventListener('click', handleClickOutside);
+    }
+  }
+
+  function handleClickOutside(event) {
+    const container = document.getElementById('chartSelectionContainer');
+    if (!container.contains(event.target)) {
+      container.style.display = 'none';
+      // Remove this event listener once the container is hidden
+      document.removeEventListener('click', handleClickOutside);
+    }
+  }
+
+var selectChartType = null;
+var selectedChartTypeId = null;
+function getChartTypes() {
+  let container = document.getElementById('chartSelectionContainer');
+  // Ensure the container is empty before adding new items
+  container.innerHTML = '';
+
+  // Create the list
+  let list = document.createElement('ul');
+  var firstChecked = false;
+  Object.entries(chartTypesNew).forEach(([chartname, func], index) => {
+    // Create list item for each chart type
+    let listItem = document.createElement('li');
+    listItem.textContent = chartname;
+    listItem.id = 'chartType' + index;
+    if (selectedChartTypeId !== null) {
+      if (listItem.id === selectedChartTypeId) {
+        listItem.classList.add('selected-chart-option');
+        selectChartType = listItem.textContent;
+      }
+    } else if (!firstChecked) {
+      // set the first one as active by default
+      listItem.classList.add('selected-chart-option');
+      selectChartType = listItem.textContent;
+      firstChecked = true;
+    }
+    listItem.onclick = () => {
+      // Remove 'selected-chart-option' class from all list items
+      container.querySelectorAll('li').forEach(li => li.classList.remove('selected-chart-option'));
+      // Apply 'selected-chart-option' class to clicked item
+      listItem.classList.add('selected-chart-option');
+      selectChartType = listItem.textContent;
+      selectedChartTypeId = listItem.id;
+      console.log(chart);
+      func(chart);
+      if ('widgetCustom' in widgetChartParams) {
+        // Access the 'widgetCustom' object
+        var widgetCustomData = widgetChartParams['widgetCustom'];
+
+        // Now, check if 'chart' exists in widgetCustomData
+        if ('chart' in widgetCustomData) {
+          // Update the 'chart_type' in the 'chart' object
+          widgetCustomData.chart.chart_type = selectChartType;
+        }
+      }
+    }
+    listItem.style.cursor = 'pointer'; // Make it visually obvious it's clickable
+    list.appendChild(listItem);
+  });
+  container.appendChild(list);
+}
+
+function selectChartTypeDisableRest() {
+    // Select all radio buttons with the name 'chartType' and check only the right one
+    let radioButtons = document.querySelectorAll('input[name="chartType"]');
+    var chartTypeId = 'chartType0';
+    for (let radioButton of radioButtons) {
+        if (radioButton.id === chartTypeId) {
+          radioButton.checked = true;
+        } else {
+          radioButton.checked = false;
+          radioButton.style.disabled = true;
+        }
+    }
+}
+
+function disableChartTypeEnableRest() {
+    // Select all radio buttons with the name 'chartType' and check only the right one
+    let radioButtons = document.querySelectorAll('input[name="chartType"]');
+    var chartTypeId = 'chartType0';
+    var firstChecked = false;
+    for (let radioButton of radioButtons) {
+        if (radioButton.id === chartTypeId) {
+          radioButton.checked = false;
+          radioButton.style.disabled = true;
+        } else {
+          if (!firstChecked){
+            radioButton.checked = true;
+            firstChecked = true;
+          }
+          radioButton.style.disabled = false;
+        }
+    }
+}
+
+  function createEmptyChart() {
+    var chartTag = 'widgetCustom';
+    var ctx = document.getElementById(chartTag).getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar', // or 'line', 'pie', etc.
+        data: {
+            labels: [], // No labels for an empty chart
+            datasets: [{
+                label: 'No Data',
+                data: [], // Empty data array
+                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                display: true, // This will display the Y-axis
+                title: {
+                    display: false,
+                    text: 'Value' // Title for the Y-axis
+                }
+              },
+              x: {
+                  beginAtZero: true,
+                  display: true, // This will display the X-axis
+                  title: {
+                      display: false,
+                      text: 'Category' // Title for the X-axis
+                  }
+              }
+            }
+        }
+    });
+    chart = myChart;
+  }
+
+var draggedElementId = null;
+// drag and drop
+function handleDragStart(e) {
+  console.log('Name');
+  draggedElementId = e.target.id;
+  e.dataTransfer.setData('text/plain', e.target.id);
+}
+
+var chosenX = document.getElementById('chosenX');
+var chosenY = document.getElementById('chosenY');
+var columnsLeft = document.getElementById('columnsLeft');
+var trashIconContainer = document.getElementById("trashIconContainer");
+// const tooltip = document.getElementById('tooltip');
+
+[chosenX, chosenY, columnsLeft].forEach(dropZone => {
+  dropZone.addEventListener('dragover', function(e) {
+    if (dropZone === columnsLeft) {
+      Array.from(document.getElementsByClassName('columnsLeftContent')).forEach(element => {element.style.opacity = '0.5';});
+      document.getElementById("trashIconContainer").style.display = 'block';
+    } else {
+      if (dropZone.querySelector(`#${draggedElementId}`) || dropZone.querySelector(`#moved${draggedElementId}`)) {
+        displayTooltip(draggedElementId, "Item already exists");
+        // element already exists in this dropZone, so disable dropping
+        return;
+      }
+      if (dropZone === chosenX && chosenY.querySelector(`#moved${draggedElementId}`)) { // if moved not yet in front, the item is new
+        displayTooltip(draggedElementId, "Item already exists in Y");
+        // element already exists in Y, so disable dropping
+        return;
+      }
+      if (dropZone === chosenY && chosenX.querySelector(`#moved${draggedElementId}`)) { // if moved not yet in front, the item is new
+        displayTooltip(draggedElementId, "Item already exists in X");
+        // element already exists in in X, so disable dropping
+        return;
+      }
+      if (dropZone === chosenX && chosenX.getElementsByTagName('li').length > 1) {
+        displayTooltip(draggedElementId, "Too many X values");
+        return;
+      }
+      if (dropZone === chosenY && chosenY.getElementsByTagName('li').length > 5) {
+        displayTooltip(draggedElementId, "Too many Y values");
+        return;
+      }
+    }
+      // tooltip.style.display = 'none';
+      e.preventDefault(); // Necessary to allow dropping
+      dropZone.style.backgroundColor = "#e0e0e0";
+      // TODO disable if length of X columns is already at 2
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+      dragLeave(dropZone);
+  });
+
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dragLeave(dropZone);
+    var itemId = e.dataTransfer.getData('text/plain');
+    console.log('Dropped item on', dropZone.id, itemId);
+    if(dropZone === columnsLeft) {
+      var element = document.getElementById(itemId);
+      if(element.classList.contains('moved')) {
+          element.remove();
+      }
+    } else {
+      addElementDrop(dropZone.id, itemId);
+    }
+    ['chosenX', 'chosenY'].forEach(containerId => {
+    var container = document.getElementById(containerId);
+    var listItems = container.getElementsByTagName('li');
+    if(listItems.length == 0) {
+      document.getElementById(`${containerId}Placeholder`).style.display = 'block';
+    }
+  })
+    createPlot();
+  });
+})
+
+function dragLeave(dropZone) {
+  dropZone.style.backgroundColor = "";
+  document.getElementById("trashIconContainer").style.display = 'none';
+  // tooltip.style.display = 'none';
+  Array.from(document.getElementsByClassName('columnsLeftContent')).forEach(element => {element.style.opacity = '1';});
+}
+
+function displayTooltip(id, message) {
+  console.log(message);
+  // TODO enable tooltip (positioning not working)
+  // var boundingBox = document.getElementById(id).getBoundingClientRect();
+  // tooltip.style.display = 'block';
+  // tooltip.style.left = (boundingBox.left + window.pageXOffset)+ 'px';
+  // tooltip.style.top = (boundingBox.top + boundingBox.height + window.pageYOffset) + 'px';
+  // tooltip.innerText = message;
+}
+
+function addElementDrop(listId, elementId) {
+  var listContainer = document.getElementById(listId);
+  var placeholder = document.getElementById(`${listId}Placeholder`);
+  placeholder.style.display = 'none';
+  var element = document.getElementById(elementId);
+  if(!element.classList.contains('moved')) {
+    var copiedItem = element.cloneNode(true);
+    copiedItem.id = `moved${elementId}`;
+    copiedItem.classList.add('moved');
+    copiedItem.addEventListener('dragstart', handleDragStart);
+    listContainer.appendChild(copiedItem);
+  } else {
+    listContainer.appendChild(element);
+  }
+}
+
+function getValues(listId) {
+  var listContainer = document.getElementById(listId);
+  var listItems = listContainer.getElementsByTagName('li');
+  var ids = [];
+
+  for (var i = 0; i < listItems.length; i++) {
+      if (listItems[i].getAttribute('data-name')) { // Check if the <li> has an ID
+          ids.push(listItems[i].getAttribute('data-name'));
+      }
+  }
+  return ids;
+}
+
+var lastX = null;
+var lastY = null;
+var pieChartOnly = false;
+async function createPlot(){
+  var xValues = getValues('chosenX');
+  var yValues = getValues('chosenY');
+  console.log(`Selected the following values: X: ${xValues}, Y: ${yValues}`);
+  if (xValues.length == 0 || yValues.length == 0) { // disabled because of pieplot
+    pieChartOnly = true;
+    return;
+  } else if (pieChartOnly) {
+    pieChartOnly = false;
+  }
+  if (xValues === lastX && yValues === lastY) {
+    // data hasn't changed
+    return;
+  }
+  let chartDataNew = {
+    chart_type: selectChartType,
+    title: document.getElementById('chartTitle').innerText,
+    x_columns: Array.from(xValues),
+    y_columns: Array.from(yValues),
+    category: 'Custom',
+    filters: filterData
+  };
+  try {
+      var data = await unifiedSendRequest(CUSTOMCHARTCREATE, {formData: JSON.stringify(chartDataNew), headerArgs: {'Content-Type': 'application/json'}});
+      console.log(data);
+      // chartData = data;
+      lastX = xValues;
+      lastY = yValues;
+      updateChartNew(data, chart, 'chartTitle');
+      chartDataNew = {
+        chart_type: selectChartType,
+        title: document.getElementById('chartTitle').innerText, // only thing that might have changed
+        x_columns: Array.from(xValues),
+        y_columns: Array.from(yValues),
+        category: 'Custom',
+        filters: filterData
+      };
+      widgetChartParams['widgetCustom'] = {
+            widgetDivId: 'widgetCustom',
+            chart: chartDataNew,
+            error: null,
+            data: data,
+            emptyChart: chart
+        }
+  } catch (error) {
+    showTooltip("Failed to create chart", false); 
+  }
+}
+
+function makeEditable(e) {
+    var currentText = this.innerText;
+    var inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.value = currentText;
+    inputField.id = 'titleInput';
+    inputField.classList.add('btn', 'btn-default');
+
+    // Replace the current title with the input field
+    this.replaceWith(inputField);
+    inputField.focus();
+
+    // Handle focus out event
+    inputField.addEventListener('blur', function() {
+        var updatedText = this.value;
+        var newTitle = document.createElement('h4');
+        newTitle.id = 'chartTitle';
+        newTitle.innerText = updatedText;
+
+        // Replace the input field with the new title
+        this.replaceWith(newTitle);
+
+        // Reattach the event listener to the new title element
+        newTitle.addEventListener('dblclick', makeEditable);
+    });
+}
+
+async function saveChart() {
+  var xValues = getValues('chosenX');
+  var yValues = getValues('chosenY');
+  if (xValues.length == 0 || yValues.length == 0) { // TODO pie chart
+    showTooltip("Cannot save: No data selected", false);
+    return;
+  }
+  console.log(`Saving the following values: X: ${xValues}, Y: ${yValues}`);
+
+  let chartData = {
+    chart_type: selectChartType,
+    title: document.getElementById('chartTitle').innerText,
+    x_columns: Array.from(xValues),
+    y_columns: Array.from(yValues),
+    category: 'Custom'
+};
+  try {
+    var data = await unifiedSendRequest(CUSTOMCHARTADD, {formData: JSON.stringify(chartData), headerArgs: {'Content-Type': 'application/json'}});
+    console.log(data);
+    showTooltip("Chart saved successfully!", true);
+    redraw();
+  } catch (error) {
+    showTooltip("Failed to save chart", false); 
+  }
+}
+
+function showTooltip(message, isSuccess) {
+  var tooltip = document.getElementById('tooltip');
+  if (!isSuccess) {
+    tooltip.style.backgroundColor = "red"; // Different background for error
+  } else {
+    tooltip.style.backgroundColor = "#2255ff";
+  }
+  tooltip.textContent = message;
+
+  setTimeout(() => {
+    tooltip.style.display = 'block';
+    setTimeout(() => {
+      tooltip.style.display = 'none';
+    }, 2000); // Show for 2 seconds
+  }, 10); // Minor delay to ensure transition effect
+}
+
+function updateYAxisPosition() {
+  var columnsLeft = document.getElementById('columnsLeft');
+  var columnsLeftWidth = columnsLeft.offsetWidth; // Get the width of the columnsLeft element
+  var yAxisContainer = document.getElementById('chosenYContainer');
+
+  // Set the left position using calc() to subtract 60vh from the columnsLeftWidth and add 15px
+  yAxisContainer.style.left = 'calc(' + (-60) + 'vh + ' + columnsLeftWidth + 'px + 15px)';
+  yAxisContainer.style.display = 'flex';
+}
+
+// Call this function on page load and whenever the layout changes
+// window.onload = updateYAxisPosition;
+window.onresize = updateYAxisPosition;
+
+getColumnsCustom();
+document.getElementById('chartTitle').addEventListener('dblclick', makeEditable);
+// document.getElementById('overlayCustom').addEventListener('click', hideModalCustom);
+document.addEventListener('DOMContentLoaded', getChartTypes);
+document.addEventListener('DOMContentLoaded', createEmptyChart);
+</script>

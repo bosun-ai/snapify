@@ -1,0 +1,59 @@
+.image-with-text p {
+    text-align: left;
+    /* hyphens: auto;
+    -webkit-hyphens: auto; */
+  }
+  .image-with-text__text h2, .image-with-text__text h3 {
+    color: #fafafa!important;
+  }
+
+
+.table-of-contents {
+    padding: 20px;
+    padding-top: 0;
+    margin-bottom: 20px;
+}
+
+.table-of-contents ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul li::marker {
+    color: #17161c; /* Change the color of the bullet points */
+}
+
+.table-of-contents li {
+    margin: 5px 0;
+}
+
+.table-of-contents li.h2-item {
+    font-weight: bold;
+}
+
+.table-of-contents li.h3-item {
+    margin-left: 20px;
+}
+
+.table-of-contents li.h4-item {
+    margin-left: 40px;
+}
+
+.table-of-contents li.h5-item {
+    margin-left: 60px;
+}
+
+.table-of-contents li.h6-item {
+    margin-left: 80px;
+}
+
+  .newsletter-form__message {color: #fafafa;}
+
+  .svg-arrow {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease; /* Smooth transition for rotation */
+  }
+
+.collapsed {
+    transform: rotate(0deg); /* Rotate arrow 90 degrees when collapsed */
+  }

@@ -1,0 +1,109 @@
+    .hero-gradient {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: linear-gradient(110deg, #2c2b30 60%, #2255ff);
+    height: auto;
+    min-height: calc(100dvh - 11rem);
+    width: 100%;
+    position: relative;
+  }
+  .content {
+    padding-bottom: 2rem;
+  }
+  .button {
+    cursor: pointer!important;
+  }
+  .inputText {
+    width: 96%;
+    border: none;
+    text-align: center;
+    font-size: large;
+    margin: 1rem;
+    height: 5rem!important;
+  }
+.navButtons {
+    position: absolute!important;
+    bottom: 1rem!important;  /* Distance from the bottom of the parent div */
+    left: 56%!important;
+    right: 0!important;
+    width: fit-content;
+    height: fit-content;
+    transform: translateX(-50%)!important;
+}
+.offbutton {
+  color: #FAFAFA!important;
+  background: #17161c!important;
+  margin-right: 5rem!important;
+}
+.page-width {
+  width: 80%;
+}
+  .buttonList {
+    padding-right: 5%;
+  }
+  .contentContainer {
+    width:65%;
+  }
+  .container {
+    height:450px;
+  }
+.buttonleft {
+  font-size: 1em;
+  font-weight: bold;
+  z-index:1;
+  cursor: default!important;
+}
+.errorMessage {
+  color: red;
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+  height:3rem;
+  display:block!important;
+}
+.field {
+  margin-top: 0!important;
+}
+.prevButton, .nextButton {
+  margin-top: 0!important;
+  margin-bottom: 0!important;
+}
+  @media screen and (max-width: 1200px) {
+    .page-width {
+      width: 90%;
+    }
+  }
+
+  @media screen and (max-width: 1000px) {
+    .page-width {
+      width: 99%;
+    }
+    .navButtons {
+      left: 0%;
+      right: 0%;
+      width: fit-content;
+      margin: 0 auto;
+      transform: none;
+    }
+  }
+
+    @media screen and (max-width: 850px) {
+    .container {
+      flex-direction: column;
+      height:600px;
+    }
+    .buttonList {
+      display: flex;
+      padding-right: 0;
+      justify-content: center;
+    }
+    .buttonleft {
+      margin-left: 0.5rem;
+    }
+    .contentContainer {
+      width:100%;
+    }
+  }
+  

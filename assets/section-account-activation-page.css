@@ -1,0 +1,11 @@
+.hero-gradient {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: linear-gradient(110deg, #2c2b30 60%, #2255ff);
+    height: auto;
+    min-height: 100dvh;
+    width: 100%;
+    position: relative;
+  }

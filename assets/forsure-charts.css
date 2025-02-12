@@ -1,0 +1,226 @@
+.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 120px;
+    height: 45px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+    px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+    px;
+  }
+
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}
+      px;
+      padding-bottom: {{ section.settings.padding_bottom }}
+      px;
+    }
+  }
+  .image-with-text p {
+    text-align: left;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  .widgetContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Spacing between widgets */
+    list-style-type: none;
+    padding:0;
+    margin-left: 5%;
+    margin-right: 5%;
+  }
+  #customChart {
+    margin-left: 5%;
+    margin-right: 5%;
+    /* border: 0.2rem solid #17161c!important;
+    border-radius: 1rem; */
+    height: 65vh;
+  }
+
+  .widget {
+    /* flex: 1; */
+    float: left;
+    /* min-width: 300px; Minimum width of a widget */
+    min-height: 300px;
+    min-width: 600px;
+    flex-basis: calc(33.333% - 17px); /* assigning a base size, adjusting for gap */
+    /* width: 300px; */
+    height: 340px;
+    border: 0.2rem solid #17161c!important;
+    padding: 10px;
+    margin: 5px;
+    box-sizing: border-box;
+    position: relative; /* Make the widget relative so that the svg can be positioned absolutely within it */
+    border-radius: 1rem;
+    background-color: #fafafa;
+  }
+
+  .icon-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex; /* Make the icons container a flex container */
+    flex-direction: row-reverse; /* Align items from right to left */
+    align-items: center; /* Vertically center the icons */
+    gap: 5px; /* Optional: Add some gap between icons */
+}
+  .enlarge-icon {
+    cursor: pointer;
+    width: 30px;
+}
+
+.chartSelector {
+    cursor: pointer;
+}
+  .chart {
+    min-height: 320px;
+    height: 320px;
+    min-width: 300px;
+  }
+  @media screen and (min-width: 2300px) {
+    .chart {
+      margin: auto;
+    }
+  }
+
+  .pinned {
+    order: -1; /* This will move the pinned items to the start of the flex container */
+    background-color: #f1f1f1; /* Highlight pinned widgets */
+  }
+  .unpinnedSVG {
+    fill: #cccccc !important; /* Gray color when unpinned */
+    cursor: pointer;
+  }
+  .pinnedSVG {
+    fill: #17161c !important; /* Black color when pinned */
+    cursor: pointer;
+  }
+  .reportsDueWidget {
+    order: -2; /* ensures the widget is always first */
+  }
+
+  #nextReportsChart table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #nextReportsChart th,
+  #nextReportsChart td {
+    border: 0.2rem solid #17161c;
+    padding: 8px;
+    text-align: left;
+  }
+
+  #nextReportsChart th {
+    background-color: #fafafa;
+  }
+  .past-deadline {
+    background-color: #a80000;
+    color: white;
+  }
+  .done-deadline {
+    background-color: #2255ff;
+    color: white;
+  }
+
+  #overlay,
+  #overlayAdd {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with 50% opacity */
+    z-index: 1; /* Displayed behind the modal */
+  }
+  #overlay {
+    z-index: 2; /* Display in front of other overlay */
+  }
+
+  /* Modal style */
+  #report-table,
+  #allCharts {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the modal */
+    padding: 20px;
+    height: 80vh;
+    background-color: #fafafa;
+    z-index: 2000; /* Displayed in front of the overlay */
+    width: 80%; /* Adjust width as needed */
+    max-width: 80%; /* Adjust max width as needed */
+    /* max-height: 61vh; /* 80% of the viewport height */
+    overflow-y: auto; /* Make it scrollable if the content is too big */
+    border-radius: 8px; /* Rounded corners */
+    border: 0.2rem solid #17161c;
+  }
+  #report-table {
+    z-index: 2001;
+  }
+
+  #filters {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+    /* flex-direction: column; */
+    gap: 10px; /* Space between dropdowns */
+    width: 250px; /* Adjust as needed */
+    margin-bottom: 20px;
+  }
+
+  select,
+  input[type="checkbox"] {
+    width: 100%; /* Make dropdowns take full width */
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .filter-group-heading {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  #sortable { list-style-type: none; margin: 0; padding: 0; width: 450px;}
+  #sortable li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 100px; height: 90px; font-size: 4em; text-align: center; 
+    border: 0.2rem solid #17161c!important;}
+  .sortable-placeholder {
+    border: 1px dashed #999;
+    background-color: #f0f0f0;
+    visibility: visible !important;
+}
+
+.ui-state-highlight { background-color: #4d4d4d!important; opacity: 0.1; border: 0.2rem solid #17161c!important;}
+
+
+#profileDropdown {
+  font-size: 16px;            /* Increase font size */
+  padding: 8px 12px;          /* Padding for better touch area and aesthetics */
+  margin-left: 8px;           /* Space between label and dropdown */
+  border: 2px solid #17161c;     /* Border for visual differentiation */
+  border-radius: 4px;         /* Rounded corners for modern look */
+  appearance: none;           /* Remove default appearance */
+  -webkit-appearance: none;  /* For Safari */
+  -moz-appearance: none;     /* For Firefox */
+  background-color: #fafafa;    /* White background */
+  cursor: pointer;            /* Indicate that it's clickable */
+  transition: border-color 0.3s;  /* Smooth transition for hover effect */
+}

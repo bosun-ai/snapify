@@ -1,0 +1,1615 @@
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+{{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: 45px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.section-{{ section.id }}-padding {
+  padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+  padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+}
+
+
+@media screen and (min-width: 750px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+}
+.image-with-text p {
+  text-align: left;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+.border-uploads {
+  border: 0.2rem solid #17161c;
+}
+.dropZone {
+    display: flex;
+    justify-content: center;
+    border: 2px dashed #17161c;
+    gap: 2rem;
+    padding: 20px;
+    width: 70%;
+    height: 350px;
+    margin: auto;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    scroll-behavior: smooth; 
+}
+.dropZone.error {
+    border-color: red;
+}
+#progressIcons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.progressIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #cccccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* cursor: pointer; */
+}
+
+.progressIcon:hover {
+    background-color: #f0f0f0;
+}
+#uploadSteps {
+    position: relative;
+    height: 650px;
+}
+.navButtons {
+    position: absolute;
+    bottom: 3rem;  /* Adjust as needed for distance from the bottom */
+    left: 50%;  /* Center the navButtons */
+    transform: translateX(-50%); /* This ensures the centering works correctly */
+}
+.heading {
+  text-align: center;
+}
+/* .wrapper {
+    display: flex;
+}
+.left, .right {
+    flex: 1;  /* Each div will take up half the width of the parent container */
+.offbutton {
+  color: #FAFAFA;
+  background: #17161c
+}
+
+.fileList {
+  height: auto;
+  width: 100%;
+  /* If you want a maximum height with a scrollbar appearing after reaching it */
+  /* max-height: 200px; */
+  /* overflow-y: auto; */
+
+  position: relative;
+
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.fileList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Dynamic grid columns */
+    gap: 1rem; /* Space between grid items */
+    padding: 1rem;
+    align-items: start;
+}
+.fileList .file-row {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0.5rem;
+    background: #f9f9f9;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7); /* White background with 70% opacity */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10; /* Ensures the overlay is on top */
+}
+
+.loading-overlay::before {
+    content: '';
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db; /* Blue color */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+td {
+  padding: 3px;
+  text-align: left;
+}
+.deletebtn {
+  background-color: #fafafa;
+  border-radius: 25%;
+  border: none;
+}
+.deletebtn:hover {
+  background-color: #f0f0f0;
+}
+
+/* .trConfirm {
+  display: flex;
+}
+.tdConfirm {
+  flex: 1;
+} */
+.wrapper {
+    margin: auto;
+    width: 0%; /* You can adjust this width as needed */
+}
+.wrapper1 {
+  margin: auto;
+  width: 50%;
+}
+.tdConfirm {
+  padding-top: 2rem;
+}
+.tdConfirm:first-child {
+    text-align: right;
+    padding-right: 10px; /* Optional: Adds some space between the columns */
+    font-weight: bold;
+}
+.tdConfirm:last-child {
+    text-align: left;
+}
+#btnOverview:hover {
+  color: #fafafa;
+}
+#btnShowReports:hover {
+  color: #fafafa;
+}
+
+
+.toggle-container {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    /* margin-left: 10px; */
+    vertical-align: middle;
+    margin: auto;
+    flex-shrink: 0;
+}
+
+.toggle-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #2255ff;
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px #2255ff;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+.toggle-options {
+  align-items: center;
+  display: flex;
+}
+div.display-flex {
+    display: flex;
+    align-items: center; /* Align items vertically in the middle */
+    justify-content: flex-start; /* Align items to the start of the container */
+    gap: 10px; /* Adjust as needed, adds space between children */
+}
+.option-card {
+    border: 0.2rem solid #17161c;
+    padding: 1rem;
+    width: 500px;
+    height: 500px;
+    border-radius: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.option-card:hover {
+    background-color: #f0f0f0;
+}
+
+.file-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+#clientsTable thead th {
+        position: sticky;
+        top: 0;
+        background-color: white; /* Background color to ensure readability */
+        z-index: 10; /* Ensure it stays above the table body content */
+        border-bottom: 2px solid #ddd; /* Keep the header visually separated */
+}
+#clientsDatatableContainer div {
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.greyed_out {
+    cursor: not-allowed;
+    background-color: grey;
+    opacity: 0.5;
+    position: relative; /* Needed for positioning the tooltip */
+    pointer-events: none; /* Disable clicks on links */
+    color: inherit; /* Ensure the link text doesn't look like a link */
+    text-decoration: none; /* Remove underline or other link styles */
+}
+
+.greyed_out_wrapper:hover .greyedout-tooltip-feature {
+    display: block; /* Show the tooltip on hover */
+}
+
+.greyedout-tooltip-feature {
+    display: none; /* Hide the tooltip by default */
+    position: absolute;
+    top: 50%; /* Position above the element */
+    left: 50%;
+    transform: translateX(-50%);
+    background: red;
+    color: white;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+.blurred {
+  filter: blur(5px);
+}
+
+.blurred:hover {
+  filter: none;
+}
+
+{%- endstyle -%}
+{% if customer.tags contains 'member' %}
+
+  <div id="reportcontainer" style="min-height: 100vh;padding-bottom: 5rem;">
+  <!-- Load d3.js -->
+  <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/d3@7"></script> {% endcomment %}
+  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
+  <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+  {% render 'forsure-guide' %}
+  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  {% render 'forsure-simple-notification' %}
+  {% render 'forsure-confirmation' %}
+  
+  <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+  <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+  {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> {% endcomment %}
+  <!-- Create a div where the graph will take place -->
+  <div id="guideButton" aria-label="Guide"  onclick="showGuideFromButton(this)"
+  style="color: black;margin-top:2rem;position: fixed;bottom: 10%;left: 2%;">
+<svg xmlns="http://www.w3.org/2000/svg" height="4rem" version="1.0" viewBox="0 0 200 200" style="cursor: pointer" onclick="showGuide()">
+  <path id="path2382" d="m165.33 113.44a103.61 103.61 0 1 1 -207.22 0 103.61 103.61 0 1 1 207.22 0z" stroke-width="0" fill="#fafafa" transform="matrix(.93739 0 0 .93739 42.143 -6.3392)"></path>
+  <g id="layer1">
+    <path id="path2413" d="m100 0c-55.2 0-100 44.8-100 100-5.0495e-15 55.2 44.8 100 100 100s100-44.8 100-100-44.8-100-100-100zm0 12.812c48.13 0 87.19 39.058 87.19 87.188s-39.06 87.19-87.19 87.19-87.188-39.06-87.188-87.19 39.058-87.188 87.188-87.188zm1.47 21.25c-5.45 0.03-10.653 0.737-15.282 2.063-4.699 1.346-9.126 3.484-12.876 6.219-3.238 2.362-6.333 5.391-8.687 8.531-4.159 5.549-6.461 11.651-7.063 18.687-0.04 0.468-0.07 0.868-0.062 0.876 0.016 0.016 21.702 2.687 21.812 2.687 0.053 0 0.113-0.234 0.282-0.937 1.941-8.085 5.486-13.521 10.968-16.813 4.32-2.594 9.808-3.612 15.778-2.969 2.74 0.295 5.21 0.96 7.38 2 2.71 1.301 5.18 3.361 6.94 5.813 1.54 2.156 2.46 4.584 2.75 7.312 0.08 0.759 0.05 2.48-0.03 3.219-0.23 1.826-0.7 3.378-1.5 4.969-0.81 1.597-1.48 2.514-2.76 3.812-2.03 2.077-5.18 4.829-10.78 9.407-3.6 2.944-6.04 5.156-8.12 7.343-4.943 5.179-7.191 9.069-8.564 14.719-0.905 3.72-1.256 7.55-1.156 13.19 0.025 1.4 0.062 2.73 0.062 2.97v0.43h21.598l0.03-2.4c0.03-3.27 0.21-5.37 0.56-7.41 0.57-3.27 1.43-5 3.94-7.81 1.6-1.8 3.7-3.76 6.93-6.47 4.77-3.991 8.11-6.99 11.26-10.125 4.91-4.907 7.46-8.26 9.28-12.187 1.43-3.092 2.22-6.166 2.46-9.532 0.06-0.816 0.07-3.03 0-3.968-0.45-7.043-3.1-13.253-8.15-19.032-0.8-0.909-2.78-2.887-3.72-3.718-4.96-4.394-10.69-7.353-17.56-9.094-4.19-1.062-8.23-1.6-13.35-1.75-0.78-0.023-1.59-0.036-2.37-0.032zm-10.908 103.6v22h21.998v-22h-21.998z"></path>
+  </g>
+</svg>
+</div>
+<div id="uploadSteps" class="border-uploads page-width" style="border-radius:1rem;">
+      <div id="progressIcons" style="margin-top: 3rem;display: none">
+        <div class="progressIcon" data-step="1">
+          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M75.59,36.31v50.27H61.72V53.68c-2.24,1.7-4.42,3.07-6.53,4.12 c-2.11,1.05-4.74,2.06-7.91,3.02V49.63c4.67-1.52,8.31-3.34,10.89-5.45c2.59-2.13,4.61-4.75,6.08-7.87H75.59L75.59,36.31z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85c-15.35,0-29.25,6.22-39.31,16.28C12.07,32.19,5.85,46.09,5.85,61.44 c0,15.35,6.22,29.25,16.28,39.31c10.06,10.06,23.96,16.28,39.31,16.28c15.35,0,29.25-6.22,39.31-16.28 c10.06-10.06,16.28-23.96,16.28-39.31C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
+          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
+        </div>
+        <div class="progressIcon" data-step="2">
+          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M82.15,86.69H40.73c0.47-4.08,1.92-7.93,4.32-11.53c2.41-3.61,6.91-7.86,13.53-12.77 c4.05-3.01,6.64-5.28,7.78-6.85c1.13-1.56,1.7-3.04,1.7-4.44c0-1.51-0.56-2.81-1.68-3.89c-1.12-1.08-2.53-1.61-4.23-1.61 c-1.76,0-3.2,0.56-4.32,1.67c-1.12,1.12-1.87,3.08-2.25,5.9l-13.81-1.12c0.54-3.9,1.54-6.93,2.98-9.11 c1.45-2.19,3.48-3.85,6.1-5.02c2.64-1.17,6.28-1.75,10.93-1.75c4.86,0,8.63,0.55,11.33,1.67c2.69,1.1,4.82,2.8,6.36,5.09 c1.55,2.3,2.32,4.87,2.32,7.71c0,3.02-0.89,5.91-2.66,8.67c-1.77,2.75-5,5.78-9.68,9.08c-2.78,1.92-4.64,3.27-5.57,4.04 c-0.94,0.77-2.04,1.77-3.31,3.02h21.56V86.69L82.15,86.69z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85 c-15.35,0-29.25,6.22-39.31,16.28C12.07,32.19,5.85,46.09,5.85,61.44c0,15.35,6.22,29.25,16.28,39.31 c10.06,10.06,23.96,16.28,39.31,16.28c15.35,0,29.25-6.22,39.31-16.28c10.06-10.06,16.28-23.96,16.28-39.31 C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
+          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
+        </div>
+        <div class="progressIcon" data-step="3">
+          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M54.83,51.45l-12.88-2.29c1.07-4.1,3.12-7.24,6.16-9.43c3.04-2.18,7.34-3.28,12.9-3.28 c6.39,0,11,1.19,13.86,3.57c2.84,2.39,4.27,5.39,4.27,9c0,2.11-0.58,4.03-1.74,5.74c-1.15,1.71-2.89,3.22-5.22,4.51 c1.89,0.47,3.34,1.02,4.34,1.64c1.63,1,2.89,2.33,3.79,3.96c0.9,1.64,1.36,3.6,1.36,5.87c0,2.85-0.74,5.59-2.24,8.22 c-1.5,2.61-3.64,4.63-6.45,6.05c-2.81,1.42-6.5,2.12-11.07,2.12c-4.45,0-7.97-0.53-10.54-1.58c-2.58-1.05-4.69-2.58-6.36-4.6 c-1.66-2.02-2.93-4.57-3.82-7.63l13.63-1.82c0.54,2.75,1.36,4.67,2.49,5.73c1.12,1.06,2.55,1.6,4.29,1.6 c1.82,0,3.33-0.67,4.55-2.01c1.21-1.34,1.82-3.12,1.82-5.35c0-2.27-0.58-4.03-1.75-5.29c-1.16-1.24-2.75-1.87-4.75-1.87 c-1.06,0-2.53,0.26-4.4,0.8l0.71-9.74c0.74,0.11,1.32,0.17,1.75,0.17c1.76,0,3.23-0.57,4.41-1.7s1.77-2.47,1.77-4.02 c0-1.5-0.45-2.68-1.32-3.56c-0.89-0.89-2.11-1.34-3.65-1.34c-1.6,0-2.89,0.48-3.89,1.45C55.86,47.35,55.18,49.04,54.83,51.45 L54.83,51.45z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85c-15.35,0-29.25,6.22-39.31,16.28 C12.07,32.19,5.85,46.09,5.85,61.44c0,15.35,6.22,29.25,16.28,39.31c10.06,10.06,23.96,16.28,39.31,16.28 c15.35,0,29.25-6.22,39.31-16.28c10.06-10.06,16.28-23.96,16.28-39.31C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
+          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
+        </div>
+        <div class="progressIcon" data-step="4">
+          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M64.9,77.74H39.58V66.3L64.9,36.19H77v30.78h6.3v10.77H77v9.37H64.9V77.74L64.9,77.74z M64.9,66.96V51.16L51.53,66.96H64.9L64.9,66.96z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85 c-15.35,0-29.25,6.22-39.31,16.28C12.07,32.19,5.85,46.09,5.85,61.44c0,15.35,6.22,29.25,16.28,39.31 c10.06,10.06,23.96,16.28,39.31,16.28c15.35,0,29.25-6.22,39.31-16.28c10.06-10.06,16.28-23.96,16.28-39.31 C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
+          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
+        </div>
+    </div>
+    <div class="step" id="chooseoption">
+        <h2 class="heading">Choose an Option</h2>
+        <div class="display-flex" style="margin: auto; width: fit-content; justify-content: space-between; gap: 2rem;">
+            <!-- Option: Create New Report -->
+             <div id="createNewReportWrapper" style="position: relative">
+              <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
+                <div id="createNewReport" class="option-card greyed_out" onclick="selectOption('new')">
+                    <h3>Create New Report</h3>
+                    <p>Start a new report by selecting<br>the required files and settings.</p>
+                    <div style="height: 50%;margin-top: 5rem">
+                      {% render 'icon-custom-compliance' %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option: Upload Existing Reports -->
+             <div id="uploadExistingReportsWrapper" style="position: relative">
+              <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
+                <div id="uploadExistingReports" class="option-card" onclick="selectOption('upload')">
+                    <h3>Submit Reports</h3>
+                    <p>Upload one or more completed<br>reports for submission.</p>
+                    <div style="height: 50%;margin-top: 5rem">
+                      {% render 'icon-auto-epr-report' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="uploadExisting" id="uploadReport" style="display: none;">
+        <h2 class="heading">Upload Existing Reports</h2>
+        <div id="clientsUploadSection" style="margin-bottom: 2rem;width: fit-content;margin: auto">
+          <div style="margin: auto">
+              <h3 style="margin-bottom: 1rem">Upload Clients File</h3>
+              <div id="clientsFileContainer" style="display: flex; align-items: center; padding: 0.5rem 0;border: 0.2rem solid #17161c;background-color: #fff;border-color: #ccc;margin-bottom: 1.5rem;">
+                  <span id="clientsFileName" style="margin: auto">No file uploaded</span>
+                  <a id="editIconClients" href="#" title="Edit" onclick="openClientsModal()" style="margin-left: 1rem;margin-right: 1rem;  margin-top: 0.5rem; display: none">
+                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+                  </a>
+                  <img width="20px" id="upload-clients" style="margin-left: 1rem; margin-right: 1rem; cursor: pointer" onclick="document.getElementById('clientsFileInput').click()" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
+              </div>
+              <input type="file" id="clientsFileInput" style="display: none;" accept=".xlsx" onchange="handleClientsUpload(this)">
+            </div>
+        </div>
+
+        <div class="dropZone" data-input="report_list" data-url="uploadreports/" style="overflow-y: auto;">
+            <div style="width: 100%;margin: auto"><div style="height:100%">
+                <div id="imagecontainer-imageuploadreports/" style="padding:2rem">
+                  <img width="220px" id="upload-imageuploadreports/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
+                </div>
+                <div id="upload-textuploadreports/">Drag & Drop your Reports here<br></div>
+                <div class="fileList" id="fileList_report_list" style="width:100%; padding:2rem"></div>
+              </div>
+            </div>
+        </div>
+        <input type="file" id="report_list" style="display: none" multiple>
+        <div id="errorsreport_list"></div>
+        <div class="navButtons">
+            <button class="button" onclick="uploadReports()">Hand in reports</button>
+        </div>
+
+        <div id="editClientsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
+            <div style="display: flex;justify-content: space-between;">
+              <h3>Edit Clients File</h3>
+              <div>
+                  <a id="replaceFileBtn" onclick="document.getElementById('replaceClientsFileInput').click()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Upload</a>    
+                  <a id="addRowBtn" onclick="addNewRow()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add Row</a>
+                  <a id="addColumnBtn" onclick="addNewColumn()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add Column</a>
+              </div>
+            </div>
+            <div id="clientsDatatableContainer">
+                <!-- Datatable for Clients File will be dynamically rendered here -->
+            </div>
+            <input type="file" id="replaceClientsFileInput" accept=".xlsx" onchange="handleClientsUploadReplacePrompt(this)" style="display: none">
+            <div style="margin-top: 1rem;">
+                <button class="button" onclick="saveClientsEdits()">Save</button>
+                <button class="button" onclick="closeClientsModal()" style="background-color: #17161c;">Cancel</button>
+            </div>
+        </div>
+        <div id="clientsModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeClientsModal()"></div>
+    </div>
+
+
+    <div class="step" id="step1" style="display: none;">
+        <h2 class="heading">Select Orderlist</h2>
+        <div class="display-flex" style="margin: auto;width: fit-content;display:flex">
+        <h3 id="liveDataText" class="toggle-options">Use live data</h3>
+          <label id="liveData" class="toggle-container">
+            <input type="checkbox" id="liveDataToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="dropZone" data-input="order_list" data-url="uploadorders/">
+            <div>
+              <div style="padding:2rem">
+                <img width="220px" id="upload-imageuploadorders/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
+              </div>
+              Drag & Drop your Order List here<br>
+              <div class="fileList" id="fileList_order_list" style="width:100%; padding:2rem"></div>
+            </div>
+        </div>
+        <input type="file" id="order_list" style="display: none" multiple>
+        <div id="errorsorder_list"></div>
+        <div class="navButtons">
+            <button class="nextButton button" onclick="uploadOrders('uploadorders/')" id="nextBtnuploadorders/" disabled>Next</button>
+        </div>
+    </div>
+
+  <div class="step" id="step2" style="display: none">
+      <h2 class="heading">Select Returnlist</h2>
+      <div class="dropZone" data-input="return_list" data-url="uploadreturns/">
+        <div>
+          <div style="padding:2rem">
+            <img width="220px" id="upload-imageuploadreturns/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
+          </div>
+          Drag & Drop your Returns here<br>
+          <div class="fileList" id="fileList_return_list" style="width:100%; padding:2rem"></div>
+        </div>
+      </div>
+      <input type="file" id="return_list" style="display: none" multiple>
+      <div id="errorsreturn_list"></div>
+      <div class="navButtons">
+          <button class="prevButton button offbutton" onclick="prevStep(1)">Back</button>
+          <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns/">Next</button>
+      </div>
+  </div>
+  <div class="step" id="step3" style="display: none;">
+      <h2 class="heading">Select country and timeframe</h2>
+      <!-- Date Selectors -->
+      <div class="dateSelectors" style="text-align: center">
+        <table class="wrapper1">
+          <tr class="trConfirm">
+            <td class="tdConfirm">Select Country</td>
+            <td class="tdConfirm"><select
+                id="country"
+                class="selectpicker"
+                data-live-search="true">
+                <option value="DE">Germany</option>
+                <option value="BE">Belgium</option>
+                <option value="IE">Ireland</option>
+                <option value="GB">Great Britain</option>
+                <option value="NL">Netherlands</option>
+                </select></td>
+          </tr>
+          <tr id="startDateTr" class="trConfirm">
+            <td class="tdConfirm">Start Date</td>
+            <td class="tdConfirm"><input type="date" id="startDate" class="btn dropdown-toggle bs-placeholder btn-default"></td>
+          </tr>
+          <tr id="endDateTr" class="trConfirm">
+            <td class="tdConfirm">End Date</td>
+            <td class="tdConfirm"><input type="date" id="endDate" class="btn dropdown-toggle bs-placeholder btn-default"></td>
+          </tr>
+          <tr id="categoryTr" class="trConfirm">
+            <td class="tdConfirm">Select Category</td>
+            <td class="tdConfirm">
+              <select
+                id="category"
+                class="selectpicker"
+                data-live-search="true">
+              <option value="Batteries">Batteries</option>
+              <option value="Packaging">Packaging</option>
+              <option value="WEEE">WEEE</option>
+                </select></td>
+          </tr>
+          <tr class="trConfirm">
+            <td class="tdConfirm">Enable Debugger</td>
+            <td class="tdConfirm"><input type="checkbox" id="debugger" class="btn dropdown-toggle bs-placeholder btn-default"></td>
+          </tr>
+        </table>
+      </div>
+      <br>
+      <div class="navButtons">
+          <button class="prevButton button offbutton" onclick="prevStep(2)">Back</button>
+          <button class="nextButton button" onclick="nextStep(4)">Next</button>
+      </div>
+  </div>
+  <div class="step" id="step4" style="display: none;">
+      <h2 class="heading">Confirm</h2>
+      <div id="confirmationDetails">
+        <table class="wrapper">
+          <tr class="trConfirm">
+            <td class="tdConfirm">Country</td>
+            <td class="tdConfirm" id="selectedCountry"></td>
+          </tr>
+          <tr class="trConfirm">
+            <td class="tdConfirm">Timerange</td>
+            <td class="tdConfirm"><span id="selectedStartDate"></span>-<span id="selectedEndDate"></span></td>
+          </tr>
+          <tr class="trConfirm">
+            <td class="tdConfirm">Category</td>
+            <td class="tdConfirm" id="selectedCategory"></td>
+          </tr>
+          <tr class="trConfirm">
+            <td class="tdConfirm">Debugger enabled</td>
+            <td class="tdConfirm" id="selectedDebugger"></td>
+          </tr>
+          <tr class="trConfirm">
+            <td class="tdConfirm">Orderlist</td>
+            <td class="tdConfirm" id="selectedOrderListFile"></td>
+          </tr>
+          <tr class="trConfirm">
+            <td class="tdConfirm">Returnlist</td>
+            <td class="tdConfirm" id="selectedReturnListFile"></td>
+          </tr>
+        </table>
+      </div>
+      <div class="navButtons">
+          <button class="prevButton button offbutton" onclick="prevStep(3)">Back</button>
+          <button class="nextButton button" onclick="createReport()">Create Report</button>
+      </div>
+  </div>
+  <div class="step" id="stepDone" style="display: none;">
+    <h2 class="heading">Report in progress</h2>
+    <div id="reportInProgress" style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report is in progress, you can leave this page.</div>
+    <div id="reportFailed" style="display:none;margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Failed to create report, please try again or contact the support.</div>
+    <div id="showReport" style="display:none">
+      <div style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report finished</div>
+      <a href="/pages/forsure-downloads" class="nextButton button" id="btnShowReports"
+      style="margin: auto;width: fit-content;display: flex;margin-top: 3rem;">Show Reports</a>
+    </div>
+    <div class="navButtons">
+          <a href="/pages/forsure-statistics" class="nextButton button" id="btnOverview">Overview</a>
+      </div>
+  </div>
+</div>
+</div>
+{% render 'forsure-login' %}
+
+<script>
+
+async function cancreatereports() {
+    try {
+        let data = await unifiedSendRequest(CANCREATEREPORTS, {method: 'GET'});
+        console.log(data);
+        if (data) {
+            document.getElementById('createNewReport').classList.remove('greyed_out');
+            document.getElementById('createNewReportWrapper').classList.remove('greyed_out_wrapper');
+        } else {
+            document.getElementById('createNewReport').classList.add('greyed_out');
+            document.getElementById('createNewReportWrapper').classList.add('greyed_out_wrapper');
+        }
+    } catch (error) {
+        console.error(error.message);
+        showMessage('Failed to get history ' + error.message, false);
+    }
+}
+cancreatereports();
+
+
+const createReportBtn = document.getElementById('createReport');
+
+
+const steps = document.querySelectorAll('.step');
+const dropZones = document.querySelectorAll('.dropZone');
+
+document.getElementById('liveDataToggle').addEventListener('change', function() {
+    var liveDataText = document.getElementById('liveDataText');
+    if (this.checked) {
+      liveDataText.innerText = "Using live data";
+      document.getElementById('nextBtnuploadorders/').disabled = false;
+    } else {
+      liveDataText.innerText = "Use live data";
+      document.getElementById('nextBtnuploadorders/').disabled = true; // todo check if file was added
+    }
+});
+
+function selectOption(option) {
+    document.getElementById('chooseoption').style.display = 'none';
+    if (option === 'new') {
+        document.getElementById('progressIcons').style.display = 'flex';
+        document.getElementById('step1').style.display = 'block';
+        sessionStorage.setItem('currentFlow', 'new');
+    } else if (option === 'upload') {
+        document.getElementById('uploadReport').style.display = 'block';
+        sessionStorage.setItem('currentFlow', 'upload');
+    }
+}
+
+
+
+dropZones.forEach(dropZone => {
+    const inputId = dropZone.getAttribute('data-input');
+    const fileInput = document.getElementById(inputId);
+    const output = document.getElementById('selected'+ inputId);
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.backgroundColor = "#e0e0e0";
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.backgroundColor = "";
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.backgroundColor = "";
+
+        const files = e.dataTransfer.files;
+        const inputId = dropZone.getAttribute('data-input');
+        const fileInput = document.getElementById(inputId);
+
+        if (files.length) {
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+    dropZone.addEventListener('click', function() {
+        const inputId = dropZone.getAttribute('data-input');
+        const fileInput = document.getElementById(inputId);
+        fileInput.click();
+    });
+
+
+    fileInput.addEventListener('change', async function() {
+        const fileList = document.getElementById('fileList_' + inputId);
+        var availableProfiles  = null;
+        if (inputId !== 'report_list') {
+            availableProfiles = await getProfiles();
+        }
+
+        for (let i = 0; i < fileInput.files.length; i++) {
+            const row = createNewFileRow(fileInput.files[i].name, availableProfiles, dropZone.getAttribute('data-url'), inputId, fileInput.files[i]);
+            fileList.appendChild(row);
+        }
+    });
+});
+
+
+document.querySelectorAll('.fileList').forEach(fileList => {
+    fileList.addEventListener('click', function(event) {
+        event.stopPropagation(); // This stops the event from bubbling up
+    });
+});
+
+async function getProfiles() {
+  try {
+    const data = await unifiedSendRequest(GETPROFILES, {method: 'GET'});
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get profiles ' + error.message, false);
+    TOKEN = false;
+  }
+}
+
+let selectedFilesOrders = {};
+let selectedFilesReturns = {};
+let selectedFilesReports = {};
+let fileCounter = 0;
+
+function generateUniqueId() {
+    return `file-${Date.now()}-${fileCounter++}`;
+}
+
+function createNewFileRow(fileName, availableProfiles, dataUrl, inputId, file) {
+    var orders = (dataUrl === 'uploadorders/');
+    var returns = (dataUrl === 'uploadreturns/');
+    var reports = (dataUrl === 'uploadreports/');
+    if (reports) {
+        document.getElementById('upload-textuploadreports/').style.display = 'none';
+        document.getElementById('imagecontainer-imageuploadreports/').style.display = 'none';
+    }
+
+    // Create a new "card" for the file
+    const row = document.createElement('div');
+    row.classList.add('file-row'); // Styled as a grid item
+    const uniqueId = generateUniqueId();
+
+    // Add filename
+    const nameCell = document.createElement('div');
+    const invisibleSpace = "\u200B"; // Unicode zero-width space
+    const updatedFileName = fileName.replace(/_/g, `_${invisibleSpace}`);
+    nameCell.textContent = updatedFileName;
+    nameCell.style.fontWeight = 'bold';
+    nameCell.style.marginBottom = '0.5rem';
+    row.appendChild(nameCell);
+
+    // Add profiles dropdown (if applicable)
+    if (availableProfiles !== null) {
+        const profileCell = document.createElement('div');
+        const select = document.createElement('select');
+        select.classList.add('btn', 'bs-placeholder', 'btn-default');
+
+        // Populate dropdown with profiles
+        availableProfiles.forEach(profile => {
+            const option = document.createElement('option');
+            option.value = profile.id;
+            option.textContent = profile.name;
+            select.appendChild(option);
+        });
+
+        profileCell.appendChild(select);
+        row.appendChild(profileCell);
+    }
+
+    // Add delete button
+    const deleteCell = document.createElement('div');
+    deleteCell.style.margin = 'auto';
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add('deletebtn');
+    deleteButton.textContent = 'X';
+    deleteButton.style.marginTop = '0.5rem';
+    deleteButton.addEventListener('click', function () {
+        // Remove the row from the grid
+        row.remove();
+
+        // Additional logic to handle file deletion
+        handleFileDeletion(uniqueId, orders, returns, reports, dataUrl);
+    });
+
+    deleteCell.appendChild(deleteButton);
+    row.appendChild(deleteCell);
+
+    // Adjust image width (if applicable)
+    var image = document.getElementById('upload-image' + dataUrl);
+    var currentWidth = image.clientWidth;
+    var decrement = 30; // define how much to decrease each time
+
+    var newWidth = currentWidth - decrement;
+    if (!reports && newWidth > 0) {
+        image.style.width = newWidth + 'px';
+    }
+    if (document.getElementById("nextBtn" + dataUrl)) {
+        document.getElementById("nextBtn" + dataUrl).disabled = false;
+    }
+    if (orders) {
+        selectedFilesOrders[uniqueId] = { file: file, filename: fileName };
+    } else if (returns) {
+        selectedFilesReturns[uniqueId] = { file: file, filename: fileName };
+    } else if (reports) {
+        selectedFilesReports[uniqueId] = { file: file, filename: fileName };
+    }
+    row.id = uniqueId;
+    return row;
+}
+
+
+function handleFileDeletion(uniqueId, orders, returns, reports, dataUrl) {
+  if (orders) {
+    if (selectedFilesOrders.hasOwnProperty(uniqueId)) {
+      delete selectedFilesOrders[uniqueId];
+    } else {
+        console.log("Order File not found: ", uniqueId);
+    }
+  } else if (returns) {
+    if (selectedFilesReturns.hasOwnProperty(uniqueId)) {
+      delete selectedFilesReturns[uniqueId];
+    } else {
+        console.log("Return File not found: ", uniqueId);
+    }
+  } else if (reports) {
+    if (selectedFilesReports.hasOwnProperty(uniqueId)) {
+      delete selectedFilesReports[uniqueId];
+    } else {
+        console.log("Report File not found: ", uniqueId);
+    }
+    if (Object.keys(selectedFilesReports).length == 0) {
+      document.getElementById('upload-textuploadreports/').style.display = 'block';
+      document.getElementById('imagecontainer-imageuploadreports/').style.display = 'block';
+    }
+  }
+  var image = document.getElementById('upload-image'+ dataUrl);
+    var currentWidth = image.clientWidth;
+    var increment = 30; // define how much to increase each time
+
+    var newWidth = currentWidth + increment;
+    image.style.width = newWidth + 'px';
+}
+
+async function uploadOrders(endpoint) {
+    document.getElementById('uploadSteps').style.cursor = 'wait';
+    document.getElementById('nextBtnuploadorders/').disabled = true;
+    document.getElementsByClassName('dropZone')[0].style.cursor = 'wait';
+    const formData = new FormData();
+    formData.append('live_data', document.getElementById('liveDataToggle').checked);
+    // Assuming each row in your table has a class 'file-row'
+    const rows = document.querySelectorAll('.file-row');
+    console.log(rows);
+    rows.forEach((row, index)=> {
+        const fileId = row.id;
+        console.log(fileId);
+        if (selectedFilesOrders.hasOwnProperty(fileId)){
+            formData.append('order_lists', selectedFilesOrders[fileId].file);
+            formData.append('profiles', row.querySelector('select').value);
+            formData.append('fileId', fileId);
+        }
+    });
+    try {
+        const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
+        console.log(data);
+        // Check if an error message already exists
+        if (data['status_code'] === 400) {
+          data['data'].forEach(failedData => {
+            console.log(failedData['file_id']);
+            var failedRow = document.getElementById(failedData['file_id']);
+            failedRow.style.color = 'red';
+            let errorMessage = failedRow.querySelector('.upload-error-message');
+            if (!errorMessage) {
+              errorMessage = document.createElement('td');
+
+              errorMessage.className = 'upload-error-message';
+              errorMessage.style.color = "red";
+              errorMessage.textContent = failedData["error"];
+              failedRow.appendChild(errorMessage);
+            }
+
+          });
+        } else {
+          nextStep(2);
+        }
+        document.getElementById('nextBtnuploadorders/').disabled = false;
+        document.getElementById('uploadSteps').style.cursor = 'default';
+        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
+        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
+    } catch (error) {
+        console.error(error);
+        document.getElementById('nextBtnuploadorders/').disabled = false;
+        document.getElementById('uploadSteps').style.cursor = 'default';
+        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
+        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
+        showMessage('Failed to upload orders ' + error.message, false);
+    }
+}
+
+async function uploadReturns(endpoint) {
+    document.getElementById('nextBtnuploadreturns/').disabled = true;
+    document.getElementById('uploadSteps').style.cursor = 'wait';
+    document.getElementsByClassName('dropZone')[1].style.cursor = 'wait';
+    const formData = new FormData();
+    formData.append('live_data', document.getElementById('liveDataToggle').checked);
+    // Assuming each row in your table has a class 'file-row'
+    const rows = document.querySelectorAll('.file-row');
+    console.log(rows);
+    rows.forEach((row, index)=> {
+        const fileId = row.id;
+        console.log(fileId);
+        if (selectedFilesReturns.hasOwnProperty(fileId)){
+            formData.append('return_lists', selectedFilesReturns[fileId].file);
+            formData.append('profiles', row.querySelector('select').value);
+            formData.append('fileId', fileId);
+        }
+    });
+    try {
+        const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
+        console.log(data);
+        // Check if an error message already exists
+        if (data['status_code'] === 400) {
+          data['data'].forEach(failedData => {
+            console.log(failedData['id']);
+            var failedRow = document.getElementById(failedData['id']);
+            failedRow.style.color = 'red';
+            let errorMessage = failedRow.querySelector('.upload-error-message');
+            if (!errorMessage) {
+              errorMessage = document.createElement('td');
+
+              errorMessage.className = 'upload-error-message';
+              errorMessage.style.color = "red";
+              errorMessage.textContent = failedData["error"];
+              failedRow.appendChild(errorMessage);
+            }
+
+          });
+        } else {
+          nextStep(3);
+        }
+        document.getElementById('nextBtnuploadreturns/').disabled = false;
+        document.getElementById('uploadSteps').style.cursor = 'default';
+        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
+        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
+    } catch (error) {
+        console.error(error);
+        document.getElementById('nextBtnuploadreturns/').disabled = false;
+        document.getElementById('uploadSteps').style.cursor = 'default';
+        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
+        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
+        showMessage('Failed to upload returns ' + error.message, false);
+    }
+}
+
+async function uploadReports() {
+    if (Object.keys(selectedFilesReports).length === 0) {
+      showMessage('Please upload your reports first', false);
+      return;
+    }
+    document.getElementsByClassName('dropZone')[0].style.cursor = 'wait';
+    const formData = new FormData();
+    // Assuming each row in your table has a class 'file-row'
+    const rows = document.querySelectorAll('.file-row');
+    console.log(rows);
+    rows.forEach((row, index)=> {
+        const fileId = row.id;
+        console.log(fileId);
+        if (selectedFilesReports.hasOwnProperty(fileId)){
+            formData.append('reports', selectedFilesReports[fileId].file);
+            formData.append('fileId', fileId);
+        }
+    });
+    try {
+        const data = await unifiedSendRequest(UPLOADREPORTS, { formData: formData });
+        console.log(data);
+        // Check if an error message already exists
+        if (data['status_code'] === 400) {
+          data['data'].forEach(failedData => {
+            console.log(failedData['file_id']);
+            var failedRow = document.getElementById(failedData['file_id']);
+            failedRow.style.color = 'red';
+            let errorMessage = failedRow.querySelector('.upload-error-message');
+            if (!errorMessage) {
+              errorMessage = document.createElement('td');
+
+              errorMessage.className = 'upload-error-message';
+              errorMessage.style.color = "red";
+              errorMessage.textContent = failedData["error"];
+              failedRow.appendChild(errorMessage);
+            }
+
+          }); 
+        } else {
+          showMessage('Successfully uploaded reports, they will be handed in now', true);
+          document.getElementById('fileList_report_list').innerHTML = '';
+
+        }
+        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
+    } catch (error) {
+        console.error(error);
+        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
+        showMessage('Failed to upload reports ' + error.message, false);
+    }
+}
+var clientData = null;
+async function getClientsFile() {
+  try {
+        const data = await unifiedSendRequest(CLIENTSFILE, {method: 'GET'});
+        console.log(data);
+        // Check if an error message already exists
+        if (data['status_code'] === 200) {
+          var data_found = data['data'];
+          if (data_found['filename']) {
+            document.getElementById('clientsFileName').textContent = data_found['filename'];
+            document.getElementById('editIconClients').style.display = 'block';
+            document.getElementById('upload-clients').style.display = 'none';
+            clientData = data_found['data'];
+            return data_found['data'];
+          }
+        }
+    } catch (error) {
+        console.error(error);
+        showMessage('Failed to fetch clients file ' + error.message, false);
+    }
+}
+getClientsFile();
+
+async function handleClientsUpload(input) {
+    const file = input.files[0];
+    try {
+        const formData = new FormData();
+        formData.append('client_file', file);
+        const data = await unifiedSendRequest(CLIENTSFILE, { formData: formData });
+        console.log(data);
+        // Check if an error message already exists
+        if (data['status_code'] === 200) {
+            document.getElementById('clientsFileName').textContent = file.name;
+            document.getElementById('editIconClients').style.display = 'block';
+            document.getElementById('upload-clients').style.display = 'none';
+        } else {
+            console.error(data);
+            showMessage('Failed to upload clients file', false);
+        }
+    } catch (error) {
+        console.error(error);
+        showMessage('Failed to upload clients file ' + error.message, false);
+    }
+}
+
+function handleClientsUploadReplacePrompt(input) {
+  showConfirmationMessage("Replace file", "Are you sure you want to replace the current clients file with the new one?",
+                          "Cancel", "Replace", function() {handleClientsUploadReplace(input)});
+}
+
+async function handleClientsUploadReplace(input) {
+  closeConfirmationModal();
+  await handleClientsUpload(input);
+  await openClientsModal();
+  showMessage('File updated successfully!', true);
+}
+
+var datatable = null;
+
+async function openClientsModal() {
+    var clientDataNew = await getClientsFile();
+    document.getElementById('editClientsModal').style.display = 'block';
+    document.getElementById('clientsModalOverlay').style.display = 'block';
+
+    if (!clientDataNew) {
+        console.error('No client data to display.');
+        return;
+    }
+
+    // Parse JSON data into an HTML table
+    const dataContainer = document.getElementById('clientsDatatableContainer');
+    dataContainer.innerHTML = ''; // Clear any existing content
+    const table = new Tabulator("#clientsDatatableContainer", {
+        data: clientDataNew, // Array of client data
+        layout: Object.keys(clientDataNew[0]).length > 20 ? "fitDataFill" : "fitColumns",
+        pagination: clientDataNew.length > 30,
+        paginationCounter: "rows",
+        paginationSize: 30,
+        columns: Object.keys(clientDataNew[0]).map(header => ({
+            title: header,
+            field: header,
+            headerSort: false,
+            editor: "input",
+            // formatter: 'plaintext',
+            formatter: header.toLowerCase().includes('password') ? (cell) => `<div class="blurred" title="Content blurred for privacy">${cell.getValue()}</div>` : "plaintext",
+        })), // Generate columns dynamically
+    });
+    datatable = table;
+
+    console.log('Clients table rendered and editable.');
+}
+
+
+
+// Function to add a new row after the last entry
+function addNewRow() {
+    datatable.addRow({});
+}
+
+function addNewColumn() {
+    const table = datatable;
+
+    // Prompt the user for a column name
+    const columnName = prompt("Enter the name for the new column:");
+    if (!columnName) return; // Exit if no column name is provided
+
+    const columns = table.getColumnDefinitions(); // Get existing column definitions
+    columns.push({
+        title: columnName,
+        field: columnName,
+        editor: "input", // Make cells editable
+    });
+
+    const data = table.getData();
+
+    // Add the new column to all existing rows
+    data.forEach(row => {
+        if (!(columnName in row)) {
+            row[columnName] = ""; // Initialize new column with empty string
+        }
+    });
+
+    // Reinitialize the table with updated columns and data
+    table.setColumns(columns); // Update column definitions
+    table.replaceData(data);
+
+    console.log(`New column "${columnName}" added.`);
+}
+
+
+function closeClientsModal() {
+    document.getElementById('editClientsModal').style.display = 'none';
+    document.getElementById('clientsModalOverlay').style.display = 'none';
+}
+
+async function saveClientsEdits() {
+    try {
+        // Get Tabulator instance
+        const table = datatable;
+
+        // Retrieve all data from the table
+        let data = table.getData();
+
+        // Convert all inputs to strings and replace null with ''
+        data = data.map(row => {
+            const updatedRow = {};
+            for (const key in row) {
+                if (row.hasOwnProperty(key)) {
+                    val = row[key] === null ? '' : String(row[key]);
+                    val = val.replace('undefined', '');
+                    updatedRow[key] = val;
+                    
+                }
+            }
+            return updatedRow;
+        });
+
+        // Send the data to the backend
+        const response = await unifiedSendRequest(CLIENTSFILEUPDATE, {
+            formData: JSON.stringify({ clients: data }),
+            headerArgs: { 'Content-Type': 'application/json' }
+        });
+
+        // Handle response
+        if (response.status_code === 200) {
+            console.log('Data saved successfully:', response);
+            showMessage('Clients data saved successfully.', true);
+            closeClientsModal();
+        } else {
+            console.error('Error saving data:', response);
+            showMessage('Failed to save clients data.', false);
+        }
+    } catch (error) {
+        console.error('Error in saveClientsEdits:', error);
+        showMessage('Failed to save clients data: ' + error.message, false);
+    }
+}
+
+
+
+function updateProgressIcons(currentStep) {
+    const icons = document.querySelectorAll('.progressIcon');
+    icons.forEach(icon => {
+        const step = parseInt(icon.getAttribute('data-step'));
+        const activeIcon = icon.querySelector('.active-icon');
+        const completedIcon = icon.querySelector('.completed-icon');
+        if (step < currentStep) {
+            activeIcon.style.display = 'none';
+            completedIcon.style.display = 'block';
+        } else if (step === currentStep) {
+            activeIcon.style.display = 'block';
+            completedIcon.style.display = 'none';
+        } else {
+            activeIcon.style.display = 'block';
+            completedIcon.style.display = 'none';
+        }
+    });
+}
+function nextStep(stepNumber) {
+    stepFunctions(stepNumber);
+    steps.forEach(step => step.style.display = 'none');
+    document.getElementById('step' + stepNumber).style.display = 'block';
+    updateProgressIcons(stepNumber);
+}
+function prevStep(stepNumber) {
+    stepFunctions(stepNumber);
+    steps.forEach(step => step.style.display = 'none');
+    document.getElementById('step' + stepNumber).style.display = 'block';
+    updateProgressIcons(stepNumber);
+}
+function stepFunctions(stepNumber){
+    if (stepNumber === 3) {
+      getTimesAndCountry();
+    }
+    if (stepNumber === 4) {
+      showConfirmationDetails();
+    }
+}
+
+async function getTimesAndCountry(){
+  try {
+        var data = await unifiedSendRequest(GETREPORTTIMES, {method: 'GET'});
+        // Assuming your data has this structure: [minDate, maxDate, countriesArray]
+        const minDate = data[0];
+        const maxDate = data[1];
+        const countries = data[2];
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        console.log(countries);
+        // Populate the dropdown with countries
+        const countryDropdown = document.getElementById('country');
+        countryDropdown.innerHTML = '';  // Clear existing options
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            countryDropdown.appendChild(option);
+        });
+
+        if (typeof $('.selectpicker').selectpicker === 'function') {
+            $('.selectpicker').selectpicker('refresh');
+        }
+        document.getElementById('country').value = countries[-1];
+        // Set the min and max dates for date selectors
+        startDateInput.min = minDate;
+        startDateInput.max = maxDate;
+        endDateInput.min = minDate;
+        endDateInput.max = maxDate;
+        // Set default values
+        if(startDateInput.value === ''){
+           startDateInput.value = minDate;
+        }
+        if(endDateInput.value === '') {
+           endDateInput.value = maxDate;
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        showMessage('Failed to retrieve countries from orders ' + error.message, false);
+        TOKEN = false;
+    }
+}
+
+function convertDateFormat(dateString) {
+    const dateParts = dateString.split("-");
+    return `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+}
+function showConfirmationDetails() {
+    // Get the selected values
+    const selectedCountryValue = document.getElementById('country').value;
+    const selectedCategoryValue = document.getElementById('category').value;
+    const selectedStartDateValue = convertDateFormat(document.getElementById('startDate').value);
+    const selectedEndDateValue = convertDateFormat(document.getElementById('endDate').value);
+    const selectedDebuggerValue = document.getElementById('debugger').checked ? 'Yes': 'No';
+    //const selectedOrderListFileValue = document.getElementById('order_list').files[0]?.name;
+    //const selectedReturnListFileValue = document.getElementById('return_list').files[0]?.name;
+
+    // Update the placeholders in the final step
+    document.getElementById('selectedCountry').textContent = selectedCountryValue;
+    document.getElementById('selectedStartDate').textContent = selectedStartDateValue;
+    document.getElementById('selectedEndDate').textContent = selectedEndDateValue;
+    document.getElementById('selectedCategory').textContent = selectedCategoryValue;
+    document.getElementById('selectedDebugger').textContent = selectedDebuggerValue;
+    var selectedOrderListFileValue = Object.values(selectedFilesOrders).map(file => file.filename);
+    var selectedReturnListFileValue = Object.values(selectedFilesReturns).map(file => file.filename);
+    var textContentOrders = selectedOrderListFileValue.length > 0 ? selectedOrderListFileValue.join('<br>') : 'No file selected';
+    var textContentReturns = selectedReturnListFileValue.length > 0 ? selectedReturnListFileValue.join('<br>') : 'No file selected';
+    document.getElementById('selectedOrderListFile').innerHTML = textContentOrders;
+    document.getElementById('selectedReturnListFile').innerHTML = textContentReturns;
+}
+
+var failedCreation = false;
+async function createReport() {
+    failedCreation = false;
+    steps.forEach(step => step.style.display = 'none');
+    document.getElementById('stepDone').style.display = 'block';
+    repeatActionReport();
+    const uploadStepsElem = document.getElementById('uploadSteps');
+
+    // Add loading overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    uploadStepsElem.style.position = 'relative'; // Ensure that the overlay covers this element
+    uploadStepsElem.appendChild(overlay);
+
+    uploadStepsElem.style.cursor = 'wait';
+    document.querySelectorAll('.nextButton').forEach(node => {node.disabled = true;})
+    document.querySelectorAll('.prevButton').forEach(node => {node.disabled = true;})
+    var data;
+    try {
+        const countryData = new FormData();
+        countryData.append("country_id", document.getElementById('country').value);
+        countryData.append("start_date", document.getElementById('startDate').value);
+        countryData.append("report_id", '-1');
+        countryData.append("category", document.getElementById('category').value);
+        countryData.append("end_date", document.getElementById('endDate').value);
+        countryData.append("use_debugger", document.getElementById('debugger').checked);
+        data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});
+        // Handle file response
+        console.log(data);
+    } catch (error) {
+        console.error(error.message);
+        TOKEN = false;
+        failedCreation = true;
+        document.getElementById('reportInProgress').style.display = 'none';
+        document.getElementById('showReport').style.display = 'none';
+        document.getElementById('reportFailed').style.display = 'block';
+        showMessage('Failed to create report ' + error.message, false);
+    }
+    uploadStepsElem.removeChild(overlay);
+    document.getElementById('uploadSteps').style.cursor = 'default';
+    document.querySelectorAll('.nextButton').forEach(node => {node.disabled = false;})
+    document.querySelectorAll('.prevButton').forEach(node => {node.disabled = false;})
+}
+
+var timeout = 1000;
+var inprogress = false;
+
+function repeatActionReport() {
+  unifiedSendRequest(GETREPORTPROGRESS, {method: 'GET'}).then(data => {
+    console.log(data);
+    if (data === "1") {
+      setTimeout(repeatActionReport, timeout); // Call the function again after the specified timeout
+      inprogress = true;
+    } else if (data === "0" && inprogress) {
+      if (!failedCreation) {
+        document.getElementById('reportInProgress').style.display = 'none';
+        document.getElementById('showReport').style.display = 'block';
+      }
+      inprogress = false;
+    } else if (data === "0") {
+      setTimeout(repeatActionReport, timeout);
+    }
+  }).catch(error => {
+    console.error(error);
+    setTimeout(repeatActionReport, timeout); // Ensure the function is called again even if there's an error
+  });
+}
+
+
+function showGuide() {
+    startGuide([
+        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' }
+    ]);
+    setCookie('showedGuideReport', 'true', 300);
+}
+function showGuideFromButton(element) {
+  showGuide();
+  element.style.display = "none";
+}
+document.addEventListener('DOMContentLoaded', function() {
+  if(readCookie('showedGuideReport') === null) {
+      setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    }
+  });
+
+</script>
+
+{% else %}
+  <div class="image-with-text image-with-text--{{ section.settings.content_layout }} page-width isolate{% if settings.text_boxes_border_thickness > 0 and settings.text_boxes_border_opacity > 0 and settings.media_border_thickness > 0 and settings.media_border_opacity > 0 %} collapse-borders{% endif %}{% unless section.settings.color_scheme == 'background-1' and settings.media_border_thickness > 0 and settings.text_boxes_shadow_opacity == 0 and settings.text_boxes_border_thickness == 0 or settings.text_boxes_border_opacity == 0 %} collapse-corners{% endunless %} section-{{ section.id }}-padding">
+        <h1>Welcome,</h1>
+    <h2>Please log in to see this page</h2>
+  </div>
+{%  endif %}
+
+{% schema %}
+{
+  "name": "t:sections.forsure_report.name",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "upload",
+      "label": "Upload"
+    },
+    {
+        "type": "image_picker",
+        "id": "trashcan",
+        "label": "Trashcan"
+    },
+    {
+      "type": "select",
+      "id": "desktop_image_width",
+      "options": [
+        {
+          "value": "small",
+          "label": "t:sections.forsure_report.settings.desktop_image_width.options__1.label"
+        },
+        {
+          "value": "medium",
+          "label": "t:sections.forsure_report.settings.desktop_image_width.options__2.label"
+        },
+        {
+          "value": "large",
+          "label": "t:sections.forsure_report.settings.desktop_image_width.options__3.label"
+        }
+      ],
+      "default": "medium",
+      "label": "t:sections.forsure_report.settings.desktop_image_width.label",
+      "info": "t:sections.forsure_report.settings.desktop_image_width.info"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "options": [
+        {
+          "value": "image_first",
+          "label": "t:sections.forsure_report.settings.layout.options__1.label"
+        },
+        {
+          "value": "text_first",
+          "label": "t:sections.forsure_report.settings.layout.options__2.label"
+        }
+      ],
+      "default": "image_first",
+      "label": "t:sections.forsure_report.settings.layout.label",
+      "info": "t:sections.forsure_report.settings.layout.info"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_position",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:sections.forsure_report.settings.desktop_content_position.options__1.label"
+        },
+        {
+          "value": "middle",
+          "label": "t:sections.forsure_report.settings.desktop_content_position.options__2.label"
+        },
+        {
+          "value": "bottom",
+          "label": "t:sections.forsure_report.settings.desktop_content_position.options__3.label"
+        }
+      ],
+      "default": "top",
+      "label": "t:sections.forsure_report.settings.desktop_content_position.label"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.forsure_report.settings.desktop_content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.forsure_report.settings.desktop_content_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.forsure_report.settings.desktop_content_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.forsure_report.settings.desktop_content_alignment.label"
+    },
+    {
+      "type": "select",
+      "id": "content_layout",
+      "options": [
+        {
+          "value": "no-overlap",
+          "label": "t:sections.forsure_report.settings.content_layout.options__1.label"
+        },
+        {
+          "value": "overlap",
+          "label": "t:sections.forsure_report.settings.content_layout.options__2.label"
+        }
+      ],
+      "default": "no-overlap",
+      "label": "t:sections.forsure_report.settings.content_layout.label"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+          "value": "accent-2",
+          "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+          "value": "background-1",
+          "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+          "value": "background-2",
+          "label": "t:sections.all.colors.background_2.label"
+        },
+        {
+          "value": "inverse",
+          "label": "t:sections.all.colors.inverse.label"
+        }
+      ],
+      "default": "background-1",
+      "label": "t:sections.all.colors.label"
+    },
+     {
+      "type": "select",
+      "id": "color_scheme2",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+          "value": "accent-2",
+          "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+          "value": "background-1",
+          "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+          "value": "background-2",
+          "label": "t:sections.all.colors.background_2.label"
+        },
+        {
+          "value": "inverse",
+          "label": "t:sections.all.colors.inverse.label"
+        }
+      ],
+      "default": "background-1",
+      "label": "t:sections.all.colors.label"
+    },
+    {
+      "type": "header",
+      "content": "Mobile layout"
+    },
+    {
+      "type": "select",
+      "id": "mobile_content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.forsure_report.settings.mobile_content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.forsure_report.settings.mobile_content_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.forsure_report.settings.mobile_content_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.forsure_report.settings.mobile_content_alignment.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.forsure_report.presets.name"
+    }
+  ]
+}
+{% endschema %}

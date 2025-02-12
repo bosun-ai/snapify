@@ -1,0 +1,198 @@
+{% schema %}
+  {
+    "name": "t:sections.thirdsection.name",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "mainpicutre",
+        "label": "Mainpicutre"
+      },
+      {
+        "type": "text",
+        "id": "title1",
+        "default": "EPR Compliance",
+        "label": "Title Line 1"
+      },
+      {
+        "type": "text",
+        "id": "title2",
+        "default": "Made Effortless",
+        "label": "Title Line 2"
+      },
+      {
+        "type": "text",
+        "id": "text",
+        "default": "Bid farewell to the hours-long data aggregation and analysis. With ForSURE, achieve precise, compliant, and insightful EPR reports within minutes, not hours. Our software is tailored to adapt to the regulatory frameworks of various countries, making compliance a less tedious, more rewarding endeavor.",
+        "label": "Text"
+      }
+    ],
+    "blocks": [
+      {
+          "type": "button",
+          "name": "Button",
+          "limit": 1,
+          "settings": [
+            {
+              "type": "text",
+              "id": "button_label",
+              "default": "Explore Features",
+              "label": "Button Label"
+            },
+            {
+              "type": "url",
+              "id": "button_link",
+              "label": "Button Link"
+            }
+          ]
+        }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.thirdsection.presets.name",
+        "blocks": [
+          {
+            "type": "button"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
+
+{%- style -%}
+  .background1 {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: #1c3180; /* Changed to white background */
+    width: 100%;
+    padding-top: 9%;
+    padding-bottom: 7%;
+    position: relative;
+    align-items: flex-start;
+  }
+  .section3element {
+    margin-top: 10%;
+  }
+  .section3-textcontainer {
+    padding-left: 7rem;
+    margin-left: 12%;
+    z-index: 2;
+  }
+  .section3-textcontainer p {
+    text-align: left;
+    text-align-last: left;
+  }
+.calendarIcon {
+      height: 250px;
+    }
+  .calendarcontainer {
+            left: 63%;
+    bottom: -40%;
+  }
+  #goodsIcon2StartConnection {
+    top: 90%;
+    left: calc(63% - 115px);
+  }
+  .section3element {
+      margin-bottom: 10rem;
+  }
+  
+  @media(max-width: 1200px) {
+    .section3element {
+      flex-direction: column; /* Items will now be laid out in a column */
+      padding: 0;
+      margin-right: 0;
+      margin-top: 17%;
+      margin-bottom: 3rem;
+    }
+    #connectingLine {
+        display: none;
+    }
+    .imgleft {
+        padding-bottom: 100px;
+    }
+    .section3-textcontainer {
+        width: 70%;
+        margin: auto;
+        padding-left: 0;
+        margin-top: 7rem;
+    }
+}
+    @media(max-width: 600px) {
+    .imgleftimg {
+      width: 75%;
+      height: 25rem;
+      margin-left: 4rem!important;
+    }
+    .calendarIcon {
+      height: 150px;
+    }
+      .calendarcontainer {
+        left: 63%;
+        bottom: -40%;
+      }
+      #goodsIcon2StartConnection {
+        top: 90%;
+        left: calc(63% - 95px);
+      }
+      .section3-textcontainer {
+        margin-top: 0rem;
+      }
+      
+  }
+      @media(max-height: 700px) {
+      #goodsIcon2StartConnection {
+        left: calc(63% - 95px);
+      }  
+  }
+{%- endstyle -%}
+
+
+<div class="background1" style="min-height: 100vh;">
+  <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5rem;margin-top:2%" class="page-width section3element">
+
+    <!-- Image container -->
+    <div class="imgleft">
+        <div style="text-align: left; position: relative;">
+            <img class="imgleftimg" style="border-radius: 10%; object-fit: cover; object-position: 80% center;"
+                width="492.86px"
+                height="450px"
+                src="{{ section.settings.mainpicutre | image_url }}"
+                alt="{{ section.settings.mainpicutre.alt | escape }}"
+                loading="lazy">
+
+            <!-- Calendar icon container -->
+            <div class="calendarcontainer" style="position: absolute;z-index: 1;">
+                {% render 'icon-calendar' %}
+            </div>
+            <div id="goodsIcon2StartConnection" class="iconhomepage" style="background-color:#fafafa; border-radius: 10%;   display: flex;
+                                                                                justify-content: center; /* Horizontally center */
+                                                                                align-items: center; /* Vertically center */
+                                                                                background-color: #fafafa;
+                                                                                border-radius: 10%;
+                                                                                position: absolute;
+                                                                                
+                                                                                z-index: 1;
+                                                                                box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);
+                                                                                ">
+                {% render 'icon-goods' %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Text container -->
+    <div class="section3-textcontainer" style="text-align: left;">
+      <h2 class="h1" style="color: #fafafa;width: 104%;">{{ section.settings.title1 }} <br> {{ section.settings.title2 }}</h2>
+      <p style="color: #fafafa;">
+        {{ section.settings.text }}
+      </p>
+      <a
+        href="{{ section.blocks[0].settings.button_link }}"
+        class="button button--primary"
+        style="font-size: 1em; font-weight: bold; margin-top: 5%;z-index:1;">{{ section.blocks[0].settings.button_label }}</a>
+    </div>
+
+  </div>
+</div>

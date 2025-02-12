@@ -1,0 +1,398 @@
+{% comment %}
+    Renders a register form.
+
+    Accepts:
+    - registerName: {String} Placeholder for Name field
+    - registerCompany: {String} Placeholder for Company field
+    - registerCheckbox: {String} Text to opt in marketing
+    - registerButton: {String} Sign up button text
+    - registerNote1: {String} Text for legal info
+    - registerNoteLink1Text: {String} Text for ToS link
+    - registerNote2: {String} Text for legal info
+    - registerNoteLink2Text: {String} Text for Privacy Policy link
+
+
+    Usage:
+    {% render 'register', registerName: section.settings.registerName, registerCompany: section.settings.registerCompany, registerCheckbox: section.settings.registerCheckbox, registerButton: section.settings.registerButton, registerNote1: section.settings.registerNote1
+                        registerNoteLink1Text: section.settings.registerNoteLink1Text, registerNote2: section.settings.registerNote2, registerNoteLink2Text: section.settings.registerNoteLink2Text%}
+{% endcomment %}
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+    px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+    px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}
+      px;
+      padding-bottom: {{ section.settings.padding_bottom }}
+      px;
+    }
+  }
+  #create_customer {
+    margin-top: 0 !important;
+    /* padding-top: 4rem; */
+  }
+
+
+  input[type="checkbox"]:checked {
+    border-radius: 2px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+    position: relative;
+    top: 5px;
+    background: #2255ff url("data:image/gif;base64, R0lGODlhCwAKAIABAP/// / 3cnSH5BAEKAAEALAAAAAALAAoAAAIUjH+AC73WHIsw0UCjglraO20PNhYAOw==") 3px 3px no-repeat !important;
+  }
+  input[type="checkbox"] {
+    border-radius: 2px;
+    border: solid 0.1rem #17161c;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+    position: relative;
+    top: 5px;
+  }
+  .field {
+    margin: 1rem auto auto !important;
+  }
+{%- endstyle -%}
+
+<div class="customer register">
+  <svg style="display: none">
+    <symbol id="icon-error" viewBox="0 0 13 13">
+      <circle
+        cx="6.5"
+        cy="6.50049"
+        r="5.5"
+        stroke="white"
+        stroke-width="2" />
+      <circle
+        cx="6.5"
+        cy="6.5"
+        r="5.5"
+        fill="#EB001B"
+        stroke="#EB001B"
+        stroke-width="0.7" />
+      <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white" />
+      <path
+        d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z"
+        fill="white"
+        stroke="#EB001B"
+        stroke-width="0.7">
+    </symbol>
+  </svg>
+  {%- form 'create_customer', novalidate: 'novalidate' -%}
+    {%- if form.errors -%}
+      <h2
+        class="form__message"
+        tabindex="-1"
+        autofocus>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          role="presentation">
+          <use href="#icon-error" />
+        </svg>
+        {{ 'templates.contact.form.error_heading' | t }}
+      </h2>
+      <ul>
+        {%- for field in form.errors -%}
+          <li>
+            {%- if field == 'form' -%}
+              {{ form.errors.messages[field] }}
+            {%- else -%}
+              <a href="#RegisterForm-{{ field }}">
+                {{ form.errors.translated_fields[field] | capitalize }}
+                {{ form.errors.messages[field] }}
+              </a>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+    <input
+      type="hidden"
+      name="customer[first_name]"
+      id="RegisterForm-FirstName"
+      {% if form.first_name %}value="{{ form.first_name }}"{% endif %}autocomplete="given-name"placeholder="{{ 'customer.register.first_name' | t }}">
+    <input
+      type="hidden"
+      name="customer[last_name]"
+      id="RegisterForm-LastName"
+      {% if form.last_name %}value="{{ form.last_name }}"{% endif %}autocomplete="family-name"placeholder="{{ 'customer.register.last_name' | t }}">
+      <input
+      type="hidden"
+      name="customer[note]"
+      id="RegisterForm-CompanyNameHidden"
+      {% if form.note %}value="{{ form.note }}"{% endif %}placeholder="">
+
+    <div class="field" style="margin-top: 3rem!important;">
+      <!-- Name Input -->
+      <input
+        type="text"
+        name="customer[name]"
+        id="RegisterForm-FullName"
+        {% if form.name %}value="{{ form.name }}"{% endif %}autocomplete="name"placeholder="{{ registerName }}"oninput="splitNameRegister()" onblur="checkName()">
+      <label for="RegisterForm-FullName">
+        {{ registerName }}
+      </label>
+      {% comment %} <input
+      type="text"
+      name="customer[first_name]"
+      id="RegisterForm-FirstName"
+      {% if form.first_name %}value="{{ form.first_name }}"{% endif %}autocomplete="given-name"placeholder="{{ 'customer.register.first_name' | t }}">
+      <label for="RegisterForm-FirstName">
+      {{ 'customer.register.first_name' | t }}
+      </label>
+      </div>
+      <div class="field">
+      <input
+      type="text"
+      name="customer[last_name]"
+      id="RegisterForm-LastName"
+      {% if form.last_name %}value="{{ form.last_name }}"{% endif %}autocomplete="family-name"placeholder="{{ 'customer.register.last_name' | t }}">
+      <label for="RegisterForm-LastName">
+      {{ 'customer.register.last_name' | t }}
+      </label> {% endcomment %}
+    </div>
+    <div class="field">
+      <input
+        type="text"
+        name="customer[companyname]"
+        id="RegisterForm-CompanyName"
+        {% if form.companyname %}value="{{ form.companyname }}"{% endif %}autocomplete="company"placeholder="{{ registerCompany }}"oninput="addCompanyName()" onblur="checkCompany()">
+      <label for="RegisterForm-CompanyName">
+        {{ registerCompany }}
+      </label>
+    </div>
+    <div class="field">
+      <input
+        type="email"
+        name="customer[email]"
+        id="RegisterForm-email"
+        {% if form.email %}value="{{ form.email }}"{% endif %}spellcheck="false"autocapitalize="off"autocomplete="email"aria-required="true"{% if form.errors contains 'email' %}aria-invalid="true"aria-describedby="RegisterForm-email-error"{% endif %}placeholder="{{ 'customer.register.email' | t }}"onblur="checkRestrictedDomain()">
+
+      <label for="RegisterForm-email">
+        {{ 'customer.register.email' | t }}
+      </label>
+    </div>
+    {%- if form.errors contains 'email' -%}
+      <span id="RegisterForm-email-error" class="form__message">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          role="presentation">
+          <use href="#icon-error" />
+        </svg>
+        {{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}.
+      </span>
+    {%- endif -%}
+    <div class="field">
+      <input
+        type="password"
+        name="customer[password]"
+        id="RegisterForm-password"
+        aria-required="true"
+        {% if form.errors contains 'password' %}aria-invalid="true"aria-describedby="RegisterForm-password-error"{% endif %}placeholder="{{ 'customer.register.password' | t }}">
+      <label for="RegisterForm-password">
+        {{ 'customer.register.password' | t }}
+      </label>
+    </div>
+    <div id="emailError" style="color: red;width: 85%; margin-left: auto; margin-right: auto;"></div>
+
+    <div class="" style="margin-top: 1.5rem;">
+      <input
+        type="hidden"
+        id="hiddenMarketingConsent"
+        name="customer[accepts_marketing]"
+        value="true" />
+      <input
+        type="checkbox"
+        id="marketingConsent"
+        name="customer[accepts_marketing]"
+        checked />
+      <label for="marketingConsent" style="font-size:11px;margin-top:2rem;margin-left:auto">{{ registerCheckbox }}</label>
+    </div>
+    {%- if form.errors contains 'password' -%}
+      <span id="RegisterForm-password-error" class="form__message">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          role="presentation">
+          <use href="#icon-error" />
+        </svg>
+        {{ form.errors.translated_fields['password'] | capitalize }} {{ form.errors.messages['password'] }}.
+      </span>
+    {%- endif -%}
+    <button id="submitBtn" style="width:70%;margin: 1.5rem 0 1.5rem!important;font-size:21px">
+      {{ registerButton }}
+    </button>
+    <p style="width:70%;margin:auto;font-size:11px;margin-bottom: 3rem">{{ registerNote1 }}
+      <a href="/policies/terms-of-service" style="color:#2255ff;font-size: 11px;">{{ registerNoteLink1Text }}</a>
+      {{ registerNote2 }}
+      <a style="color:#2255ff;font-size: 11px;" href="/policies/privacy-policy">{{ registerNoteLink2Text }}</a>.</p>
+  {%- endform -%}
+</div>
+{% render "domain-list" %}
+<script>
+  document.getElementById('marketingConsent').addEventListener('change', function() {
+    if (this.checked) {
+      document.getElementById('hiddenMarketingConsent').value = "true";
+    } else {
+      document.getElementById('hiddenMarketingConsent').value = "false";
+    }
+  });
+  function isDomainRestricted(email, restrictedDomains) {
+
+// Extract the domain from the email
+    const domain = email.split('@')[1];
+
+// Check if the domain is in the restricted domains list
+    return restrictedDomains.includes(domain);
+  }
+
+  var nameOk = false;
+  var companyOk = false;
+  var emailOk = false;
+  var submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+
+  function checkRestrictedDomain() {
+    const email = document.getElementById('RegisterForm-email').value.toLowerCase();
+    const firstName = document.getElementById('RegisterForm-FirstName').value.toLowerCase();
+    const lastName = document.getElementById('RegisterForm-LastName').value.toLowerCase();
+    const companyName = document.getElementById('RegisterForm-CompanyName').value.toLowerCase();
+    const restrictedDomains = [
+      'me.com',
+      'mac.com',
+      'aurora.dti.ne.jp',
+      ...domainlist
+    ];
+
+    if (email && isDomainRestricted(email, restrictedDomains)) {
+      document.getElementById('emailError').textContent = 'Please use a business email.';
+      submitBtn.disabled = true;
+    } else {
+      document.getElementById('emailError').textContent = '';
+
+// Sanitize email for comparison
+      const sanitizedEmail = sanitizeString(email);
+      if (firstName.length < 3) {
+        document.getElementById('emailError').textContent = 'Please use a valid first name with more than two letters.';
+        submitBtn.disabled = true;
+        nameOk = false;
+        return;
+      }
+      if (lastName.length < 3) {
+        document.getElementById('emailError').textContent = 'Please use a valid last name with more than two letters.';
+        submitBtn.disabled = true;
+        nameOk = false;
+        return;
+      }
+      if (companyName.length < 3) {
+        document.getElementById('emailError').textContent = 'Please use a valid company name with more than two letters.';
+        submitBtn.disabled = true;
+        companyOk = false;
+        return;
+      }
+
+// Check if the sanitized email contains the first name, last name, or company name
+      if (! sanitizedEmail.includes(firstName) && ! sanitizedEmail.includes(lastName) && ! sanitizedEmail.includes(companyName)) {
+        document.getElementById('emailError').textContent = 'Please use an email which contains your first name, last name, or company name.';
+        submitBtn.disabled = true;
+        emailOk = false;
+        return;
+      }
+        emailOk = true;
+        if (nameOk && companyOk && emailOk) {
+          submitBtn.disabled = false;
+        }
+    }
+
+  }
+  function sanitizeString(str) {
+    return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function checkName() {
+    const firstName = document.getElementById('RegisterForm-FirstName').value.toLowerCase();
+    const lastName = document.getElementById('RegisterForm-LastName').value.toLowerCase();
+    if (firstName.length < 3) {
+      document.getElementById('emailError').textContent = 'Please use a valid first name with more than two letters.';
+      nameOk = false;
+      submitBtn.disabled = true;
+      return;
+    }
+    if (lastName.length < 3) {
+        document.getElementById('emailError').textContent = 'Please use a valid last name with more than two letters.';
+        nameOk = false;
+        submitBtn.disabled = true;
+        return;
+      }
+    nameOk = true;
+    document.getElementById('emailError').textContent = '';
+    const companyName = document.getElementById('RegisterForm-CompanyName').value.toLowerCase();
+    if (companyName.length > 0){
+      checkCompany();
+    }
+  }
+
+  function checkCompany() {
+    const companyName = document.getElementById('RegisterForm-CompanyName').value.toLowerCase();
+    if (companyName.length < 3) {
+      document.getElementById('emailError').textContent = 'Please use a valid company name with more than two letters.';
+      submitBtn.disabled = true;
+      companyOk = false;
+      return;
+    }
+    companyOk = true;
+    document.getElementById('emailError').textContent = '';
+    const email = document.getElementById('RegisterForm-email').value;
+    if (email.length > 0) {
+      checkRestrictedDomain();
+    }
+  }
+
+  function splitNameRegister() {
+    const fullName = document.getElementById('RegisterForm-FullName').value.trim();
+    const names = fullName.split(' ');
+    console.log(names);
+
+    const firstName = names[0];
+    const lastName = names.length > 1
+      ? names.slice(1).join(' ')
+      : '';
+
+    document.getElementById('RegisterForm-FirstName').value = firstName;
+    document.getElementById('RegisterForm-LastName').value = lastName;
+  }
+  function addCompanyName() {
+    const companyName = document.getElementById('RegisterForm-CompanyName').value.trim();
+    document.getElementById('RegisterForm-CompanyNameHidden').value = "CompanyName: " + companyName + ";";
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    var submitBtn = document.getElementById('submitBtn');
+    submitBtn.addEventListener('click', function(event) {
+      event.preventDefault(); // Prevent form submission
+      setCookieShort('recentlyRegistered', 'true', 30);
+      // After your function completes, you can submit the form
+      // For example, you might want to trigger the form submission here
+      submitBtn.form.submit();
+    });
+  });
+
+</script>

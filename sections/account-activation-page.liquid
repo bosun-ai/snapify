@@ -1,0 +1,81 @@
+{% schema %}
+  {
+    "name": "t:sections.freeplantemp.name",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "default": "Thank You for Registering!",
+        "label": "Title"
+      },
+      {
+        "type": "textarea",
+        "id": "text",
+        "default": "Your EPR journey is about to begin.\nPlease look out for our activation email, where you can set up your password. Remember to check your spam folder just in case. If you can't find the email, please don't hesitate to contact us for assistance. Let's get started!",
+        "label": "Text"
+      },
+      {
+        "type": "text",
+        "id": "button",
+        "default": "Contact Us",
+        "label": "Button Text"
+      },
+      {
+        "type": "text",
+        "id": "cookie",
+        "default": "recentlyRegistered",
+        "label": "Cookie name, don't change"
+      }
+    ],
+      "presets": [
+    {
+      "name": "t:sections.freeplantemp.presets.name"
+    }
+    ]
+  }
+{% endschema %}
+
+{{ 'section-account-activation-page.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+{% if customer.tags contains 'subscription-ended' %}
+  
+{% elsif customer.tags contains 'member' %}
+  <script>
+  window.location.href = '{{ routes.root_url }}';
+  </script>
+{% elsif customer.tags contains 'free-plan' and section.settings.cookie == "recentlyApplied" %}
+  {% if customer.metafields.custom.acceptedconditions != true %}
+    <script>
+    console.log("recently applied");
+    // only redirect the application complete page if already successful
+    if (readCookie('{{ section.settings.cookie }}') === null) {
+      window.location.href = '{{ routes.root_url }}';
+    }
+    </script>
+  {% endif %}
+    
+{% else %}
+  <script>
+    console.log("recently other");
+    if(readCookie('{{ section.settings.cookie }}') === null) {
+      window.location.href = '{{ routes.root_url }}';
+    }
+  </script>
+{% endif %}
+<div class="hero-gradient">
+  <div class="page-width">
+    <div style="border-radius: 2.5rem;    overflow: hidden;">
+    <div style="background: #fafafa;"> <!-- left side -->
+      <div id="title" style='background: #2255ff; padding: 3rem;'>
+        <h1 style="color:#fafafa;margin:0;text-align: center;text-align: center;">{{ section.settings.title }}</h1>
+      </div>
+      <div style="background: #fafafa; width: 65%;margin:auto;padding-top:5%;padding-bottom:5%">
+        <h3>{{ section.settings.text | newline_to_br }}</h3>
+        <div style="justify-content: center;display: flex;padding-top:5%">
+          <a href="{{ pages['contact'].url }}" class="button button--primary" style="font-size: 1em; font-weight: bold; z-index:1;">{{ section.settings.button }}</a> 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

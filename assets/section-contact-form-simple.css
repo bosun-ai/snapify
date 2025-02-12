@@ -1,0 +1,31 @@
+.image-with-text p {
+    /* hyphens: auto;
+    -webkit-hyphens: auto;  */
+    text-align: left;
+    text-align-last: left;
+  }
+  .field__input {
+    height: 5.5rem;
+  }
+  .contactGrey {
+    color: rgba(var(--color-foreground),.75);
+  }
+
+  .align-right-col {
+    margin-left: auto;
+  }
+
+  .align-left-col {
+    margin-right: auto;
+  }
+
+
+.text-with-text-swipeable {
+  min-width: 0!important;
+}
+.ul-with-swipeable {
+  flex-wrap: unset;
+}
+.formpartner {
+  max-width: 98%;
+}

@@ -1,0 +1,322 @@
+{% schema %}
+  {
+    "name": "t:sections.sixthnewhomepage.name",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "default": "Rooted in Innovation, Nurtured by Partnership",
+        "label": "Title"
+      },
+      {
+        "type": "text",
+        "id": "text",
+        "default": "Proudly incubated at UtrechtInc and in partnership with Hogeschool Utrecht, we are at the nexus of technological innovation and academic excellence. This collaboration doesn’t just fuel our software’s prowess; it shapes a nurturing ecosystem for the next wave of retail industry leaders.",
+        "label": "Text left"
+      },
+      {
+          "type": "text",
+          "id": "button_label",
+          "label": "t:sections.text-with-text.blocks.button.settings.button_label.label",
+          "info": "t:sections.text-with-text.blocks.button.settings.button_label.info"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "t:sections.text-with-text.blocks.button.settings.button_link.label"
+        }
+    ],
+    "blocks": [
+      {
+      "type": "partner",
+      "name": "t:Partner Element",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "default": "With UtrechtInc's strategic insights, ForSURE is crafting accessible data management solutions that embody the future of tech innovation.",
+          "label": "Text"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "URL to partner page"
+        }
+      ]
+    }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.sixthnewhomepage.presets.name"
+      }
+    ]
+  }
+{% endschema %}
+
+{%- style -%}
+  .gradientparnter {
+    background: linear-gradient(60deg, #2c2b30 35%, #2255ff);
+  }
+  .section6text, .partnerText {
+    /* hyphens: auto;
+    -webkit-hyphens: auto;  */
+    text-align: left;
+    text-align-last: left;
+  }
+
+  .mySlides {
+    display: none;
+  }
+  img {
+    vertical-align: middle;
+  }
+
+  /* Slideshow container */
+  .slideshow-container {
+    max-width: 1000px;
+    /* position: relative; */
+    margin: auto;
+  }
+
+
+
+  /* The dots/bullets/indicators */
+  .dot {
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+    cursor: pointer
+  }
+
+  .active {
+    background-color: #717171;
+  }
+
+  /* Fading animation */
+  .fade {
+    animation-name: fade;
+    animation-duration: 1.5s;
+  }
+
+  @keyframes fade {
+    from {
+      opacity: .4
+    }
+    to {
+      opacity: 1
+    }
+  }
+
+  /* On smaller screens, decrease text size */
+  @media only screen and (max-width: 300px) {
+    .text {
+      font-size: 11px
+    }
+  }
+
+  .container2 {
+    min-width: 500px;
+    min-height: 400px;
+    background-color: grey;
+    margin: 0 auto; /* This will center the container if it's within a wider parent */
+    display: block;
+    border-radius: var(--text-boxes-radius);
+    z-index: 10;
+    padding: 3rem;
+  }
+  .background6th {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: #fafafa; /* Changed to white background */
+    width: 100%;
+    padding-top: 10%;
+    padding-bottom: 10%;
+    position: relative;
+    align-items: flex-start;
+  }
+  .textcontainer {
+    margin-top: 2%;
+  }
+  .section6header {
+    margin-right: 40%;
+    width: 75%;
+  }
+  .section6text {
+    margin-right: 30%;
+  }
+  .handshake {
+    /* position:absolute;
+    left:45%;
+    top: -7%; */
+    position: relative;
+    margin: auto;
+    background-color: #fafafa;
+    width: 80px;
+    height: 60px;
+    border-radius: 2.5rem;
+    display: flex;
+    z-index: 1;
+    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);
+  }
+  .imgcontainerLogo {
+    /* height: 100px;
+    width: 300px; */
+    background-color: #fafafa;
+    border-radius: var(--text-boxes-radius);
+    margin-top: 2rem;
+    width: 80%;
+  }
+  .mySlides {
+    margin-top: -5%;
+  }
+    .partnerText {
+        width: 75%;
+    }
+  
+  @media(max-width: 1200px) {
+    .section6 {
+      flex-direction: column; /* Items will now be laid out in a column */
+      padding: 0;
+      margin-right: 0;
+    }
+    .textcontainer {
+        width: 70%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10rem;
+    }
+    .section6text, .section6header {
+        margin-right: 0;
+    }
+    .slideshow-container {
+        width: 70%;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    .container2 {
+        width: 70%;
+        min-width: 0;
+        min-height: 0;
+    }
+    .mySlides {
+    margin-top: -3%;
+  }
+}
+  @media(max-width:750px) {
+    .slideshow-container {
+      width: 100%;
+    }
+  }
+{%- endstyle -%}
+
+<div style="position: relative;" class="background6th">
+  <div style="display: flex" class="page-width section6">
+    <div class="triangle"></div>
+    <div class="triangle1"></div>
+    <div class="textcontainer">
+      <h2 class="section6header">{{ section.settings.title }}</h2>
+      <p class="section6text">
+        {{ section.settings.text }}
+      </p>
+      {%- if section.settings.button_label != blank -%}
+        <a{% if section.settings.button_link == blank %} role="link" aria-disabled="true"{% else %} href="{{ section.settings.button_link }}"{% endif %} class="button{% if section.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}" style="z-index:1">{{ section.settings.button_label | escape }}</a>
+      {%- endif -%}
+
+    </div>
+
+    <div>
+      <div class="slideshow-container">
+        <div class="handshake">
+          {% render 'icon-handshake' %}
+        </div>
+
+        {%- for block in section.blocks -%}
+          <div class="mySlides fade">
+            <div class="container2 gradientparnter">
+              <div class="imgcontainerLogo">
+                <a href="{{ block.settings.link }}"><img
+                  style="width: 100%;padding:2rem"
+                  src="{{ block.settings.logo | image_url }}"
+                  alt="{{ block.settings.logo | escape }}"
+                  loading="lazy"></a>
+              </div>
+              <div>
+                <p class="partnerText" style="color:#fafafa;">{{ block.settings.text }}</p>
+
+              </div>
+
+            </div>
+          </div>
+        {% endfor %}
+        {% comment %} <div class="mySlides fade">
+          <div class="container2 gradientparnter">
+            <div class="imgcontainerLogo">
+              <img
+                style="width: 100%;padding:2rem"
+                src="{{ section.settings.logo2 | image_url }}"
+                alt="{{ section.settings.logo2.alt | escape }}"
+                loading="lazy">
+            </div>
+            <div>
+              <p class="partnerText" style="color:#fafafa;">{{ section.settings.text2 }}</p>
+
+            </div>
+
+          </div>
+        </div> {% endcomment %}
+
+
+        <div style="text-align:center; margin-top: 5%;">
+          {%- for block in section.blocks -%}
+            <span class="dot" onclick="currentSlide({{ forloop.index0 }})" style="margin-right: 5%"></span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  let slideTimeout = null;
+  let slideIndex = 0;
+  showSlides();
+
+  function showSlides() {
+    let i;
+    let slides = document.getElementsByClassName("mySlides");
+    let dots = document.getElementsByClassName("dot");
+    for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";
+    }
+    slideIndex++;
+    if (slideIndex > slides.length) {
+      slideIndex = 1
+    }
+    for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
+    }
+    slides[slideIndex - 1].style.display = "block";
+    dots[slideIndex - 1].className += " active";
+    slideTimeout = setTimeout(showSlides, 10000); // Change image every 2 seconds
+  }function currentSlide(n) {
+    console.log(n);
+    slideIndex = n;
+    if (slideTimeout) {
+      clearTimeout(slideTimeout);
+      showSlides();
+    }
+
+  }
+</script>

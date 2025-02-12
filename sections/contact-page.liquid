@@ -1,0 +1,381 @@
+{{ 'countrySelect.css' | asset_url | stylesheet_tag }}
+{% schema %}
+  {
+    "name": "t:sections.contactpage.name",
+    "settings": [
+      { 
+        "type": "text",
+        "id": "title",
+        "default": "Effortless EPR Starts Here",
+        "label": "Title"
+      },
+      {
+        "type": "text",
+        "id": "subheader",
+        "default": "Streamline your EPR compliance with ForSURE. Make it hassle-free.",
+        "label": "Subheader"
+      },
+      {
+        "type": "text",
+        "id": "text",
+        "default": "Managing EPR compliance doesn’t have to be difficult. Let ForSURE simplify it for you. As your strategic partner, we help you navigate complex regulations and stay compliant. Reach out today to see how we can help you save time and cut costs.",
+        "label": "Text left"
+      },
+      {
+        "type": "text",
+        "id": "buttonText",
+        "default": "Get Started",
+        "label": "Button"
+      }
+    ],
+      "presets": [
+    {
+      "name": "t:sections.contactpage.presets.name"
+    }
+    ]
+  }
+{% endschema %}
+{{ 'section-free-plan-form.css' | asset_url | stylesheet_tag }}
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+<style>
+    .leftSide {
+        width: 46%;
+        padding-right: 5%;
+    }
+    .image-class {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius:25px;
+  }
+  .contact-text {
+    padding: 5%;
+    text-align: left;
+    /* hyphens: auto;
+    -webkit-hyphens: auto; */
+    text-align-last: left;
+    /* -moz-hyphens: auto; */
+  }
+  .field__input {
+    height: 5.5rem;
+  }
+
+  .left-column {
+    color:#FAFAFA;
+    margin-right:5%;
+    padding:1%;
+    margin-left:5%;
+  }
+
+  .button-center {
+    display: flex;
+  justify-content: center;
+  }
+  @media screen and (max-width: 850px) {
+    .leftSide {
+        width: 100%;
+        padding-right: 0;
+    }
+  }
+  
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  @media screen and (min-width: 1000px) {
+    .left-column {
+      width:22%;
+    }
+    .right-column {
+      width:30%;
+    }
+    .wrapper-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .button-center {
+      display: flex;
+    justify-content: left;
+    }
+  }
+
+
+.image-container {
+  display: flex!important;
+  /* justify-content: space-between; */
+  /* align-items: center; */
+  /* background-color: #fafafa; */
+  border-radius: 1rem;
+  /* border: 0.2rem solid #17161c; */
+  width: 100%;
+}
+.image-wrapper {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+#img1, #img2,#img3 {
+  border-radius: {{section.settings.imageWidth | divided_by: 2}}rem;
+  width: {{section.settings.imageWidth}}rem;
+  height: {{section.settings.imageHeight}}rem;
+  margin: auto;
+  display: block; /* changed from flex */
+  object-fit: cover; /* add this line */
+}
+#wrapper1, #wrapper2 {
+  margin-right: 1rem;
+}
+.image-with-text__media-item {
+  height: 40rem;
+}
+.img-title {
+  text-align: center;
+  color: #fafafa;
+}
+  .contactGrey {
+    color: rgba(var(--color-foreground),.75);
+  }
+  .container {
+    height: fit-content;
+  }
+</style>
+<script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="{{ 'countrySelect.js' | asset_url }}" defer="defer"></script>
+{% render 'forsure-simple-notification' %}
+<div class="hero-gradient">
+  <div class="page-width" style="margin-top: 3rem;margin-bottom: 3rem;">
+    <div style="border-radius: 2.5rem;    overflow: hidden;">
+    <div style="background: #fafafa;">
+      <div class="container" style="background: #fafafa;margin:auto;padding:3%;display:flex;width: 90%;position:relative;padding-left: 7px;">
+        <div class="leftSide">
+            <h1 class="h1" style="margin: 2rem 0 3rem 0;">
+                {{ section.settings.title }}
+            </h1>
+            <div class="h4" style="margin-bottom: 3rem;">
+                {{ section.settings.subheader }}
+            </div>
+            <p>
+                {{ section.settings.text }}
+            </p>
+        </div>
+        <div style='border-left: 4px solid #17161c;display: block!important;padding-right: 5%;'></div>
+        {%- form 'contact', id: 'ContactForm', class: 'isolate' -%}
+            {%- if form.errors -%}
+              <div class="form__message">
+                <h2 class="form-status caption-large text-body" role="alert" tabindex="-1" autofocus>{% render 'icon-error' %} {{ 'templates.contact.form.error_heading' | t }}</h2>
+              </div>
+              <ul class="form-status-list caption-large" role="list">
+                <li>
+                  <a href="#ContactForm-email" class="link">
+                    {{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}
+                  </a>
+                </li>
+              </ul>
+            {%- endif -%}
+            <div class="contact__fields" style="display:flex">
+              <div class="field" style="width:25rem">
+                <select id="ContactForm-gender" class="field__input contactGrey" name="contact[gender]">
+                  <option value="" selected disabled>{{ 'templates.contact.form.select_gender' | t }}</option>
+                  <option value="male">{{ 'templates.contact.form.male' | t }}</option>
+                  <option value="female">{{ 'templates.contact.form.female' | t }}</option>
+                  <option value="nonbinary">{{ 'templates.contact.form.nonbinary' | t }}</option>
+                </select>
+                <label for="ContactForm-gender" class="field__label">{{ 'templates.contact.form.gender' | t }}</label>
+              </div>      
+              <div class="field">
+                <input class="field__input" required autocomplete="name" type="text" id="ContactForm-name" name="contact[{{ 'templates.contact.form.name' | t }}]" value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}" placeholder="{{ 'templates.contact.form.name' | t }}">
+                <label class="field__label" for="ContactForm-name">{{ 'templates.contact.form.name' | t }} <span aria-hidden="true">*</span></label>
+              </div>
+              </div>
+              <div class="field field--with-error">
+                <input
+                  autocomplete="email"
+                  type="email"
+                  id="ContactForm-email"
+                  class="field__input"
+                  name="contact[email]"
+                  spellcheck="false"
+                  autocapitalize="off"
+                  value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+                  aria-required="true"
+                  {% if form.errors contains 'email' %}
+                    aria-invalid="true"
+                    aria-describedby="ContactForm-email-error"
+                  {% endif %}
+                  placeholder="{{ 'templates.contact.form.email' | t }}"
+                >
+                <label class="field__label" for="ContactForm-email">{{ 'templates.contact.form.email' | t }} <span aria-hidden="true">*</span></label>
+                {%- if form.errors contains 'email' -%}
+                  <small class="contact__field-error" id="ContactForm-email-error">
+                    <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+                    <span class="form__message">{% render 'icon-error' %}{{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}</span>
+                  </small>
+                {%- endif -%}
+            </div>
+            <div class="contact__fields" style="display:flex">
+                <div>
+                    <div class="field">
+                        <input type="tel" required id="ContactForm-phone" class="field__input" autocomplete="tel" name="contact[{{ 'templates.contact.form.phone' | t }}]" pattern="\+?[0-9\-]*" value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}" placeholder="{{ 'templates.contact.form.phone' | t }}" aria-required="true">
+                        <label class="field__label" for="ContactForm-phone">{{ 'templates.contact.form.phone' | t }} <span aria-hidden="true">*</span></label>
+                    </div>
+                    <input
+                        type="hidden"
+                        id="countrycode"
+                        class="field__input"
+                        name="contact[country_code]"
+                        autocapitalize="off"
+                        value="{{ shop.locale }}"
+                    >
+                </div>
+                <div>
+                    <div class="field">
+                        <input
+                            type="text"
+                            required
+                            id="ContactForm-company"
+                            class="field__input"
+                            name="contact[company]"
+                            autocapitalize="off"
+                            value="{% if form.company %}{{ form.company }}{% endif %}"
+                            placeholder="{{ 'templates.contact.form.company' | t }}"
+                        >
+                        <label class="field__label" for="ContactForm-company">{{ 'templates.contact.form.company' | t }} <span aria-hidden="true">*</span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="contact__fields" style="display:flex">
+                <input type="hidden" required id="source" class="field__input" name="contact[source]" autocapitalize="off">
+                <div class="field">
+                    <select id="sourceSelect" required class="field__input contactGrey" onchange="handleSelection(this.value)">
+                    <option value="" selected disabled>{{ 'templates.contact.form.source_choice' | t }}</option>
+                    <option value="Partner">{{ 'templates.contact.form.source_partner' | t }}</option>
+                    <option value="Social Media">{{ 'templates.contact.form.source_social_media' | t }}</option>
+                    <option value="Search">{{ 'templates.contact.form.source_search' | t }}</option>
+                    <option value="Friend">{{ 'templates.contact.form.source_friend' | t }}</option>
+                    <option value="Other">{{ 'templates.contact.form.source_other' | t }}</option>
+                    </select>
+                    <label for="sourceSelect" class="field__label">{{ 'templates.contact.form.source_question' | t }}</label>
+                </div>
+                <div class="field" id="partnerSelect" style="display:none;">
+                    <select id="partnerDetails" class="field__input contactGrey" onchange="showCustomPartnerInput(this.value)">
+                    <option value="" selected disabled>{{ 'templates.contact.form.source_partner_option' | t }}</option>
+                    {% render 'partner' %}
+                    <option value="Other">{{ 'templates.contact.form.source_partner_other' | t }}</option>
+                    </select>
+                    <label for="partnerDetails" class="field__label">{{ 'templates.contact.form.source_partner_selection' | t }}</label>
+                </div>
+            </div>
+                <div class="field" id="customPartnerInput" style="display:none;">
+                    <input class="field__input" type="text" id="customPartner" placeholder="{{ 'templates.contact.form.source_partner_other_text' | t }}">
+                    <label class="field__label" for="customPartner">{{ 'templates.contact.form.source_partner_other_text' | t }} <span aria-hidden="true">*</span></label>
+                </div>
+            <div class="field" id="otherInput" style="display:none;">
+              <input class="field__input" type="text" id="otherDetails" placeholder="{{ 'templates.contact.form.source_other_text' | t }}">
+              <label class="field__label" for="otherDetails">{{ 'templates.contact.form.source_other_text' | t }} <span aria-hidden="true">*</span></label>
+            </div>
+
+            <input class="field__input" type="hidden" id="cookies" name="contact[questionnaire_answers]" placeholder="">
+            
+            <div class="field">
+              <textarea
+                rows="10"
+                required
+                id="ContactForm-body"
+                class="text-area field__input"
+                name="contact[{{ 'templates.contact.form.comment' | t }}]"
+                placeholder="{{ 'templates.contact.form.comment' | t }}"
+                aria-required="true"
+              >
+                {{- form.body -}}
+              </textarea>
+              <label class="form__label field__label" for="ContactForm-body">{{ 'templates.contact.form.comment' | t }} <span aria-hidden="true">*</span></label>
+            </div>
+            {%- if form.posted_successfully? -%}
+              <script>
+                showMessage("Thanks for contacting us. We'll get back to you as soon as possible.", true);
+                function gtag_report_conversion() {
+                  gtag('event', 'conversion', {
+                      'send_to': 'AW-11083318606/sJVxCJml3pgaEM6K-KQp',
+                      'value': 1.0,
+                      'currency': 'EUR'
+                  });
+                }
+                gtag_report_conversion();
+                </script>
+            {%- endif -%}
+            <div class="contact__button button-center" style="margin-top: 2rem;">
+              <button type="submit" class="button">
+                {{ section.settings.buttonText }}
+              </button>
+            </div>
+          {%- endform -%}
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+
+function updateSourceValue(value) {
+    document.getElementById('source').value = value; // Update the source input field's value
+}
+
+function sendCookies() {
+  var cookies = [];
+  for (var idx = 1; idx <= 4; idx++) {
+    var cookie = readCookie('questionnaire-answer-' + idx);
+    if (cookie) {
+      cookies.push(cookie);
+    }
+  }
+  document.getElementById('cookies').value = cookies.join(',');
+}
+document.addEventListener('DOMContentLoaded', function() {
+    sendCookies();
+});
+  
+function handleSelection(value) {
+  var partnerSelect = document.getElementById('partnerSelect');
+  var otherInput = document.getElementById('otherInput');
+  
+  // Hide both fields initially
+  partnerSelect.style.display = 'none';
+  otherInput.style.display = 'none';
+  
+  // Reset partner dropdown in case it was changed to custom input before
+  document.getElementById('customPartnerInput').style.display = 'none';
+  document.getElementById('partnerDetails').value = '';
+  
+  // Display the appropriate field based on selection
+  if(value === "Partner") {
+      partnerSelect.style.display = 'block';
+  } else if(value === "Other") {
+      otherInput.style.display = 'block';
+  }
+  updateSourceValue(value);
+}
+
+function showCustomPartnerInput(value) {
+    var customInput = document.getElementById('customPartnerInput');
+    customInput.style.display = value === "Other" ? 'block' : 'none';
+    if(value !== "Other") {
+        updateSourceValue(value);
+    }
+}
+document.getElementById('customPartner').addEventListener('input', function() {
+    updateSourceValue(this.value); // Update the source input with the custom partner input
+});
+
+document.getElementById('otherDetails').addEventListener('input', function() {
+    updateSourceValue(this.value); // Update the source input with the other details input
+});
+</script>

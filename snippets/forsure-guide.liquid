@@ -1,0 +1,264 @@
+{% comment %}
+Renders guide popup
+
+Usage:
+{% render 'forsure-guide' %}
+{% endcomment %}
+<style>
+.guide-popup {
+  position: absolute;
+  background-color: #fafafa;
+  border: 0;
+  padding: 10px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+  z-index: 2; /* Ensure it appears above other content */
+  display: none; /* Initially hidden */
+  border-radius: 2rem;
+  width: 40rem;
+}
+
+.guide-popup button {
+  margin-top: 10px;
+}
+#overviewArrow {
+transform: rotate(0deg);
+}
+.extended {
+    transform: rotate(90deg)!important;
+}
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with 50% opacity */
+    z-index: 1; /* Displayed behind the modal */
+  }
+  .displayTempGuide {
+    display: block!important;
+  }
+
+</style>
+<div id="guideBackground" class="overlay" style="display:none"></div>
+<div id="guidePopup" class="guide-popup">
+  <div onclick="endGuide()" style="position:absolute;top:5%;right:5%;cursor:pointer;z-index: 2;">X</div>
+    <div id="guideContent" style="position:relative;margin: 1rem">
+        <h4 id="guideTitle" style="margin: 0.7rem 0;">Guide Title</h4>
+        <p id="guideText">Guide Text</p>
+        <hr style="margin:1rem 0 0 0; border-top: 1px solid #cccccc">
+        <div style="display: flex;padding-bottom: 1rem;">
+          <div style="display: flex;margin-top: auto;">
+            <span id="currentGuideNumber" style="padding: 1rem 0;padding-right:1rem;font-size: large;"></span>
+            <div id="guideOverview" onclick="showGuideGroups()" style="padding-top: 1rem;">
+                <svg id="overviewArrow" style="cursor:pointer" class="svg-arrow" width="20.593" height="22.88" viewBox="0 0 80.593 122.88"><polygon style="fill:#17161c;" points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0"></polygon></svg>
+            </div>
+          </div>
+          <div style="margin-left: auto;width: fit-content;display:flex">
+              <button class="button" style="padding: 1rem;min-width:0;min-height:0;cursor:pointer;font-weight: bold;" id="nextButton" onclick="nextGuideStep()">
+                Next
+              </button>    
+          </div>
+        </div>
+        <div id="guideOverviewContainer" style="display: none"></div>
+    </div>
+</div>
+<script>
+let guideSteps = []; // filled on the different pages
+let currentStep = 0;
+let previousTargetElement = null;
+let previousTargetSecondElement = null;
+let previousHideOther = null;
+let hideAfter = null;
+function showGuideStep(step) {
+  const guidePopup = document.getElementById('guidePopup');
+  const guideText = document.getElementById('guideText');
+  const guideTitle = document.getElementById('guideTitle');
+  if (previousTargetElement) {
+    previousTargetElement.style.zIndex = ""; // Reset to default or original value
+  }
+  if (previousTargetSecondElement) {
+    previousTargetSecondElement.style.zIndex = ""; // Reset to default or original value
+  }
+  if (previousHideOther) {
+    document.querySelectorAll(previousHideOther).forEach(element => element.style.zIndex="");
+  }
+  if (hideAfter) {
+    hideAfter.classList.remove('displayTempGuide');
+  }
+  if(step < guideSteps.length) {
+    if (step == guideSteps.length -1 ) {
+      document.getElementById('nextButton').innerText = 'Finish';
+    }
+    const targetElement = document.querySelector(guideSteps[step].element);
+    if(targetElement) {
+      if (guideSteps[step].displayTemp) {
+        targetElement.classList.add('displayTempGuide');
+        hideAfter = targetElement;
+      } else {
+        hideAfter = null;
+      }
+      document.getElementById('guideBackground').style.display = 'block';
+      targetElement.style.zIndex = "2";
+      previousTargetElement = targetElement;
+      document.getElementById('currentGuideNumber').innerText = `${currentStep+1}/${guideSteps.length}`;
+      guideText.innerHTML = decodeHtmlEntities(guideSteps[step].text.replace(/\n/g, '<br />'));
+      guideTitle.textContent = guideSteps[step].title;
+      const rect = targetElement.getBoundingClientRect();
+      var guidePopupRect = guidePopup.getBoundingClientRect();
+      var offSetLeft = 0;
+      var offSetTop = 0;
+      guidePopup.style.display = 'block';
+      if (guideSteps[step].where === 'below') {
+        offSetLeft = rect.left + window.scrollX;
+        offSetTop = rect.bottom + window.scrollY + 20;
+      } else if (guideSteps[step].where === 'right') {
+        offSetLeft = rect.right + window.scrollX + 20;
+        offSetTop = rect.top + window.scrollY;
+      } else if (guideSteps[step].where === 'left') {
+        offSetLeft = rect.left + window.scrollX - guidePopupRect.width - 20;
+        offSetTop = rect.top + window.scrollY;
+      } else if (guideSteps[step].where === 'inside') {
+        targetElement.style.zIndex = "1";
+        offSetLeft = rect.left + window.scrollX + rect.width/1.5;
+        offSetTop = rect.top + window.scrollY + 20;
+      } else if (guideSteps[step].where === 'middle') {
+        offSetLeft = rect.left + window.scrollX + rect.width/2 - 200; // use number here instead of guidePopupRect.width, as guidePopupRect is still hidden
+        offSetTop =  '35vh';
+        guidePopup.style.top = offSetTop;
+      }
+      if (offSetLeft + guidePopupRect.width > window.innerWidth) {
+        offSetLeft = window.innerWidth - guidePopupRect.width - 20;
+      }
+      guidePopup.style.left = offSetLeft + 'px';
+      if (guideSteps[step].where !== 'middle') {
+        guidePopup.style.top = offSetTop + 'px';
+      }
+    }
+    const targetSecondElement = document.querySelector(guideSteps[step].secondElement);
+    if(targetSecondElement) {
+        targetSecondElement.style.zIndex = "2";
+        previousTargetSecondElement = targetSecondElement;
+    }
+    var hideOther = guideSteps[step].hideOther;
+    if (hideOther) {
+      previousHideOther = hideOther;
+    }
+    updateGuideGroups();
+    if (guideSteps[step].where !== 'middle') {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      guidePopup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+  } else {
+    endGuide();
+  }
+}
+
+
+function decodeHtmlEntities(html) {
+    var textArea = document.createElement('textarea');
+    textArea.innerHTML = html;
+    return textArea.value;
+}
+
+function endGuide() {
+  if (previousTargetElement) {
+    previousTargetElement.style.zIndex = ""; // Reset to default or original value
+  }
+  if (previousTargetSecondElement) {
+    previousTargetSecondElement.style.zIndex = ""; // Reset to default or original value
+  }
+  if (previousHideOther) {
+    document.querySelectorAll(previousHideOther).forEach(element => element.style.zIndex="");
+  }
+    document.getElementById('guideBackground').style.display = 'none';
+    const guidePopup = document.getElementById('guidePopup');
+    guidePopup.style.display = 'none';
+    document.getElementById('guideButton').style.display = 'block';
+}
+
+function nextGuideStep() {
+  currentStep++;
+  showGuideStep(currentStep);
+}
+
+function prevGuideStep() {
+  currentStep--;
+  if (currentStep < 0) {
+    currentStep = 0;
+  }
+  showGuideStep(currentStep);
+}
+
+function startGuide(steps) {
+  guideSteps = steps;
+  currentStep = 0;
+  showGuideStep(currentStep);
+  document.getElementById('guideBackground').addEventListener('click', endGuide);
+}
+
+function showGuideGroups() {
+    updateGuideGroups();
+    document.getElementById('overviewArrow').classList.toggle('extended');
+  // Toggle the visibility of the guideOverviewContainer
+  if (guideOverviewContainer.style.display === 'none' || guideOverviewContainer.style.display === '') {
+    guideOverviewContainer.style.display = 'block';
+
+  } else {
+    guideOverviewContainer.style.display = 'none';
+  }
+}
+
+function updateGuideGroups() {
+    const guideOverviewContainer = document.getElementById('guideOverviewContainer');
+    // Clear the current content
+    guideOverviewContainer.innerHTML = '';
+
+    // Create an object to track progress for each group
+    let groupsProgress = guideSteps.reduce((acc, step, index) => {
+        if (!acc[step.group]) {
+        acc[step.group] = { firstStepIndex: index, total: 0, done: 0 };
+        }
+        acc[step.group].total++;
+        if (index <= currentStep) {
+            acc[step.group].done++;
+        }
+        return acc;
+    }, {});
+
+    // Generate HTML content for each group
+    Object.keys(groupsProgress).forEach(groupName => {
+        const group = groupsProgress[groupName];
+        const groupDiv = document.createElement('div');
+        groupDiv.style.display = 'flex';
+        groupDiv.style.justifyContent = 'space-between';
+        groupDiv.style.cursor = 'pointer';
+        groupDiv.style.marginBottom = '10px';
+        groupDiv.innerHTML = `<span>${groupName}</span> <span>${group.done}/${group.total}</span>`;
+
+        // Attach click handler to jump to the first step of the group
+        groupDiv.addEventListener('click', () => {
+            currentStep = group.firstStepIndex;
+            showGuideStep(currentStep);
+        });
+
+        guideOverviewContainer.appendChild(groupDiv);
+    });
+}
+
+document.addEventListener('keydown', function(event) {
+  const guidePopup = document.getElementById('guidePopup');
+  // Check if the guide is currently displayed
+  if (guidePopup.style.display !== 'none') {
+    if (event.key === 'ArrowRight') {
+      nextGuideStep();
+    } else if (event.key === 'ArrowLeft') {
+      prevGuideStep();
+    }
+  }
+});
+
+</script>

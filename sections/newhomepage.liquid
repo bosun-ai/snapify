@@ -1,0 +1,534 @@
+{% schema %}
+  {
+    "name": "t:sections.newhomepage.name",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "arrow",
+        "label": "Arrow"
+      }, {
+        "type": "image_picker",
+        "id": "mainpicutre",
+        "label": "Mainpicutre"
+      }, {
+        "type": "image_picker",
+        "id": "icon1",
+        "label": "Icon1"
+      }, {
+        "type": "image_picker",
+        "id": "icon2",
+        "label": "Icon2"
+      },
+      {
+        "type": "url",
+        "id": "button_link_register",
+        "label": "Register Button"
+      },
+      {
+        "type": "url",
+        "id": "button_link_demo",
+        "label": "Demo Button"
+      },
+      {
+        "type": "text",
+        "id": "title1",
+        "default": "Tailored",
+        "label": "Title Part 1"
+      },
+      {
+        "type": "text",
+        "id": "titlebluedefault",
+        "default": "EPR Software",
+        "label": "Title blue default text"
+      },
+      {
+        "type": "text",
+        "id": "dynamicTitle",
+        "default": "EPR Analysing,EPR Processes,Data Managing,EPR Software",
+        "label": "Dynamic Title, split with , without space"
+      },
+      {
+        "type": "text",
+        "id": "title2",
+        "default": "for Modern Retailers",
+        "label": "Title part 2"
+      },
+      {
+        "type": "text",
+        "id": "subtitle",
+        "default": "ForSURE offers tailored EPR software for modern retailers, simplifying compliance with user-centric design for efficient EPR processes.",
+        "label": "Subtitle"
+      },
+      {
+        "type": "text",
+        "id": "leftbutton",
+        "default": "FREE PLAN",
+        "label": "Left Button"
+      },
+      {
+        "type": "text",
+        "id": "rightbutton",
+        "default": "DEMO",
+        "label": "Right button"
+      },
+      {
+        "type": "text",
+        "id": "epr_icon",
+        "default": "EPR",
+        "label": "EPR icon text"
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.newhomepage.presets.name"
+      }
+    ]
+  }
+{% endschema %}
+
+{%- style -%}
+  .background-triangle {
+    position: relative;
+  }
+  .hero-gradient {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: linear-gradient(110deg, #2c2b30 60%, #2255ff);
+    height: auto; 
+    min-height: calc(100vh - 11rem);
+    width: 100%;
+    position: relative;
+  }
+  .left-bottom-triangle-transparent {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) 0 0 calc(100vw/6.5);
+    border-color: transparent transparent transparent #2255ff99;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: block !important
+  }
+  h1 {
+
+    text-align: left;
+    color: #fafafa;
+  }
+  #subtitle {
+    text-align: left;
+    width: 83%;
+    color: #fafafa;
+  }
+
+  .arrow img {
+    transform: rotate(-90deg); /* This will rotate the image 45 degrees */
+  }
+  .flex-container {
+    display: flex;
+    align-items: center; /* This vertically centers the children */
+  }
+
+  #namewordings:after {
+    color: #2255ff;
+    content: '|';
+    animation: blink 1s infinite;
+  }
+
+  .button-free-plan:hover {
+    color: #2255ff !important;
+    border: none !important;
+
+  }
+
+
+  .svg-default {
+    display: block;
+  }
+
+  .svg-hover {
+    display: none;
+  }
+
+  /* When hovering over the anchor tag, hide the default SVG and show the hover SVG */
+  .button-free-plan:hover .svg-default {
+    display: none;
+  }
+
+  .button-free-plan:hover .svg-hover {
+    display: block !important;
+  }
+  .title-column {
+    flex-direction: row; /* Items will now be laid out in a row */
+    padding-right: 100px; /* To account for the svg on the right*/
+    margin-top: -3rem;
+  }
+  .imgright {
+    width: 40rem;
+    height:40rem;
+  }
+      .iconhomepage {
+      height:130px;
+      width:130px;
+    }
+.titlehomepage {
+  font-size: 4rem;
+}
+  .title-left {
+    z-index: 2;
+    position: relative;
+  }
+  @media(max-width: 1200px) {
+    .title-column {
+      flex-direction: column; /* Items will now be laid out in a column */
+      padding: 0;
+      margin-right: 0;
+      margin-top: 3rem;
+    }
+    .imgContainerRight {
+        padding-top: 5rem;
+        margin: auto;
+        margin-bottom:110px; /* To account for the svgs at the bottom*/
+    }
+    .title-left {
+        margin-left: 15%!important;
+    }
+    .buttons-left {
+        justify-content: center;
+        margin-left: -15%;
+    }
+  }
+  @media(max-height: 700px) {
+      .imgright {
+        width: 30rem;
+        height:30rem;
+      }
+    .iconEPR {
+      width:100px!important;
+      height:100px!important;
+    }
+    .eprText {
+      font-size: 45px;
+    }
+    .iconGovernment {
+      width:80px;
+    }
+    .iconGoods {
+      width:80px;
+    }
+    .iconhomepage {
+      height:100px;
+      width:100px;
+    }
+    .iconAgency {
+      width:80px;
+    }
+    .iconData {
+      width:80px;
+    }
+    .subtitle {
+      font-size: 2rem;
+    }
+  }
+  
+  /* @media(max-width: 1300px) {
+    .title-left {
+      margin-left: 10%;
+      }
+  } */
+  @media(max-width: 600px) {
+    .imgright {
+      width: 65%;
+      height: 25rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+          .imgright {
+        width: 25rem;
+        height:25rem;
+      }
+    .iconEPR {
+      width:100px!important;
+      height:100px!important;
+    }
+    .eprText {
+        font-size: 45px;
+    }
+    .iconGovernment {
+      width:80px;
+    }
+    .iconGoods {
+      width:80px;
+    }
+    .iconhomepage {
+      height:100px;
+      width:100px;
+    }
+    .iconAgency {
+      width:80px;
+    }
+    .iconData {
+      width:80px;
+    }
+    .titlehomepage {
+      font-size: 4rem;
+    }
+    .subtitle {
+      font-size: 2rem;
+    }
+  }
+  @keyframes blink {
+    0,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .connector {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+{%- endstyle -%}
+
+
+<div style="position: relative; border-bottom: .25rem solid #2255ff" class="hero-gradient">
+  <div style="display: flex;" class="title-column page-width">
+    <div class="left-bottom-triangle-transparent"></div>
+    <div class="title-left">
+      <h1 class="titlehomepage">{{ section.settings.title1 }}
+        <span id="namewordings">{{ section.settings.titlebluedefault }}</span>
+        <br> {{ section.settings.title2 }}</h1>
+      <p class="h3 subheading" id="subtitle">
+        {{ section.settings.subtitle }}
+      </p>
+      <div class="buttons-left" style="display: flex;z-index: 1;position: relative;">
+        <a
+          style="  font-size: 1em;
+                font-weight: bold;z-index: 1"
+          href="{{ section.settings.button_link_register }}"
+          class="button">{{ section.settings.leftbutton }}</a>
+        <div class="flex-container">
+          <a
+            href="{{ section.settings.button_link_demo }}"
+            class="button-free-plan"
+            style="display: inline-flex; color: white; text-decoration: none; font-size: 1.17em; font-weight: bold; margin-left: 4rem;">{{ section.settings.rightbutton }}
+            <svg
+              version="1.1"
+              style="margin: auto; margin-left: 0.6rem;"
+              class="svg-default"
+              xmlns="http://www.w3.org/2000/svg"
+              x="0px"
+              y="0px"
+              width="20.593px"
+              height="22.88px"
+              viewBox="0 0 80.593 122.88"
+              xml:space="preserve">
+              <g>
+                <polygon style="fill: #fafafa " points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0" />
+              </g>
+            </svg>
+            <!-- The hover SVG is initially hidden with inline style "display: none;" -->
+            <svg
+              version="1.1"
+              style="margin: auto; margin-left: 0.6rem;"
+              class="svg-hover"
+              xmlns="http://www.w3.org/2000/svg"
+              x="0px"
+              y="0px"
+              width="20.593px"
+              height="22.88px"
+              viewBox="0 0 80.593 122.88"
+              xml:space="preserve"
+              style="display: none;">
+              <g>
+                <polygon style="fill: #2255ff" points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0" />
+              </g>
+            </svg>
+          </a>
+
+
+        </div>
+      </div>
+    </div>
+    <div class="imgContainerRight" style="position: relative;">
+
+
+
+      {% capture small_send %}
+        {% render 'icon-send' %}
+      {% endcapture %}
+
+
+      <div class="imgright" style='position:relative;'>
+        <img style="border-radius: 10%; object-fit: cover; object-position: 65% center;"
+          width="100%"
+          height="100%"
+          src="{{ section.settings.mainpicutre | image_url }}"
+          alt="{{ section.settings.mainpicutre.alt | escape }}"
+          loading="lazy">
+
+        <!-- Existing div for icons and the connecting line between them -->
+        <div style="position: absolute; top: 90%; left: -15%; width: 115%; height: 130px; display: flex; justify-content: space-between; align-items: center;">
+
+
+          <!-- Existing icon on the left -->
+          <div id="goodsContainerSection1" class="iconhomepage" style="background-color:#fafafa; border-radius: 10%; display: flex;
+                        justify-content: center; align-items: center;z-index: 2;
+                        position: absolute; left:0%;box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);">
+            {% render 'icon-goods-categories' %}
+          </div>
+
+          <!-- Existing icon on the right -->
+          <div id="eprContainerSection1" class="iconhomepage" style="position: absolute; right: 5%;">
+            {% render 'icon-with-small-icon', bigIconText: section.settings.epr_icon, smallIcon: small_send %}
+          </div>
+        </div>
+
+      
+
+      <!-- Separate div for the top right icon -->
+      <div id="governmentContainerSection1" class="iconhomepage" style="background-color:#fafafa; border-radius: 10%; display: flex;
+                justify-content: center; align-items: center;
+                position: absolute; top: 20%; right: -23%; z-index: 2;box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);">
+        {% render 'icon-government' %}
+      </div>
+</div>
+
+
+    </div>
+
+  </div>
+</div>
+<svg id="connectingLineStraightSection1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;z-index:0">
+  <path d="" fill="none" stroke="#a3a3a3" stroke-width="3" stroke-dasharray="11,11" style="z-index:1"/>
+</svg>
+<svg id="connectingLineUpSection1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;z-index:0">
+  <path d="" fill="none" stroke="#a3a3a3" stroke-width="3" stroke-dasharray="11,11" style="z-index:1"/>
+</svg>
+<script>
+    function drawLineStraight(id1, id2, connectingLineId) {
+        // set size of surrounding svg
+        const svgElement = document.getElementById(connectingLineId);
+
+        const width = Math.max(
+          document.body.scrollWidth,
+          document.body.offsetWidth,
+          document.documentElement.clientWidth,
+          document.documentElement.scrollWidth,
+          document.documentElement.offsetWidth
+        );
+      
+        const height = Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          document.documentElement.clientHeight,
+          document.documentElement.scrollHeight,
+          document.documentElement.offsetHeight
+        );
+        svgElement.style.width = 100 + '%';
+        svgElement.style.height = height + 'px';
+        // set path
+        const element1 = document.getElementById(id1).getBoundingClientRect();
+        const element2 = document.getElementById(id2).getBoundingClientRect();
+        const startX = element1.right + window.pageXOffset;
+        const startY = element1.top + element2.height /2 + window.pageYOffset;
+        const endX = element2.left + window.pageXOffset;
+        const endY = element2.top + element2.height / 2 + window.pageYOffset;
+
+        const path = document.querySelector(`#${connectingLineId} path`);
+        path.setAttribute('d', `M ${startX} ${startY} L ${endX} ${endY}`);      
+    }
+
+    function drawLineUp(id1, id2, connectingLineId) {
+        // set size of surrounding svg
+        const svgElement = document.getElementById(connectingLineId);
+
+        const width = Math.max(
+          document.body.scrollWidth,
+          document.body.offsetWidth,
+          document.documentElement.clientWidth,
+          document.documentElement.scrollWidth,
+          document.documentElement.offsetWidth
+        );
+      
+        const height = Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          document.documentElement.clientHeight,
+          document.documentElement.scrollHeight,
+          document.documentElement.offsetHeight
+        );
+        svgElement.style.width = 100 + '%';
+        svgElement.style.height = height + 'px';
+        // set path
+        const element1 = document.getElementById(id1).getBoundingClientRect();
+        const element2 = document.getElementById(id2).getBoundingClientRect();
+        const startX = element1.right + window.pageXOffset;
+        const startY = element1.top + element2.height /2 + window.pageYOffset;
+        const endX = element2.left + window.pageXOffset + element2.width / 2;
+        const endY = element2.bottom + window.pageYOffset;
+        const intermediateX = endX;
+        const intermediateY = startY;
+        console.log(startX, endX);
+        console.log(startY, endY);
+        const path = document.querySelector(`#${connectingLineId} path`);
+        path.setAttribute('d', `M ${startX} ${startY} L ${intermediateX} ${intermediateY} L ${endX} ${endY}`);      
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        drawLineStraight('goodsContainerSection1', 'eprContainerSection1', 'connectingLineStraightSection1');
+        drawLineUp('eprContainerSection1', 'governmentContainerSection1', 'connectingLineUpSection1');
+    });
+
+    window.addEventListener('resize', (event) => {
+        drawLineStraight('goodsContainerSection1', 'eprContainerSection1', 'connectingLineStraightSection1');
+        drawLineUp('eprContainerSection1', 'governmentContainerSection1', 'connectingLineUpSection1');
+    });
+    
+  document.addEventListener("DOMContentLoaded", function() {
+    {% assign titles = section.settings.dynamicTitle | split: ',' %}
+    var texts = {{ titles | json }};
+    // const texts = ["EPR Analysing", "EPR Processes", "Data Managing", "EPR Software"];
+    let textIndex = 0;
+    let charIndex = 0;
+    let timer;
+
+    function writeText() {
+      if (charIndex <= texts[textIndex].length) {
+        document.getElementById('namewordings').innerText = texts[textIndex].slice(0, charIndex);
+        charIndex++;
+      } else { // Once the current text is fully written, reset charIndex and move to the next text
+        charIndex = 0;
+        textIndex++;
+
+        clearInterval(timer);
+
+// Stop the current timer
+
+// If we've gone through all the texts, wrap back to the first one
+        if (textIndex >= texts.length) {
+          textIndex = 0;
+        }
+
+// Add a 3-second delay before starting the next text
+        setTimeout(() => {
+          timer = setInterval(writeText, 100); // Start writing the next text
+        }, 3000);
+      }
+    }
+
+// Start writing the first text
+    if (window.innerWidth > 600) {
+      timer = setInterval(writeText, 100);
+    }
+  });
+</script>

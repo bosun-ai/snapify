@@ -1,0 +1,309 @@
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+
+
+{%- style -%}
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+
+  @-webkit-keyframes rotate {
+    from {
+      -webkit-transform: rotate(0deg);
+    }
+    to {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+
+  .load {
+    width: 3rem;
+    height: 3rem;
+    margin-right: 1rem;
+    /* margin: 110px auto 0; */
+    border: solid 0.2rem #2255ff;
+    border-radius: 50%;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    -webkit-transition: all 0.5s ease-in;
+    -webkit-animation-name: rotate;
+    -webkit-animation-duration: 1.0s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+
+    transition: all 0.5s ease-in;
+    animation-name: rotate;
+    animation-duration: 1.0s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+{%- endstyle -%}
+{% if customer.tags contains 'member' %}
+  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
+  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+
+  {% render 'forsure-login' %}
+  <div id="report-status" style="display: none;position: fixed; bottom: 10px; right: 10px; background-color: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+    <div
+      id="loading-icon"
+      class="load"
+      style="display: block;"></div>
+    <div id="report-message">Creating report...</div>
+    <a
+      id="report-link"
+      href="/pages/forsure-downloads"
+      style="display: none;">See report</a>
+  </div>
+  <script>
+    var timeout = 1000;
+
+    function repeatAction() {
+        unifiedSendRequest(GETREPORTPROGRESS, {method: 'GET'})
+            .then(data => {
+                if (data === "1") {
+                    document.getElementById('report-status').style.display = 'flex';
+                    document.getElementById('loading-icon').style.display = 'block';
+                    document.getElementById('report-message').style.display = 'block';
+                    document.getElementById('report-link').style.display = 'none';
+                    timeout = 1000;
+                } else if (data === "0") {
+                    document.getElementById('loading-icon').style.display = 'none';
+                    document.getElementById('report-message').style.display = 'none';
+                    document.getElementById('report-link').style.display = 'block';
+                    timeout = 5000; // set higher, as it will run continuously
+                }
+    
+                setTimeout(repeatAction, timeout); // Call the function again after the specified timeout
+            })
+            .catch(error => {
+                console.error(error);
+                setTimeout(repeatAction, timeout); // Ensure the function is called again even if there's an error
+            });
+    }
+    
+    // repeatAction(); // Initial call to start the process
+    document.getElementById("report-link").addEventListener("click", function() {
+      document.getElementById("report-status").style.display = 'none';
+    });
+  </script>
+{% else %}
+
+{% endif %}
+
+{% schema %}
+  {
+    "name": "t:sections.forsure_progressbar.name",
+    "class": "section",
+    "settings": [
+
+      {
+        "type": "select",
+        "id": "desktop_image_width",
+        "options": [
+          {
+            "value": "small",
+            "label": "t:sections.forsure_progressbar.settings.desktop_image_width.options__1.label"
+          }, {
+            "value": "medium",
+            "label": "t:sections.forsure_progressbar.settings.desktop_image_width.options__2.label"
+          }, {
+            "value": "large",
+            "label": "t:sections.forsure_progressbar.settings.desktop_image_width.options__3.label"
+          }
+        ],
+        "default": "medium",
+        "label": "t:sections.forsure_progressbar.settings.desktop_image_width.label",
+        "info": "t:sections.forsure_progressbar.settings.desktop_image_width.info"
+      },
+      {
+        "type": "select",
+        "id": "layout",
+        "options": [
+          {
+            "value": "image_first",
+            "label": "t:sections.forsure_progressbar.settings.layout.options__1.label"
+          }, {
+            "value": "text_first",
+            "label": "t:sections.forsure_progressbar.settings.layout.options__2.label"
+          }
+        ],
+        "default": "image_first",
+        "label": "t:sections.forsure_progressbar.settings.layout.label",
+        "info": "t:sections.forsure_progressbar.settings.layout.info"
+      },
+      {
+        "type": "select",
+        "id": "desktop_content_position",
+        "options": [
+          {
+            "value": "top",
+            "label": "t:sections.forsure_progressbar.settings.desktop_content_position.options__1.label"
+          }, {
+            "value": "middle",
+            "label": "t:sections.forsure_progressbar.settings.desktop_content_position.options__2.label"
+          }, {
+            "value": "bottom",
+            "label": "t:sections.forsure_progressbar.settings.desktop_content_position.options__3.label"
+          }
+        ],
+        "default": "top",
+        "label": "t:sections.forsure_progressbar.settings.desktop_content_position.label"
+      },
+      {
+        "type": "select",
+        "id": "desktop_content_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:sections.forsure_progressbar.settings.desktop_content_alignment.options__1.label"
+          }, {
+            "value": "center",
+            "label": "t:sections.forsure_progressbar.settings.desktop_content_alignment.options__2.label"
+          }, {
+            "value": "right",
+            "label": "t:sections.forsure_progressbar.settings.desktop_content_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_progressbar.settings.desktop_content_alignment.label"
+      }, {
+        "type": "select",
+        "id": "content_layout",
+        "options": [
+          {
+            "value": "no-overlap",
+            "label": "t:sections.forsure_progressbar.settings.content_layout.options__1.label"
+          }, {
+            "value": "overlap",
+            "label": "t:sections.forsure_progressbar.settings.content_layout.options__2.label"
+          }
+        ],
+        "default": "no-overlap",
+        "label": "t:sections.forsure_progressbar.settings.content_layout.label"
+      }, {
+        "type": "select",
+        "id": "color_scheme",
+        "options": [
+          {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+          },
+          {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+          },
+          {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+          },
+          {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+          }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+          }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+      }, {
+        "type": "select",
+        "id": "color_scheme2",
+        "options": [
+          {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+          },
+          {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+          },
+          {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+          },
+          {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+          }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+          }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+      }, {
+        "type": "header",
+        "content": "Mobile layout"
+      }, {
+        "type": "select",
+        "id": "mobile_content_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:sections.forsure_progressbar.settings.mobile_content_alignment.options__1.label"
+          }, {
+            "value": "center",
+            "label": "t:sections.forsure_progressbar.settings.mobile_content_alignment.options__2.label"
+          }, {
+            "value": "right",
+            "label": "t:sections.forsure_progressbar.settings.mobile_content_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_progressbar.settings.mobile_content_alignment.label"
+      }, {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      }, {
+        "type": "image_picker",
+        "id": "trashcan",
+        "label": "Trashcan"
+      }, {
+        "type": "image_picker",
+        "id": "open",
+        "label": "Open"
+      }, {
+        "type": "image_picker",
+        "id": "download",
+        "label": "Download"
+      }, {
+        "type": "image_picker",
+        "id": "share",
+        "label": "Share"
+      }, {
+        "type": "image_picker",
+        "id": "filter",
+        "label": "Filter"
+      }, {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 36
+      }, {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 36
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.forsure_progressbar.presets.name"
+      }
+    ]
+  }
+{% endschema %}

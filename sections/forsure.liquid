@@ -1,0 +1,314 @@
+ <!-- deprecated -->
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+
+
+{%- style -%}
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: 45px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+  
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  .image-with-text p {
+    text-align: left;
+    hyphens: auto;
+    -webkit-hyphens: auto; 
+  }
+{%- endstyle -%}
+{% if customer.tags contains 'member' %}
+  <div class="image-with-text image-with-text--{{ section.settings.content_layout }} page-width isolate{% if settings.text_boxes_border_thickness > 0 and settings.text_boxes_border_opacity > 0 and settings.media_border_thickness > 0 and settings.media_border_opacity > 0 %} collapse-borders{% endif %}{% unless section.settings.color_scheme == 'background-1' and settings.media_border_thickness > 0 and settings.text_boxes_shadow_opacity == 0 and settings.text_boxes_border_thickness == 0 or settings.text_boxes_border_opacity == 0 %} collapse-corners{% endunless %} section-{{ section.id }}-padding">
+        <h1>Welcome {{ customer.name }}</h1>
+  </div>
+
+  <!-- Load d3.js -->
+  <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+  <script src="{{ 'charts.js' | asset_url }}"></script>
+  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  
+  <!-- Create a div where the graph will take place -->
+    <table border="1" cellspacing="0" cellpadding="10" class="page-width">
+    <tr>
+      <th>Chart 1</th>
+      <th>Chart 2</th>
+      <th>Chart 3</th>
+    </tr>
+    <tr>
+      <td><div id="my_dataviz"></div></td>
+      <td><div id="my_dataviz1"></div></td>
+      <td><div id="my_dataviz2"></div></td>
+    </tr>
+    <tr>
+      <td><div id="my_dataviz3"></div></td>
+      <td><div id="my_dataviz4"></div></td>
+      <td><div id="my_dataviz5"></div></td>
+    </tr>
+  </table>
+  
+  <script>
+
+  // Your data in CSV format
+  const parsedData = loadData();
+  
+  const data = parsedData.filter(function(d) { return d.category === "Batteries"; });
+  
+  var chart = initChart("#my_dataviz");
+  var columnNames = ["Weight B2B (kg)", "Weight B2C (kg)"];
+  // Draw the multi-bar chart
+  drawMultiBarChart(chart, data, columnNames, "Weight B2B vs B2C", "#my_dataviz");
+
+  chart = initChart("#my_dataviz1");
+  drawBarChart(chart, data, "Weight Total (kg)", "Weight per Battery Type");
+    
+  chart = initChart("#my_dataviz2");
+  columnNames = ["Amount B2B", "Amount B2C"];
+  // Draw the multi-bar chart
+  drawMultiBarChart(chart, data, columnNames, "Amount B2B vs B2C", "#my_dataviz2");
+
+  chart = initChart("#my_dataviz3");
+  drawLineChart(chart, data, "Amount Total", "Amount Total");
+
+  chart = initChart("#my_dataviz4");
+  drawPieChart(chart, data, ["Amount Total", "Type"], "Amount Total");
+</script>
+
+  
+{% else %}
+  <div class="image-with-text image-with-text--{{ section.settings.content_layout }} page-width isolate{% if settings.text_boxes_border_thickness > 0 and settings.text_boxes_border_opacity > 0 and settings.media_border_thickness > 0 and settings.media_border_opacity > 0 %} collapse-borders{% endif %}{% unless section.settings.color_scheme == 'background-1' and settings.media_border_thickness > 0 and settings.text_boxes_shadow_opacity == 0 and settings.text_boxes_border_thickness == 0 or settings.text_boxes_border_opacity == 0 %} collapse-corners{% endunless %} section-{{ section.id }}-padding">
+        <h1>Welcome,</h1>
+    <h2>Please log in to see this page</h2>
+  </div>
+{%  endif %}
+
+{% schema %}
+{
+  "name": "t:sections.forsure.name",
+  "class": "section",
+  "settings": [
+
+    {
+      "type": "select",
+      "id": "desktop_image_width",
+      "options": [
+        {
+          "value": "small",
+          "label": "t:sections.forsure.settings.desktop_image_width.options__1.label"
+        },
+        {
+          "value": "medium",
+          "label": "t:sections.forsure.settings.desktop_image_width.options__2.label"
+        },
+        {
+          "value": "large",
+          "label": "t:sections.forsure.settings.desktop_image_width.options__3.label"
+        }
+      ],
+      "default": "medium",
+      "label": "t:sections.forsure.settings.desktop_image_width.label",
+      "info": "t:sections.forsure.settings.desktop_image_width.info"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "options": [
+        {
+          "value": "image_first",
+          "label": "t:sections.forsure.settings.layout.options__1.label"
+        },
+        {
+          "value": "text_first",
+          "label": "t:sections.forsure.settings.layout.options__2.label"
+        }
+      ],
+      "default": "image_first",
+      "label": "t:sections.forsure.settings.layout.label",
+      "info": "t:sections.forsure.settings.layout.info"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_position",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:sections.forsure.settings.desktop_content_position.options__1.label"
+        },
+        {
+          "value": "middle",
+          "label": "t:sections.forsure.settings.desktop_content_position.options__2.label"
+        },
+        {
+          "value": "bottom",
+          "label": "t:sections.forsure.settings.desktop_content_position.options__3.label"
+        }
+      ],
+      "default": "top",
+      "label": "t:sections.forsure.settings.desktop_content_position.label"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.forsure.settings.desktop_content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.forsure.settings.desktop_content_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.forsure.settings.desktop_content_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.forsure.settings.desktop_content_alignment.label"
+    },
+    {
+      "type": "select",
+      "id": "content_layout",
+      "options": [
+        {
+          "value": "no-overlap",
+          "label": "t:sections.forsure.settings.content_layout.options__1.label"
+        },
+        {
+          "value": "overlap",
+          "label": "t:sections.forsure.settings.content_layout.options__2.label"
+        }
+      ],
+      "default": "no-overlap",
+      "label": "t:sections.forsure.settings.content_layout.label"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+          "value": "accent-2",
+          "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+          "value": "background-1",
+          "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+          "value": "background-2",
+          "label": "t:sections.all.colors.background_2.label"
+        },
+        {
+          "value": "inverse",
+          "label": "t:sections.all.colors.inverse.label"
+        }
+      ],
+      "default": "background-1",
+      "label": "t:sections.all.colors.label"
+    },
+     {
+      "type": "select",
+      "id": "color_scheme2",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+          "value": "accent-2",
+          "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+          "value": "background-1",
+          "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+          "value": "background-2",
+          "label": "t:sections.all.colors.background_2.label"
+        },
+        {
+          "value": "inverse",
+          "label": "t:sections.all.colors.inverse.label"
+        }
+      ],
+      "default": "background-1",
+      "label": "t:sections.all.colors.label"
+    },
+    {
+      "type": "header",
+      "content": "Mobile layout"
+    },
+    {
+      "type": "select",
+      "id": "mobile_content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.forsure.settings.mobile_content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.forsure.settings.mobile_content_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.forsure.settings.mobile_content_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.forsure.settings.mobile_content_alignment.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.forsure.presets.name"
+    }
+  ]
+}
+{% endschema %}

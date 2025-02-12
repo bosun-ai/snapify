@@ -1,0 +1,1125 @@
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+{{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .tooltip {
+    position: absolute;
+    text-align: center;
+    width: 120px;
+    height: 45px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+    px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+    px;
+  }
+
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}
+      px;
+      padding-bottom: {{ section.settings.padding_bottom }}
+      px;
+    }
+  }
+  .image-with-text p {
+    text-align: left;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  .border {
+    border: 0.2rem solid #17161c;
+  }
+  .bordertop {
+    border-top: 0.2rem solid #17161c;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    border: none !important;
+    border-top: 0.2rem solid #17161c !important;
+  }
+  td {
+    border: none !important;
+    border-top: 0.2rem solid #17161c !important;
+  }
+
+  .flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .table-header {
+    text-decoration: underline; /* Underline the text */
+    cursor: pointer; /* Change cursor to a hand pointer */
+    margin-left: 10px;
+  }
+  .icons {
+    margin-left: auto;
+    margin-right: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 35%; /* occupies 30% of the flex container */
+    justify-content: flex-end; /* aligns icons to the right within their space */
+    display: flex;
+  }
+
+  .arrow {
+    margin-left: 10px;
+    margin-right: 10px; /* Optional: Add some space between the arrow and the text */
+    transition: transform 0.3s ease;
+  }
+
+  .icons i {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  .flex-header.rotated .arrow {
+    transform: rotate(90deg);
+  }
+  .trashcan,
+  .info {
+    cursor: pointer;
+  }
+  .nonlivedata {
+    display: block;
+  }
+  .livedata {
+    display: none;
+  }
+
+  .toggle-container {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    /* margin-left: 10px; */
+    vertical-align: middle;
+    margin: auto;
+    flex-shrink: 0;
+}
+
+.toggle-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #2255ff;
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px #2255ff;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+  .toggle-options {
+  align-items: center;
+  display: flex;
+}
+div.display-flex {
+    display: flex;
+    align-items: center; /* Align items vertically in the middle */
+    justify-content: flex-start; /* Align items to the start of the container */
+    gap: 10px; /* Adjust as needed, adds space between children */
+}
+
+.tab {
+    cursor: pointer;
+    padding: 10px;
+    margin-right: 5px;
+    background-color: #f1f1f1;
+    border: solid 1px #ccc;
+    border-bottom: none;
+  }
+  .tab:hover {
+    background-color: #ddd;
+  }
+  .tab-content {
+    border: solid 1px #ccc;
+    padding: 10px;
+    display: none;
+  }
+  .active, .tab:hover {
+    background-color: #2255FF;
+    color: #fafafa;
+  }
+
+#countrySelectionContainer {
+  display: none; /* Start hidden */
+  position: absolute; /* Position it below the icon or wherever it fits */
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  z-index: 1; /* Make sure it's above other content */
+  border-radius: 1rem;
+}
+
+#countrySelectionContainer ul {
+  list-style: none; /* Remove default list styling */
+  margin: 0;
+  padding: 0;
+}
+
+#countrySelectionContainer li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer; /* Change cursor on hover */
+}
+
+#countrySelectionContainer li:hover {
+  background-color: #f6f6f6;
+}
+#countrySelectionContainer li:last-child {
+  border-bottom: none;
+}
+{%- endstyle -%}
+{% if customer.tags contains 'member' %}
+
+
+  <!-- Load d3.js -->
+  <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"> </script>
+  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
+  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  {% render 'forsure-login' %}
+  {% render 'forsure-guide' %}
+  {% render 'forsure-simple-notification' %}
+  <div id="countrySelectionContainer" style="margin: auto;width:fit-content"></div>
+
+  <div>
+    <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem;">
+        <h2>Configure General Settings</h2>
+      </div>
+      <div class="display-flex" style="margin: auto;width: fit-content;display:flex">
+        </div>
+        <div id="generalConfig" class="bordertop" style="background-color: #fafafa;">
+          <h3 class="flex-header" style="margin-left: 2rem">
+            <span class="table-header">Company Information</span>
+            <span class="icons">
+              <!-- <i class="icon-1">🔷</i><i class="icon-2">🔶</i> -->
+              <i id="emptyGeneral" class="icon-3"><img
+                  width="20px"
+                  src="{{ section.settings.trashcan | image_url }}"
+                  alt="{{ section.settings.trashcan.alt | escape }}"
+                  loading="lazy"></i>
+              <i class="icon-4 arrow"><img
+                  width="20px"
+                  src="{{ section.settings.arrow | image_url }}"
+                  alt="{{ section.settings.arrow.alt | escape }}"
+                  loading="lazy"></i>
+            </span>
+          </h3>
+          <div id="configurationGeneral"></div>
+        </div>
+      </div>
+    <div class="page-width" style="text-align: right">
+      <button
+        id="submitChanges"
+        class="button"
+        style="margin-top: 1rem;z-index: 1">Submit Changes</button>
+    </div>
+  </div>
+  <script>
+
+function createTableCategory(configDiv, tableData, settings=false) {
+
+// Clear any existing fields
+      configDiv.innerHTML = "";
+
+// Create a table element
+      const table = document.createElement('table');
+      table.style.width = '100%';
+
+// Make the table take up the full width of its container
+
+// Mapping to keep track of checkboxes and the inputs they control
+      const checkboxInputMap = {};
+
+// Iterate over the tableData list
+      for (let row of tableData) {
+         // Create a row for each entry
+        if (row.key === "options") { // TODO remove and implement properly
+          continue;
+        }
+        var tableRow = document.createElement('tr');
+        tableRow.id = row.key;
+        if (row.key.startsWith("pro_")) {
+          tableRow.className = 'pro';
+          tableRow.style.display = 'none';
+        }
+        if (row.key == 'pro_email_address') {
+          tableRow.style.display = 'none';
+        }
+        if (row.key === 'countries') {
+          console.log('check');
+          var tableCol = document.createElement('td');
+          tableCol.colSpan = 6;
+          var tableId = 'countryTable';
+          if (settings) {
+            tableId = 'settingscountryTable';
+          }
+          tableCol.id = tableId;
+          var countryDiv = createCountryPage(row, settings);
+          countryDiv.style.width = "100%";
+          tableCol.appendChild(countryDiv);
+          tableRow.appendChild(tableCol);
+          table.appendChild(tableRow);
+          continue;
+        }
+
+// Function to create a column with padding
+        const createCol = (content, title = '', alignRight = false) => {
+          var col = document.createElement('td');
+          col.style.padding = '10px'; // Add padding
+          if (alignRight) {
+            col.style.textAlign = 'right'; // Align content to the right
+          }col.innerHTML = content;
+          if (title) { // col.title = title; // Add tooltip
+
+          createToolTip(col, title);
+          }
+          return col;
+        };
+
+// Create columns
+        tableRow.appendChild(createCol('<i class="info"><img width="20px" src="    {{ section.settings.info | image_url }} " alt="    {{ section.settings.info.alt | escape }}" loading="lazy"></i>', row.info, true));
+        const titleCol = createCol(row.title, bold = true);
+        titleCol.style.width = '30%'; // Make title column take up more space
+        titleCol.style.fontWeight = 'bold';
+        tableRow.appendChild(titleCol);
+        if (row.checkbox !== null) {
+          tableRow.appendChild(createCol('<i class="info"><img width="20px" src="    {{ section.settings.info | image_url }} " alt="    {{ section.settings.info.alt | escape }}" loading="lazy"></i>', row.checkbox_info, true));
+        } else {
+          tableRow.appendChild(createCol(""));
+        }
+
+        const checkboxCol = createCol('');
+        if (row.special) {
+          // TODO change design to livedata toggle?
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = row.value;
+          checkbox.setAttribute("data-name", row.key);
+          checkbox.id = row.title;
+          checkbox.addEventListener('change', function() {
+            var country_fields = document.getElementsByClassName(this.id.toLowerCase());
+
+            for (var country_field of country_fields) {
+              if (this.checked) {
+                country_field.style.display = 'table';
+              } else {
+                country_field.style.display = 'none';
+              }
+            }
+          if (row.key == 'pro_login') {
+              if (this.checked) {
+                document.getElementById('pro_login_url').style.display = 'none';
+                document.getElementById('pro_username').style.display = 'none';
+                document.getElementById('pro_password').style.display = 'none';
+                document.getElementById('pro_email_address').style.display = 'table-row';
+              } else  {
+                document.getElementById('pro_login_url').style.display = 'table-row';
+                document.getElementById('pro_username').style.display = 'table-row';
+                document.getElementById('pro_password').style.display = 'table-row';
+                document.getElementById('pro_email_address').style.display = 'none';
+              }
+            }
+            if (row.key == 'has_pro') {
+              const pro_elements = document.querySelectorAll('.pro');
+              if (this.checked) {
+                pro_elements.forEach(element => {
+                  element.style.display = 'table-row';
+                });
+                if (document.getElementById('Send reports per email').checked) {
+                  document.getElementById('pro_login_url').style.display = 'none';
+                  document.getElementById('pro_username').style.display = 'none';
+                  document.getElementById('pro_password').style.display = 'none';
+                  document.getElementById('pro_email_address').style.display = 'table-row';
+                } else  {
+                  document.getElementById('pro_login_url').style.display = 'table-row';
+                  document.getElementById('pro_username').style.display = 'table-row';
+                  document.getElementById('pro_password').style.display = 'table-row';
+                  document.getElementById('pro_email_address').style.display = 'none';
+                }
+              } else {
+                pro_elements.forEach(element => {
+                  element.style.display = 'none';
+                });
+              }
+            }
+          });
+          checkboxCol.appendChild(checkbox);
+        }
+        else if (row.checkbox !== null) {
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = row.checkbox;
+          checkbox.setAttribute("data-name", row.key + "_needed");
+          checkboxCol.appendChild(checkbox);
+        }
+        tableRow.appendChild(checkboxCol);
+
+        const inputCol = createCol('');
+        if (!row.special) {
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = row.value;
+            input.style.width = '100%'; // Make input field take up full width of its column
+            input.setAttribute("data-name", row.key); // Set data-name attribute
+            checkboxInputMap[row.key] = input;
+            if (['TOBATT', 'BATTWEIGHT'].includes(row.key)) {
+              input.disabled = checkboxInputMap['BATT'].disabled;
+            }
+            console.log(row.key);
+            if ('api_token' === row.key) {
+              input.type = 'password';
+              input.placeholder = 'shpat_...';
+            }
+            if (row.checkbox !== null) {
+              input.disabled = ! row.checkbox;
+
+    // Disable input if checkbox is not needed
+    // Add an event listener to the checkbox to toggle the input field
+              const checkbox = checkboxCol.querySelector('input');
+              checkbox.addEventListener('change', function() {
+                input.disabled = !this.checked;
+              });
+
+            }
+            inputCol.appendChild(input);
+            inputCol.style.width = '30%'; // Make input column take up more space
+            tableRow.appendChild(inputCol);
+
+            const lastIconCol = createCol('<i class="trashcan"><img width="20px" src="    {{ section.settings.trashcan | image_url }} " alt="    {{ section.settings.trashcan.alt | escape }}" loading="lazy"></i>'); // Placeholder icon
+            lastIconCol.title = "Delete input text";
+            lastIconCol.addEventListener('click', function() {
+              input.value = ''; // Clear the input field
+            });
+            tableRow.appendChild(lastIconCol);
+        }
+        else {
+          tableRow.appendChild(inputCol);
+          tableRow.appendChild(createCol(''));
+        }
+
+// Append the row to the table
+        table.appendChild(tableRow);
+      }
+
+// Append the table to the configuration div
+      configDiv.appendChild(table);
+      var tabsContainer = document.getElementById('tabs');
+      var firstTab = tabsContainer.children[0] || tabsContainer.firstElementChild; // Getting the first tab
+
+      if (firstTab && firstTab.id !== 'add_country') {
+        firstTab.click(); // Click the first tab if its id is not 'add_country'
+      }
+      return checkboxInputMap;
+    }
+
+
+function createCountryPage(countryRow, settings=false) {
+  const container = document.createElement('div');
+  const tabsContainer = document.createElement('div');
+  var tabsContainerId = 'tabs';
+  if (settings) {
+    tabsContainerId = 'settingstabs';
+  }
+  tabsContainer.id = tabsContainerId;
+
+  const contentContainer = document.createElement('div');
+  var contentContainerId = 'tab-content';
+  if (settings) {
+    contentContainerId = 'settingstab-content';
+  }
+  contentContainer.id = contentContainerId;
+
+  Object.keys(countryRow.value).forEach((key, index) => {
+    var tabButton = addTab(key, settings);
+
+    tabsContainer.appendChild(tabButton);
+    console.log('Added tab');
+    contentContainer.appendChild(createTabContent(countryRow.value, key, settings));
+  });
+  const tabButtonPlus = document.createElement('button');
+  tabButtonPlus.textContent = 'Add Country';
+  tabButtonPlus.classList.add('tab');
+  tabButtonPlus.id = 'add_country';
+  var tabButtonPlusId = 'add_country';
+  if (settings) {
+    tabButtonPlusId = 'settingsadd_country';
+  }
+  tabButtonPlus.id = tabButtonPlusId;
+  tabButtonPlus.onclick = function() {
+      getCountries(tabButtonPlusId, settings);
+    };
+  tabsContainer.appendChild(tabButtonPlus);
+  console.log('Adding stuff');
+  container.appendChild(tabsContainer);
+  container.appendChild(contentContainer);
+  return container;
+}
+
+function addTab(country, settings=false) {
+  const tabButton = document.createElement('button');
+  tabButton.textContent = country;
+  tabButton.classList.add('tab');
+  var tabButtonId = 'tab' + country;
+  var tabContentId = country + '-content';
+  if (settings) {
+    tabContentId = 'settings' + country + '-content';
+    tabButtonId = 'settingstab' + country;
+  }
+  tabButton.id = tabButtonId;
+  tabButton.onclick = function() {
+    document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(tabContentId).style.display = 'block';
+    tabButton.classList.add('active');
+  };
+  return tabButton;
+}
+
+function convertStringFormat(s) {
+    if (s === 'pikachu') {
+      return 'Electro';
+    }
+    return s.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+
+function createTabContent(data, key, settings) {
+  const container = document.createElement('div');
+  if (settings) {
+    container.id = 'settings' + key + "-content";
+  } else {
+    container.id = key + "-content";
+  }
+
+  container.classList.add("tab-content");
+  Object.entries(data[key]).forEach(([category, details]) => {
+    console.log(category);
+    console.log(details);
+    const table = document.createElement('table');
+    table.classList.add(category);
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
+
+    const headerRow = document.createElement('tr');
+    const th = document.createElement('th');
+    th.textContent = convertStringFormat(category);
+    th.colSpan = 6;
+    headerRow.appendChild(th);
+    thead.appendChild(headerRow);
+
+    const createCol = (content, title = '', alignRight = false) => {
+          var col = document.createElement('td');
+          col.style.padding = '10px'; // Add padding
+          if (alignRight) {
+            col.style.textAlign = 'right'; // Align content to the right
+          }
+          col.innerHTML = content;
+          if (title) { // col.title = title; // Add tooltip
+            createToolTip(col, title);
+          }
+          return col;
+        };
+    const checkboxInputMap = {};
+
+    for (let row of details) {
+        const tableRow = document.createElement('tr');
+        tableRow.appendChild(createCol('<i class="info"><img width="20px" src="    {{ section.settings.info | image_url }} " alt="    {{ section.settings.info.alt | escape }}" loading="lazy"></i>', row.info, true));
+        const titleCol = createCol(row.title, bold = true);
+        titleCol.style.width = '30%'; // Make title column take up more space
+        titleCol.style.fontWeight = 'bold';
+        tableRow.appendChild(titleCol);
+        if (row.checkbox !== null) {
+          tableRow.appendChild(createCol('<i class="info"><img width="20px" src="    {{ section.settings.info | image_url }} " alt="    {{ section.settings.info.alt | escape }}" loading="lazy"></i>', row.checkbox_info, true));
+        } else {
+          tableRow.appendChild(createCol(""));
+        }
+
+        const checkboxCol = createCol('');
+        if (row.special) {
+          // TODO change design to livedata toggle?
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = row.value;
+          checkbox.setAttribute("data-name", row.key);
+          checkbox.id = row.title;
+          checkbox.addEventListener('change', function() {
+            var country_fields = document.getElementsByClassName(this.id.toLowerCase());
+
+            for (var country_field of country_fields) {
+              if (this.checked) {
+                country_field.style.display = 'table';
+              } else {
+                country_field.style.display = 'none';
+              }
+            }
+          });
+          checkboxCol.appendChild(checkbox);
+        }
+        else if (row.checkbox !== null) {
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = row.checkbox;
+          checkbox.setAttribute("data-name", row.key + "_needed");
+          checkboxCol.appendChild(checkbox);
+        }
+        tableRow.appendChild(checkboxCol);
+
+        const inputCol = createCol('');
+        if (!row.special) {
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = row.value;
+            input.style.width = '100%'; // Make input field take up full width of its column
+            input.setAttribute("data-name", row.key); // Set data-name attribute
+            input.setAttribute("data-category", category); // Set data-name attribute
+            input.setAttribute("data-country", key); // Set data-name attribute
+            checkboxInputMap[row.key] = input;
+            if (['TOBATT', 'BATTWEIGHT'].includes(row.key)) {
+              input.disabled = checkboxInputMap['BATT'].disabled;
+            }
+            console.log(row.key);
+            if ('api_token' === row.key) {
+              input.type = 'password';
+              input.placeholder = 'shpat_...';
+            }
+            if (row.checkbox !== null) {
+              input.disabled = ! row.checkbox;
+
+    // Disable input if checkbox is not needed
+    // Add an event listener to the checkbox to toggle the input field
+              const checkbox = checkboxCol.querySelector('input');
+              checkbox.addEventListener('change', function() {
+                input.disabled = !this.checked;
+              });
+
+            }
+            inputCol.appendChild(input);
+            inputCol.style.width = '30%'; // Make input column take up more space
+            tableRow.appendChild(inputCol);
+
+            const lastIconCol = createCol('<i class="trashcan"><img width="20px" src="    {{ section.settings.trashcan | image_url }} " alt="    {{ section.settings.trashcan.alt | escape }}" loading="lazy"></i>'); // Placeholder icon
+            lastIconCol.title = "Delete input text";
+            lastIconCol.addEventListener('click', function() {
+              input.value = ''; // Clear the input field
+            });
+            tableRow.appendChild(lastIconCol);
+        }
+        else {
+          tableRow.appendChild(inputCol);
+          tableRow.appendChild(createCol(''));
+        }
+
+// Append the row to the table
+        tbody.appendChild(tableRow);
+    }
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    container.appendChild(table);
+  });
+  return container;
+}
+
+async function getCountries(tabButtonPlusId, settings=false) {
+  let container = document.getElementById('countrySelectionContainer');
+
+  var svg = document.getElementById(tabButtonPlusId);
+  if (container.style.display === 'none' || !container.style.display) {
+      // Ensure the container is empty before adding new items
+      container.innerHTML = '';
+
+      // Create the list
+      let list = document.createElement('ul');
+      var tabsId = 'tabs';
+      console.log(settings);
+      try {
+        var url = GETCATEGORYLABELSCOUNTRIES;
+        var countryURL = GETCATEGORYLABELSCOUNTRY;
+        var settingsstr = '';
+
+        if (settings) {
+          settingsstr = 'settings';
+          url = GETGENERALCONFIGCOUNTRIES;
+          countryURL = GETGENERALCONFIGCOUNTRY;
+        }
+        var tabs = settingsstr + 'tabs';
+        var tabId = settingsstr + 'tab';
+        var add = settingsstr + 'add_country';
+        var content = settingsstr + 'tab-content';
+        var countryData = await unifiedSendRequest(url, {method: 'GET'});
+        console.log(countryData);
+        countryData.forEach((item) => {
+            if (!document.getElementById(tabId + item.country)) {
+              let listItem = document.createElement('li');
+              listItem.textContent = item.country; // Access the country property
+              listItem.id = item.country; // Use the country property for the ID
+              listItem.onclick = async () => {
+                  var countryname = listItem.id;
+                  console.log(countryname);
+
+                  var countryLabels = await unifiedSendRequest(countryURL + `?country=${countryname}`, {method: 'GET'});
+                  console.log(countryLabels);
+                  var plusButton = document.getElementById(add);
+                  var tabButton = addTab(countryname, settings);
+                  document.getElementById(tabs).insertBefore(tabButton, plusButton);
+                  var data = {[countryname]: countryLabels}; // Using computed property name syntax
+                  console.log(data);
+                  var tabContent = createTabContent(data, countryname, settings);
+                  console.log(tabContent);
+                  document.getElementById(content).appendChild(tabContent);
+                  document.getElementById('countrySelectionContainer').style.display = 'none';
+                  tabButton.click();
+              };
+              listItem.style.cursor = 'pointer';
+              list.appendChild(listItem);
+            }
+        });
+        container.appendChild(list);
+        const rect = svg.getBoundingClientRect();
+        container.style.position = 'absolute'; // Ensure the container is positioned absolutely
+        container.style.left = (rect.left + window.scrollX) + 'px';
+        container.style.top = (rect.bottom + window.scrollY) + 'px';
+        container.style.display = 'block';
+        // Add event listener to document after a short delay to prevent immediate trigger
+        setTimeout(() => document.addEventListener('click', handleClickOutside), 0);
+      } catch (error) {
+        console.error(error.message);
+      }
+    } else {
+      container.style.display = 'none';
+      // It's safe to attempt to remove the listener even if it might not be added yet
+      document.removeEventListener('click', handleClickOutside);
+    }
+}
+
+function handleClickOutside(event) {
+    const container = document.getElementById('countrySelectionContainer');
+    if (!container.contains(event.target)) {
+      container.style.display = 'none';
+      // Remove this event listener once the container is hidden
+      document.removeEventListener('click', handleClickOutside);
+    }
+  }
+
+
+
+function createToolTip(col, title) {
+  const tooltip = document.createElement('span');
+  tooltip.innerText = title;
+  tooltip.style.position = 'absolute';
+  tooltip.style.display = 'none';
+  tooltip.style.backgroundColor = '#17161c';
+  tooltip.style.color = '#fafafa';
+  tooltip.style.padding = '5px';
+  tooltip.style.borderRadius = '5px';
+  tooltip.style.zIndex = '9999';
+  tooltip.style.textAlign = 'left';
+
+  col.appendChild(tooltip);
+
+  col.addEventListener('click', (e) => {
+
+// Show tooltip on click
+    tooltip.style.top = (e.clientY + window.scrollY + 10) + 'px';
+    tooltip.style.left = (e.clientX + window.scrollX + 10) + 'px';
+    tooltip.style.display = 'block';
+
+// Hide tooltip after a few seconds or on mouseout
+    setTimeout(() => {
+      tooltip.style.display = 'none';
+    }, 3000);
+  });
+
+  // col.addEventListener('mouseover', (e) => {
+  // // Show tooltip on hover
+  // tooltip.style.top = (e.clientY + window.scrollY + 10) + 'px';
+  // tooltip.style.left = (e.clientX + window.scrollX + 10) + 'px';
+  // tooltip.style.display = 'block';
+
+  // // Hide tooltip after a few seconds or on mouseout
+  // setTimeout(() => {
+  //     tooltip.style.display = 'none';
+  // }, 3000);
+  // });
+
+  col.addEventListener('mouseout', () => {
+    tooltip.style.display = 'none';
+  });
+}
+
+async function getGeneralLabels() {
+  try {
+    const data = await unifiedSendRequest(GETGENERALCONFIG, {method: 'GET'});
+    console.log(data);
+
+// Get the configuration div
+    const configDiv = document.getElementById("configurationGeneral");
+    const inputs = createTableCategory(configDiv, data, true);
+    const emptyCategoriesBtn = document.getElementById("emptyGeneral");
+    emptyCategoriesBtn.addEventListener('click', function() {
+      Object.values(inputs).forEach(input => {
+        input.value = ''; // Clear the input field
+      })
+    });
+  } catch (error) {
+    console.error(error.message);
+    TOKEN = false;
+  }
+}
+
+
+async function submitData() {
+  const configDiv = document.getElementById("configurationGeneral");
+  const inputs = configDiv.querySelectorAll("input");
+  const dataToSend = { countries: {} };
+
+  inputs.forEach(input => {
+    const category = input.getAttribute('data-category');
+    const country = input.getAttribute('data-country');
+    const inputName = input.getAttribute('data-name');
+    const inputValue = input.type === "text" ? (input.value || input.placeholder) : input.checked;
+
+    // Check and initialize country within 'countries' if not already present
+    if (country && !dataToSend.countries[country]) {
+      dataToSend.countries[country] = {};
+    }
+
+    // Define targetObject to point to the right level where the data should be inserted
+    let targetObject = country ? dataToSend.countries[country] : dataToSend;
+
+    // If category is specified, further narrow down targetObject
+    if (category) {
+      if (!targetObject[category]) {
+        targetObject[category] = {};
+      }
+      targetObject = targetObject[category];
+    }
+
+    // Assign the input value or checked status to the correct place in the structure
+    targetObject[inputName] = inputValue;
+  });
+
+  console.log(dataToSend);
+  try {
+      var response = await unifiedSendRequest(GETGENERALCONFIG, {formData: JSON.stringify(dataToSend), headerArgs: { 'Content-Type': 'application/json'}});
+      showMessage('Submitted changes successfully', true);
+  } catch (error) {
+      console.error('Error submitting settings', error);
+      showMessage('Failed to submit changes ' + error.message, false);
+  }
+}
+
+document.getElementById("submitChanges").addEventListener("click", submitData);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const iconElements = document.querySelectorAll('.icons i');
+
+      iconElements.forEach(function(icon) {
+        icon.addEventListener('click', function() {
+
+// Your click handling logic here
+          console.log('Icon clicked:', this);
+        });
+      });
+
+      const arrows = document.querySelectorAll('.arrow');
+      arrows.forEach(function(icon) {
+        icon.addEventListener('click', function() {
+          const parentH3 = icon.closest('.flex-header');
+          const tableDiv = parentH3.nextElementSibling;
+
+          if (tableDiv.style.display === 'none') {
+            tableDiv.style.display = 'block';
+            parentH3.classList.remove('rotated');
+          } else {
+            tableDiv.style.display = 'none';
+            parentH3.classList.add('rotated');
+          }
+        });
+      });
+
+// Get all the .table-header elements within elements with class "border"
+      const headers = document.querySelectorAll('.border .table-header');
+
+// Add a click event listener to each .table-header element
+      headers.forEach(function(header) {
+        header.addEventListener('click', function() {
+
+// Get the parent h3
+          const parentH3 = header.closest('.flex-header');
+
+// Get the corresponding div that contains the table (it's the next sibling of the parent h3)
+          const tableDiv = parentH3.nextElementSibling;
+
+// Toggle the display style to hide or show the div
+          if (tableDiv.style.display === 'none') {
+            tableDiv.style.display = 'block';
+            parentH3.classList.remove('rotated'); // Remove the rotated class from h3
+          } else {
+            tableDiv.style.display = 'none';
+            parentH3.classList.add('rotated'); // Add the rotated class to h3
+          }
+        });
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        getGeneralLabels(); // Delay in milliseconds, adjust as necessary
+  });
+  </script>
+
+{% else %}
+{% endif %}
+
+{% schema %}
+  {
+    "name": "t:sections.forsure_settings.name",
+    "class": "section",
+    "settings": [
+
+      {
+        "type": "select",
+        "id": "desktop_image_width",
+        "options": [
+          {
+            "value": "small",
+            "label": "t:sections.forsure_config.settings.desktop_image_width.options__1.label"
+          }, {
+            "value": "medium",
+            "label": "t:sections.forsure_config.settings.desktop_image_width.options__2.label"
+          }, {
+            "value": "large",
+            "label": "t:sections.forsure_config.settings.desktop_image_width.options__3.label"
+          }
+        ],
+        "default": "medium",
+        "label": "t:sections.forsure_config.settings.desktop_image_width.label",
+        "info": "t:sections.forsure_config.settings.desktop_image_width.info"
+      },
+      {
+        "type": "select",
+        "id": "layout",
+        "options": [
+          {
+            "value": "image_first",
+            "label": "t:sections.forsure_config.settings.layout.options__1.label"
+          }, {
+            "value": "text_first",
+            "label": "t:sections.forsure_config.settings.layout.options__2.label"
+          }
+        ],
+        "default": "image_first",
+        "label": "t:sections.forsure_config.settings.layout.label",
+        "info": "t:sections.forsure_config.settings.layout.info"
+      },
+      {
+        "type": "select",
+        "id": "desktop_content_position",
+        "options": [
+          {
+            "value": "top",
+            "label": "t:sections.forsure_config.settings.desktop_content_position.options__1.label"
+          }, {
+            "value": "middle",
+            "label": "t:sections.forsure_config.settings.desktop_content_position.options__2.label"
+          }, {
+            "value": "bottom",
+            "label": "t:sections.forsure_config.settings.desktop_content_position.options__3.label"
+          }
+        ],
+        "default": "top",
+        "label": "t:sections.forsure_config.settings.desktop_content_position.label"
+      },
+      {
+        "type": "select",
+        "id": "desktop_content_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:sections.forsure_config.settings.desktop_content_alignment.options__1.label"
+          }, {
+            "value": "center",
+            "label": "t:sections.forsure_config.settings.desktop_content_alignment.options__2.label"
+          }, {
+            "value": "right",
+            "label": "t:sections.forsure_config.settings.desktop_content_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_config.settings.desktop_content_alignment.label"
+      }, {
+        "type": "select",
+        "id": "content_layout",
+        "options": [
+          {
+            "value": "no-overlap",
+            "label": "t:sections.forsure_config.settings.content_layout.options__1.label"
+          }, {
+            "value": "overlap",
+            "label": "t:sections.forsure_config.settings.content_layout.options__2.label"
+          }
+        ],
+        "default": "no-overlap",
+        "label": "t:sections.forsure_config.settings.content_layout.label"
+      }, {
+        "type": "select",
+        "id": "color_scheme",
+        "options": [
+          {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+          },
+          {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+          },
+          {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+          },
+          {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+          }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+          }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+      }, {
+        "type": "select",
+        "id": "color_scheme2",
+        "options": [
+          {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+          },
+          {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+          },
+          {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+          },
+          {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+          }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+          }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+      }, {
+        "type": "header",
+        "content": "Mobile layout"
+      }, {
+        "type": "select",
+        "id": "mobile_content_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:sections.forsure_config.settings.mobile_content_alignment.options__1.label"
+          }, {
+            "value": "center",
+            "label": "t:sections.forsure_config.settings.mobile_content_alignment.options__2.label"
+          }, {
+            "value": "right",
+            "label": "t:sections.forsure_config.settings.mobile_content_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_config.settings.mobile_content_alignment.label"
+      }, {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      }, {
+        "type": "image_picker",
+        "id": "trashcan",
+        "label": "Trashcan"
+      }, {
+        "type": "image_picker",
+        "id": "arrow",
+        "label": "Arrow"
+      }, {
+        "type": "image_picker",
+        "id": "info",
+        "label": "Info"
+      }, {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 36
+      }, {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 36
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.forsure_settings.presets.name"
+      }
+    ]
+  }
+{% endschema %}

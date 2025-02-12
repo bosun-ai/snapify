@@ -1,0 +1,161 @@
+{% comment %}
+Renders big chart popup for statistics
+
+Usage:
+{% render 'forsure-chart-big' %}
+{% endcomment %}
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<style>
+    #widgetPopupWrapper {
+    width: 90%;
+    height: 60vh;
+    position: relative;
+  }
+  #widgetPopup {
+    margin: auto;
+    /* width: fit-content!important;
+    height: fit-content!important; */
+    width: 100%;
+    height: 100%;
+  }
+  .tabulator-page.active {
+    color: #2255FF!important;
+  }
+</style>
+<div id="overlay"></div>
+<div id="report-table" style="display: none">
+  <div style="display:flex">
+    <div id="widgetPopupWrapper">
+      <canvas id="widgetPopup"></canvas>
+    </div>
+    <div id="legend-container"></div>
+  </div>
+  <div class="icon-container">
+    <div class="enlarge-icon" onclick="hideModal()">
+      <svg xmlns="http://www.w3.org/2000/svg"
+        height="2rem"
+        viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path fill="#17161c" d="M160 64c0-17.7-14.3-32-32-32s-32 14.3-32 32v64H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h96c17.7 0 32-14.3 32-32V64zM32 320c-17.7 0-32 14.3-32 32s14.3 32 32 32H96v64c0 17.7 14.3 32 32 32s32-14.3 32-32V352c0-17.7-14.3-32-32-32H32zM352 64c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H352V64zM320 320c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32s32-14.3 32-32V384h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H320z" /></svg>
+    </div>
+  </div>
+  <br>
+  <div id="chartInfo"></div>
+</div>
+<script>
+  let excludedColumns = new Set();
+  function showModal() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('report-table').style.display = 'block';
+  }
+
+  function hideModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('report-table').style.display = 'none';
+    excludedColumns = new Set();
+  }
+  document.getElementById('overlay').addEventListener('click', hideModal);
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      hideModal();
+    }
+  });
+
+  var chartBig = null;
+
+  async function showPopup(widgetId) {
+    const widgetContent = document.getElementById(widgetId).innerHTML;
+    // const params = widgetChartParams[widgetId];
+    showModal();
+    if (chartBig === null) {
+        chartBig = createEmptyChartDraw('widgetPopup', true);
+    } else {
+        // If the chart already exists, you might just need to resize it
+        chartBig.resize();
+    }
+    const params = widgetChartParams[widgetId];
+    drawChart(params, chartBig, true);
+    let tableContainer = document.getElementById('chartInfo');
+    tableContainer.innerHTML = '';
+    await generateTable(params);
+  }
+
+  var tableTabulator;
+  var tabulatorData;
+
+  async function generateTable(params) {
+    var tabulatorData = params.data;
+    var data;
+      try {
+          var chartData = params.chart;
+          tabulatorData = await unifiedSendRequest(GETSTATSDETAILS, {formData: JSON.stringify(chartData), headerArgs: {'Content-Type': 'application/json'}});
+          console.log(chartData.x_columns[0]);
+          drawTable(tabulatorData, chartData.x_columns[0]);
+      } catch (error) {
+        console.error(error);
+        // showTooltip("Failed to create chart", false);
+      }
+  }
+
+  function updateTable(legendItem) {
+    if (! legendItem.hidden) { // stroke through
+      excludedColumns.add(legendItem.text);
+    } else {
+      excludedColumns.delete(legendItem.text);
+    }
+    console.log(excludedColumns);
+    console.log(tabulatorData);
+    filteredData = tabulatorData.filter(item => ! excludedColumns.has(item.Category) && ! excludedColumns.has(item.Country) && ! excludedColumns.has(item.Profile));
+    console.log(filteredData);
+    drawTable(filteredData);
+  }
+
+  function createColumns(tabulatorData, groupbyCol=false) {
+    var columns = Object.keys(tabulatorData[0]).map(key => {
+      if (key == groupbyCol) {
+        return {title: convertStringFormat(key), field: key, visible: false};
+      }
+      return {title: convertStringFormat(key), field: key};
+    });
+    return columns;
+  }
+
+function getGroupby(tabulatorData, groupbyCol=false) {
+  var groupby = null;
+    if (Object.keys(tabulatorData[0]).includes(groupbyCol)) {
+      groupby = groupbyCol;
+    } else if (Object.keys(tabulatorData[0]).includes('Category')) {
+      var uniqueCategoriesCount = new Set(tabulatorData.map(item => item.Category)).size;
+      if (uniqueCategoriesCount > 1) {
+        groupby = 'Category';
+      }
+    }
+    console.log(`Table groupby: ${groupby}`);
+    console.log(groupby);
+    return groupby;
+}
+
+  function drawTable(tabulatorData, groupbyCol=false) {
+    console.log(`Using groupby ${groupbyCol}`);
+    if (tabulatorData.length == 0) {
+      return;
+    }
+    var columns = createColumns(tabulatorData, groupbyCol);
+    var groupby = getGroupby(tabulatorData, groupbyCol);
+
+// return createTable(data);
+    tableTabulator = new Tabulator("#chartInfo", {
+      data: tabulatorData,
+      layout: "fitColumns", // Fit columns to width of table (optional)
+      groupBy: groupby,
+      groupHeader: function(value, count, tabulatorData, group) {
+        return value; // returns just the category name without count
+      },
+      pagination: true,
+      paginationCounter: "rows",
+      paginationSize: 50,
+      columns: columns
+    });
+  }
+
+</script>

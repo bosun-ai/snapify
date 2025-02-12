@@ -1,0 +1,298 @@
+{% schema %}
+  {
+    "name": "t:sections.main-register.name",
+    "settings": [
+      {
+        "type": "textarea",
+        "id": "conditions1title",
+        "default": "Conditions for \nthe Free Plan",
+        "label": "Conditions 1 Title"
+      },
+      {
+        "type": "textarea",
+        "id": "conditions1subtitle",
+        "default": "Companies and individuals with less than €500,000 in annual gross revenue.",
+        "label": "Conditions 1 Subtitle"
+      },
+      {
+        "type": "textarea",
+        "id": "conditions2title",
+        "default": "License",
+        "label": "Conditions 2 Title"
+      },
+      {
+        "type": "textarea",
+        "id": "conditions2subtitle",
+        "default": "The free plan is subject to an annual renewal process and must be reapproved by us.",
+        "label": "Conditions 2 Subtitle"
+      },
+      {
+        "type": "textarea",
+        "id": "conditions3title",
+        "default": "Software",
+        "label": "Conditions 3 Title"
+      },
+      {
+        "type": "textarea",
+        "id": "conditions3subtitle",
+        "default": "On the free plan, report templates are available for Belgium, Germany, and the Netherlands.",
+        "label": "Conditions 3 Subtitle"
+      },
+      {
+        "type": "text",
+        "id": "containerName",
+        "default": "Register Now",
+        "label": "Register Container Name"
+      },
+      {
+        "type": "text",
+        "id": "registerName",
+        "default": "Full Name",
+        "label": "Register Name"
+      },
+      {
+        "type": "text",
+        "id": "registerCompany",
+        "default": "Company",
+        "label": "Company"
+      },
+      {
+        "type": "textarea",
+        "id": "registerCheckbox",
+        "default": "I agree to receiving marketing emails and special deals.",
+        "label": "Marketing Checkbox"
+      },
+      {
+        "type": "text",
+        "id": "registerButton",
+        "default": "Sign up",
+        "label": "Register button"
+      },
+      {
+        "type": "richtext",
+        "id": "registerNote1",
+        "default": "<p>By signing up, you are agree to the</p>",
+        "label": "Register Note Part 1"
+      },
+      {
+        "type": "textarea",
+        "id": "meta_description",
+        "default": "Efficient EPR &amp; compliance software for retailers &amp; SMEs. Streamline your reporting with ForSURE. Book a demo for sustainable retail solutions.",
+        "label": "Meta Description"
+      }
+    ],
+      "presets": [
+    {
+      "name": "t:sections.main-register.presets.name"
+    }
+    ]
+  }
+{% endschema %}
+
+{% style %}
+    .hero-gradient {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: linear-gradient(110deg, #2c2b30 60%, #2255ff);
+    height: auto;
+    min-height: calc(100vh - 11rem);
+    width: 100%;
+    position: relative;
+  }
+  #rightSide {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: none!important;
+  padding-top: 20px;
+  /* gap: 20px;
+  padding: 20px; */
+}
+
+.freeplanitems {
+  /* padding: 20px; */
+  text-align: center;
+  
+}
+
+/* Adjusted grid placement */
+.freeplanitems:nth-child(1) {
+  grid-column: 2 / span 2;
+  grid-row: 1; /* The first item spans the first two rows */
+}
+
+.freeplanitems:nth-child(2) {
+  grid-column: 1 / span 2;
+  grid-row: 2; /* The second item starts at the first row and spans two rows */
+  margin-top: -2%;
+}
+
+.freeplanitems:nth-child(3) {
+  grid-column: 3 / span 2;
+  grid-row: 2; /* The third item starts at the third row and spans two rows */
+  margin-top: -2%;
+}
+  .iconcontainer {
+    background:#fafafa;
+    width: fit-content;
+    width: 130px;
+    height: 130px;
+    border-radius: 1rem;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);
+  }
+    .field {
+    width: 90%;
+    margin: 0 auto 20px auto;
+  }
+  .field__input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    box-sizing: border-box; /* Ensures padding does not affect width */
+  }
+  .button--primary {
+    width: 90%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    display: block;
+    margin: 20px auto;
+  }
+  .field__input::placeholder {
+  color: #888; /* Placeholder text color */
+}
+  .textright {
+    color: #fafafa;
+    width: 58%;
+    padding-top:1%;
+    margin: auto;
+  }
+  .registerContainer {
+    width: 40rem;
+    border-radius: 3rem;
+    overflow: hidden;
+    height: fit-content;
+    margin-right:2%;
+    margin-top: 1%;
+  }
+  @media(max-width: 850px) {
+    .registerMain {
+      flex-direction: column;
+      margin-top: 5%;
+    }
+    .rightSidecontainer {
+      margin: auto;
+    }
+    .registerContainer {
+      margin: auto;
+      max-width: 90%;
+    }
+    .freeplanitems:nth-child(1) {
+      grid-column: 1 / span 4;
+      grid-row: 1; /* The first item spans the first two rows */
+    }
+
+    .freeplanitems:nth-child(2) {
+      grid-column: 1 / span 4;
+      grid-row: 2; /* The second item starts at the first row and spans two rows */
+      margin-top: 0%;
+    }
+
+    .freeplanitems:nth-child(3) {
+      grid-column: 1 / span 4;
+      grid-row: 3; /* The third item starts at the third row and spans two rows */
+      margin-top: 0%;
+    }
+}
+@media(max-width: 360px) {
+  .registerContainer {
+      margin: auto;
+      max-width: 75%;
+    }
+}
+{% endstyle %}
+<meta name="description" content="{{ section.settings.meta_description }}">
+<div class="hero-gradient">
+  <div class="registerMain" style="display:flex;margin-top: 1%;margin-bottom: 5%">
+    <div class="rightSidecontainer" style="display:flex;border-radius: 2.5rem;overflow: hidden;width:70%">
+    <div style="text-align:center;">
+    <div id="rightSide">
+      <div class="freeplanitems">
+        <div class="iconcontainer">
+          <svg id="Layer_1" data-name="Layer 1" viewBox="0 0 108.81 122.88" width="100px" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>.cls-1{fill-rule:evenodd;}</style>
+            </defs>
+            <title>lock-files</title>
+            <rect x="59.587" y="75.389" width="41.501" height="39.79" style="stroke: rgb(0, 0, 0); fill: rgb(34, 85, 255);"/>
+            <path class="cls-1" d="M62.72,69.75H99.84a9,9,0,0,1,9,9V113.9a9,9,0,0,1-9,9H62.72a9,9,0,0,1-9-9V78.72a9,9,0,0,1,9-9ZM20,51.62A2.05,2.05,0,0,0,18,53.76,2,2,0,0,0,20,55.89H57A2.05,2.05,0,0,0,59,53.76,2,2,0,0,0,57,51.62Zm37.4-40.56L76.24,28.69H57.35V11.06Zm29.4,20.16a3.15,3.15,0,0,0-2.29-3l-27.83-27A3.09,3.09,0,0,0,54.21,0H5.66A5.65,5.65,0,0,0,0,5.65v96.78a5.6,5.6,0,0,0,1.66,4,5.66,5.66,0,0,0,4,1.65h4.81V116a7,7,0,0,0,6.92,6.92H43.74V117H17.35a1,1,0,0,1-1-1v-7.89H43.76v-6.31H6.32V6.29H51V31.83A3.17,3.17,0,0,0,54.21,35H80.44V60.2h6.31V42.44h7.81a1,1,0,0,1,.71.28,1,1,0,0,1,.28.7V60.21h6V43.42a6.91,6.91,0,0,0-2-4.88,6.82,6.82,0,0,0-4.88-2H86.75V31.22ZM20,66.89A2,2,0,0,0,18.06,69,2,2,0,0,0,20,71.15h23.7V66.89Zm0,15.26a2,2,0,0,0-1.92,2.13A2,2,0,0,0,20,86.41h23.7V82.15Zm0-45.79A2,2,0,0,0,18,38.49,2,2,0,0,0,20,40.62H41.89a2,2,0,0,0,1.91-2.13,2,2,0,0,0-1.91-2.13ZM20,21.1a2,2,0,0,0-1.92,2.13A2,2,0,0,0,20,25.36H32a2,2,0,0,0,1.91-2.13A2,2,0,0,0,32,21.1ZM70,94.34h2.24V90.88A9.21,9.21,0,0,1,75,84.35h0a9.23,9.23,0,0,1,13.07,0h0a9.18,9.18,0,0,1,2.72,6.53v3.46h1.78a.72.72,0,0,1,.72.72v15.22a.72.72,0,0,1-.72.72H70a.72.72,0,0,1-.72-.72V95.06a.72.72,0,0,1,.72-.72Zm5.83,0H87.16V90.83a5.63,5.63,0,0,0-1.66-4h0a5.66,5.66,0,0,0-9.65,4v3.51Zm5.7,8.33,1.14,5.27H79.56l.92-5.34a2.12,2.12,0,1,1,1.07.06Z"/>
+          </svg>
+        </div>
+        <h2 class="textright">{{ section.settings.conditions1title | newline_to_br }}</h2>
+        <p class="textright">{{ section.settings.conditions1subtitle | newline_to_br }}</p>
+      </div>
+
+      <div class="freeplanitems">
+        <div class="iconcontainer">
+          <svg viewBox="0 0 110.46 122.88" width="100px" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>.cls-1{fill-rule:evenodd;}</style>
+            </defs>
+            <circle style="stroke: rgb(0, 0, 0); fill: rgb(34, 85, 255);" transform="matrix(0.11906599998474121, 0, 0, 0.12582199275493622, 0.7952379156798886, -3.8753062115840047)" cx="648.889" cy="772.222" r="84.444"/>
+            <path class="cls-1" d="M78.06,80.32a2.94,2.94,0,0,1,1.8.56c.7.45,1.49,1.33,2.47,1.88,1.38.79,3.93-.29,5.23,1.65a5.11,5.11,0,0,1,.85,2.89,5,5,0,0,0,1.2,3.08c1.6,2.12,1.93,3.53,1.11,5-.57,1-1.75,1.56-2,2.19-.58,1.35.06,2.36-.73,3.94a4.19,4.19,0,0,1-2.55,2.17c-1,.31-1.93-.14-2.7.19-1.35.57-2.34,1.89-3.42,2.23a4.06,4.06,0,0,1-1.24.19,4.11,4.11,0,0,1-1.24-.19c-1.08-.33-2.07-1.66-3.42-2.23-.77-.32-1.73.12-2.7-.19a4.11,4.11,0,0,1-2.54-2.17c-.8-1.58-.16-2.59-.74-3.94-.27-.64-1.45-1.2-2-2.19-.83-1.47-.5-2.88,1.11-5a5.06,5.06,0,0,0,1.2-3.08,5.07,5.07,0,0,1,.85-2.89c1.3-1.94,3.86-.85,5.23-1.65,1-.55,1.77-1.44,2.47-1.88a3,3,0,0,1,1.8-.56ZM15.63,122.87c-3.94.06-7.4-.11-10.13-1.39C2.05,119.86,0,116.8,0,111v-5.29H15.1V13.39c-.22-5.31,1.07-8.61,3.44-10.67S24.11.08,27.89,0c.18-.09,74.82,0,82.57,0V110.15c0,4.46-1.1,7.62-3.36,9.73s-5.46,3-9.78,3ZM34.05,23.51a2.13,2.13,0,1,1,0-4.26H72.9a2.13,2.13,0,0,1,0,4.26Zm0,14.51a2.13,2.13,0,0,1,0-4.26h57.1a2.13,2.13,0,0,1,0,4.26Zm0,43.5a2.12,2.12,0,0,1,0-4.24H53.76a2.12,2.12,0,0,1,0,4.24Zm0-14.49a2.13,2.13,0,0,1,0-4.26h57.1a2.13,2.13,0,0,1,0,4.26Zm0-14.54a2.1,2.1,0,1,1,0-4.2H91.48a2.1,2.1,0,1,1,0,4.2ZM33,96.81c4.94-6.49,9.15-3.55,15,.55l.87.61c1.61,1.12,3.48-.53,5.25-2.1a22,22,0,0,1,2.62-2.09l1.82,2.87a18.92,18.92,0,0,0-2.18,1.76c-2.76,2.43-5.65,5-9.44,2.35l-.89-.62c-4.31-3-7.4-5.17-10.37-1.27L33,96.81ZM15.1,110H4.26v1c0,3.83,1.14,5.74,3,6.63s4.61,1,7.81,1V110Zm91.11.18V4.3H27.91c-2.83,0-5.15.39-6.59,1.63s-2.14,3.47-2,7.36V118.61h78c3.22,0,5.51-.56,6.88-1.85s2-3.4,2-6.61ZM78.06,85.52a7.78,7.78,0,1,1-7.77,7.78,7.78,7.78,0,0,1,7.77-7.78Z" transform="matrix(1.0000000000000002, 0, 0, 1, 8.881784197001252e-16, -1.7763568394002505e-15)"/>
+          </svg>
+        </div>
+        <h2 class="textright">{{ section.settings.conditions2title | newline_to_br }}</h2>
+        <p class="textright">{{ section.settings.conditions2subtitle | newline_to_br }}</p>
+      </div>
+      <div class="freeplanitems">
+        <div class="iconcontainer">
+          <svg viewBox="0 0 122.88 101.91" style="enable-background:new 0 0 122.88 101.91" width="100px" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style>
+            </defs>
+            <rect x="90.687" y="14.999" width="3.548" height="9.344" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="92.32" y="15.535" width="3.548" height="9.344" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="93.239" y="16.076" width="3.548" height="9.344" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="94.267" y="16.725" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="94.97" y="17.32" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="95.673" y="18.022" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="96.268" y="18.834" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="96.917" y="19.537" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="97.511" y="20.672" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="97.944" y="21.538" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="98.16" y="21.754" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="95.456" y="21.808" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <rect x="91.077" y="21.97" width="3.548" height="3.612" style="stroke: rgb(0, 0, 0); stroke-opacity: 0; fill: rgb(34, 85, 255);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)"/>
+            <g transform="matrix(1, 0, 0, 0.9999999999999999, 0, 8.881784197001252e-16)">
+              <path class="st0" d="M3.34,0h116.2c1.84,0,3.34,1.5,3.34,3.34v76.98c0,1.84-1.5,3.34-3.34,3.34H3.34C1.5,83.66,0,82.16,0,80.32 V3.34C0,1.5,1.5,0,3.34,0L3.34,0L3.34,0z M91.58,27.97L102.08,28c-0.01,2.8-1.14,5.48-3.13,7.45c-0.47,0.46-0.99,0.88-1.54,1.25 L91.58,27.97L91.58,27.97L91.58,27.97z M31.13,19.72h3.2c0.17,0,0.31,0.14,0.31,0.31v11.4c0,0.17-0.14,0.31-0.31,0.31h-3.2 c-0.17,0-0.31-0.14-0.31-0.31v-11.4C30.82,19.86,30.96,19.72,31.13,19.72L31.13,19.72z M16.65,15.87h3.2 c0.17,0,0.31,0.14,0.31,0.31v15.26c0,0.17-0.14,0.31-0.31,0.31h-3.2c-0.17,0-0.31-0.14-0.31-0.31V16.18 C16.34,16.01,16.48,15.87,16.65,15.87L16.65,15.87z M23.89,13.7h3.2c0.17,0,0.31,0.14,0.31,0.31v17.43c0,0.17-0.14,0.31-0.31,0.31 h-3.2c-0.17,0-0.31-0.14-0.31-0.31V14.01C23.58,13.84,23.72,13.7,23.89,13.7L23.89,13.7z M16.84,61.37c-0.7,0-1.26-0.57-1.26-1.28 c0-0.7,0.57-1.28,1.26-1.28h89.41c0.7,0,1.26,0.57,1.26,1.28c0,0.7-0.57,1.28-1.26,1.28H16.84L16.84,61.37z M16.63,52.07 c-0.7,0-1.26-0.57-1.26-1.28c0-0.7,0.57-1.28,1.26-1.28h35.85c0.7,0,1.26,0.57,1.26,1.28c0,0.7-0.57,1.28-1.26,1.28H16.63 L16.63,52.07z M57.4,52.07c-0.7,0-1.26-0.57-1.26-1.28c0-0.7,0.57-1.28,1.26-1.28h48.85c0.7,0,1.26,0.57,1.26,1.28 c0,0.7-0.57,1.28-1.26,1.28H57.4L57.4,52.07z M16.63,43.76c-0.7,0-1.26-0.57-1.26-1.28c0-0.7,0.57-1.28,1.26-1.28h54.16 c0.7,0,1.26,0.57,1.26,1.28c0,0.7-0.57,1.28-1.26,1.28H16.63L16.63,43.76z M90.5,25.88l-0.56-11.23c-0.01-0.22,0.16-0.41,0.38-0.42 c0.06,0,0.14-0.01,0.23-0.01c0.07,0,0.15,0,0.23,0c3.08-0.03,5.92,1.13,8.03,3.08c2.12,1.95,3.51,4.67,3.73,7.75 c0.02,0.22-0.15,0.41-0.37,0.43l-11.23,0.8c-0.22,0.02-0.41-0.15-0.43-0.37C90.5,25.9,90.5,25.89,90.5,25.88L90.5,25.88L90.5,25.88 z M90.76,15.02l0.52,10.43l10.42-0.74c-0.29-2.7-1.56-5.09-3.44-6.81c-1.97-1.81-4.61-2.9-7.48-2.87L90.76,15.02L90.76,15.02 L90.76,15.02z M89.24,27.48l5.63,9.75c-1.71,0.99-3.65,1.51-5.63,1.51c-6.22,0-11.26-5.04-11.26-11.26c0-5.59,4.1-10.33,9.63-11.14 L89.24,27.48L89.24,27.48z M46.29,88.27h30.3c0.08,5.24,2.24,9.94,8.09,13.63H38.2C42.88,98.51,46.31,94.39,46.29,88.27 L46.29,88.27L46.29,88.27z M61.44,72.41c2.37,0,4.29,1.92,4.29,4.29c0,2.37-1.92,4.29-4.29,4.29c-2.37,0-4.29-1.92-4.29-4.29 C57.15,74.33,59.07,72.41,61.44,72.41L61.44,72.41z M10.05,6.29h102.79c1.63,0,2.95,1.33,2.95,2.95v57.52 c0,1.62-1.33,2.95-2.95,2.95H10.05c-1.62,0-2.95-1.33-2.95-2.95V9.24C7.09,7.62,8.42,6.29,10.05,6.29L10.05,6.29L10.05,6.29z"/>
+            </g>
+          </svg>
+        </div>
+        <h2 class="textright">{{ section.settings.conditions3title | newline_to_br }}</h2>
+        <p class="textright">{{ section.settings.conditions3subtitle | newline_to_br }}</p>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="registerContainer" style="background: #fafafa;"> <!-- left side -->
+    <div id="title" style='background: #2255ff; padding: 2rem'>
+      <h1 style="color:#fafafa;margin:0;text-align:center;font-size: 4rem;">{{ section.settings.containerName }}</h1>
+    </div>
+    <div style="background: #fafafa;">
+      {% render 'register-server', registerName: section.settings.registerName, registerCompany: section.settings.registerCompany,
+                    registerCheckbox: section.settings.registerCheckbox, registerButton: section.settings.registerButton, registerNote1: section.settings.registerNote1
+                    registerNoteLink1Text: section.settings.registerNoteLink1Text, registerNote2: section.settings.registerNote2, registerNoteLink2Text: section.settings.registerNoteLink2Text %}
+    </div>
+      
+  </div>
+
+              </div>
+</div>

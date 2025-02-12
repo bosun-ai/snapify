@@ -1,0 +1,1011 @@
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+
+
+{%- style -%}
+  .tooltip {
+    position: absolute;
+    text-align: center;
+    width: 120px;
+    height: 45px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+    px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+    px;
+  }
+
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}
+      px;
+      padding-bottom: {{ section.settings.padding_bottom }}
+      px;
+    }
+  }
+  .image-with-text p {
+    text-align: left;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  .border {
+    border: 0.2rem solid #17161c;
+  }
+  .bordertop {
+    border-top: 0.2rem solid #17161c;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    border: none !important;
+    border-top: 0.2rem solid #17161c !important;
+  }
+  td {
+    border: none !important;
+    border-top: 0.2rem solid #17161c !important;
+  }
+
+  .flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .table-header {
+    text-decoration: underline; /* Underline the text */
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  .icons {
+    margin-left: auto;
+    margin-right: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 35%; /* occupies 30% of the flex container */
+    justify-content: flex-end; /* aligns icons to the right within their space */
+    display: flex;
+  }
+
+  .arrow {
+    margin-left: 10px;
+    margin-right: 10px; /* Optional: Add some space between the arrow and the text */
+    transition: transform 0.3s ease;
+  }
+
+  .icons i {
+    margin-left: 2rem;
+    cursor: pointer;
+  }
+
+  .flex-header.rotated .arrow {
+    transform: rotate(90deg);
+  }
+  .trashcan,
+  .info,
+  .open,
+  .download,
+  .share,
+  .send {
+    cursor: pointer;
+  }
+
+  /* Overlay style */
+  #overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with 50% opacity */
+    z-index: 2; /* Displayed behind the modal */
+  }
+
+  /* Modal style */
+  #report-table {
+    /* display: none; */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the modal */
+    padding: 20px;
+    background-color: #fff;
+    z-index: 2; /* Displayed in front of the overlay */
+    width: 80%; /* Adjust width as needed */
+    max-width: 80%; /* Adjust max width as needed */
+    /* overflow-y: auto; /* Make it scrollable if the content is too big */
+    */ border-radius: 8px; /* Rounded corners */
+  }
+
+.table-header-title {
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+.table-header-title-hidden {
+  max-height: 0;
+  overflow: hidden;
+}
+.svg-arrow {
+  transform: rotate(90deg);
+  transition: transform 0.3s ease; /* Smooth transition for rotation */
+}
+
+.collapsed {
+  transform: rotate(0deg); /* Rotate arrow 90 degrees when collapsed */
+}
+
+tr {
+  border-top: 0.2rem solid #17161c !important;
+}
+
+.tabulator-page.active {
+    color: #2255FF!important;
+  }
+
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 100;
+}
+
+.modal-content {
+    position: absolute;
+    border-radius: 25px;
+    border-width: 0.2rem;
+    border-style: solid;
+    border-color: #17161c;
+    width: 90%;
+    max-width: 450px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.modalContainer {
+  border-radius: 3rem;
+  overflow: hidden;
+}
+
+.tooltipSave {
+  position: absolute;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  z-index: 1;
+  top: 30%;
+  left: 50%;
+  margin-left: -60px;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+}
+  .tabulator-row {
+    cursor: default!important;
+  }
+  .tabulator-group-toggle {
+    cursor: pointer!important;
+  }
+.tabulator-arrow {
+    display: block!important;
+}
+
+.row {
+    border-top: 0.2rem solid #17161c; /* Full-width border for each row */
+    padding: 2rem 0; /* Vertical padding for spacing */
+    width: 100%; /* Ensure the row spans the full container width */
+  }
+
+  .folder-row {
+    font-weight: bold; /* Highlight folders */
+    padding-left: 0; /* Ensure full-width borders */
+    text-indent: 2rem; /* Indent text instead of moving the entire row */
+    cursor: pointer;
+  }
+
+  .file-row {
+    padding-left: 0; /* Ensure full-width borders */
+    text-indent: 4rem; /* Further indent text for files */
+    display: flex;
+  }
+
+  #tabs-container {
+        display: flex;
+        border-bottom: 2px solid #ddd;
+        margin-bottom: 1rem;
+        overflow-x: auto; /* Handle large numbers of tabs */
+    }
+
+    .tab-button {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        background-color: #f9f9f9;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+        margin-right: 5px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .tab-button:hover {
+        background-color: #eaeaea;
+    }
+
+    .tab-button.active {
+        background-color: #fff;
+        border-bottom: 2px solid #fff;
+        font-weight: bold;
+    }
+
+    #report-table-data-excel {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+{%- endstyle -%}
+{% if customer.tags contains 'member' %}
+
+<div id="newUploadHistory" style="display: none;min-height: 100vh;padding-bottom: 5rem;">
+
+  <!-- Load d3.js -->
+  <!-- <script src="https://d3js.org/d3.v4.js"></script> --><script src="https://cdn.jsdelivr.net/npm/d3@7"> </script>
+  <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+  <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
+  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+  {% render 'forsure-guide' %}
+  {% render 'forsure-simple-notification' %}
+  <div id="tooltipWarn" class="tooltip" style="display: none;">Tooltip content</div>
+  <div id='tooltip' class="tooltipSave"></div>
+{% comment %} <div id="guideButton" aria-label="Guide"  onclick="showGuideFromButtonReport(this)"
+    style="color: black;margin-top:2rem;position: fixed;bottom: 10%;left: 2%;">
+    <svg xmlns="http://www.w3.org/2000/svg" height="4rem" version="1.0" viewBox="0 0 200 200" style="cursor: pointer" onclick="showGuide()">
+    <path id="path2382" d="m165.33 113.44a103.61 103.61 0 1 1 -207.22 0 103.61 103.61 0 1 1 207.22 0z" stroke-width="0" fill="#fafafa" transform="matrix(.93739 0 0 .93739 42.143 -6.3392)"></path>
+    <g id="layer1">
+        <path id="path2413" d="m100 0c-55.2 0-100 44.8-100 100-5.0495e-15 55.2 44.8 100 100 100s100-44.8 100-100-44.8-100-100-100zm0 12.812c48.13 0 87.19 39.058 87.19 87.188s-39.06 87.19-87.19 87.19-87.188-39.06-87.188-87.19 39.058-87.188 87.188-87.188zm1.47 21.25c-5.45 0.03-10.653 0.737-15.282 2.063-4.699 1.346-9.126 3.484-12.876 6.219-3.238 2.362-6.333 5.391-8.687 8.531-4.159 5.549-6.461 11.651-7.063 18.687-0.04 0.468-0.07 0.868-0.062 0.876 0.016 0.016 21.702 2.687 21.812 2.687 0.053 0 0.113-0.234 0.282-0.937 1.941-8.085 5.486-13.521 10.968-16.813 4.32-2.594 9.808-3.612 15.778-2.969 2.74 0.295 5.21 0.96 7.38 2 2.71 1.301 5.18 3.361 6.94 5.813 1.54 2.156 2.46 4.584 2.75 7.312 0.08 0.759 0.05 2.48-0.03 3.219-0.23 1.826-0.7 3.378-1.5 4.969-0.81 1.597-1.48 2.514-2.76 3.812-2.03 2.077-5.18 4.829-10.78 9.407-3.6 2.944-6.04 5.156-8.12 7.343-4.943 5.179-7.191 9.069-8.564 14.719-0.905 3.72-1.256 7.55-1.156 13.19 0.025 1.4 0.062 2.73 0.062 2.97v0.43h21.598l0.03-2.4c0.03-3.27 0.21-5.37 0.56-7.41 0.57-3.27 1.43-5 3.94-7.81 1.6-1.8 3.7-3.76 6.93-6.47 4.77-3.991 8.11-6.99 11.26-10.125 4.91-4.907 7.46-8.26 9.28-12.187 1.43-3.092 2.22-6.166 2.46-9.532 0.06-0.816 0.07-3.03 0-3.968-0.45-7.043-3.1-13.253-8.15-19.032-0.8-0.909-2.78-2.887-3.72-3.718-4.96-4.394-10.69-7.353-17.56-9.094-4.19-1.062-8.23-1.6-13.35-1.75-0.78-0.023-1.59-0.036-2.37-0.032zm-10.908 103.6v22h21.998v-22h-21.998z"></path>
+    </g>
+    </svg>
+</div> {% endcomment %}
+  <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
+    <div>
+      <h2 class="flex-header" style="margin-left: 2rem">
+        <span id="historyheader" class="table-header" style="cursor: default">
+          Report History
+        </span>
+      </h2>
+      <div id="reportshistory" class="table-header-title"></div>
+    </div>
+  </div>
+  <div id="imageModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1000; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2);">
+    <span id="closeModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;">&times;</span>
+    <img id="modalImage" src="" alt="Image Preview" style="max-width:100%; max-height:80vh; display:block; margin:0 auto;">
+</div>
+<div id="modalOverlayImage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:999;"></div>
+
+<div id="excelModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+    <div id="tabs-container" style="display: flex; margin-bottom: 1rem; border-bottom: 1px solid #ddd;"></div>
+    <div id="report-table-data-excel"></div>
+    <span id="closeExcelModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;">&times;</span>
+</div>
+<div id="modalOverlayExcel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:999;"></div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf_viewer.min.css" />
+<div id="pdfModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+    <canvas id="pdfCanvas" style="border: 1px solid #ddd; margin: 0 auto; display: block;"></canvas>
+    <div style="text-align: center; margin-top: 10px;">
+        <button id="prevPage">Previous Page</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage">Next Page</button>
+    </div>
+    <span id="closePdfModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;">&times;</span>
+</div>
+<div id="modalOverlayPdf" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:999;"></div>
+
+
+  {% render 'forsure-login' %}
+  <script>
+
+async function checkHistoryVersion() {
+    try {
+        let data = await unifiedSendRequest(GETREPORTHISTORYVERSION, {method: 'GET'});
+        console.log(data);
+        if (data) {
+            document.getElementById('newUploadHistory').style.display = 'block';
+            document.getElementById('classicalHistory').style.display = 'none';
+        } else {
+            document.getElementById('newUploadHistory').style.display = 'none';
+            document.getElementById('classicalHistory').style.display = 'block';
+        }
+    } catch (error) {
+        console.error(error.message);
+        showMessage('Failed to get history ' + error.message, false);
+    }
+}
+checkHistoryVersion();
+
+function buildHierarchy(paths) {
+  const hierarchy = {};
+
+  paths.forEach(path => {
+    const parts = path.split('/');
+    let currentLevel = hierarchy;
+
+    parts.forEach((part, index) => {
+      if (index === parts.length - 1) {
+        // It's a file, store it in an array at the current level
+        if (!Array.isArray(currentLevel.files)) currentLevel.files = [];
+        currentLevel.files.push(part);
+      } else {
+        // It's a folder, create a nested object if it doesn't exist
+        if (!currentLevel[part]) currentLevel[part] = {};
+        currentLevel = currentLevel[part];
+      }
+    });
+  });
+
+  return hierarchy;
+}
+
+function createFolderStructure(configDiv, hierarchy, currentPath = '') {
+  configDiv.innerHTML = ''; // Clear existing content
+
+  // Recursive function to create the structure
+  function renderLevel(level, parentElement, path, depth = 0) {
+    Object.keys(level).forEach(key => {
+      if (key === 'files') {
+        // Render files
+        level[key].forEach(file => {
+            const fullPath = `${path}/${file}`; // Construct full path
+            const fileRow = document.createElement('div');
+            fileRow.className = 'row file-row'; // Add CSS class for consistent styling
+            fileRow.style.paddingLeft = `${depth * 2}rem`; // Offset based on depth
+            fileRow.textContent = file;
+            
+            fileRow.style.justifyContent = 'space-between';
+            fileRow.style.alignItems = 'center'; // Vertically center items          
+            
+            const icons = document.createElement('div');
+            icons.style.marginRight = '5rem';
+            icons.style.display = 'flex';
+            // Add icons
+            const openCol = addOpenIconReport(file, fullPath);
+            const downloadCol = addDownloadIcon(file, fullPath);
+
+            icons.appendChild(openCol);
+            icons.appendChild(downloadCol);
+            fileRow.appendChild(icons);
+            parentElement.appendChild(fileRow);
+        });
+      } else {
+        // Render folder
+        const folderRow = document.createElement('div');
+        folderRow.className = 'row folder-row'; // Add CSS class for consistent styling
+        folderRow.style.paddingLeft = `${depth * 2}rem`; // Offset text for hierarchy
+
+        // Add the SVG arrow
+        const svg = `<svg class="svg-arrow collapsed" style="margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" viewBox="0 0 80.593 122.88">
+                      <polygon style="fill:#17161c;" points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0"></polygon>
+                    </svg>`;
+
+        folderRow.innerHTML = `${svg}<span>${key}</span>`;
+
+        const folderContent = document.createElement('div');
+        folderContent.style.display = 'none'; // Initially hidden
+
+        // Add click event to toggle visibility and arrow direction
+        folderRow.addEventListener('click', () => {
+          folderContent.style.display = folderContent.style.display === 'none' ? 'block' : 'none';
+          const arrow = folderRow.querySelector('.svg-arrow');
+          arrow.classList.toggle('collapsed');
+        });
+
+        parentElement.appendChild(folderRow);
+        parentElement.appendChild(folderContent);
+
+        // Recurse into the next level
+        renderLevel(level[key], folderContent, `${path}/${key}`, depth + 1);
+      }
+    });
+  }
+
+  renderLevel(hierarchy, configDiv, '', 0);
+}
+
+
+function createColReport(content, title = '', alignRight = false) {
+    const col = document.createElement('div');
+    col.innerHTML = content;
+    return col;
+}
+
+function addOpenIconReport(fileName, fullPath) {
+    const openCol = createColReport(
+        '<i class="open"><img width="20px" src="{{ section.settings.open | image_url }}" alt="{{ section.settings.open.alt | escape }}" loading="lazy"></i>',
+        'Open report'
+    );
+    openCol.addEventListener('click', async () => {
+        try {
+            document.body.style.cursor = 'wait';
+            // Apply the 'wait' cursor to each element
+            document.querySelectorAll('.folder-row').forEach(row => {
+                row.style.cursor = 'wait';
+            });
+            const formData = new FormData();
+            formData.append('filepath', fullPath);
+            formData.append('display', true);
+
+            const extension = fileName.split('.').pop().toLowerCase();
+            if (extension === 'png' || extension === 'jpg' || extension === 'jpeg') {
+                const blob = await unifiedSendRequestBlob(GETREPORTDETAILS, {method: 'POST', formData: formData});
+                // Open image in modal
+                const imageUrl = URL.createObjectURL(blob);
+                const modal = document.getElementById('imageModal');
+                const modalOverlay = document.getElementById('modalOverlayImage');
+                const modalImage = document.getElementById('modalImage');
+                modalImage.src = imageUrl;
+                modal.style.display = 'block';
+                modalOverlay.style.display = 'block';
+            } else if (extension === 'xlsx' || extension === 'csv') {
+                const data = await unifiedSendRequest(GETREPORTDETAILS, {method: 'POST', formData: formData});
+                console.log(data);
+                displayExcelReport(data);
+            } else if (extension === 'pdf') {
+                const blob = await unifiedSendRequestBlob(GETREPORTDETAILS, {method: 'POST', formData: formData});
+                const arrayBuffer = await blob.arrayBuffer();
+                displayPdfInModal(new Uint8Array(arrayBuffer));
+            }
+            else {
+                console.error('Filetype is not yet supported, please download it to look at the content');
+                showMessage('Filetype is not yet supported, please download it to look at the content', false);
+            }
+            
+        } catch (error) {
+            console.error(error.message);
+            showMessage('Failed to open report ' + error.message, false);
+        }
+        document.body.style.cursor = 'default';
+        // Apply the 'wait' cursor to each element
+        document.querySelectorAll('.folder-row').forEach(row => {
+            row.style.cursor = 'pointer';
+        });
+    });
+    return openCol;
+}
+
+// Download Icon
+function addDownloadIcon(fileName, fullPath) {
+    const downloadCol = createColReport(
+        '<i class="download"><img width="20px" src="{{ section.settings.download | image_url }}" alt="{{ section.settings.download | image_url }}" loading="lazy"></i>',
+        'Download report'
+    );
+    downloadCol.addEventListener('click', async () => {
+        try {
+            const formData = new FormData();
+            formData.append('filepath', fullPath);
+            const blob = await unifiedSendRequestBlob(GETREPORTDETAILS, {method: 'POST', formData: formData});
+            const bloburl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = bloburl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(bloburl);
+        } catch (error) {
+            console.error(error.message);
+            showMessage('Failed to download file ' + error.message, false);
+        }
+    });
+    return downloadCol;
+}
+
+function displayExcelReport(data) {
+    const modalOverlay = document.getElementById('modalOverlayExcel');
+    const modal = document.getElementById('excelModal');
+    const tabsContainer = document.getElementById('tabs-container');
+    const tableContainer = document.getElementById('report-table-data-excel');
+
+    // Reset modal content
+    tabsContainer.innerHTML = '';
+    tableContainer.innerHTML = '';
+
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; // Alphabet for column headers
+
+    // Generate Tabs for each sheet
+    const sheets = Object.keys(data); // Each key represents a sheet
+    sheets.forEach((sheetName, sheetIndex) => {
+        // Create Tab Button
+        const tabButton = document.createElement('button');
+        tabButton.textContent = sheetName;
+        tabButton.className = 'tab-button';
+        tabButton.style.margin = '5px';
+        tabButton.dataset.sheet = sheetName;
+
+        tabButton.addEventListener('click', () => {
+            // Clear the table container
+            tableContainer.innerHTML = '';
+            highlightActiveTab(sheetIndex);
+            renderSheet(data[sheetName]); // Render the clicked sheet
+        });
+
+        tabsContainer.appendChild(tabButton);
+    });
+
+    // Helper function to highlight active tab
+    function highlightActiveTab(activeIndex) {
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach((btn, index) => {
+            btn.classList.toggle('active', index === activeIndex);
+        });
+    }
+
+
+    // Function to render a single sheet
+    function renderSheet(sheetData) {
+        const columns = Object.keys(sheetData[0]).map((key, idx) => {
+            return {
+                title: alphabet[idx] || `Column ${idx + 1}`, // Use alphabet for headers
+                field: key,
+                headerSort: false, // Disable sorting
+                formatter: "plaintext", // Ensure raw text is displayed
+                cellMouseOver: (e, cell) => {
+                    // Add tooltip on hover for full entry
+                    const tooltip = document.createElement('div');
+                    tooltip.id = 'hover-tooltip';
+                    tooltip.style.position = 'absolute';
+                    tooltip.style.padding = '8px';
+                    tooltip.style.background = '#333';
+                    tooltip.style.color = '#fff';
+                    tooltip.style.borderRadius = '4px';
+                    tooltip.style.pointerEvents = 'none';
+                    tooltip.style.zIndex = '9999';
+                    tooltip.textContent = cell.getValue();
+
+                    document.body.appendChild(tooltip);
+                    document.body.addEventListener('mousemove', moveTooltip);
+
+                    function moveTooltip(event) {
+                        tooltip.style.left = `${event.pageX + 10}px`;
+                        tooltip.style.top = `${event.pageY + 10}px`;
+                    }
+
+                    cell.getElement().addEventListener('mouseout', () => {
+                        document.body.removeEventListener('mousemove', moveTooltip);
+                        document.body.removeChild(tooltip);
+                    });
+                },
+            };
+        });
+
+        // Initialize Tabulator for the sheet
+        new Tabulator("#report-table-data-excel", {
+            data: sheetData,
+            layout: columns.length > 20 ? "fitDataFill" : "fitColumns",
+            pagination: sheetData.length > 50, // Enable pagination for large sheets
+            paginationCounter: "rows",
+            paginationSize: 50,
+            columns: columns,
+        });
+    }
+
+    // Render the first sheet by default
+    if (sheets.length > 0) {
+        renderSheet(data[sheets[0]]);
+        highlightActiveTab(0);
+    }
+
+    // Show the modal
+    modal.style.display = 'block';
+    modalOverlay.style.display = 'block';
+}
+
+function displayPdfInModal(pdfBlob) {
+    const modal = document.getElementById('pdfModal');
+    const modalOverlay = document.getElementById('modalOverlayPdf');
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const ctx = pdfCanvas.getContext('2d');
+
+    let pdfDoc = null;
+    let pageNum = 1;
+    let pageRendering = false;
+    let pageNumPending = null;
+
+    const renderPage = (num) => {
+        pageRendering = true;
+        pdfDoc.getPage(num).then((page) => {
+            const viewport = page.getViewport({ scale: 1.5 }); // Adjust scale for better rendering
+            pdfCanvas.height = viewport.height;
+            pdfCanvas.width = viewport.width;
+
+            // Render the page
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport,
+            };
+            const renderTask = page.render(renderContext);
+
+            renderTask.promise.then(() => {
+                pageRendering = false;
+
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+
+        // Update page info
+        document.getElementById('pageInfo').textContent = `Page ${num} of ${pdfDoc.numPages}`;
+    };
+
+    const queueRenderPage = (num) => {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    };
+
+    const onPrevPage = () => {
+        if (pageNum <= 1) return;
+        pageNum--;
+        queueRenderPage(pageNum);
+    };
+
+    const onNextPage = () => {
+        if (pageNum >= pdfDoc.numPages) return;
+        pageNum++;
+        queueRenderPage(pageNum);
+    };
+
+    document.getElementById('prevPage').addEventListener('click', onPrevPage);
+    document.getElementById('nextPage').addEventListener('click', onNextPage);
+
+    // Load the PDF
+    const loadingTask = pdfjsLib.getDocument({ data: pdfBlob });
+    loadingTask.promise.then((pdf) => {
+        pdfDoc = pdf;
+        renderPage(pageNum);
+    });
+
+    // Show the modal
+    modal.style.display = 'block';
+    modalOverlay.style.display = 'block';
+}
+
+async function getReports() {
+    try {
+    let data = await unifiedSendRequest(GETREPORTSONEDRIVE);
+    console.log(data);
+    const configDiv = document.getElementById("reportshistory");
+    
+    const hierarchy = buildHierarchy(data);
+    console.log(hierarchy);
+
+    createFolderStructure(configDiv, hierarchy);
+
+    } catch (error) {
+    console.error(error.message);
+    TOKEN = false;
+    }
+}
+
+
+function hideImageModal() {
+    document.getElementById('imageModal').style.display = 'none';
+    document.getElementById('modalOverlayImage').style.display = 'none';
+}
+
+function hideExcelModal() {
+    document.getElementById('excelModal').style.display = 'none';
+    document.getElementById('modalOverlayExcel').style.display = 'none';
+}
+
+function hidePdfModal() {
+    document.getElementById('pdfModal').style.display = 'none';
+    document.getElementById('modalOverlayPdf').style.display = 'none';
+}
+
+document.getElementById('modalOverlayImage').addEventListener('click', hideImageModal);
+document.getElementById('closeModal').addEventListener('click', hideImageModal);
+
+document.getElementById('closeExcelModal').addEventListener('click', hideExcelModal);
+document.getElementById('modalOverlayExcel').addEventListener('click', hideExcelModal);
+
+document.getElementById('closePdfModal').addEventListener('click', hidePdfModal);
+document.getElementById('modalOverlayPdf').addEventListener('click', hidePdfModal);
+
+getReports();
+
+// function showGuideReport() {
+//     startGuide([
+//         { element: "main", group: "{{ 'software.guide.download.welcome.group' | t }}", title: "{{ 'software.guide.download.welcome.title' | t }}", text: "{{ 'software.guide.download.welcome.text' | t }}", where: 'middle' },
+//         { element: "#inprogressbox", group: "{{ 'software.guide.download.inprogress.group' | t }}", title: "{{ 'software.guide.download.inprogress.title' | t }}", text: "{{ 'software.guide.download.inprogress.text' | t }}", where: 'below' },
+//         { element: "#historybox", group: "{{ 'software.guide.download.history.group' | t }}", title: "{{ 'software.guide.download.history.title' | t }}", text: "{{ 'software.guide.download.history.text' | t }}", where: 'inside' },
+//         { element: "#reportshistory", group: "{{ 'software.guide.download.country.group' | t }}", title: "{{ 'software.guide.download.country.title' | t }}", text: "{{ 'software.guide.download.country.text' | t }}", where: 'below', displayTemp: true },
+//         { element: "#reportshistory table tr:nth-child(3)", group: "{{ 'software.guide.download.debugger.group' | t }}", title: "{{ 'software.guide.download.debugger.title' | t }}", text: "{{ 'software.guide.download.debugger.text' | t }}", where: 'below', secondElement: '#downloads', displayTemp: true},
+//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.report.group' | t }}", title: "{{ 'software.guide.download.report.title' | t }}", text: "{{ 'software.guide.download.report.text' | t }}", where: 'below', secondElement: '#downloads', displayTemp: true},
+//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.open.group' | t }}", title: "{{ 'software.guide.download.open.title' | t }}", text: "{{ 'software.guide.download.open.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
+//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.download.group' | t }}", title: "{{ 'software.guide.download.download.title' | t }}", text: "{{ 'software.guide.download.download.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
+//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.share.group' | t }}", title: "{{ 'software.guide.download.share.title' | t }}", text: "{{ 'software.guide.download.open.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
+//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.delete.group' | t }}", title: "{{ 'software.guide.download.delete.title' | t }}", text: "{{ 'software.guide.download.delete.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
+//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.send.group' | t }}", title: "{{ 'software.guide.download.send.title' | t }}", text: "{{ 'software.guide.download.send.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
+//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.checkbox.group' | t }}", title: "{{ 'software.guide.download.checkbox.title' | t }}", text: "{{ 'software.guide.download.checkbox.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true }
+//     ]);
+//     setCookie('showedGuideDownload', 'true', 300);
+// }
+// function showGuideFromButtonReport(element) {
+//     showGuideReport();
+//     element.style.display = "none";
+// }
+
+// document.addEventListener('DOMContentLoaded', function() {
+//   if(readCookie('showedGuideDownload') === null) {
+//       setTimeout(showGuideReport, 1000); // Delay in milliseconds, adjust as necessary
+//     }
+//   });
+
+// window.addEventListener('scroll', function () {
+//   const guideButton = document.getElementById('guideButton');
+//   const footer = document.querySelector('footer'); // Adjust if your footer has a different tag or class
+//   const buttonHeight = guideButton.offsetHeight;
+//   const footerTop = footer.getBoundingClientRect().top;
+//   const viewportHeight = window.innerHeight;
+
+//   // Calculate if the button is overlapping the footer
+//   if (footerTop < viewportHeight - buttonHeight - 20) {
+//     guideButton.style.position = 'absolute';
+//     guideButton.style.bottom = `${viewportHeight - footerTop + 20}px`;
+//   } else {
+//     guideButton.style.position = 'fixed';
+//     guideButton.style.bottom = '2rem';
+//   }
+// });
+
+  </script>
+</div>
+{% else %}
+  <div class="image-with-text image-with-text--{{ section.settings.content_layout }} page-width isolate{% if settings.text_boxes_border_thickness > 0 and settings.text_boxes_border_opacity > 0 and settings.media_border_thickness > 0 and settings.media_border_opacity > 0 %} collapse-borders{% endif %}{% unless section.settings.color_scheme == 'background-1' and settings.media_border_thickness > 0 and settings.text_boxes_shadow_opacity == 0 and settings.text_boxes_border_thickness == 0 or settings.text_boxes_border_opacity == 0 %} collapse-corners{% endunless %} section-{{ section.id }}-padding">
+    <h1>Welcome,</h1>
+    <h2>Please log in to see this page</h2>
+  </div>
+{% endif %}
+
+{% schema %}
+  {
+    "name": "t:sections.forsure_download_new.name",
+    "class": "section",
+    "settings": [
+
+      {
+        "type": "select",
+        "id": "desktop_image_width",
+        "options": [
+          {
+            "value": "small",
+            "label": "t:sections.forsure_download.settings.desktop_image_width.options__1.label"
+          }, {
+            "value": "medium",
+            "label": "t:sections.forsure_download.settings.desktop_image_width.options__2.label"
+          }, {
+            "value": "large",
+            "label": "t:sections.forsure_download.settings.desktop_image_width.options__3.label"
+          }
+        ],
+        "default": "medium",
+        "label": "t:sections.forsure_download.settings.desktop_image_width.label",
+        "info": "t:sections.forsure_download.settings.desktop_image_width.info"
+      },
+      {
+        "type": "select",
+        "id": "layout",
+        "options": [
+          {
+            "value": "image_first",
+            "label": "t:sections.forsure_download.settings.layout.options__1.label"
+          }, {
+            "value": "text_first",
+            "label": "t:sections.forsure_download.settings.layout.options__2.label"
+          }
+        ],
+        "default": "image_first",
+        "label": "t:sections.forsure_download.settings.layout.label",
+        "info": "t:sections.forsure_download.settings.layout.info"
+      },
+      {
+        "type": "select",
+        "id": "desktop_content_position",
+        "options": [
+          {
+            "value": "top",
+            "label": "t:sections.forsure_download.settings.desktop_content_position.options__1.label"
+          }, {
+            "value": "middle",
+            "label": "t:sections.forsure_download.settings.desktop_content_position.options__2.label"
+          }, {
+            "value": "bottom",
+            "label": "t:sections.forsure_download.settings.desktop_content_position.options__3.label"
+          }
+        ],
+        "default": "top",
+        "label": "t:sections.forsure_download.settings.desktop_content_position.label"
+      },
+      {
+        "type": "select",
+        "id": "desktop_content_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:sections.forsure_download.settings.desktop_content_alignment.options__1.label"
+          }, {
+            "value": "center",
+            "label": "t:sections.forsure_download.settings.desktop_content_alignment.options__2.label"
+          }, {
+            "value": "right",
+            "label": "t:sections.forsure_download.settings.desktop_content_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_download.settings.desktop_content_alignment.label"
+      }, {
+        "type": "select",
+        "id": "content_layout",
+        "options": [
+          {
+            "value": "no-overlap",
+            "label": "t:sections.forsure_download.settings.content_layout.options__1.label"
+          }, {
+            "value": "overlap",
+            "label": "t:sections.forsure_download.settings.content_layout.options__2.label"
+          }
+        ],
+        "default": "no-overlap",
+        "label": "t:sections.forsure_download.settings.content_layout.label"
+      }, {
+        "type": "select",
+        "id": "color_scheme",
+        "options": [
+          {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+          },
+          {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+          },
+          {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+          },
+          {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+          }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+          }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+      }, {
+        "type": "select",
+        "id": "color_scheme2",
+        "options": [
+          {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+          },
+          {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+          },
+          {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+          },
+          {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+          }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+          }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+      }, {
+        "type": "header",
+        "content": "Mobile layout"
+      }, {
+        "type": "select",
+        "id": "mobile_content_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:sections.forsure_download.settings.mobile_content_alignment.options__1.label"
+          }, {
+            "value": "center",
+            "label": "t:sections.forsure_download.settings.mobile_content_alignment.options__2.label"
+          }, {
+            "value": "right",
+            "label": "t:sections.forsure_download.settings.mobile_content_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_download.settings.mobile_content_alignment.label"
+      }, {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      }, {
+        "type": "image_picker",
+        "id": "trashcan",
+        "label": "Trashcan"
+      }, {
+        "type": "image_picker",
+        "id": "open",
+        "label": "Open"
+      }, {
+        "type": "image_picker",
+        "id": "download",
+        "label": "Download"
+      }, {
+        "type": "image_picker",
+        "id": "share",
+        "label": "Share"
+      }, {
+        "type": "image_picker",
+        "id": "filter",
+        "label": "Filter"
+      }, {
+        "type": "image_picker",
+        "id": "send_report",
+        "label": "Send Report"
+      }, {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 36
+      }, {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 36
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.forsure_download_new.presets.name"
+      }
+    ]
+  }
+{% endschema %}

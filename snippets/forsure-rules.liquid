@@ -1,0 +1,568 @@
+{% comment %}
+Renders popup for rules
+
+Usage:
+{% render 'forsure-rules' %}
+{% endcomment %}
+{% style %}
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+        border-bottom: 0.2rem solid #17161c;
+    }
+    .rules-list {
+        width: 20%; /* Adjust as needed for desired layout */
+        border-right: 1px solid #ccc;
+        padding-right: 1rem;
+        overflow-y: auto;
+    }
+
+    .rule-details {
+        width: 80%; /* Adjust as needed for desired layout */
+        padding-left: 1rem;
+    }
+    .rule-item {
+        display: flex;
+        margin: 2rem;
+    }
+    .conditions-container {
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px; /* Space between form groups */
+        padding: 10px; /* Padding around each form group */
+        border: 1px solid #ddd; /* Optional border for better visual separation */
+        border-radius: 4px; /* Rounded corners */
+        background-color: #f9f9f9; /* Background color for better visibility */
+    }
+    .form-group .label {
+        min-width: 60px; /* Set a minimum width for labels to ensure alignment */
+        text-align: right; /* Align text to the right */
+        margin-right: 10px; /* Space between label and input */
+    }
+    .form-group .input, .form-group .select {
+        flex: 1; /* Allow inputs and selects to grow */
+        margin-left: 10px; /* Space between inputs */
+    }
+
+    .logic-label {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 10px;
+        font-weight: bold;
+    }
+
+    .condition-group {
+        flex-direction: row; /* Ensure items are in a row */
+        width: 100%; /* Make sure each condition group takes full width */
+    }
+
+    .condition, .condition-value, .and-or {
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 1;
+    }
+
+    .condition-value {
+        flex: 1; /* Allow condition value input to grow */
+    }
+
+    .add-condition-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .form-header {
+        margin-top: 2rem;
+    }
+    #action {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+
+    .delete-condition-button, .add-condition-button {
+        cursor: pointer;
+    }
+
+
+#overlayRules {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with 50% opacity */
+    z-index: 2; /* Display in front of other overlay */
+  }
+
+  /* Modal style */
+  #rules-table {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the modal */
+    padding: 20px;
+    background-color: #fafafa;
+    width: 80%; /* Adjust width as needed */
+    max-width: 80%; /* Adjust max width as needed */
+    /* max-height: 61vh; /* 80% of the viewport height */
+    overflow-y: auto; /* Make it scrollable if the content is too big */
+    border-radius: 8px; /* Rounded corners */
+    border: 0.2rem solid #17161c;
+    z-index: 2;
+  }
+{% endstyle %}
+{% render 'forsure-toggle' %}
+{% render 'forsure-simple-notification' %}
+{% render 'forsure-confirmation' %}
+<div id="overlayRules"></div>
+<div id="rules-table" style="display: none">
+    <span class="close" onclick="hideModal()">&times;</span>
+    <div class="modal-header">
+        <h2 style="margin-right: auto">Rules</h2>
+        <button onclick="showAddRuleForm()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Rule</button>
+    </div>
+    <div id="rules-container" style="display: flex;">
+        <div id="rules-list" class="rules-list">
+            <p style="text-align: center; padding: 2rem;">No rules added yet</p>
+        </div>
+        <div id="rule-details" class="rule-details">
+            <!-- This is where the rule details or form will be displayed -->
+            <p style="text-align: center; padding: 2rem;">Select a rule to see details or add a new rule</p>
+        </div>
+    </div>
+</div>
+<script>
+    async function displayRules() {
+        document.getElementById('overlayRules').style.display = 'block';
+        document.getElementById('rules-table').style.display = 'block';
+        columns = await getColumns();
+        rules = await getRules();
+        loadRules(rules);
+    }
+    function hideModal() {
+        document.getElementById('overlayRules').style.display = 'none';
+        document.getElementById('rules-table').style.display = 'none';
+        excludedColumns = new Set();
+    }
+  document.getElementById('overlayRules').addEventListener('click', hideModal);
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      hideModal();
+    }
+  });
+
+ruleConditions = ['is less than', 'is equal to', 'is not', 'is greater than', 'is in'];
+columns = ['price', 'value', 'number', 'items'];
+const actionOptions = ['exclude', 'set', 'use'];
+
+
+  function loadRules(rules) {
+    // rules = [
+    //     { id: 1, name: 'Exclude products', conditions: [{ column: 'price', condition: 'is less than', value: '5.00' }], actions: 'exclude', targetColumn: 'price', status: 'play' },
+    //     { id: 2, name: 'Exclude textile', conditions: [{ column: 'value', condition: 'is less than', value: '5.00' }, { andOr: 'OR', column: 'price', condition: 'is greater than', value: '10.00' }], actions: 'use instead', targetColumn: 'value', status: 'play' },
+    //     { id: 3, name: 'Exclude other', conditions: [{ column: 'number', condition: 'is equal to', value: '5.00' }], actions: 'set to', targetValue: '0', status: 'pause' },
+    // ];
+    const rulesList = document.getElementById('rules-list');
+    rulesList.innerHTML = ''; // Clear existing content
+
+    if (rules.length === 0) {
+        rulesList.innerHTML = '<p style="text-align: center; padding: 2rem;">No rules added yet</p>';
+    } else {
+        rules.forEach(rule => {
+            const ruleItem = document.createElement('div');
+            ruleItem.classList.add('rule-item');
+            const ruleName = document.createElement('span');
+            ruleName.textContent = rule.ruleName;
+            ruleName.style.cursor = 'pointer';
+            ruleName.onclick = () => showAddRuleForm(rule); 
+            ruleItem.appendChild(ruleName);
+
+            // Create the play/pause button
+            const statusButton = document.createElement('div');
+            statusButton.style.marginLeft = 'auto';
+            statusButton.style.cursor = 'pointer';
+            statusButton.innerHTML = rule.status === 'pause' ? getPlaySVG() : getPauseSVG();
+            statusButton.onclick = () => updateStatus(rule);
+            ruleItem.appendChild(statusButton);
+
+            const deleteButton = document.createElement('div');
+            deleteButton.style.marginLeft = '10px';
+            deleteButton.style.cursor = 'pointer';
+            deleteButton.innerHTML = `<i id="deleteRule" class="icon-3"><img width="20px" src="{{ section.settings.trashcan | image_url }}" alt="{{ section.settings.trashcan.alt | escape }}" loading="lazy"></i>`;
+            deleteButton.onclick = () => deleteRule(rule.ruleID);
+            ruleItem.appendChild(deleteButton);
+
+            // Add click event to display details with the rule's data
+            
+            rulesList.appendChild(ruleItem);
+        });
+    }
+}
+
+function getPlaySVG() {
+    return '<svg xmlns="http://www.w3.org/2000/svg" style="height: 20px;width: 20px;" viewBox="0 0 384 512"><title>Rule paused</title><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#2255ff" d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg>';
+}
+function getPauseSVG() {
+    return '<svg xmlns="http://www.w3.org/2000/svg" style="height: 20px;width: 20px;" viewBox="0 0 320 512"><title>Rule started</title><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#2255ff" d="M48 64C21.5 64 0 85.5 0 112L0 400c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48L48 64zm192 0c-26.5 0-48 21.5-48 48l0 288c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48l-32 0z"/></svg>';
+}
+
+function showAddRuleForm(rule = null) {
+    const ruleDetails = document.getElementById('rule-details');
+    
+    // Clear existing content
+    ruleDetails.innerHTML = '';
+
+    // Create the form structure
+    const formHeader = document.createElement('div');
+    formHeader.className = 'form-header';
+    formHeader.style.display = 'flex';
+
+    const ruleNameGroup = document.createElement('div');
+    ruleNameGroup.className = 'form-group';
+    ruleNameGroup.innerHTML = `
+        <label for="rule-name">Name</label>
+        <input type="text" style="margin-left: 2rem" id="rule-name" placeholder="Enter rule name" value="${rule ? rule.ruleName : ''}" />
+        <input type="hidden" id="rule-id" value="${rule ? rule.ruleID: ''}"/>
+    `;
+    formHeader.appendChild(ruleNameGroup);
+
+    const toggleButton = document.createElement('div');
+    toggleButton.style.marginLeft = 'auto';
+    toggleButton.style.marginRight = '2rem';
+    toggleButton.innerHTML = getToggle(rule && rule.status === 'play');
+    formHeader.appendChild(toggleButton);
+
+    ruleDetails.appendChild(formHeader);
+
+    let conditionsContainer = document.getElementById('conditions-container');
+    if (!conditionsContainer) {
+        conditionsContainer = document.createElement('div');
+        conditionsContainer.id = 'conditions-container';
+        conditionsContainer.className = 'conditions-container';
+        ruleDetails.appendChild(conditionsContainer);
+    }
+
+    if (rule && rule.conditions) {
+        rule.conditions.forEach((condition, index) => {
+            addCondition(condition, index !== 0);
+        });
+    } else {
+        addCondition(); // Add an empty condition if no rule is provided
+    }
+
+    ruleDetails.appendChild(conditionsContainer);
+
+    const actionGroup = document.createElement('div');
+    actionGroup.className = 'form-group';
+    const actionSelect = document.createElement('select');
+    actionSelect.id = 'action';
+    actionOptions.forEach(action => {
+        const option = document.createElement('option');
+        option.value = action;
+        option.textContent = action.charAt(0).toUpperCase() + action.slice(1);
+        if (rule && rule.action === action) option.selected = true;
+        actionSelect.appendChild(option);
+    });
+
+    actionGroup.innerHTML = `<label for="action">Action</label>`;
+    actionGroup.appendChild(actionSelect);
+    targetContainer = document.createElement('div');
+    targetContainer.id = 'action-target';
+    actionGroup.appendChild(targetContainer);
+    actionSelect.addEventListener('change', () => updateActionTarget(actionSelect.value, rule));
+
+    ruleDetails.appendChild(actionGroup);
+
+    // Add the initial action target based on the rule data
+    updateActionTarget(rule ? rule.action : 'exclude', rule);
+
+    const saveButton = document.createElement('button');
+    saveButton.className = 'button';
+    saveButton.onclick = saveNewRule;
+    saveButton.textContent = 'Save Rule';
+    ruleDetails.appendChild(saveButton);
+}
+
+function addCondition(condition = {}, hasAndOr = false) {
+    const conditionsContainer = document.getElementById('conditions-container');
+
+    if (!conditionsContainer) {
+        console.error('Conditions container not found!');
+        return;
+    }
+
+    // Remove the plus button from the last condition group, if any
+    const existingConditionGroups = conditionsContainer.getElementsByClassName('condition-group');
+    if (existingConditionGroups.length > 0) {
+        const lastConditionGroup = existingConditionGroups[existingConditionGroups.length - 1];
+        const lastButton = lastConditionGroup.querySelector('.add-condition-button');
+        if (lastButton) {
+            lastButton.classList.remove('add-condition-button');
+            lastButton.classList.add('delete-condition-button');
+            lastButton.textContent = 'x';
+            lastButton.onclick = () => deleteCondition(lastButton);
+        }
+    }
+
+    const conditionGroup = document.createElement('div');
+    conditionGroup.className = 'form-group condition-group';
+    conditionGroup.style.display = 'flex';
+    conditionGroup.style.alignItems = 'center';
+
+    const logicLabel = document.createElement('div');
+    logicLabel.className = 'logic-label';
+    logicLabel.style.width = '60px'; // Set a fixed width for uniformity
+    logicLabel.style.marginRight = '10px';
+
+    if (hasAndOr) {
+        logicLabel.innerHTML = `
+            <select class="and-or">
+                <option value="AND" ${condition.andOr === 'AND' ? 'selected' : ''}>AND</option>
+                <option value="OR" ${condition.andOr === 'OR' ? 'selected' : ''}>OR</option>
+            </select>
+        `;
+    } else {
+        logicLabel.innerHTML = `<span>IF</span>`;
+    }
+    conditionGroup.appendChild(logicLabel);
+
+    const columnSelect = document.createElement('select');
+    columnSelect.className = 'column';
+    columns.forEach(col => {
+        const option = document.createElement('option');
+        option.value = col;
+        option.textContent = col;
+        if (condition.column === col) option.selected = true;
+        columnSelect.appendChild(option);
+    });
+    conditionGroup.appendChild(columnSelect);
+
+    const conditionSelect = document.createElement('select');
+    conditionSelect.className = 'condition';
+    ruleConditions.forEach(cond => {
+        const option = document.createElement('option');
+        option.value = cond;
+        option.textContent = cond.charAt(0).toUpperCase() + cond.slice(1);
+        if (condition.condition === cond) option.selected = true;
+        conditionSelect.appendChild(option);
+    });
+    const maxConditionWidth = ruleConditions.reduce((max, cond) => {
+        const tempElement = document.createElement('div');
+        tempElement.style.display = 'inline-block';
+        tempElement.style.position = 'absolute';
+        tempElement.style.visibility = 'hidden';
+        tempElement.textContent = cond.charAt(0).toUpperCase() + cond.slice(1);
+        document.body.appendChild(tempElement);
+        const width = tempElement.offsetWidth;
+        document.body.removeChild(tempElement);
+        return Math.max(max, width);
+    }, 0);
+
+    conditionSelect.style.width = `${maxConditionWidth + 20}px`; // Add some padding
+    conditionGroup.appendChild(conditionSelect);
+
+    const conditionValue = document.createElement('input');
+    conditionValue.type = 'text';
+    conditionValue.className = 'condition-value';
+    conditionValue.placeholder = 'Enter value';
+    conditionValue.value = condition.value || '';
+    conditionGroup.appendChild(conditionValue);
+
+    // Add the plus button for adding more conditions
+    const addButton = document.createElement('div');
+    addButton.className = 'add-condition-button'; 
+    addButton.onclick = () => addCondition({}, true);
+    addButton.style.border = '0.2rem solid #17161c';
+    addButton.style.width = 'fit-content';
+    addButton.style.padding = '0.2rem';
+    addButton.style.borderRadius = '4px';
+    addButton.textContent = '+';
+    conditionGroup.appendChild(addButton);
+
+    conditionsContainer.appendChild(conditionGroup);
+}
+
+function updateActionTarget(actionType, rule) {
+    let targetContainer = document.getElementById('action-target');
+    targetContainer.style.display = 'flex';
+    targetContainer.innerHTML = "";
+    if (actionType === 'exclude') {
+        // nothing needed, will exclude whole SKU
+    } else if (actionType === 'set') {
+        const columnSelect = document.createElement('select');
+        columnSelect.id = 'target-column';
+        columns.forEach(col => {
+            const option = document.createElement('option');
+            option.value = col;
+            option.textContent = col.charAt(0).toUpperCase() + col.slice(1);
+            if (rule && rule.targetColumn === col) option.selected = true;
+            columnSelect.appendChild(option);
+        });
+        targetContainer.appendChild(columnSelect);
+        const note = document.createElement('div');
+        note.innerText = 'to';
+        note.style.marginLeft = '2rem';
+        note.style.marginRight = '2rem';
+        targetContainer.appendChild(note);
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'target-value';
+        input.placeholder = 'Enter value';
+        input.value = rule && rule.targetValue ? rule.targetValue : '';
+        targetContainer.appendChild(input);
+    } else if (actionType === 'use') {
+        const columnSelect = document.createElement('select');
+        columnSelect.id = 'target-column';
+        columns.forEach(col => {
+            const option = document.createElement('option');
+            option.value = col;
+            option.textContent = col.charAt(0).toUpperCase() + col.slice(1);
+            if (rule && rule.targetColumn === col) option.selected = true;
+            columnSelect.appendChild(option);
+        });
+        targetContainer.appendChild(columnSelect);
+        const note = document.createElement('div');
+        note.innerText = 'instead of';
+        note.style.marginLeft = '2rem';
+        note.style.marginRight = '2rem';
+        targetContainer.appendChild(note);
+        const columnSelect2 = document.createElement('select');
+        columnSelect2.id = 'target-column2';
+        columns.forEach(col => {
+            const option = document.createElement('option');
+            option.value = col;
+            option.textContent = col.charAt(0).toUpperCase() + col.slice(1);
+            if (rule && rule.targetColumn === col) option.selected = true;
+            columnSelect2.appendChild(option);
+        });
+        targetContainer.appendChild(columnSelect2);
+    }
+
+}
+
+async function saveNewRule() {
+    const ruleName = document.getElementById('rule-name').value;
+    var ruleID = document.getElementById('rule-id').value;
+    if (ruleID === '') {
+        ruleID = null;
+    }
+    const action = document.getElementById('action').value;
+    const status = document.getElementById('toggleCheckbox').checked? 'play': 'pause';
+    const conditionElements = document.querySelectorAll('.condition-group');
+    const conditions = Array.from(conditionElements).map(group => ({
+        andOr: group.querySelector('.and-or')?.value,
+        column: group.querySelector('.column').value,
+        condition: group.querySelector('.condition').value,
+        value: group.querySelector('.condition-value').value
+    }));
+
+    let targetValue = '';
+    let targetColumn = '';
+    let targetColumn2 = '';
+
+    if (action !== 'exclude') {
+        targetColumn = document.getElementById('target-column').value;
+        if (action === 'set') {
+            targetValue = document.getElementById('target-value').value;
+        } else {
+            targetColumn2 = document.getElementById('target-column2').value;
+        }
+    }
+    ruleData = {
+        ruleID,
+        ruleName,
+        status,
+        action,
+        targetValue,
+        targetColumn,
+        targetColumn2,
+        conditions
+    }
+    console.log(ruleData);
+    try {
+        const response = await unifiedSendRequest(CATEGORYLISTRULES, {
+            formData: JSON.stringify(ruleData), headerArgs: { 'Content-Type': 'application/json'}
+        });
+        console.log('Rule saved successfully:', response);
+        showMessage('Rule saved successfully', true);
+        await displayRules();
+    } catch (error) {
+        console.error('Failed to save rule:', error.message);
+        showMessage('Failed to save rule: ' + error.message, false);
+    }
+}
+
+function deleteCondition(button) {
+    const conditionGroup = button.parentElement;
+    conditionGroup.remove();
+    // Update the first remaining condition group to "IF" if necessary
+    const conditionsContainer = document.getElementById('conditions-container');
+    const remainingConditionGroups = conditionsContainer.getElementsByClassName('condition-group');
+
+    if (remainingConditionGroups.length > 0) {
+        // Get the first remaining condition group
+        const firstConditionGroup = remainingConditionGroups[0];
+        const firstLogicLabel = firstConditionGroup.querySelector('.logic-label');
+        
+        // Update to show "IF"
+        if (firstLogicLabel) {
+            firstLogicLabel.innerHTML = `<span>IF</span>`;
+        }
+    }
+}
+
+async function getColumns() {
+    try {
+        const response = await unifiedSendRequest(GETCATEGORYLISTCOLS, {method: 'GET'});
+        console.log(response);
+        return response;
+    } catch (error) {
+        console.error('Failed to get categorylist columns:', error.message);
+        showMessage('Failed to get categorylist columns' + error.message, false);
+    }
+}
+
+async function getRules() {
+    try {
+        const response = await unifiedSendRequest(CATEGORYLISTRULES, {method: 'GET'});
+        console.log(response);
+        return response;
+    } catch (error) {
+        console.error('Failed to get categorylist rules:', error.message);
+        showMessage('Failed to get rules' + error.message, false);
+    }
+}
+async function deleteRule(ruleID) {
+    try {
+        const response = await unifiedSendRequest(CATEGORYLISTRULES + `?ruleID=${ruleID}`, {method: 'DELETE'});
+        console.log(response);
+        await displayRules();
+    } catch (error) {
+        console.error('Failed to delete categorylist rules:', error.message);
+        showMessage('Failed to delete rules' + error.message, false);
+    }
+}
+async function updateStatus(ruleData) {
+    ruleData.status = ruleData.status == 'play'? 'pause': 'play';
+    try {
+        const response = await unifiedSendRequest(CATEGORYLISTRULES, {
+            formData: JSON.stringify(ruleData), headerArgs: { 'Content-Type': 'application/json'}
+        });
+        console.log('Rule saved successfully:', response);
+        showMessage('Rule saved successfully', true);
+        await displayRules();
+    } catch (error) {
+        console.error('Failed to delete categorylist rules:', error.message);
+        showMessage('Failed to delete rules' + error.message, false);
+    }
+}
+</script>

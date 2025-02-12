@@ -1,0 +1,787 @@
+<link rel="stylesheet" href="{{ 'component-rte.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'section-rich-text.css' | asset_url }}" media="print" onload="this.media='all'">
+{{ 'section-popup.css' | asset_url | stylesheet_tag }}
+<noscript>{{ 'component-rte.css' | asset_url | stylesheet_tag }}</noscript>
+<noscript>{{ 'section-rich-text.css' | asset_url | stylesheet_tag }}</noscript>
+<script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+<script src="{{ 'section-popup.js' | asset_url }}"></script>
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+#reopenButton {
+    color: {{ section.settings.text_color_button }}; /* Color from the provided style */
+  }
+{%- endstyle -%}
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<button id="reopenButton" class="button button--primary newsletter-form__button" name="commit" aria-label="Sign up for free promo"
+        style="color: {{ section.settings.text_color_button }};margin-top:2rem;background-color: #17161C; display: none;">
+    {{ 'sections.popup.closed_text' | t }}
+</button>
+<div id="myModal" class="modal isolate{% unless section.settings.full_width %} page-width{% endunless %}">
+ <div class="modal-content popupContainer" style="background: #fafafa;">
+       <div id="title" style='background: #2255ff; padding: 2rem'>
+          <h2 style="color:#fafafa;text-align:center;">{{ 'sections.popup.title' | t | newline_to_br }}</h2>
+         <span class="close-btn">&times;</span>
+        </div>
+    <div class="rich-text__wrapper modal-content-text rich-text__wrapper--{{ section.settings.desktop_content_position }}{% if section.settings.full_width %} page-width{% endif %}">
+      <div class="rich-text__blocks {{ section.settings.content_alignment }}">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'caption' -%}
+              <p class="rich-text__caption {{ block.settings.text_style }} {{ block.settings.text_style }}--{{ block.settings.text_size }}" {{ block.shopify_attributes }} style="color: #17161c">
+                {{ 'sections.popup.caption' | t }}
+              </p>
+            {%- when 'text' -%}
+              <div class="rich-text__text textblock rte" {{ block.shopify_attributes }} style="color: #17161c; width: 88%; margin: 0 auto;margin-top:4rem">
+                {{ 'sections.popup.text' | t }}
+              </div>
+            {%- when 'button' -%}
+              <div class="rich-text__buttons{% if block.settings.button_label != blank and block.settings.button_label_2 != blank %} rich-text__buttons--multiple{% endif %}" {{ block.shopify_attributes }} style="color: {{ section.settings.text_color_button }}">
+                {% if block.settings.button_label != blank %}
+                  <a{% if block.settings.button_link == blank %} role="link" aria-disabled="true"{% else %} href="{{ block.settings.button_link }}"{% endif %} class="button{% if block.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}" style="color: {{ section.settings.text_color_button }}">{{ section.settings.button_label | escape }}</a>
+                {%- endif -%}
+                {%- if block.settings.button_label_2 != blank -%}
+                  <a{% if block.settings.button_link_2 == blank %} role="link" aria-disabled="true"{% else %} href="{{ block.settings.button_link_2 }}"{% endif %} class="button{% if block.settings.button_style_secondary_2 %} button--secondary{% else %} button--primary{% endif %}" style="color: {{ section.settings.text_color_button }}">{{ block.settings.button_label_2 | escape }}</a>
+                {%- endif -%}
+              </div>
+            {%- when 'signup_form' -%}
+           <div {{ block.shopify_attributes }} style="margin-top: 0;margin-bottom: 2rem;">
+    {% form 'customer', class: 'newsletter-form', id: NewsletterForm %}
+        <input type="hidden" name="contact[tags]" value="newsletter,popup,{{ page.url }}">
+        <div class="newsletter-form__field-wrapper">
+            <div class="field">
+              <input
+                  type="hidden"
+                  id="FirstNameHidden"
+                  name="contact[first_name]"
+                  value="{{ form.first_name }}"
+              >
+              <input
+                  type="hidden"
+                  id="LastNameHidden"
+                  name="contact[last_name]"
+                  value="{{ form.last_name }}"
+              >
+                <input
+                    id="PromoForm--{{ section.id }}-0"
+                    type="text"
+                    class="field__input"
+                    aria-required="true"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    autocomplete="name"
+                    {% if form.errors %}
+                        autofocus
+                        aria-invalid="true"
+                        aria-describedby="Promo-error--{{ section.id }}"
+                    {% elsif form.posted_successfully? %}
+                        aria-describedby="Promo-success--{{ section.id }}"
+                    {% endif %}
+                    placeholder="Enter your full name"
+                    oninput="splitName('PromoForm--{{ section.id }}-0')"
+                    onblur="checkName('{{ 'sections.popup.error_first' | t }}', '{{ 'sections.popup.error_last' | t }}')"
+                    required
+                >
+                <label class="field__label" for="PromoForm--{{ section.id }}-0">
+                    {{ 'sections.popup.form_name' | t }}
+                </label>
+            </div>
+            <div class="field">
+                <input
+                    id="PromoForm--{{ section.id }}-1"
+                    type="email"
+                    name="contact[email]"
+                    class="field__input"
+                    value="{{ form.email }}"
+                    aria-required="true"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    autocomplete="email"
+                    {% if form.errors %}
+                        autofocus
+                        aria-invalid="true"
+                        aria-describedby="Promo-error--{{ section.id }}"
+                    {% elsif form.posted_successfully? %}
+                        aria-describedby="Promo-success--{{ section.id }}"
+                    {% endif %}
+                    placeholder="Enter your email"
+                    required
+                >
+                <label class="field__label" for="PromoForm--{{ section.id }}-1">
+                    {{ 'sections.popup.form_email' | t }}
+                </label>
+            </div>
+          {% if block.settings.consent != blank %}
+            <div id="consent">
+              {{ 'sections.popup.marketing' | t }}
+            </div>
+            {% endif %}
+                <div id="errorName" style="color: #a80000;width: 85%; margin-left: auto; margin-right: auto;margin-top: 2rem;font-weight:bold"></div>
+                <!-- Submit Button -->
+                <button type="submit" class="button button--primary" name="commit" id="Subscribe" aria-label="Sign up for free promo"
+                  style="color: {{ section.settings.text_color_button }};margin-top:2rem">
+                    {{ 'sections.popup.button' | t }}
+                </button>
+            {%- if form.errors -%}
+                <small class="newsletter-form__message form__message" id="Promo-error--{{ section.id }}">{% render 'icon-error' %}{{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}</small>
+            {%- endif -%}
+        </div>
+    {% endform %}
+   </div>
+    <script>
+      $('#PromoForm--{{ section.id }}-0').on('change invalid', function() {
+        var textfield = $(this).get(0);
+        handleErrors(textfield, '{{ 'sections.popup.error_valueMissing' | t }}', '{{ 'sections.popup.error_typeMismatch' | t }}');
+      });
+      $('#PromoForm--{{ section.id }}-1').on('change invalid', function() {
+        var textfield = $(this).get(0);
+        handleErrors(textfield);
+      });
+    </script>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+<div id="thankYouModal" class="modal isolate{% unless section.settings.full_width %} page-width{% endunless %}">
+  <div class="modal-content rich-text content-container color-{{ section.settings.color_scheme }} gradient{% if section.settings.full_width %} rich-text--full-width content-container--full-width{% endif %} section-{{ section.id }}-padding">
+    <div class="rich-text__wrapper rich-text__wrapper--{{ section.settings.desktop_content_position }}{% if section.settings.full_width %} page-width{% endif %}"
+      style="padding: 0 1rem;">
+      <div class="rich-text__blocks {{ section.settings.content_alignment }}">
+        <!-- <span id="closeBtn2" class="close-btn">&times;</span> -->
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'heading2' -%}
+              <{{ block.settings.heading_size_google2 }} class="rich-text__heading rte {{ block.settings.heading_size2 }}" {{ block.shopify_attributes }} style="color: {{ section.settings.text_color_heading }}">
+                {{ 'sections.popup.thank_title' | t }}
+              </{{ block.settings.heading_size_google2 }}>
+            {%- when 'caption2' -%}
+              <p class="rich-text__caption {{ block.settings.text_style2 }} {{ block.settings.text_style2 }}--{{ block.settings.text_size2 }}" {{ block.shopify_attributes }} style="color: {{ section.settings.text_color }};text-align:center;text-align-last:center; width:75%;margin: 1rem auto;font-size:1.7rem">
+                {{ 'sections.popup.thank_caption' | t }}
+              </p>
+            {%- when 'text2' -%}
+              <div class="rich-text__text textblock rte" {{ block.shopify_attributes }} style="color: {{ section.settings.text_color }};width:65%;margin:3rem auto;font-size: 2rem;margin-bottom:4rem">
+                {{ 'sections.popup.thank_text' | t }}
+              </div>
+            {%- when 'button2' -%}
+              <div class="rich-text__buttons" {{ block.shopify_attributes }} style="color: {{ section.settings.text_color_button }}">
+                {% if block.settings.button_label2 != blank %}
+                  {% if block.settings.button_link2 != blank %}  
+                    <a href="{{ block.settings.button_link2 }}" class="button{% if block.settings.button_style_secondary2 %} button--secondary{% else %} button--primary{% endif %}" style="color: {{ section.settings.text_color_button }}">{{ 'sections.popup.thank_button' | t }}</a>
+                  {% else %}
+                    <a id="closeBtn3" class="button{% if block.settings.button_style_secondary2 %} button--secondary{% else %} button--primary{% endif %}" style="color: {{ section.settings.text_color_button }};cursor: pointer">{{ 'sections.popup.thank_button' | t }}</a>
+                  {% endif %}
+                  
+                {%- endif -%}
+              </div>
+            {%- when 'share' -%}
+              {% assign text = 'sections.popup.share_text' | t %}
+              {% assign title = 'sections.popup.share_title' | t %}
+              {% assign url = 'sections.popup.share_url' | t %}
+              {% render 'share', linkedin: block.settings.linkedin, mail: block.settings.mail, whatsapp: block.settings.whatsapp, 
+                                 telegram: block.settings.telegram, other: block.settings.other, share_url: url,
+                                 share_text: text, share_title: title %}
+          {% endcase %}
+        {% endfor %}
+          </div>
+    </div>
+  </div>
+</div>
+<script>
+if ({{section.settings.display_popup}}) {
+  document.addEventListener("DOMContentLoaded", function() {
+    start();
+    displayPopupAfterTime("{{ customer.accepts_marketing }}");
+  });
+}
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.popup.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text_color_heading",
+      "default": "#FAFAFA",
+      "label": "Choose text color for the heading"
+    },
+    {
+      "type": "text",
+      "id": "text_color",
+      "default": "#FAFAFA",
+      "label": "Choose text color"
+    },
+    {
+      "type": "text",
+      "id": "text_color_button",
+      "default": "#FAFAFA",
+      "label": "Choose text color for the button"
+    },
+    {
+      "type": "text",
+      "id": "closed_text",
+      "default": "Sign up to the newsletter",
+      "label": "Choose the Text for the closed popup"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.popup.settings.desktop_content_position.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.popup.settings.desktop_content_position.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.popup.settings.desktop_content_position.options__3.label"
+        }
+      ],
+      "default": "center",
+      "label": "t:sections.popup.settings.desktop_content_position.label",
+      "info": "t:sections.popup.settings.desktop_content_position.info"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.popup.settings.content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.popup.settings.content_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.popup.settings.content_alignment.options__3.label"
+        }
+      ],
+      "default": "center",
+      "label": "t:sections.popup.settings.content_alignment.label"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+          "value": "accent-2",
+          "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+          "value": "background-1",
+          "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+          "value": "background-2",
+          "label": "t:sections.all.colors.background_2.label"
+        },
+        {
+          "value": "inverse",
+          "label": "t:sections.all.colors.inverse.label"
+        }
+      ],
+      "default": "background-2",
+      "label": "t:sections.all.colors.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": true,
+      "label": "t:sections.popup.settings.full_width.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "checkbox",
+      "id": "display_popup",
+      "default": true,
+      "label": "t:sections.popup.settings.display_popup.label"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "t:sections.popup.blocks.heading.name",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "heading",
+          "default": "<p>Unlock More EPR insights with ForSURE!</p>",
+          "label": "t:sections.popup.blocks.heading.settings.heading.label"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "options": [
+            {
+              "value": "h2",
+              "label": "t:sections.all.heading_size.options__1.label"
+            },
+            {
+              "value": "h1",
+              "label": "t:sections.all.heading_size.options__2.label"
+            },
+            {
+              "value": "h0",
+              "label": "t:sections.all.heading_size.options__3.label"
+            },
+            {
+              "value": "hxl",
+              "label": "t:sections.all.heading_size.options__4.label"
+            }
+          ],
+          "default": "h2",
+          "label": "t:sections.all.heading_size.label"
+        },
+        {
+          "type": "select",
+          "id": "heading_size_google",
+          "options": [
+            {
+              "value": "h0",
+              "label": "t:sections.all.heading_size_google.options__1.label"
+            },
+            {
+              "value": "h1",
+              "label": "t:sections.all.heading_size_google.options__2.label"
+            },
+            {
+              "value": "h2",
+              "label": "t:sections.all.heading_size_google.options__3.label"
+            },
+            {
+              "value": "h3",
+              "label": "t:sections.all.heading_size_google.options__4.label"
+            },
+            {
+              "value": "h4",
+              "label": "t:sections.all.heading_size_google.options__5.label"
+            }
+          ],
+          "default": "h2",
+          "label": "t:sections.all.heading_size_google.label"
+        }
+      ]
+    },
+    {
+      "type": "heading2",
+      "name": "t:sections.popup.blocks.heading2.name",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "heading2",
+          "default": "<p>EPR: Your Journey Starts!</p>",
+          "label": "t:sections.popup.blocks.heading2.settings.heading.label"
+        },
+        {
+          "type": "select",
+          "id": "heading_size2",
+          "options": [
+            {
+              "value": "h2",
+              "label": "t:sections.all.heading_size.options__1.label"
+            },
+            {
+              "value": "h1",
+              "label": "t:sections.all.heading_size.options__2.label"
+            },
+            {
+              "value": "h0",
+              "label": "t:sections.all.heading_size.options__3.label"
+            },
+            {
+              "value": "hxl",
+              "label": "t:sections.all.heading_size.options__4.label"
+            }
+          ],
+          "default": "h2",
+          "label": "t:sections.all.heading_size.label"
+        },
+        {
+          "type": "select",
+          "id": "heading_size_google2",
+          "options": [
+            {
+              "value": "h0",
+              "label": "t:sections.all.heading_size_google.options__1.label"
+            },
+            {
+              "value": "h1",
+              "label": "t:sections.all.heading_size_google.options__2.label"
+            },
+            {
+              "value": "h2",
+              "label": "t:sections.all.heading_size_google.options__3.label"
+            },
+            {
+              "value": "h3",
+              "label": "t:sections.all.heading_size_google.options__4.label"
+            },
+            {
+              "value": "h4",
+              "label": "t:sections.all.heading_size_google.options__5.label"
+            }
+          ],
+          "default": "h3",
+          "label": "t:sections.all.heading_size_google.label"
+        }
+      ]
+    },
+    {
+      "type": "caption",
+      "name": "t:sections.popup.blocks.caption.name",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "caption",
+          "default": "Add a tagline",
+          "label": "t:sections.popup.blocks.caption.settings.text.label"
+        },
+        {
+          "type": "select",
+          "id": "text_style",
+          "options": [
+            {
+              "value": "subtitle",
+              "label": "t:sections.popup.blocks.caption.settings.text_style.options__1.label"
+            },
+            {
+              "value": "caption-with-letter-spacing",
+              "label": "t:sections.popup.blocks.caption.settings.text_style.options__2.label"
+            }
+          ],
+          "default": "caption-with-letter-spacing",
+          "label": "t:sections.popup.blocks.caption.settings.text_style.label"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "options": [
+            {
+              "value": "small",
+              "label": "t:sections.popup.blocks.caption.settings.caption_size.options__1.label"
+            },
+            {
+              "value": "medium",
+              "label": "t:sections.popup.blocks.caption.settings.caption_size.options__2.label"
+            },
+            {
+              "value": "large",
+              "label": "t:sections.popup.blocks.caption.settings.caption_size.options__3.label"
+            }
+          ],
+          "default": "medium",
+          "label": "t:sections.popup.blocks.caption.settings.caption_size.label"
+        }
+      ]
+    },
+    {
+      "type": "caption2",
+      "name": "t:sections.popup.blocks.caption2.name",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "caption2",
+          "default": "Let's explore the future of responsible retailing together.",
+          "label": "t:sections.popup.blocks.caption2.settings.text.label"
+        },
+        {
+          "type": "select",
+          "id": "text_style2",
+          "options": [
+            {
+              "value": "subtitle",
+              "label": "t:sections.popup.blocks.caption2.settings.text_style.options__1.label"
+            },
+            {
+              "value": "caption-with-letter-spacing",
+              "label": "t:sections.popup.blocks.caption2.settings.text_style.options__2.label"
+            }
+          ],
+          "default": "subtitle",
+          "label": "t:sections.popup.blocks.caption2.settings.text_style.label"
+        },
+        {
+          "type": "select",
+          "id": "text_size2",
+          "options": [
+            {
+              "value": "small",
+              "label": "t:sections.popup.blocks.caption2.settings.caption_size.options__1.label"
+            },
+            {
+              "value": "medium",
+              "label": "t:sections.popup.blocks.caption2.settings.caption_size.options__2.label"
+            },
+            {
+              "value": "large",
+              "label": "t:sections.popup.blocks.caption2.settings.caption_size.options__3.label"
+            }
+          ],
+          "default": "medium",
+          "label": "t:sections.popup.blocks.caption2.settings.caption_size.label"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "t:sections.popup.blocks.text.name",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>If you found our blog enlightening, there's so much more we'd love to share. Subscribe to dive deeper into the world of EPR solutions and stay ahead of the curve.</p>",
+          "label": "t:sections.popup.blocks.text.settings.text.label"
+        }
+      ]
+    },
+    {
+      "type": "text2",
+      "name": "t:sections.popup.blocks.text2.name",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text2",
+          "default": "<p><b>Join the EPR Conversation!</b><br>Share your ForSURE journey with friends and colleagues.</p>",
+          "label": "t:sections.popup.blocks.text2.settings.text.label"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "t:sections.popup.blocks.buttons.name",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "default": "Button label",
+          "label": "t:sections.popup.blocks.buttons.settings.button_label_1.label",
+          "info": "t:sections.popup.blocks.buttons.settings.button_label_1.info"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "t:sections.popup.blocks.buttons.settings.button_link_1.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary",
+          "default": false,
+          "label": "t:sections.popup.blocks.buttons.settings.button_style_secondary_1.label"
+        },
+        {
+          "type": "text",
+          "id": "button_label_2",
+          "label": "t:sections.popup.blocks.buttons.settings.button_label_2.label",
+          "info": "t:sections.popup.blocks.buttons.settings.button_label_2.info"
+        },
+        {
+          "type": "url",
+          "id": "button_link_2",
+          "label": "t:sections.popup.blocks.buttons.settings.button_link_2.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary_2",
+          "default": false,
+          "label": "t:sections.popup.blocks.buttons.settings.button_style_secondary_2.label"
+        }
+      ]
+    },
+    {
+      "type": "button2",
+      "name": "t:sections.popup.blocks.buttons2.name",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label2",
+          "default": "Explore More",
+          "label": "t:sections.popup.blocks.buttons2.settings.button_label_1.label",
+          "info": "t:sections.popup.blocks.buttons2.settings.button_label_1.info"
+        },
+        {
+          "type": "url",
+          "id": "button_link2",
+          "label": "t:sections.popup.blocks.buttons2.settings.button_link_1.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary2",
+          "default": false,
+          "label": "t:sections.popup.blocks.buttons2.settings.button_style_secondary_1.label"
+        }
+      ]
+    },
+    {
+      "type": "signup_form",
+      "name": "t:sections.popup.blocks.signup_form.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "default": "Sign up",
+          "label": "t:sections.popup.blocks.signup_form.settings.button_label.label",
+          "info": "t:sections.popup.blocks.signup_form.settings.button_label.info"
+        },
+        {
+          "type": "text",
+          "id": "consent",
+          "default": "I consent to receive emails from ForSURE and understand I can opt out anytime.",
+          "label": "t:sections.popup.blocks.signup_form.settings.consent.label",
+          "info": "t:sections.popup.blocks.signup_form.settings.consent.info"
+        }
+      ]
+    },
+    {
+      "type": "share",
+      "name": "t:sections.popup.blocks.share.name",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "share_label",
+          "label": "t:sections.popup.blocks.share.settings.text.label",
+          "default": "Share"
+        },
+        {
+          "type": "paragraph",
+          "content": "t:sections.popup.blocks.share.settings.featured_image_info.content"
+        },
+        {
+          "type": "paragraph",
+          "content": "t:sections.popup.blocks.share.settings.title_info.content"
+        },
+        {
+          "type": "text",
+          "id": "share_title",
+          "default": "ForSURE",
+          "label": "t:sections.popup.blocks.share.settings.share_title.label",
+          "info": "t:sections.popup.blocks.share.settings.share_title.info"
+        },
+        {
+          "type": "text",
+          "id": "share_text",
+          "default": "Just signed up for an amazing newsletter! Join me and stay updated on the latest news and insights about EPR!🌍✉️",
+          "label": "t:sections.popup.blocks.share.settings.share_text.label",
+          "info": "t:sections.popup.blocks.share.settings.share_text.info"
+        },
+        {
+          "type": "url",
+          "id": "share_url",
+          "label": "t:sections.popup.blocks.share.settings.share_url.label"
+        },
+        {
+          "type": "image_picker",
+          "id": "linkedin",
+          "label": "t:sections.popup.blocks.share.settings.linkedin.label"
+        },
+        {
+          "type": "image_picker",
+          "id": "mail",
+          "label": "t:sections.popup.blocks.share.settings.mail.label"
+        },
+        {
+          "type": "image_picker",
+          "id": "whatsapp",
+          "label": "t:sections.popup.blocks.share.settings.whatsapp.label"
+        },
+        {
+          "type": "image_picker",
+          "id": "telegram",
+          "label": "t:sections.popup.blocks.share.settings.telegram.label"
+        },
+        {
+          "type": "image_picker",
+          "id": "other",
+          "label": "t:sections.popup.blocks.share.settings.other.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.popup.presets.name",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "signup_form"
+        },
+        {
+          "type": "heading2"
+        },
+        {
+          "type": "caption2"
+        },
+        {
+          "type": "text2"
+        },
+        {
+          "type": "share"
+        },
+        {
+          "type": "button2"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

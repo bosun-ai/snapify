@@ -1,0 +1,16 @@
+  .article-card p {
+    text-align: left;
+    /* hyphens: auto;
+    -webkit-hyphens: auto; */
+  }
+  @media screen and (max-width: 750px) {
+    .blog-articles-display {
+      display: flex!important;
+    }
+  }
+  .background-triangle {
+    position: relative;
+  }
+  #shopify-section-template--17300924137739__2199ede2-c47a-4307-b8bc-c72ae5c2cc73 {
+    margin-top: 0!important;
+  }

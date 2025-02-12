@@ -1,0 +1,447 @@
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+{{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+.section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  
+table {
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+.popup {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #ddd;
+    padding: 30px;
+    background-color: white;
+    z-index: 1000;
+}
+.overlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 500;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+.edit-btn, .modal button {
+    padding: 5px 10px;
+    /* color: white; */
+    /* border: none; */
+    cursor: pointer;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 101;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 34%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-check:checked + .btn {
+    background-color: #2255ff;
+    color: #fafafa;
+}
+
+.btn-check:not(:checked) + .btn {
+    background-color: #fafafa;
+    color: #17161c;
+    border-color: #17161c;
+    border-radius: 0.2rem;
+}
+.disabled-table {
+    pointer-events: none;
+    opacity: 0.5;
+    /* background-color: grey; */
+}
+
+#role-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* Space between items */
+    max-width: 600px; /* Optional: limit the width of the container */
+    margin: 0 auto;
+}
+
+.role-item {
+    flex: 0 1 calc(33.33% - 20px); /* 3 items per row, with gap space accounted for */
+    text-align: center;
+    margin-bottom: 20px; /* Space below each row */
+}
+
+{%- endstyle -%}
+{% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
+
+
+  <!-- Load d3.js -->
+  <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"> </script>
+  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
+  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  {% render 'forsure-login' %}
+  {% render 'forsure-guide' %}
+  {% render 'forsure-simple-notification' %}
+  {% render 'forsure-confirmation' %}
+  <div class="section-{{ section.id }}-padding">
+    <div class="configbox page-width border" style="border-radius: 1rem">
+        <div><h2>Manage Access</h2></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Access Rights</th>
+                    <th style="width: 10%;">Edit</th>
+                    <th style="width: 10%">Delete</th>
+                </tr>
+            </thead>
+            <tbody id="userList">          
+            </tbody>
+        </table>
+        <div id="editModal" class="modal">
+
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h1 style="margin-left: auto;margin-right: auto;width: fit-content;">Edit User Roles</h1>
+                <div style="margin: 3rem auto;width: fit-content;"><select id="rolesDropdown" style="border: 0.2rem solid #17161c;text-align: left;" class="btn"></select></div>
+                <div id="roleOptions"></div>
+                <div style="margin: 2rem auto;width: fit-content;"><button class="button" onclick="saveChanges(currentEditingUserId)">Save Changes</button></div>
+            </div>
+        </div>
+        <div id="container" style="padding-bottom: 2rem; display: flex">
+            <button id="addUserButton" class="button" style="z-index:1" onclick="addInputField()">Add User</button>
+            <input type="email" id="emailInput" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;display: none">
+            <button id="addButton" class="button" style="display: none">Add User</button>
+        </div>
+</div>
+</div>
+
+<script>
+function addToTable(user) {
+    var table = document.getElementById('userList');
+    var row = table.insertRow(-1);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+    var email = user.email;
+    if (user.you) {
+        email = email + '<b style="border-radius:1rem;background:#2255ff;color: #fafafa;margin: 1rem;padding: 0.5rem;">You</b>'
+    }
+    cell1.innerHTML = email;
+    cell2.innerHTML = user.roles.join(', ');
+    if (user.can_edit) {
+        cell3.innerHTML = `<div title="Edit the roles of this user" style="margin: auto;width: fit-content;cursor: pointer"><svg onclick="openEditModal('${user.id}', '${user.roles}', ${user.you})" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg></div>`;
+        if (user.you) {
+            cell4.innerHTML = "<center>You cannot delete yourself</center>";
+        } else {
+            cell4.innerHTML = `<div title="Delete this user" style="margin: auto;width: fit-content;cursor: pointer"><img onclick="validateDeleteUser('${user.id}', '${user.email}')" width="20px" src="{{ section.settings.trashcan | image_url }}" alt="{{ section.settings.trashcan.alt | escape }}" loading="lazy"></div>`;
+        }
+    } else {
+        cell3.colSpan = 2;
+        cell3.innerHTML = "You cannot edit this user";
+        row.deleteCell(3);
+    }
+}
+
+
+async function getUsers() {
+    try {
+        var data = await unifiedSendRequest(ACCESS_MANAGER, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+        document.getElementById('userList').innerHTML = '';
+        console.log(data);
+        for (user of data) {
+            addToTable(user);
+        }
+    } catch (error) {
+        console.error('Failed to get users:', error);
+        showMessage('Failed to get users: ' + error.message, false);
+    }
+}
+
+var currentEditingUserId = ''; 
+async function openEditModal(userId, userRoles, isUser) {
+    currentEditingUserId = userId;  
+    var modal = document.getElementById('editModal');
+    var roleOptions = document.getElementById('roleOptions');
+    modal.style.display = "block";
+
+    // Clear previous content and show loading message
+    roleOptions.innerHTML = '<p>Loading...</p>';
+
+    try {
+        // Fetch roles data using your unified API request function
+        const data = await unifiedSendRequest(ACCESS_ROLES, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+
+        // Assume data is in the form { "Report": ["VIEW", "ADMIN"], "User": ["VIEW", "EDIT"] }
+        roleOptions.innerHTML = ''; // Clear loading message
+        const dropdown = document.getElementById("rolesDropdown");
+        dropdown.innerHTML = '';
+        Object.keys(data).sort().forEach(entry => {
+                const option = document.createElement("option");
+                option.value = entry;
+                option.textContent = entry;
+                dropdown.appendChild(option);
+            });
+        
+
+        function updateDetailsDisplay(selectedRole) {
+            // Clear previous details
+            roleOptions.innerHTML = '';
+            // Get role details
+            const details = data[selectedRole];
+            const roleDiv = document.createElement('div');
+            roleDiv.innerHTML = `<h2 style="margin: auto;width: fit-content;">${selectedRole}</h2><p style="margin: 3rem auto;width: 85%;text-align: center">${details.description}</p>`;
+            var tableContainer = document.createElement('div');
+            tableContainer.style.position = 'relative';
+            tableContainer.id = 'role-table';
+            var rolesDiv = document.createElement('div');
+            rolesDiv.id = 'role-container';
+            details.roles.forEach(roleDetails => {
+                var rightsDiv = document.createElement('div');
+                rightsDiv.classList.add('role-item');
+
+                var right = roleDetails['right'];
+                var can_edit = roleDetails['can_edit'];
+                var description = roleDetails['description'];
+                const checkboxId = selectedRole + '_' + right;
+                const fullRoleName = `${selectedRole}_${right}`;
+                // Check if user already has this role
+                const isChecked = userRoles.includes(fullRoleName) ? 'checked' : '';
+                // cell.innerHTML = `<label for="${checkboxId}"><input type="checkbox" id="${checkboxId}" ${isChecked}> ${right}</label>`;
+                var disabled = '';
+                if (!can_edit) {
+                    disabled = 'pointer-events: none;opacity: 0.5;';
+                    description = "You don't have the rights to assign this role. Please contact an administrator";
+                }
+                var disabled = can_edit ? '': 'pointer-events: none;opacity: 0.5;';
+                rightsDiv.innerHTML = `<div title="${description}"><input type="checkbox" class="btn-check" id="${checkboxId}" autocomplete="off" ${isChecked} style="display:none"><label class="btn" for="${checkboxId}" style="${disabled}">${right}</label></div>`;
+                rolesDiv.appendChild(rightsDiv);
+            });
+            if (isUser && selectedRole == 'USER') {
+                rolesDiv.classList.add('disabled-table');
+                tableContainer.innerHTML = '<div class="" style="position: absolute;color: #fafafa;background-color: #2255ff;opacity: 1;top: 50%;left: 50%;transform: translate(-50%, -50%);margin: auto;z-index: 2;padding: 1rem;border-radius: 1rem;">You cannot edit your own USER roles</div>';
+            }
+            tableContainer.appendChild(rolesDiv);
+            roleDiv.appendChild(tableContainer);
+            roleOptions.appendChild(roleDiv);
+        }
+        dropdown.addEventListener('change', function() {
+            updateDetailsDisplay(this.value);
+        });
+
+        // Initial display
+        updateDetailsDisplay(dropdown.value);
+    } catch (error) {
+        console.error('Failed to fetch roles:', error);
+        roleOptions.innerHTML = '<p>Error loading roles.</p>';
+    }
+}
+
+function validateDeleteUser(userId, user_email) {
+    var text = `Are you sure you want to delete the following user from your company?<br><br>${user_email}`;
+    showConfirmationMessage("Delete user", text, "Cancel", "Delete", function() {deleteUser(userId)});
+}
+
+async function deleteUser(userId) {
+    try {
+        var formData = new FormData();
+        formData.append('user_id_to_remove', userId);
+        const response = await unifiedSendRequest(ACCESS_DELETE_USER, {formData: formData});
+        console.log(response);
+        if (response.status == 'success') {
+            showMessage('User deleted successfully!', true);
+            closeConfirmationModal();
+            getUsers();
+        } else {
+            console.error('Failed to delete user:', response);
+            showMessage('Failed to delete user. Please try again.', false);
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        showMessage('Failed to delete user' + error.message, false);
+    }
+}
+
+function addInputField() {
+    const container = document.getElementById('container');
+    const addUserButton = document.getElementById('addUserButton');
+    addUserButton.style.display = 'none';
+    document.getElementById('emailInput').style.display = 'block';
+    var addButton = document.getElementById('addButton');
+    addButton.style.display = 'block';
+    addButton.onclick = function() {
+            addUser(document.getElementById('emailInput').value);
+    };
+}
+
+async function addUser(userEmail) {
+    try {
+        var formData = new FormData();
+        if (!document.getElementById('emailInput').value.includes('@')) {
+            showMessage('Please enter a valid email address.', false);
+            return;
+        }
+        formData.append('user_email', userEmail);
+        const response = await unifiedSendRequest(ACCESS_ADD_USER, {formData: formData});
+        console.log(response);
+        if (response.status == 'success') {
+            showMessage('User added successfully!', true);
+            const addUserButton = document.getElementById('addUserButton');
+            document.getElementById('emailInput').style.display = 'none';
+            document.getElementById('addButton').style.display = 'none';
+            addUserButton.style.display = 'block';
+            getUsers();
+        } else {
+            console.error('Failed to add user:', response);
+            showMessage('Failed to add user. Please try again', false);
+        }
+    } catch (error) {
+        console.error('Error adding user:', error.message);
+        showMessage('Failed to add user' + error.message, false);
+    }
+}
+
+
+async function saveChanges(userId) {
+    var checkboxes = document.querySelectorAll('#role-table input[type="checkbox"]');
+    var selectedRoles = [];
+    var unselectedRoles = [];
+    
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            selectedRoles.push(checkbox.id);
+        } else {
+            unselectedRoles.push(checkbox.id);
+        }
+    });
+    var formData = new FormData();
+    formData.append('user_id_edited', userId);
+    formData.append('new_roles', selectedRoles);  // Convert array to JSON string as formData expects string values
+    formData.append('removed_roles', unselectedRoles);  // Convert array to JSON string as formData expects string values
+    if (selectedRoles.length == 0 && unselectedRoles.length == 0) {
+        showMessage("Please change at least one role.", false);
+        return;
+    }
+    try {
+        const response = await unifiedSendRequest(ACCESS_EDIT, {formData: formData});
+        console.log(response);
+        if (response.status == 'success') {
+            showMessage('Updated roles successfully', true);
+            getUsers();
+        } else {
+            showMessage('Failed to update roles. Please try again.', false);
+        }
+    } catch (error) {
+        console.error('Error updating roles:', error);
+        showMessage('An error occurred while updating roles.' + error, false);
+    }
+}
+
+
+
+function closeModal() {
+    var modal = document.getElementById('editModal');
+    modal.style.display = "none";
+}
+
+// Close the modal when clicking outside of it
+window.onclick = function(event) {
+    var modal = document.getElementById('editModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', getUsers);
+
+</script>
+{% endif %}
+
+{% schema %}
+  {
+    "name": "t:sections.forsure_access.name",
+    "class": "section",
+    "settings": [
+        {
+        "type": "image_picker",
+        "id": "trashcan",
+        "label": "Trashcan"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 36
+      }, {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 36
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.forsure_access.presets.name"
+      }
+    ]
+  }
+{% endschema %}

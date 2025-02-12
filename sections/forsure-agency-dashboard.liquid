@@ -1,0 +1,1262 @@
+{% schema %}
+    {
+      "name": "t:sections.forsure_agency_dashboard.name", 
+      "class": "section",
+      "settings": [
+        {
+            "type": "image_picker",
+            "id": "send_report",
+            "label": "Send Report"
+          },
+          {
+            "type": "image_picker",
+            "id": "open",
+            "label": "Open"
+          },
+          {
+            "type": "image_picker",
+            "id": "info",
+            "label": "Info"
+          },
+          {
+            "type": "image_picker",
+            "id": "share",
+            "label": "Share"
+          },
+          {
+            "type": "image_picker",
+            "id": "download",
+            "label": "Download"
+          },
+            {
+                "type": "range",
+                "id": "padding_top",
+                "min": 0,
+                "max": 100,
+                "step": 4,
+                "unit": "px",
+                "label": "t:sections.all.padding.padding_top",
+                "default": 36
+              }, {
+                "type": "range",
+                "id": "padding_bottom",
+                "min": 0,
+                "max": 100,
+                "step": 4,
+                "unit": "px",
+                "label": "t:sections.all.padding.padding_bottom",
+                "default": 36
+              }
+      ],
+      "presets": [
+        {
+          "name": "t:sections.forsure_agency_dashboard.presets.name"
+        }
+      ]
+    }
+    {% endschema %}
+    {{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+    {% if customer.tags contains 'member' %}
+      <style>
+         .section-{{ section.id }}-padding {
+        padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+        px;
+        padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+        px;
+      }
+    
+    
+      @media screen and (min-width: 750px) {
+        .section-{{ section.id }}-padding {
+          padding-top: {{ section.settings.padding_top }}
+          px;
+          padding-bottom: {{ section.settings.padding_bottom }}
+          px;
+        }
+      }
+        .grid-container {
+          display: grid;
+          grid-template-columns: 0.8fr 1fr 1fr 1fr; /* Four columns with varying sizes */
+          grid-template-rows: repeat(6, 1fr); /* Three rows */
+          gap: 10px; /* Space between grid items */
+          grid-auto-flow: dense; /* Allows items to fill smaller gaps in the grid */
+          height: 80vh;
+        }
+    
+        .grid-item {
+          border: 1px solid #ccc; /* Border for grid items */
+          margin: 10px; /* Padding inside grid items */
+          /* display: flex; */
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          border: 0.2rem solid #17161c;
+          border-radius: 1rem;
+          position: relative;
+          /* overflow-x: auto; */
+          overflow-x: auto;
+          scrollbar-width: none;
+          scrollbar-color: #2255ff #fafafa;
+        }
+        .grid-title {
+          background-color: #484B52;
+          color: #fafafa;
+          font-weight: bold;
+          width: 100%;
+          /* position: absolute; */
+          padding: 1rem;
+          /* top: 0; */
+          border-bottom: 0.2rem solid #17161c;
+          text-align: left;
+            position: sticky; /* Makes the title sticky */
+            top: 0; /* Sticks the title at the top of the container */
+            z-index: 1;
+        }
+        .deadlines {
+          grid-column: 1 / 2; /* Span across one column */
+          grid-row: 1 / span 5; /* Span across two rows */
+        }
+    
+        .tasks {
+          grid-column: 2 / 3; /* Span across two columns */
+          grid-row: 1 / span 2; /* Span across one row */
+        }
+    
+        .metrics {
+          grid-column: 3 / 5; /* Fourth column */
+          grid-row: 1 / span 3; /* First row */
+        }
+    
+        .not-registered {
+          grid-column: 2 / 3; /* Second column */
+          grid-row: 3 / span 3; /* Second row */
+        }
+    
+        .audits {
+          grid-column: 3 / 4; /* Third column */
+          grid-row: 4 / span 2; /* Second row */
+        }
+    
+        .errors {
+          grid-column: 4 / 5; /* Fourth column */
+          grid-row: 4 / span 2; /* Second row */
+        }
+        #reports-entry {
+            text-align: left;
+        }
+        .title-text-reports {
+            padding: 0 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+        .active-tab {
+            font-weight: bold; /* Highlight the active tab */
+            border-bottom: 2px solid #17161c; /* Add a bottom border to the active tab */
+        }
+        .active {
+            background-color: #2255ff44;
+        }
+        .deadline {
+            margin-bottom: 1rem;
+            border-radius: 1rem;
+            border: 0.2rem solid #17161c;
+            padding: 1rem 1rem 1rem 1rem;
+            cursor: pointer;
+        }
+        .activeDeadline {
+            background: #2255ff;
+            color: #fafafa;
+        }
+        .glyphicon-ok:before {
+            content: "\2713"
+        }
+        .filter-group {
+            margin: 0 2rem;
+        }
+        .scroll-entry {
+            padding: 1rem;
+            text-align: left;
+            overflow-y: auto; /* Allows scrolling for the content */
+            height: 100%;
+        }
+        .tab {
+            overflow: hidden;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            width: 25%;
+        }
+    
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+    
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+    
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+    
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 16px 12px;
+            border-top: none;
+        }
+        .indented-text {
+        display: inline-block;
+        margin-left: 20px; /* Adjust the value as needed to control the indentation */
+    }
+    
+    .hover-effect {
+        text-decoration: none; /* No underline by default */
+        font-weight: bold;
+        transition: color 0.3s ease, text-decoration 0.3s ease; /* Smooth transition for color and underline */
+    }
+    
+    .hover-effect:hover {
+        color: #2255ff; /* Change to your desired hover color */
+        text-decoration: underline; /* Underline the text on hover */
+    }
+    .theader {
+        border: 0.2rem solid #17161c;
+    }
+    .tentry {
+        border: none!important;
+        padding: 1rem!important;
+        text-align: left;
+    }
+    .icon {
+        margin-right: 1rem;
+    }
+    .activeDeadline div div svg #Electronics .st2 {
+        stroke: #fafafa;
+    }
+    .activeDeadline div div svg #Electronics .st5 {
+        stroke: #fafafa;
+        fill: #fafafa;
+    }
+    .activeDeadline div div svg #Batterie .st2  {
+        stroke: #fafafa;
+        /* fill: #fafafa; */
+    }
+    .activeDeadline div div svg #Batterie .st5  {
+        stroke: #fafafa;
+        fill: #fafafa;
+    }
+
+    .activeDeadline div div svg #Packaging .st2  {
+        stroke: #fafafa;
+        /* fill: #fafafa; */
+    }
+    .activeDeadline div div svg #Packaging .st5  {
+        stroke: #fafafa;
+        /* fill: #fafafa; */
+    }
+    .iconreport {
+        margin-right: 3rem;
+        cursor: pointer;
+    }
+    .report-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+}
+
+.report-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.report-name {
+    flex: 1;
+    cursor: pointer;
+}
+
+.assignee {
+    flex: 0;
+    margin-left: 1rem;
+    text-align: left;
+    white-space: nowrap;
+    margin-right: 15rem;
+}
+  .dropdown-menu .active a, .dropdown-menu .active a:focus, .dropdown-menu .active a:hover {
+    background-color: #2255ff
+  }
+      </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
+      <div class="section-{{ section.id }}-padding" style="width: 90%;margin: auto;    padding-top: 5rem;">
+        <div id="filters" style="display: flex;margin-left: auto;width: fit-content;margin-bottom: 2rem;">
+            <div class="filter-group">
+                <select
+                id="countries"
+                class="selectpicker"
+                multiple
+                data-live-search="true">
+                <option value="DE">Germany</option>
+                <option value="BE">Belgium</option>
+                <option value="IE">Ireland</option>
+                <option value="GB">Great Britain</option>
+                <option value="NL">Netherlands</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select
+                id="categories"
+                class="selectpicker"
+                multiple
+                data-live-search="true">
+                <option value="WEEE">WEEE</option>
+                <option value="Batteries">Batteries</option>
+                <option value="Packaging">Packaging</option>
+                <option value="SUP">SUP</option>
+                <option value="Textile">Textile</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select
+                id="companies"
+                class="selectpicker"
+                
+                data-live-search="true">
+                <option value="DE">Add new Company</option>
+                </select>
+            </div>
+            <div style="width: 25px;transform: rotate(270deg);cursor: pointer;align-self: center;" onclick='window.location.href="https://for-sure.net/pages/forsure-statistics";'>{% render 'icon-arrow-rounded' %}</div>
+        </div>
+        <div class="grid-container">
+            <div class="grid-item deadlines">
+                <div class="grid-title">Deadlines</div>
+                <div style="width: 100%">
+                    <div id="deadlines-entry" class="scroll-entry"></div>
+                </div>
+                </div>
+            <div class="grid-item tasks">
+                <div class="grid-title">
+                  <div style="display: flex; justify-content: space-between">
+                      <div>Tasks</div>
+                      <div><svg style="width: 14px;margin-right: 1rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#fafafa" d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg></div>
+                  </div>
+                </div>
+                <div style="width: 100%">
+                    <table id="tasks-table" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th class="theader" style="width: 50%">Name</th>
+                                <th class="theader">Status</th>
+                                <th class="theader">Deadline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="grid-item metrics">
+                <div class="grid-title">Report Overview</div>
+                <div class="tab-buttons" style="display: flex; justify-content: space-between">
+                    <div class="tab">
+                        <button id="missing" class="tablinks title-text-reports active-tab" style="color: #17161c;" onclick="fillReports('missing')">
+                            <div style="display: flex;margin: auto;width: fit-content;">
+                                <svg class="icon" width="20px" height="20px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" zoomAndPan="magnify" viewBox="0 0 384 383.999986" height="512" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="4eafdf85f2"><path d="M 21.46875 21.46875 L 362.53125 21.46875 L 362.53125 362.53125 L 21.46875 362.53125 Z M 21.46875 21.46875 " clip-rule="nonzero"/></clipPath><clipPath id="08f3036b4d"><path d="M 192 21.46875 C 97.820312 21.46875 21.46875 97.820312 21.46875 192 C 21.46875 286.179688 97.820312 362.53125 192 362.53125 C 286.179688 362.53125 362.53125 286.179688 362.53125 192 C 362.53125 97.820312 286.179688 21.46875 192 21.46875 Z M 192 21.46875 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#4eafdf85f2)"><g clip-path="url(#08f3036b4d)"><path fill="#fafafa" d="M 21.46875 21.46875 L 362.53125 21.46875 L 362.53125 362.53125 L 21.46875 362.53125 Z M 21.46875 21.46875 " fill-opacity="1" fill-rule="nonzero"/></g></g><path fill="#a80000" d="M 172.800781 249.601562 L 211.199219 249.601562 L 211.199219 288 L 172.800781 288 Z M 172.800781 96 L 211.199219 96 L 211.199219 211.199219 L 172.800781 211.199219 Z M 191.808594 0 C 85.824219 0 0 86.015625 0 192 C 0 297.984375 85.824219 384 191.808594 384 C 297.984375 384 384 297.984375 384 192 C 384 86.015625 297.984375 0 191.808594 0 Z M 192 345.601562 C 107.136719 345.601562 38.398438 276.863281 38.398438 192 C 38.398438 107.136719 107.136719 38.398438 192 38.398438 C 276.863281 38.398438 345.601562 107.136719 345.601562 192 C 345.601562 276.863281 276.863281 345.601562 192 345.601562 Z M 192 345.601562 " fill-opacity="1" fill-rule="nonzero"/></svg>
+                                <div>Missing (24)</div>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="tab">
+                        <button id="warning" class="tablinks title-text-reports" style="color: #17161c" onclick="fillReports('warning')">
+                            <div style="display: flex;margin: auto;width: fit-content;">
+                                <svg class="icon" width="20px" height="20px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" zoomAndPan="magnify" viewBox="0 0 384 383.999986" height="512" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="ac75a94e90"><path d="M 1 18.152344 L 378 18.152344 L 378 345.902344 L 1 345.902344 Z M 1 18.152344 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#ac75a94e90)"><path fill="#ffca5b" d="M 373.867188 306.578125 L 211.59375 30.933594 C 211.308594 30.453125 211.007812 29.980469 210.695312 29.515625 C 210.378906 29.054688 210.050781 28.601562 209.707031 28.160156 C 209.363281 27.71875 209.003906 27.289062 208.632812 26.871094 C 208.261719 26.453125 207.875 26.046875 207.476562 25.652344 C 207.078125 25.257812 206.667969 24.878906 206.246094 24.511719 C 205.824219 24.148438 205.390625 23.792969 204.941406 23.457031 C 204.496094 23.117188 204.039062 22.792969 203.574219 22.484375 C 203.105469 22.175781 202.628906 21.882812 202.144531 21.605469 C 201.660156 21.328125 201.164062 21.066406 200.660156 20.820312 C 200.160156 20.574219 199.648438 20.34375 199.128906 20.132812 C 198.613281 19.917969 198.089844 19.722656 197.558594 19.546875 C 197.027344 19.367188 196.492188 19.207031 195.949219 19.0625 C 195.410156 18.917969 194.863281 18.792969 194.316406 18.683594 C 193.765625 18.574219 193.214844 18.484375 192.660156 18.414062 C 192.105469 18.339844 191.546875 18.285156 190.988281 18.25 C 190.429688 18.214844 189.871094 18.195312 189.3125 18.195312 C 188.75 18.195312 188.191406 18.214844 187.632812 18.25 C 187.074219 18.285156 186.519531 18.339844 185.964844 18.414062 C 185.410156 18.484375 184.855469 18.574219 184.308594 18.683594 C 183.757812 18.792969 183.214844 18.917969 182.671875 19.0625 C 182.132812 19.207031 181.59375 19.367188 181.066406 19.546875 C 180.535156 19.722656 180.011719 19.917969 179.492188 20.132812 C 178.976562 20.34375 178.464844 20.574219 177.960938 20.820312 C 177.457031 21.066406 176.964844 21.328125 176.476562 21.605469 C 175.992188 21.882812 175.515625 22.175781 175.050781 22.484375 C 174.582031 22.792969 174.125 23.117188 173.679688 23.457031 C 173.234375 23.792969 172.800781 24.148438 172.375 24.511719 C 171.953125 24.878906 171.542969 25.257812 171.144531 25.652344 C 170.746094 26.046875 170.363281 26.453125 169.988281 26.871094 C 169.617188 27.289062 169.261719 27.71875 168.914062 28.160156 C 168.570312 28.601562 168.242188 29.054688 167.929688 29.515625 C 167.613281 29.980469 167.3125 30.453125 167.03125 30.933594 L 4.761719 306.578125 C 4.1875 307.554688 3.675781 308.566406 3.234375 309.609375 C 2.792969 310.65625 2.417969 311.722656 2.117188 312.816406 C 1.8125 313.910156 1.585938 315.019531 1.429688 316.144531 C 1.273438 317.269531 1.191406 318.398438 1.183594 319.53125 C 1.175781 320.667969 1.242188 321.796875 1.382812 322.921875 C 1.523438 324.046875 1.738281 325.160156 2.027344 326.257812 C 2.3125 327.355469 2.671875 328.429688 3.101562 329.480469 C 3.53125 330.53125 4.027344 331.546875 4.589844 332.53125 C 5.152344 333.519531 5.777344 334.460938 6.464844 335.363281 C 7.152344 336.265625 7.894531 337.121094 8.695312 337.925781 C 9.496094 338.730469 10.34375 339.480469 11.242188 340.171875 C 12.140625 340.867188 13.082031 341.496094 14.0625 342.066406 C 15.042969 342.636719 16.058594 343.140625 17.105469 343.574219 C 18.152344 344.011719 19.226562 344.375 20.320312 344.671875 C 21.414062 344.964844 22.527344 345.1875 23.652344 345.335938 C 24.777344 345.484375 25.90625 345.558594 27.039062 345.558594 L 351.589844 345.558594 C 371.585938 345.558594 384.015625 323.8125 373.867188 306.578125 Z M 32.066406 317.820312 L 187.335938 58.246094 L 342.613281 317.820312 Z M 32.066406 317.820312 " fill-opacity="1" fill-rule="nonzero"/></g><path fill="#ffca5b" d="M 168.265625 280.28125 C 168.265625 268.644531 176.351562 260.238281 187.335938 260.238281 C 198.972656 260.238281 206.414062 268.644531 206.414062 280.28125 C 206.414062 291.601562 198.972656 300.324219 187.335938 300.324219 C 176.023438 300.324219 168.265625 291.601562 168.265625 280.28125 Z M 176.449219 244.402344 L 168.570312 134.957031 C 168.175781 129.511719 176.753906 125.027344 187.34375 125.027344 C 197.925781 125.027344 206.519531 129.511719 206.125 134.957031 L 198.234375 244.402344 C 197.964844 248.117188 193.1875 251.046875 187.335938 251.046875 C 181.484375 251.046875 176.703125 248.117188 176.441406 244.402344 Z M 176.449219 244.402344 " fill-opacity="1" fill-rule="nonzero"/></svg>
+                                <div>Double-Check (12)</div>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="tab">
+                        <button id="to_send" class="tablinks title-text-reports" style="color: #17161c;" onclick="fillReports('to_send')">
+                            <div style="display: flex;margin: auto;width: fit-content;">
+                                <svg class="icon" width="20px" height="20px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                    viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+                                    <style type="text/css">
+                                    .st15{fill:#2255ff;stroke:#2255ff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+                                    .st1{display:none;}
+                                    .st2{display:inline;}
+                                    .st3{fill:none;stroke:#2255ff;stroke-width:10;stroke-linecap:round;stroke-miterlimit:10;}
+                                    .st4{display:inline;fill:none;stroke:#2255ff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+                                    </style>
+                                    <g id="data-analytics-icon">
+                                    </g>
+                                    <g id="data-analytics-icon_-_copie" class="st1">
+                                    </g>
+                                    <g id="flats-residential-apartment-ic">
+                                    </g>
+                                    <g id="goods-contents-icon">
+                                    </g>
+                                    <g id="government_building_icon">
+                                    </g>
+                                    <g id="partner-handshake-icon" class="st1">
+                                    </g>
+                                    <g id="partner-handshake-icon_-_copie">
+                                    </g>
+                                    <g id="Send_icon">
+                                    <path class="st15" d="M492.79,24.13L359.35,472.06c-7.03,23.6-36.73,31.12-54.15,13.71l-75.23-122.57
+                                    c-7.51-13.13-5.69-27.76,2.38-42.66l72.75-123.71l-117.73,71.96c-16.57,10.74-29.35,9.1-45.27,0.13L16.03,196.58
+                                    c-17.41-17.41-9.9-47.11,13.71-54.15L477.66,9C486.92,6.24,495.55,14.86,492.79,24.13z M52.69,454.77l-2.29-2.29
+                                    c-4.69-4.69-4.69-12.28,0-16.97l109-109c4.69-4.69,12.28-4.69,16.97,0l2.29,2.29c4.69,4.69,4.69,12.28,0,16.97l-109,109
+                                    C64.97,459.46,57.37,459.46,52.69,454.77z M178.6,490.74l57.43-57.43c4.27-4.27,4.27-13.18-1.05-18.49h0
+                                    c-5.32-5.32-13.94-5.03-18.21-0.76l-57.43,57.43c-4.27,4.27-4.55,13.74,0.76,19.06h0C165.43,495.86,174.33,495.01,178.6,490.74z
+                                    M28.96,341.82l57.43-57.43c4.27-4.27,4.27-13.18-1.05-18.49l0,0c-5.32-5.32-13.94-5.03-18.21-0.76L9.7,322.56
+                                    c-4.27,4.27-4.55,13.74,0.76,19.06h0C15.78,346.94,24.69,346.09,28.96,341.82z"/>
+                                    </g>
+                                    </svg>
+                            <div>To Send (23)</div>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="tab">
+                        <button id="done" class="tablinks title-text-reports" style="color: #17161c" onclick="fillReports('done')">
+                            <div style="display: flex;margin: auto;width: fit-content;"> 
+                                <svg class="icon" width="20px" height="20px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" zoomAndPan="magnify" viewBox="0 0 384 383.999986" height="512" preserveAspectRatio="xMidYMid meet" version="1.0"><path fill="#40d48b" d="M 384 192 C 384 195.140625 383.921875 198.28125 383.769531 201.421875 C 383.613281 204.558594 383.382812 207.691406 383.074219 210.820312 C 382.765625 213.945312 382.382812 217.0625 381.921875 220.171875 C 381.460938 223.28125 380.921875 226.375 380.3125 229.457031 C 379.699219 232.539062 379.007812 235.605469 378.246094 238.652344 C 377.484375 241.699219 376.644531 244.726562 375.734375 247.734375 C 374.820312 250.742188 373.835938 253.722656 372.777344 256.683594 C 371.71875 259.640625 370.585938 262.570312 369.386719 265.476562 C 368.183594 268.378906 366.910156 271.25 365.566406 274.089844 C 364.222656 276.929688 362.808594 279.738281 361.328125 282.507812 C 359.847656 285.277344 358.300781 288.011719 356.683594 290.707031 C 355.070312 293.402344 353.386719 296.058594 351.640625 298.667969 C 349.894531 301.28125 348.085938 303.851562 346.214844 306.375 C 344.34375 308.898438 342.410156 311.375 340.417969 313.804688 C 338.425781 316.234375 336.371094 318.609375 334.261719 320.9375 C 332.152344 323.265625 329.988281 325.542969 327.765625 327.765625 C 325.542969 329.984375 323.265625 332.152344 320.9375 334.261719 C 318.609375 336.371094 316.234375 338.425781 313.804688 340.417969 C 311.375 342.410156 308.898438 344.34375 306.375 346.214844 C 303.851562 348.085938 301.28125 349.894531 298.667969 351.640625 C 296.058594 353.386719 293.402344 355.066406 290.707031 356.683594 C 288.011719 358.300781 285.28125 359.847656 282.507812 361.328125 C 279.738281 362.808594 276.929688 364.222656 274.089844 365.566406 C 271.25 366.910156 268.378906 368.183594 265.476562 369.386719 C 262.570312 370.585938 259.640625 371.71875 256.683594 372.777344 C 253.722656 373.835938 250.742188 374.820312 247.734375 375.734375 C 244.726562 376.644531 241.699219 377.484375 238.652344 378.246094 C 235.605469 379.007812 232.539062 379.699219 229.457031 380.3125 C 226.375 380.925781 223.28125 381.460938 220.171875 381.921875 C 217.0625 382.382812 213.945312 382.765625 210.820312 383.074219 C 207.691406 383.382812 204.558594 383.613281 201.421875 383.769531 C 198.28125 383.921875 195.140625 384 192 384 C 188.859375 384 185.71875 383.921875 182.578125 383.769531 C 179.441406 383.613281 176.308594 383.382812 173.179688 383.074219 C 170.054688 382.765625 166.9375 382.382812 163.828125 381.921875 C 160.71875 381.460938 157.625 380.925781 154.542969 380.3125 C 151.460938 379.699219 148.394531 379.007812 145.347656 378.246094 C 142.300781 377.484375 139.273438 376.644531 136.265625 375.734375 C 133.257812 374.820312 130.277344 373.835938 127.316406 372.777344 C 124.359375 371.71875 121.429688 370.585938 118.523438 369.386719 C 115.621094 368.183594 112.75 366.910156 109.910156 365.566406 C 107.070312 364.222656 104.261719 362.808594 101.492188 361.328125 C 98.71875 359.847656 95.988281 358.300781 93.292969 356.683594 C 90.597656 355.066406 87.941406 353.386719 85.332031 351.640625 C 82.71875 349.894531 80.148438 348.085938 77.625 346.214844 C 75.101562 344.34375 72.625 342.410156 70.195312 340.417969 C 67.765625 338.425781 65.390625 336.371094 63.0625 334.261719 C 60.734375 332.152344 58.457031 329.984375 56.234375 327.765625 C 54.011719 325.542969 51.847656 323.265625 49.738281 320.9375 C 47.628906 318.609375 45.574219 316.234375 43.582031 313.804688 C 41.589844 311.375 39.65625 308.898438 37.785156 306.375 C 35.914062 303.851562 34.105469 301.28125 32.359375 298.667969 C 30.613281 296.058594 28.929688 293.402344 27.316406 290.707031 C 25.699219 288.011719 24.152344 285.277344 22.671875 282.507812 C 21.191406 279.738281 19.777344 276.929688 18.433594 274.089844 C 17.089844 271.25 15.816406 268.378906 14.613281 265.476562 C 13.414062 262.570312 12.28125 259.640625 11.222656 256.683594 C 10.164062 253.722656 9.179688 250.742188 8.265625 247.734375 C 7.355469 244.726562 6.515625 241.699219 5.753906 238.652344 C 4.992188 235.605469 4.300781 232.539062 3.6875 229.457031 C 3.078125 226.375 2.539062 223.28125 2.078125 220.171875 C 1.617188 217.0625 1.234375 213.945312 0.925781 210.820312 C 0.617188 207.691406 0.386719 204.558594 0.230469 201.421875 C 0.078125 198.28125 0 195.140625 0 192 C 0 188.859375 0.078125 185.71875 0.230469 182.578125 C 0.386719 179.441406 0.617188 176.308594 0.925781 173.179688 C 1.234375 170.054688 1.617188 166.9375 2.078125 163.828125 C 2.539062 160.71875 3.078125 157.625 3.6875 154.542969 C 4.300781 151.460938 4.992188 148.394531 5.753906 145.347656 C 6.515625 142.300781 7.355469 139.273438 8.265625 136.265625 C 9.179688 133.257812 10.164062 130.277344 11.222656 127.316406 C 12.28125 124.359375 13.414062 121.429688 14.613281 118.523438 C 15.816406 115.621094 17.089844 112.75 18.433594 109.910156 C 19.777344 107.070312 21.191406 104.261719 22.671875 101.492188 C 24.152344 98.71875 25.699219 95.988281 27.316406 93.292969 C 28.929688 90.597656 30.613281 87.941406 32.359375 85.332031 C 34.105469 82.71875 35.914062 80.148438 37.785156 77.625 C 39.65625 75.101562 41.589844 72.625 43.582031 70.195312 C 45.574219 67.765625 47.628906 65.390625 49.738281 63.0625 C 51.847656 60.734375 54.011719 58.457031 56.234375 56.234375 C 58.457031 54.011719 60.734375 51.847656 63.0625 49.738281 C 65.390625 47.628906 67.765625 45.574219 70.195312 43.582031 C 72.625 41.589844 75.101562 39.65625 77.625 37.785156 C 80.148438 35.914062 82.71875 34.105469 85.332031 32.359375 C 87.941406 30.613281 90.597656 28.929688 93.292969 27.316406 C 95.988281 25.699219 98.71875 24.152344 101.492188 22.671875 C 104.261719 21.191406 107.070312 19.777344 109.910156 18.433594 C 112.75 17.089844 115.621094 15.816406 118.523438 14.613281 C 121.429688 13.414062 124.359375 12.28125 127.316406 11.222656 C 130.277344 10.164062 133.257812 9.179688 136.265625 8.265625 C 139.273438 7.355469 142.300781 6.515625 145.347656 5.753906 C 148.394531 4.992188 151.460938 4.300781 154.542969 3.6875 C 157.625 3.078125 160.71875 2.539062 163.828125 2.078125 C 166.9375 1.617188 170.054688 1.234375 173.179688 0.925781 C 176.308594 0.617188 179.441406 0.386719 182.578125 0.230469 C 185.71875 0.078125 188.859375 0 192 0 C 195.140625 0 198.28125 0.078125 201.421875 0.230469 C 204.558594 0.386719 207.691406 0.617188 210.820312 0.925781 C 213.945312 1.234375 217.0625 1.617188 220.171875 2.078125 C 223.28125 2.539062 226.375 3.078125 229.457031 3.6875 C 232.539062 4.300781 235.605469 4.992188 238.652344 5.753906 C 241.699219 6.515625 244.726562 7.355469 247.734375 8.265625 C 250.742188 9.179688 253.722656 10.164062 256.683594 11.222656 C 259.640625 12.28125 262.570312 13.414062 265.476562 14.613281 C 268.378906 15.816406 271.25 17.089844 274.089844 18.433594 C 276.929688 19.777344 279.738281 21.191406 282.507812 22.671875 C 285.28125 24.152344 288.011719 25.699219 290.707031 27.316406 C 293.402344 28.929688 296.058594 30.613281 298.667969 32.359375 C 301.28125 34.105469 303.851562 35.914062 306.375 37.785156 C 308.898438 39.65625 311.375 41.589844 313.804688 43.582031 C 316.234375 45.574219 318.609375 47.628906 320.9375 49.738281 C 323.265625 51.847656 325.542969 54.011719 327.765625 56.234375 C 329.988281 58.457031 332.152344 60.734375 334.261719 63.0625 C 336.371094 65.390625 338.425781 67.765625 340.417969 70.195312 C 342.410156 72.625 344.34375 75.101562 346.214844 77.625 C 348.085938 80.148438 349.894531 82.71875 351.640625 85.332031 C 353.386719 87.941406 355.070312 90.597656 356.683594 93.292969 C 358.300781 95.988281 359.847656 98.71875 361.328125 101.492188 C 362.808594 104.261719 364.222656 107.070312 365.566406 109.910156 C 366.910156 112.75 368.183594 115.621094 369.386719 118.523438 C 370.585938 121.429688 371.71875 124.359375 372.777344 127.316406 C 373.835938 130.277344 374.820312 133.257812 375.734375 136.265625 C 376.644531 139.273438 377.484375 142.300781 378.246094 145.347656 C 379.007812 148.394531 379.699219 151.460938 380.3125 154.542969 C 380.921875 157.625 381.460938 160.71875 381.921875 163.828125 C 382.382812 166.9375 382.765625 170.054688 383.074219 173.179688 C 383.382812 176.308594 383.613281 179.441406 383.769531 182.578125 C 383.921875 185.71875 384 188.859375 384 192 Z M 384 192 " fill-opacity="1" fill-rule="nonzero"/><path fill="#fafafa" d="M 297.417969 155.730469 C 307.691406 145.449219 307.691406 128.785156 297.410156 118.507812 C 287.128906 108.234375 270.464844 108.234375 260.1875 118.519531 L 169.097656 209.648438 L 123.625 164.179688 C 113.347656 153.898438 96.683594 153.898438 86.402344 164.179688 C 76.125 174.457031 76.125 191.121094 86.402344 201.398438 L 150.492188 265.488281 C 155.429688 270.425781 162.125 273.195312 169.105469 273.195312 C 176.085938 273.195312 182.78125 270.417969 187.71875 265.480469 Z M 297.417969 155.730469 " fill-opacity="1" fill-rule="nonzero"/></svg>
+                                <div>Done (61)</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div id="reports-entry" style="width: 100%">
+                </div>
+            </div>
+            <div class="grid-item not-registered">
+                <div class="grid-title">Companies Unregistered</div>
+                <div style="width: 100%">
+                    <table id="unreg-table" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th class="theader" style="width: 60%">Company</th>
+                                <th class="theader">Unregistered in</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            <div class="grid-item audits">
+                <div class="grid-title">Upcoming Audits</div>
+                <div style="width: 100%">
+                    <table id="audit-table" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th class="theader">Company</th>
+                                <th class="theader">Country</th>
+                                <th class="theader">Category</th>
+                                <th class="theader">Threshold</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="grid-item errors">
+                <div class="grid-title">Errors</div>
+                <div style="width: 100%">
+                    <table id="error-table" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th class="theader">Company</th>
+                                <th class="theader">Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+      </div>
+      </div>
+      <script>
+    
+        var deadlineSelected = null;
+    
+        var reports = {
+            "missing": [
+                { "name": "ForSURE Europe B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data"},
+                { "name": "Aurora Innovations B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data"},
+                { "name": "Blue Horizon Ventures B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data"},
+                { "name": "Redstone Technologies B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "OpalWave B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Quantum Leap B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Bright Future B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Silver Lake Ventures B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Golden Gate B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Neptune Ventures B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Blue Ocean B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Sunset Enterprises B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Crimson Sky B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Ironclad Industries B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Emerald Isle B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Ivory Tower B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Galaxy Systems B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Starship Technologies B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Meteoric Rise B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Cosmic Innovations B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Zephyr Labs B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Violet Ventures B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Lunar Tech B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" },
+                { "name": "Eclipse Industries B.V.", "reportname": "DE Batt 07.2024", "warning": "Missing data" }
+    
+            ],
+            "warning": [
+                { "name": "PrimeWave Solutions B.V.", "reportname": "DE Batt 07.2024", "warning": "Exceeded 20%" },
+                { "name": "Vortex Industries B.V.", "reportname": "DE Batt 07.2024", "warning": "Applied Rule 1" },
+                { "name": "GreenLeaf Technologies B.V.", "reportname": "DE Batt 07.2024", "warning": "Applied Rule 5" },
+                { "name": "AquaDynamics B.V.", "reportname": "DE Batt 07.2024", "warning": "Exceeded 25%" },
+                { "name": "Thunderstorm Tech B.V.", "reportname": "DE Batt 07.2024", "warning": "Applied Rule 1" },
+                { "name": "Pine Hill B.V.", "reportname": "DE Batt 07.2024", "warning": "Exceeded 22%" },
+                { "name": "MapleWave B.V.", "reportname": "DE Batt 07.2024", "warning": "Exceeded 27%" },
+                { "name": "Crystal Clear B.V.", "reportname": "DE Batt 07.2024", "warning": "Applied Rule 2" },
+                { "name": "Dynamic Systems B.V.", "reportname": "DE Batt 07.2024", "warning": "Applied Rule 4" },
+                { "name": "Velocity Ventures B.V.", "reportname": "DE Batt 07.2024", "warning": "Exceeded 20%" },
+                { "name": "Pulse Innovations B.V.", "reportname": "DE Batt 07.2024", "warning": "Applied Rule 2" },
+                { "name": "Cloud Heights B.V.", "reportname": "DE Batt 07.2024", "warning": "Exceeded 32%" }
+            ],
+            "to_send": [
+                { "name": "UrbanNest Developments B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Skyline Logistics B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Neptune Dynamics B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Evergreen Technologies B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "SkyHigh Enterprises B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Canyon Creations B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Seaside Systems B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Forest Grove B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Cedar Valley B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Aspen Technologies B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "PebblePath B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Riverside Solutions B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "MountainPeak B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Cascade Innovations B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Sunset Valley B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Pinnacle Point B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Desert Bloom B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Meadowbrook B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Wilderness Ventures B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Horizon Heights B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Ocean Breeze B.V.", "reportname": "DE Batt 07.2024" },
+                { "name": "Sapphire Skies B.V.", "reportname": "DE Batt 07.2024" },
+            ],
+            "done": [
+                { "name": "Golden Bridge Investments B.V.", "reportname": "DE Batt 07.2024", "info": "Sent yesterday" },
+                { "name": "EchoStar Enterprises B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 01.09.2024" },
+                { "name": "Silver Lining Consulting B.V.", "reportname": "DE Batt 07.2024", 'info': 'Sent on 01.09.2024' },
+                { "name": "AmberWave Technologies B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 02.09.2024" },
+                { "name": "Topaz Labs B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 03.09.2024" },
+                { "name": "Jade Solutions B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 04.09.2024" },
+                { "name": "Onyx Innovations B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 05.09.2024" },
+                { "name": "IvoryCoast B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 06.09.2024" },
+                { "name": "Emerald Edge B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 07.09.2024" },
+                { "name": "Garnet Group B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 08.09.2024" },
+                { "name": "Turquoise Technologies B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 09.09.2024" },
+                { "name": "Crimson Tide B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 10.09.2024" },
+                { "name": "Obsidian Enterprises B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 11.09.2024" },
+                { "name": "Ruby Rail B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 12.09.2024" },
+                { "name": "Amethyst Ventures B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 13.09.2024" },
+                { "name": "Pearl Partners B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 14.09.2024" },
+                { "name": "Opal Oceans B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 15.09.2024" },
+                { "name": "Moonstone Media B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 16.09.2024" },
+                { "name": "Aquamarine Associates B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 17.09.2024" },
+                { "name": "Topaz Trust B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 18.09.2024" },
+                { "name": "Diamond Dynamics B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 19.09.2024" },
+                { "name": "Sapphire Streams B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 20.09.2024" },
+                { "name": "Peridot Projects B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 21.09.2024" },
+                { "name": "Heliotrope Holdings B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 22.09.2024" },
+                { "name": "Zirconia Zone B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 23.09.2024" },
+                { "name": "Coral Coast B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 24.09.2024" },
+                { "name": "Quartz Quest B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 25.09.2024" },
+                { "name": "Fluorite Frameworks B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 26.09.2024" },
+                { "name": "JetStream B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 27.09.2024" },
+                { "name": "Rainforest Industries B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 28.09.2024" },
+                { "name": "Seashell Solutions B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 29.09.2024" },
+                { "name": "Stormfront Tech B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 30.09.2024" },
+                { "name": "Pine Valley Ventures B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 01.10.2024" },
+                { "name": "Golden Horizon B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 02.10.2024" },
+                { "name": "Emerald City B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 03.10.2024" },
+                { "name": "Midnight Sun B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 04.10.2024" },
+                { "name": "Polar Peak B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 05.10.2024" },
+                { "name": "Oasis Development B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 06.10.2024" },
+                { "name": "Waves & Winds B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 07.10.2024" },
+                { "name": "Sand Dunes B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 08.10.2024" },
+                { "name": "Northern Lights B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 09.10.2024" },
+                { "name": "Crater Lake B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 10.10.2024" },
+                { "name": "Mesa Ridge B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 11.10.2024" },
+                { "name": "Hollow Stone B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 12.10.2024" },
+                { "name": "Platinum Crest B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 13.10.2024" },
+                { "name": "Titanium Trust B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 14.10.2024" },
+                { "name": "Bronze Barrel B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 15.10.2024" },
+                { "name": "Iron Heights B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 16.10.2024" },
+                { "name": "Copper Canyon B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 17.10.2024" },
+                { "name": "Aluminium Arc B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 18.10.2024" },
+                { "name": "Nickel Ridge B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 19.10.2024" },
+                { "name": "Zinc Zone B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 20.10.2024" },
+                { "name": "Cobalt Coast B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 21.10.2024" },
+                { "name": "Platinum Plaza B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 22.10.2024" },
+                { "name": "Quartz Quay B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 23.10.2024" },
+                { "name": "Helix Heights B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 24.10.2024" },
+                { "name": "Vertex Ventures B.V.", "reportname": "DE Batt 07.2024", "info": "Sent on 25.10.2024" }
+            ]
+        }
+    
+function fillReports(key) {
+    // Unset the active key
+    var elements = document.querySelectorAll('.title-text-reports');
+    elements.forEach(function(element) {
+        if (element.classList.contains('active')) {
+            element.classList.remove('active');
+        }
+    });
+    document.getElementById(key).classList.add('active');
+
+    var reportEntry = document.getElementById('reports-entry');
+    reportEntry.innerHTML = '';
+
+    // Define a broader list of assignees for diversity
+    var assignees = ['Tom', 'Martin', 'Alice', 'Sophia', 'Liam', 'Olivia', 'Noah', 'Emma', 'Ava', 'Isabella'];
+
+    // Create a new table element
+    var table = document.createElement('table');
+    table.id = 'reports-table';
+    table.style.width = '100%';
+
+    // Create the table header
+    var thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th class="theader" style="width: 40%">Company</th>
+            <th class="theader" style="width: 25%">Assignee</th>
+            <th class="theader">Actions</th>
+        </tr>`;
+    table.appendChild(thead);
+
+    // Create the table body
+    var tbody = document.createElement('tbody');
+
+    reports[key].forEach(function(report) {
+        // Create a new table row
+        var tr = document.createElement('tr');
+
+        // Pick a random assignee from the list
+        var assignee = assignees[Math.floor(Math.random() * assignees.length)];
+
+        // Create the Company cell
+        var tdCompany = document.createElement('td');
+        tdCompany.classList.add('tentry');
+        tdCompany.innerHTML = `<div class="hover-effect report-name" onclick="window.location.href='https://for-sure.net/pages/forsure-statistics';">${report.name}</div>`;
+        tr.appendChild(tdCompany);
+
+        // Create the Assignee cell
+        var tdAssignee = document.createElement('td');
+        tdAssignee.className = 'assignee';
+        tdAssignee.classList.add('tentry');
+        tdAssignee.style.textAlign = 'left'; // Aligns assignee names to the right
+        tdAssignee.textContent = assignee;
+        tr.appendChild(tdAssignee);
+
+        // Create the Actions cell
+        var tdActions = document.createElement('td');
+        tdActions.classList.add('tentry');
+        tdActions.style.marginLeft = 'auto'; // Aligns assignee names to the right
+        if (key === 'done') {
+            var svg = `<svg style="width: 20px;margin-right:1rem;cursor: pointer;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><title>${report.info}</title><path fill="#40d48b" d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>`;
+            tdActions.innerHTML = svg;
+        } else if (key === 'to_send') {
+            var imgOpen = '<img class="iconreport" width="20px" style="cursor: pointer;" src="{{ section.settings.open | image_url }}" alt="{{ section.settings.open.alt | escape }}" loading="lazy">';
+            var svgAnalyse = '<svg class="iconreport" width="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>';
+            var imgSend = '<img class="iconreport" width="20px" style="cursor: pointer;margin-right: 0;" src="{{ section.settings.send_report | image_url }}" alt="{{ section.settings.send_report.alt | escape }}" loading="lazy">';
+            var imgShare = '<img class="iconreport" width="20px" style="cursor: pointer;" src="{{ section.settings.share | image_url }}" alt="{{ section.settings.share.alt | escape }}" loading="lazy">';
+            var imgDownload = '<img class="iconreport" width="20px" style="cursor: pointer;" src="{{ section.settings.download | image_url }}" alt="{{ section.settings.download.alt | escape }}" loading="lazy">';
+            tdActions.innerHTML = `<div style="width: fit-content;margin: auto;">${svgAnalyse}${imgDownload}${imgShare}${imgOpen}${imgSend}</div>`;
+        } else if (key === 'warning') {
+            tdActions.textContent = report.warning;
+        } else {
+            var svg = `<svg style="width: 20px;margin-right:1rem;cursor: pointer;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>${report.warning}</title><path fill='#a80000' d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>`;
+            tdActions.innerHTML = svg;
+        }
+        tr.appendChild(tdActions);
+
+        // Append the row to the tbody
+        tbody.appendChild(tr);
+    });
+
+    // Append the tbody to the table
+    table.appendChild(tbody);
+
+    // Append the table to the reports-entry element
+    reportEntry.appendChild(table);
+}
+
+// Call the function to fill the table with reports
+fillReports('to_send');
+
+    
+var deadlines = [
+    {'country': 'DE', 'category': 'WEEE', 'Deadline': '2024-09-15', 'name': 'WEEE Report', 'full_name': 'Monthly WEEE Report'},
+    {'country': 'IE', 'category': 'Batteries', 'Deadline': '2024-09-19', 'name': 'Battery Report', 'full_name': 'Monthly Battery Report'},
+    {'country': 'IE', 'category': 'WEEE', 'Deadline': '2024-09-19', 'name': 'WEEE Report', 'full_name': 'Monthly WEEE Report'},
+    {'country': 'GB', 'category': 'Packaging', 'Deadline': '2024-10-01', 'name': 'WEEE Quarterly Report', 'full_name': 'Packaging Quarterly Reports'},
+    {'country': 'IE', 'category': 'Packaging', 'Deadline': '2024-10-10', 'name': 'Packaging', 'full_name': 'Packaging Self-Complier'},
+    {'country': 'DE', 'category': 'WEEE', 'Deadline': '2024-10-15', 'name': 'WEEE Report', 'full_name': 'Monthly WEEE Report'},
+    {'country': 'IE', 'category': 'WEEE', 'Deadline': '2024-10-19', 'name': 'WEEE Report', 'full_name': 'Monthly WEEE Report'},
+    {'country': 'IE', 'category': 'Batteries', 'Deadline': '2024-10-19', 'name': 'Battery Report', 'full_name': 'Monthly Battery Report'},
+    {'country': 'GB', 'category': 'WEEE', 'Deadline': '2024-10-31', 'name': 'WEEE Quarterly Report', 'full_name': 'WEEE Quarterly Report'},
+    {'country': 'GB', 'category': 'Batteries', 'Deadline': '2024-10-31', 'name': 'Batteries Quarterly Report', 'full_name': 'Batteries Quarterly Report'},
+    {'country': 'DE', 'category': 'WEEE', 'Deadline': '2024-11-15', 'name': 'WEEE Report', 'full_name': 'Monthly WEEE Report'},
+    {'country': 'IE', 'category': 'WEEE', 'Deadline': '2024-11-19', 'name': 'WEEE Report', 'full_name': 'Monthly WEEE Report'},
+    {'country': 'IE', 'category': 'Batteries', 'Deadline': '2024-11-19', 'name': 'Battery Report', 'full_name': 'Monthly Battery Report'},
+    {'country': 'DE', 'category': 'WEEE', 'Deadline': '2024-12-15', 'name': 'WEEE Report', 'full_name': 'Monthly WEEE Report'},
+];
+    
+        function fillDeadlinesTable() {
+    // Get the div element by id
+    var deadlinesEntry = document.getElementById('deadlines-entry');
+
+    // Start building the table HTML
+    var tableHtml = `<ul style="list-style: none; padding: 1rem 1rem 0 1rem; text-align: left;">`;
+
+    // Iterate over each deadline in the deadlines array
+    deadlines.forEach(function(deadline) {
+        // Format the deadline date from "YYYY-MM-DD" to "DD.MM.YYYY"
+        var dateParts = deadline.Deadline.split('-');
+        var catImg = deadline.category;
+        
+        // Determine which SVG to use based on the category
+        if (deadline.category == 'WEEE') {
+            catImg = getWEEESVG();
+        } else if (deadline.category == 'Batteries') {
+            catImg = getBatteriesSVG();
+        } else if (deadline.category == 'Packaging') {
+            catImg = getPackagingSVG();
+        }
+
+        var formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+
+        // Create list item with structured layout
+        tableHtml += `
+            <li id="${deadline.country}-${deadline.category}-${deadline.Deadline}" class="deadline" onclick="selectDeadline(this)" style="padding: 0.5rem 0;">
+                <div style="display: flex; align-items: center;">
+                    <div style="flex: 1; font-size: large;font-weight: bold; text-align: left;margin-left:3rem">${deadline.country}</div>
+                    <div style="flex: 1; display: flex; justify-content: center;margin-right: 3rem">${catImg}</div>
+                    <div style="flex: 1; text-align: right; font-size: large;font-weight: bold;margin-right: 3rem;">${formattedDate}</div>
+                </div>
+            </li>`;
+    });
+
+    tableHtml += '</ul>';
+    // Set the inner HTML of the div to the table HTML
+    deadlinesEntry.innerHTML = tableHtml;
+}
+
+
+    function getWEEESVG() {
+        return `
+        <svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+        viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+        <style type="text/css">
+        .st0{display:none;}
+        .st1{display:inline;}
+        .st2{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+        .st3{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-miterlimit:10;}
+        .st4{fill:#2255FF;}
+        .st5{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+        .st6{fill:none;}
+        .st7{fill:none;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+        .st8{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+        .st9{stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
+        </style>
+        <g id="Calque_14" class="st0">
+        </g>
+        <g id="data-analytics-icon">
+        </g>
+        <g id="data-analytics-icon_-_copie" class="st0">
+        </g>
+        <g id="flats-residential-apartment-ic">
+        </g>
+        <g id="goods-contents-icon">
+        </g>
+        <g id="government_building_icon">
+        </g>
+        <g id="partner-handshake-icon">
+        </g>
+        <g id="partner-handshake-icon_-_copie">
+        </g>
+        <g id="Send_icon">
+        </g>
+        <g id="Calque_9">
+        </g>
+        <g id="Packaging">
+        </g>
+        <g id="Batterie">
+        </g>
+        <g id="Electronics">
+        <g>
+        <path class="st2" d="M146.1,291v-97.83h207.8V291c0,49.51-40.14,89.64-89.64,89.64h-28.51C186.24,380.64,146.1,340.51,146.1,291z"
+        />
+        <g>
+        <path class="st2" d="M187.67,154.27V18.49c0-6.02,4.88-10.9,10.9-10.9h3.47c6.02,0,10.9,4.88,10.9,10.9v135.78H187.67z"/>
+        <path class="st2" d="M287.06,153.14V18.49c0-6.02,4.88-10.9,10.9-10.9h3.47c6.02,0,10.9,4.88,10.9,10.9v134.65H287.06z"/>
+        </g>
+        <path class="st5" d="M115.04,176.12v-5.27c0-9.15,7.42-16.56,16.56-16.56h236.78c9.15,0,16.56,7.42,16.56,16.56v5.27
+        c0,9.15-7.42,16.56-16.56,16.56H131.61C122.46,192.68,115.04,185.27,115.04,176.12z"/>
+        <line class="st2" x1="238.95" y1="494.11" x2="239.08" y2="383.94"/>
+        <line class="st2" x1="271.94" y1="494.11" x2="272.07" y2="383.94"/>
+        </g>
+        <polygon class="st2" points="282.39,275.45 248.85,275.59 280.03,215.42 225.39,290.48 258.93,290.34 235.83,350.84 "/>
+        </g>
+        <g id="Electronics_-_copie">
+        </g>
+        <g id="Textile">
+        </g>
+        <g id="Packaging2">
+        </g>
+        <g id="Batterie2">
+        </g>
+        <g id="Textile2">
+        </g>
+        <g id="Electronics_-_copie_2" class="st0">
+        </g>
+        <g id="Electronics_-_copie_3">
+        </g>
+        <g id="Calque_19">
+        </g>
+        <g id="Calque_21-test">
+        </g>
+        <g id="Calque_22">
+        </g>
+        </svg>`;
+    }
+
+  function getBatteriesSVG() {
+        return `<svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+            <style type="text/css">
+            .st0{display:none;}
+            .st1{display:inline;}
+            .st2{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+            .st3{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-miterlimit:10;}
+            .st4{display:inline;fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+            .st5{fill:#2255FF;}
+            .st6{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+
+            .st7{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:22,25,22,25,22,25;}
+            .st8{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+            .st9{stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
+            </style>
+            <g id="Calque_14" class="st0">
+            </g>
+            <g id="data-analytics-icon">
+            </g>
+            <g id="data-analytics-icon_-_copie" class="st0">
+            </g>
+            <g id="flats-residential-apartment-ic">
+            </g>
+            <g id="goods-contents-icon">
+            </g>
+            <g id="government_building_icon">
+            </g>
+            <g id="partner-handshake-icon" class="st0">
+            </g>
+            <g id="partner-handshake-icon_-_copie">
+            </g>
+            <g id="Send_icon">
+            </g>
+            <g id="Calque_9">
+            </g>
+            <g id="Packaging">
+            </g>
+            <g id="Batterie">
+            <path class="st5" d="M203.89,51.98c-2.21-4.28,0.25,97.41,0.25,97.41s42.27,29.92,122.68,29.93
+            c94.48,0.01,119.49-35.82,119.49-35.82l-0.49-93.23c0,0-22.93,35.9-114.83,36.31S203.89,51.98,203.89,51.98z"/>
+            <path class="st5" d="M246.1,469.14c-6.69-27.84-3.99-39,3.54-59.36c7.53-20.36,27.4-36.29,27.4-36.29l72.18,21.06
+            c0,0-16.51,13.14-26.11,34.88c-9.6,21.74-1.54,61.43-1.54,61.43L246.1,469.14z"/>
+            <g>
+            <path class="st2" d="M202.76,340.43c0-90.59,0-292.84,0-292.84"/>
+            <path class="st2" d="M446.02,47.02c0,0,0,313.45,0,335.21c0,16.32-30.63,30.32-74.29,36.31"/>
+            <path class="st2" d="M368.3,49.3c0,6.83-19.17,12.37-42.81,12.37c-23.64,0-42.81-5.54-42.81-12.37"/>
+            <path class="st2" d="M445.93,140.06c0,21.76-54.44,39.4-121.59,39.4s-121.59-17.64-121.59-39.4"/>
+            <ellipse class="st2" cx="324.34" cy="46.45" rx="121.59" ry="39.4"/>
+            <ellipse class="st2" cx="325.48" cy="28.18" rx="42.81" ry="12.37"/>
+            <line class="st2" x1="282.62" y1="28.18" x2="282.73" y2="49.87"/>
+            <line class="st2" x1="368.24" y1="27.74" x2="368.35" y2="49.43"/>
+            </g>
+            <g>
+            <path class="st2" d="M252.82,469.19c-11.57-3.69-14.14-28.03-5.74-54.37c8.4-26.34,24.59-44.7,36.15-41.01"/>
+
+            <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -186.2469 634.8038)" class="st2" cx="341.22" cy="444.84" rx="50.06" ry="22.6"/>
+
+            <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -186.1162 635.1949)" class="st2" cx="341.56" cy="444.94" rx="17.63" ry="4.28"/>
+
+            <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -180.9776 651.7137)" class="st2" cx="355.43" cy="449.69" rx="17.63" ry="4.28"/>
+            <path class="st2" d="M327.51,493.05c0,0-251.63-80.23-269.1-85.8s-24.82-31.45-16.42-57.8c8.4-26.35,29.38-43.2,46.84-37.63
+            s268.64,85.66,268.64,85.66"/>
+            <line class="st2" x1="359.13" y1="432.04" x2="348.08" y2="428.52"/>
+            <line class="st2" x1="348.44" y1="465.63" x2="337.38" y2="462.11"/>
+            </g>
+            </g>
+            <g id="Electronics">
+            </g>
+            <g id="Textile">
+            </g>
+            <g id="Packaging2">
+            </g>
+            <g id="Batterie2">
+            </g>
+            <g id="Textile2">
+            </g>
+            <g id="Electronic2">
+            </g>
+            <g id="Calque_19">
+            </g>
+            <g id="Calque_21-test">
+            </g>
+            <g id="Calque_22">
+            </g>
+            </svg>`;
+    }
+
+function getPackagingSVG() {
+    return `<svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+            <style type="text/css">
+            .st0{display:none;}
+            .st1{display:inline;}
+            .st2{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+            .st3{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-miterlimit:10;}
+            .st4{display:inline;fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+            .st5{fill:#2255FF;}
+            .st6{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+
+            .st7{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:22,25,22,25,22,25;}
+            .st8{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+            .st9{stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
+            </style>
+            <g id="Calque_14" class="st0">
+            </g>
+            <g id="data-analytics-icon">
+            </g>
+            <g id="data-analytics-icon_-_copie" class="st0">
+            </g>
+            <g id="flats-residential-apartment-ic">
+            </g>
+            <g id="goods-contents-icon">
+            </g>
+            <g id="government_building_icon">
+            </g>
+            <g id="partner-handshake-icon" class="st0">
+            </g>
+            <g id="partner-handshake-icon_-_copie">
+            </g>
+            <g id="Send_icon">
+            </g>
+            <g id="Calque_9">
+            </g>
+            <g id="Packaging">
+            <polygon class="st5" points="87.49,201.21 252.31,109.68 420.36,208 248.74,293.81 "/>
+            <polyline class="st2" points="227.5,282.17 249.62,266.08 273.3,282.28 "/>
+            <path class="st2" d="M422.56,286.91l0.51,84.24c0.06,10.33-5.71,19.81-14.92,24.49l-143.75,73.07c-7.68,3.9-16.76,3.95-24.48,0.12
+            L97.49,398.26c-9.23-4.57-15.1-13.96-15.17-24.26l-0.65-93.66"/>
+            <polygon class="st2" points="250.86,294.51 286.6,361.68 462.16,264.53 420.6,206.01 "/>
+            <polygon class="st2" points="250.24,295.75 84.67,201.45 44.56,257.95 214.78,361.02 "/>
+            <polyline class="st2" points="250.24,110.97 194.72,53.85 28.56,139.63 84.67,201.45 250.24,110.97 "/>
+            <polyline class="st2" points="250.24,110.97 420.26,205.45 478.13,139.44 308.96,53.38 250.24,110.97 "/>
+            <line class="st2" x1="250.24" y1="110.97" x2="250.24" y2="264.75"/>
+            </g>
+            <g id="Batterie">
+            </g>
+            <g id="Electronics">
+            </g>
+            <g id="Textile">
+            </g>
+            <g id="Packaging2">
+            </g>
+            <g id="Batterie2">
+            </g>
+            <g id="Textile2">
+            </g>
+            <g id="Electronic2">
+            </g>
+            <g id="Calque_19">
+            </g>
+            <g id="Calque_21-test">
+            </g>
+            <g id="Calque_22">
+            </g>
+            </svg>`;
+}
+     
+    function selectDeadline(el) {
+        deadlineSelected = el.id;
+        var elements = document.querySelectorAll('.deadline');
+            elements.forEach(function(element) {
+                if (element.classList.contains('activeDeadline')) {
+                    element.classList.remove('activeDeadline');
+                }
+            });
+        el.classList.add('activeDeadline');
+        document.getElementById('countries').value = el.id.split('-')[0];
+        document.getElementById('categories').value = el.id.split('-')[1];
+        if (typeof $('.selectpicker').selectpicker === 'function') {
+            $('.selectpicker').selectpicker('refresh');
+        }
+    }
+    // Call the function to fill the table
+    fillDeadlinesTable();
+
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     var weeeOption = document.querySelector('option[value="WEEE"]');
+    //     var weeeSVG = getWEEESVG();
+    //     var encodedSVG = encodeURIComponent(weeeSVG).replace(/'/g, "%27").replace(/"/g, "%22");
+    //     console.log("TEST");
+    //     console.log(encodedSVG);
+    //     weeeOption.setAttribute('data-content', `<img src="data:image/svg+xml;utf8,${encodedSVG}" style="width: 20px; height: 20px;"> WEEE`);
+    //     $('.selectpicker').selectpicker('refresh'); // Refresh bootstrap-select
+    // });
+    
+    function populateCompaniesSelect() {
+        // Get the select element by its ID
+        var selectElement = document.getElementById('companies');
+    
+        // Iterate over each category in the reports object
+        for (var category in reports) {
+            if (reports.hasOwnProperty(category)) {
+                // Get the array of companies in this category
+                var companies = reports[category];
+    
+                // Iterate over each company in the array
+                companies.forEach(function(company) {
+                    // Create a new option element
+                    var option = document.createElement('option');
+                    option.value = company.name;  // Set the value attribute to the company name
+                    option.text = company.name;   // Set the displayed text to the company name
+                    
+                    // Append the option to the select element
+                    selectElement.appendChild(option);
+                });
+            }
+        }
+    
+        // Refresh the select picker to update the UI (if using Bootstrap selectpicker)
+        if (typeof $('.selectpicker').selectpicker === 'function') {
+            $('.selectpicker').selectpicker('refresh');
+        }
+    }
+    
+    // Call the function to populate the select element
+    populateCompaniesSelect();
+    
+    var errors = [
+                { "name": "Blue Horizon Ventures B.V.", "error": "Broken API"},
+                { "name": "Forest Grove B.V.", "error": "Missing product details"},
+                { "name": "Ruby Rail B.V.", "error": "Invalid entry in categorylist"},
+                { "name": "Redstone Technologies B.V.", "error": "Broken API" },
+                { "name": "Bright Future B.V.", "error": "Broken API" }
+        ];
+    
+    
+        function populateErrorTable() {
+        var tableBody = document.getElementById('error-table').getElementsByTagName('tbody')[0];
+        
+        errors.forEach(function(task) {
+            var row = document.createElement('tr');
+
+            // Create a cell for the task name with a tooltip
+            var nameCell = document.createElement('td');
+            nameCell.classList.add('tentry');
+            var nameDiv = document.createElement('div');
+            nameDiv.classList.add('full-info');
+            nameDiv.textContent = task.name.slice(0, 20);
+            nameDiv.title = task.fullInfo; // Adds tooltip with full info
+            nameCell.appendChild(nameDiv);
+            row.appendChild(nameCell);
+            
+            // Create a cell for the task status
+            var statusCell = document.createElement('td');
+            statusCell.classList.add('tentry');
+            statusCell.textContent = task.error;
+            row.appendChild(statusCell);
+
+            // Append the row to the table body
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Call the function to populate the table on page load
+    populateErrorTable();
+    
+    
+    
+    var audits = [
+                { "name": "ForSURE Europe B.V.", "country": "DE", "category": "Packaging Paper", "limit": "50t"},
+                { "name": "Rainforest Industries B.V.", "country": "DE", "category": "Packaging Paper", "limit": "50t"},
+                { "name": "Oasis Development B.V.", "country": "DE", "category": "Packaging Glass", "limit": "30t"},
+                { "name": "Helix Heights B.V.", "country": "IE", "category": "Packaging Paper", "limit": "50t"}
+        ];
+    
+        function populateAuditTable() {
+        var tableBody = document.getElementById('audit-table').getElementsByTagName('tbody')[0];
+        
+        audits.forEach(function(task) {
+            var row = document.createElement('tr');
+
+            // Create a cell for the task name with a tooltip
+            var nameCell = document.createElement('td');
+            nameCell.classList.add('tentry');
+            var nameDiv = document.createElement('div');
+            nameDiv.classList.add('full-info');
+            nameDiv.textContent = task.name.slice(0, 20);
+            nameDiv.title = task.fullInfo; // Adds tooltip with full info
+            nameCell.appendChild(nameDiv);
+            row.appendChild(nameCell);
+
+            // Create a cell for the task status
+            var statusCell = document.createElement('td');
+            statusCell.classList.add('tentry');
+            statusCell.innerHTML = `<div style='margin: auto;width: fit-content'>${task.country}</div>`;
+            row.appendChild(statusCell);
+            
+            // Create a cell for the task status
+            var statusCell = document.createElement('td');
+            statusCell.classList.add('tentry');
+            statusCell.innerHTML = `<div style='margin: auto;width: fit-content'>${getPackagingSVG()}</div>`;
+            row.appendChild(statusCell);
+            
+            // Create a cell for the task status
+            var statusCell2 = document.createElement('td');
+            statusCell2.classList.add('tentry');
+            statusCell2.innerHTML = `<div style='margin: auto;width: fit-content'>${task.limit}</div>`;
+            row.appendChild(statusCell2);
+
+            // Append the row to the table body
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Call the function to populate the table on page load
+    populateAuditTable();
+    
+    var unregistered = [
+            { "name": "Titanium Trust B.V.", "info": "7 Countries", 'fullInfo':  'DE, NL, BE, GB, IE, FR, LU'},
+            { "name": "Bronze Barrel B.V.", "info": "3 Countries", 'fullInfo':  'GB, IE, LU' },
+            { "name": "Iron Heights B.V.", "info": "5 Countries", 'fullInfo':  'DE, NL, BE, GB, IE' },
+            { "name": "Copper Canyon B.V.", "info": "DE", 'fullInfo':  'DE Packaging' },
+            { "name": "Amethyst Ventures B.V.", "info": "5 Countries", 'fullInfo':  'DE, NL, BE, GB, IE'  },
+            { "name": "Pearl Partners B.V.", "info": "5 Countries", 'fullInfo':  'DE, NL, BE, GB, IE'  },
+            { "name": "Opal Oceans B.V.", "info": "GB", 'fullInfo':  'GB'  },
+            { "name": "Moonstone Media B.V.", "info": "BE", 'fullInfo':  'BE'  },
+            { "name": "Aquamarine Associates B.V.", "info": "4 Countries", 'fullInfo':  'DE, NL, BE, GB, IE' },
+        ];
+    
+    function populateUnregTable() {
+        var tableBody = document.getElementById('unreg-table').getElementsByTagName('tbody')[0];
+        
+        unregistered.forEach(function(task) {
+            var row = document.createElement('tr');
+
+            // Create a cell for the task name with a tooltip
+            var nameCell = document.createElement('td');
+            nameCell.classList.add('tentry');
+            var nameDiv = document.createElement('div');
+            nameDiv.classList.add('full-info');
+            nameDiv.textContent = task.name;
+            nameDiv.title = task.fullInfo; // Adds tooltip with full info
+            nameCell.appendChild(nameDiv);
+            row.appendChild(nameCell);
+
+            // Create a cell for the task status
+            var statusCell = document.createElement('td');
+            statusCell.classList.add('tentry');
+            statusCell.textContent = task.info;
+            row.appendChild(statusCell);
+
+            // Append the row to the table body
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Call the function to populate the table on page load
+    populateUnregTable();
+    
+    var tasks = [
+            { "name": "Contact ForSURE Broken API", "status": "In Progress", 'fullInfo':  'ForSURE Europe B.V. has a broken API', 'deadline': '09.09.2024'},
+            { "name": "Validate report AquaDynamics", "status": "In Progress", 'fullInfo':  'AquaDynamics B.V. has a report that exceeds the growth', 'deadline': '09.09.2024'},
+            { "name": "Contact Forest Grove missing product", "status": "TODO", 'fullInfo':  'Forest Grove B.V. has a product missing in the category list.', 'deadline': '19.09.2024'},
+            { "name": "Contact Rainforest Broken API", "status": "TODO", 'fullInfo':  'Forest Grove B.V. has a product missing in the category list.', 'deadline': '19.09.2024'},
+            { "name": "Validate report Golden Gate", "status": "TODO", 'fullInfo':  'Forest Grove B.V. has a product missing in the category list.', 'deadline': '09.10.2024'},
+            { "name": "Contact Quantum missing product", "status": "TODO", 'fullInfo':  'Forest Grove B.V. has a product missing in the category list.', 'deadline': '09.12.2024'},
+        ];
+    
+    
+    function populateTasksTable() {
+        var tableBody = document.getElementById('tasks-table').getElementsByTagName('tbody')[0];
+        
+        tasks.forEach(function(task) {
+            var row = document.createElement('tr');
+
+            // Create a cell for the task name with a tooltip
+            var nameCell = document.createElement('td');
+            nameCell.classList.add('tentry');
+            var nameDiv = document.createElement('div');
+            nameDiv.classList.add('full-info');
+            nameDiv.textContent = task.name.slice(0, 20);
+            nameDiv.title = task.fullInfo; // Adds tooltip with full info
+            nameCell.appendChild(nameDiv);
+            row.appendChild(nameCell);
+
+            // Create a cell for the task status
+            var statusCell = document.createElement('td');
+            statusCell.classList.add('tentry');
+            statusCell.textContent = task.status;
+            row.appendChild(statusCell);
+
+            // Create a cell for the task deadline
+            var deadlineCell = document.createElement('td');
+            deadlineCell.classList.add('tentry');
+            deadlineCell.textContent = task.deadline;
+            row.appendChild(deadlineCell);
+
+            // Append the row to the table body
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Call the function to populate the table on page load
+    populateTasksTable();
+    
+
+      </script>
+    {% else %}
+      <div class="image-with-text image-with-text--{{ section.settings.content_layout }} page-width isolate{% if settings.text_boxes_border_thickness > 0 and settings.text_boxes_border_opacity > 0 and settings.media_border_thickness > 0 and settings.media_border_opacity > 0 %} collapse-borders{% endif %}{% unless section.settings.color_scheme == 'background-1' and settings.media_border_thickness > 0 and settings.text_boxes_shadow_opacity == 0 and settings.text_boxes_border_thickness == 0 or settings.text_boxes_border_opacity == 0 %} collapse-corners{% endunless %} section-{{ section.id }}-padding">
+        <h1>Welcome,</h1>
+        <h2>Please log in to see this page</h2>
+      </div>
+    {% endif %}
+    

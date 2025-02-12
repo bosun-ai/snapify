@@ -1,0 +1,207 @@
+{{ 'video-section.css' | asset_url | stylesheet_tag }}
+
+{% schema %}
+  {
+    "name": "t:sections.secondsection.name",
+    "settings": [
+      {
+        "type": "video_url",
+        "id": "video_url",
+        "accept": [
+          "youtube", "vimeo"
+        ],
+        "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
+        "label": "t:sections.video.settings.video_url.label",
+        "placeholder": "t:sections.video.settings.video_url.placeholder",
+        "info": "t:sections.video.settings.video_url.info"
+      },
+      {
+        "type": "text",
+        "id": "video_alt_text",
+        "default": "EPR explained by ForSURE in a video",
+        "label": "Video Alt Text"
+      },
+      {
+        "type": "text",
+        "id": "titleLine1",
+        "default": "Revolutionizing Retail",
+        "label": "Title Line 1"
+      },
+      {
+        "type": "text",
+        "id": "titleLine2",
+        "default": "Compliance with",
+        "label": "Title Line 2"
+      },
+      {
+        "type": "text",
+        "id": "titleBlue",
+        "default": "ForSURE",
+        "label": "Title Blue word"
+      },
+      {
+        "type": "text",
+        "id": "subtitle",
+        "default": "In the rapidly evolving retail environment, ForSURE stands as your reliable partner, simplifying the intricate compliance landscape. Our software is engineered for modern retailers, e-commerce, importers, and manufacturers, with a special focus on SMEs. Through a seamless blend of advanced technology and user-centric design, ForSURE transforms the daunting task of EPR reporting into a streamlined, click-efficient process.",
+        "label": "Subtitle"
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.secondsection.presets.name"
+      }
+    ]
+  }
+{% endschema %}
+
+{%- style -%}
+
+  .background2nd {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    flex-direction: column; /* Stack children vertically */
+    background: #fafafa; /* Changed to white background */
+    width: 100%;
+    position: relative;
+    align-items: flex-start;
+  }
+  .text-section2 {
+    z-index: 2;
+    position: relative;
+  }
+
+
+  .container1 {
+    /* min-width: 1000px; */
+    /* min-height: 500px; */
+    background-color: grey;
+    margin: 0 auto; /* This will center the container if it's within a wider parent */
+    display: block;
+    border-radius: 2rem;
+    z-index: 1;
+    width:60%;
+  }
+
+  .triangle1 {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) calc(100vw/6.5) 0 0;
+    border-color: #2255ff transparent transparent transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 calc(100vw/8) calc(100vw/6.5);
+    border-color: transparent transparent #2256ff transparent;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .containersection2 {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding-top:3%;
+    margin-bottom: -15%;
+  }
+  @media(max-width: 1265px) { /* 1265 to avoid h1 going to 3 rows*/
+    .text-section2 {
+      width:70%!important;
+    }
+  }
+  @media(max-width: 1000px) {
+    .container1 {
+      width:80%;
+    }
+    .containersection2 {
+      margin-bottom: -20%;
+    }
+  }
+  @media(max-width: 500px) { /* 1265 to avoid h1 going to 3 rows*/
+    .text-section2 {
+      width:75%!important;
+      /* hyphens: auto; */
+      text-align: left;
+    }
+  }
+   @media(min-width: 1001px) {
+    .titleonly {
+      margin-left: 5%;
+    }
+   }
+{%- endstyle -%}
+
+
+<div class="background2nd" style="margin-bottom: 18rem">
+  <div class="triangle" style="bottom: -18rem"></div>
+  <div class="triangle1"></div>
+  <div class="containersection2">
+    <h2 class="h1 text-section2 titleonly" style="color: #17161c;  text-align: left; width: 50%;margin-bottom:2rem;z-index:1;">
+      {% assign url_parts = request.path | split: '/' %}
+      {% if url_parts[1] == 'de' %}
+        <span style="color: #2255ff">{{ section.settings.titleBlue }}</span>
+        {{ section.settings.titleLine1 }} <br>{{ section.settings.titleLine2 }}
+      {% else %}
+        {{ section.settings.titleLine1 }} <br>{{ section.settings.titleLine2 }}
+        <span style="color: #2255ff">{{ section.settings.titleBlue }}</span>
+      {% endif %}
+    </h2>
+    <p class="text-section2" style="color: #17161c; text-align: left; text-align-last: left;width: 45%; margin-bottom: 4rem;">
+      {{ section.settings.subtitle }}
+    </p>
+    <div class="container1" style="position:relative;box-sizing:content-box;">
+      <div
+        id="videobox"
+        class="video-section__media deferred-media no-js-hidden gradient global-media-settings{% if section.settings.full_width %} global-media-settings--full-width{% endif %}"
+        data-media-id="{{ section.settings.video_url.id }}"
+        style="padding-bottom:0px;display:none"></div>
+      <img
+        class="video-thumbnail play-button"
+        src="https://img.youtube.com/vi/2jQlz4toMHM/maxresdefault.jpg"
+        alt="{{ section.settings.video_alt_text }}"
+        loading="lazy"
+        data-id="{{ section.settings.video_url.id }}"
+        style="width:100%;height:100%;border-radius:2rem">
+      <img
+        id="youtubeplay"
+        class="play-button"
+        src="https://cdn.shopify.com/s/files/1/0659/6024/7563/files/yt_icon_rgb.png?v=1691007032"
+        style="width:10%;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);"
+        data-id="{{ section.settings.video_url.id }}"
+        alt="YouTube Icon"
+        loading="lazy">
+
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(function() {
+    $(document).on('click', '.play-button', function() {
+      var iframe = document.createElement("iframe");
+      iframe.setAttribute("frameborder", "0");
+      iframe.setAttribute("allowfullscreen", "");
+      iframe.setAttribute("allow", "autoplay; encrypted-media");
+      iframe.setAttribute("class", "js-youtube");
+      iframe.setAttribute("src", "https://www.youtube.com/embed/" + $(this).data("id") + "?enablejsapi=1&autoplay=1");
+
+      var container = document.getElementById("videobox");
+      container.appendChild(iframe); // Attach the iframe to the videobox
+      container.style.display = "block";
+      container.style.paddingBottom = "56.25%";
+      $('.play-button').remove();
+
+// $(this).remove(); // Remove the image from the DOM
+    });
+  });
+</script>
