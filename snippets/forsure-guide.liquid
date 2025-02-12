@@ -2,7 +2,44 @@
 Renders guide popup
 
 Usage:
+To use it, you need to add the snippet and then define which items you want to show the guide for.
+Note: Currently works through forsure-floating-navigation.liquid, as there is the questionmark button
 {% render 'forsure-guide' %}
+      function showGuide() {
+      startGuide([
+            { element: "main", group: "{{ 'software.guide.statistics.welcome.group' | t }}", title: "{{ 'software.guide.statistics.welcome.title' | t }}", text: "{{ 'software.guide.statistics.welcome.text' | t }}", where: 'middle' },
+            { element: "#guideButton", group: "{{ 'software.guide.statistics.help.group' | t }}", title: "{{ 'software.guide.statistics.help.title' | t }}", text: "{{ 'software.guide.statistics.help.text' | t }}", where: 'right' },
+            { element: "#list-element-1-active", group: "{{ 'software.guide.statistics.overview.group' | t }}", title: "{{ 'software.guide.statistics.overview.title' | t }}", text: "{{ 'software.guide.statistics.overview.text' | t }}", where: 'below' },
+            { element: "#list-element-2", group: "{{ 'software.guide.statistics.report.group' | t }}", title: "{{ 'software.guide.statistics.report.title' | t }}", text: "{{ 'software.guide.statistics.report.text' | t }}", where: 'below' },
+            { element: "#list-element-3", group: "{{ 'software.guide.statistics.history.group' | t }}", title: "{{ 'software.guide.statistics.history.title' | t }}", text: "{{ 'software.guide.statistics.history.text' | t }}", where: 'below' },
+            { element: "#list-element-4", group: "{{ 'software.guide.statistics.categorylist.group' | t }}", title: "{{ 'software.guide.statistics.categorylist.title' | t }}", text: "{{ 'software.guide.statistics.categorylist.text' | t }}", where: 'below' },
+            { element: "#list-element-5", group: "{{ 'software.guide.statistics.settings.group' | t }}", title: "{{ 'software.guide.statistics.settings.title' | t }}", text: "{{ 'software.guide.statistics.settings.text' | t }}", where: 'below' },
+            { element: "#list-element-6", group: "{{ 'software.guide.statistics.account.group' | t }}", title: "{{ 'software.guide.statistics.account.title' | t }}", text: "{{ 'software.guide.statistics.account.text' | t }}", where: 'below' },
+
+            { element: "#widgetContainerCustom", group: "{{ 'software.guide.statistics.createChart.group' | t }}", title: "{{ 'software.guide.statistics.createChart.title' | t }}", text: "{{ 'software.guide.statistics.createChart.text' | t }}", where: 'inside' },
+            { element: "#chosenYContainer", group: "{{ 'software.guide.statistics.yAxis.group' | t }}", title: "{{ 'software.guide.statistics.yAxis.title' | t }}", text: "{{ 'software.guide.statistics.yAxis.text' | t }}", secondElement: "#columnsContentLeft ul li:first-child div", where: 'right', hideOther: '.colItemContainer' },
+            { element: "#chosenX", group: "{{ 'software.guide.statistics.xAxis.group' | t }}", title: "{{ 'software.guide.statistics.xAxis.title' | t }}", text: "{{ 'software.guide.statistics.xAxis.text' | t }}", secondElement: "#columnsContentLeft > :nth-child(2) ul li:first-child div", where: 'right', hideOther: '.colItemContainer' },
+            { element: "#widgetCustom", group: "{{ 'software.guide.statistics.showChart.group' | t }}", title: "{{ 'software.guide.statistics.showChart.title' | t }}", text: "{{ 'software.guide.statistics.showChart.text' | t }}", where: 'inside', hideOther: '.colItemContainer' },
+            { element: ".iconContainer", group: "{{ 'software.guide.statistics.chartOptions.group' | t }}", title: "{{ 'software.guide.statistics.chartOptions.title' | t }}", text: "{{ 'software.guide.statistics.chartOptions.text' | t }}", where: 'left'},
+
+            { element: "#countries-filter-guide", group: "{{ 'software.guide.statistics.countryFilter.group' | t }}", title: "{{ 'software.guide.statistics.countryFilter.title' | t }}", text: "{{ 'software.guide.statistics.countryFilter.text' | t }}", where: 'below' },
+            { element: "#date-filter-guide", group: "{{ 'software.guide.statistics.dateFilter.group' | t }}", title: "{{ 'software.guide.statistics.dateFilter.title' | t }}", text: "{{ 'software.guide.statistics.dateFilter.text' | t }}", where: 'below' },
+            { element: "#profile-filter-guide", group: "{{ 'software.guide.statistics.profileFilter.group' | t }}", title: "{{ 'software.guide.statistics.profileFilter.title' | t }}", text: "{{ 'software.guide.statistics.profileFilter.text' | t }}", where: 'below' },
+
+            { element: "#widgetReportsDue", group: "{{ 'software.guide.statistics.reportsDue.group' | t }}", title: "{{ 'software.guide.statistics.reportsDue.title' | t }}", text: "{{ 'software.guide.statistics.reportsDue.text' | t }}", where: 'right'},
+            { element: "#widgetContainer > :nth-child(2)", group: "{{ 'software.guide.statistics.example.group' | t }}", title: "{{ 'software.guide.statistics.example.title' | t }}", text: "{{ 'software.guide.statistics.example.text' | t }}", where: 'left'},
+          ]);
+          setCookie('showedGuideChart', 'true', 300);
+    }
+
+function showGuideFromButton(element) {
+  showGuide();
+}
+document.addEventListener('DOMContentLoaded', function() {
+  if(readCookie('showedGuideChart') === null) {
+      setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    }
+});
 {% endcomment %}
 <style>
 .guide-popup {
@@ -64,6 +101,7 @@ transform: rotate(0deg);
         <div id="guideOverviewContainer" style="display: none"></div>
     </div>
 </div>
+
 <script>
 let guideSteps = []; // filled on the different pages
 let currentStep = 0;
