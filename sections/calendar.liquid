@@ -910,7 +910,7 @@ fieldset[disabled] .btn-default:hover {
                     name="contact[source]"
                     autocapitalize="off"
                   >
-                  <div class="field">
+                  <div class="field" id="partnerDisplay">
                     <select
                       id="sourceSelect"
                       required
@@ -1411,6 +1411,11 @@ function gtag_report_conversion() {
       endDate.setHours(timeSplit[0], timeSplit[1], timeSplit[2]);
       endDate.setMinutes(endDate.getMinutes() + event_details['duration']);
       document.getElementById('eventTimeQuestionsContainer').style.display = 'flex';
+      if (event_details['hide_partners']) {
+        document.getElementById('partnerDisplay').style.display = 'none';
+        document.getElementById("source").removeAttribute("required");
+        document.getElementById("sourceSelect").removeAttribute("required");
+      }
       eventTimeQuestions = document.getElementById('eventTimeQuestions');
       eventTimeQuestions.innerText =
         time.slice(0, -3) +
