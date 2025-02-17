@@ -17,7 +17,7 @@ GETSTATSDETAILS = 'stats/charts/details'
 STATSREPORTS = "stats/charts/filters"
 TOGGLEPIN = 'stats/charts/toggle'
 
-NEXTREPORTS = 'reports/deadlines'
+NEXTREPORTS = 'reports/deadlines?all_reports=true'
 
 GETREPORTNAMES = 'download/reports/'
 GETREPORTNAMESINPROGRESS = 'download/reports/inprogress'
@@ -80,3 +80,4 @@ CATEGORYLISTWEBSOCKET = 'categorylist/ws'
 CATEGORYLISTVERSION = 'categorylist/versions'
 NAVBAR = 'nav/'
 NOTIFICATIONS = 'nav/notifications'
+NOTIFICATIONSETTINGS = 'nav/notificationsettings'

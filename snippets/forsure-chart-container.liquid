@@ -53,14 +53,21 @@ Usage:
 // Add resize event to window
   window.addEventListener('resize', redraw);
 
-  document.addEventListener('DOMContentLoaded', redraw);
+  document.addEventListener('DOMContentLoaded', async () => {
+    await redraw(null, true);
+});
 
-
-  async function redraw(hard = false) {
+  async function redraw(event = null, hard = false) {
     let containerId = 'widgetContainer';
-
+    console.log(`Redrawing with: ${hard}`);
     if (hard) { // Clear the contents of widgetContainer
       document.getElementById(containerId).innerHTML = '';
+      var reportsDue = createCanvasElement('widgetReportsDue');
+      reportsDue.classList.add('reportsDueWidget');
+      document.getElementById('widgetContainer').appendChild(reportsDue);
+      getReportsDue('widgetReportsDue').then(async (result) => {
+          createReportsDueWidget(result);
+      });
     }
     let availableCharts = await getPinnedCharts();
     console.log(availableCharts);

@@ -36,6 +36,7 @@ function updateChartNew(chartData, chartCanvas, titleId=false, bigmode=false, se
     }
     if (titleId) {
         document.getElementById(titleId).innerText = title;
+        chartCanvas.options.plugins.title.display = false;
     } else {
         chartCanvas.config.options.scales.x.title.text = shortenTitle(columnNamesXOutput.join(" per "), bigmode);
         chartCanvas.config.options.scales.y.title.text = shortenTitle(columnNamesYOutput.join(" - "), bigmode);
