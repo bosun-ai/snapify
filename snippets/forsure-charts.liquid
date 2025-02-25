@@ -6,10 +6,8 @@ Usage:
 {% endcomment %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script src="{{ 'charts.js' | asset_url }}"></script>
 <script src="{{ 'charts_new.js' | asset_url }}"></script>
 <script src="{{ 'forsure-charts-helper.js' | asset_url }}"></script>
 
-{% render 'forsure-chart-add' %}
 {% render 'forsure-chart-container', trashcan: trashcan %}
 {% render 'forsure-chart-big' %}

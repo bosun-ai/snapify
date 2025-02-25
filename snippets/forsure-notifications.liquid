@@ -284,6 +284,10 @@ function createNotificationCards() {
     notifications.forEach((notification, index) => {
         const card = document.createElement("div");
         card.className = "notificationCard";
+        resolution_button = '';
+        if (notification.allow_custom_resolution) {
+            resolution_button = `<button onclick="addResolution(${notification.id})">Add Resolution</button>`;
+        }
 
         card.innerHTML = `
             <div class="notificationDetails">
@@ -291,6 +295,7 @@ function createNotificationCards() {
                 <p><strong>Company:</strong> ${notification.user}</p>
                 <p><strong>Type of Report:</strong> ${notification.type_of_report}</p>
                 <p><strong>Error:</strong> ${notification.error_message}</p>
+                ${resolution_button}
                 <div class="date">${notification.date_of_notification}</div>
             </div>
             <button class="removeButton" onclick="removeNotification(${notification.id})">✖</button>
@@ -311,6 +316,91 @@ async function removeNotification(notificationId) {
         console.error("Failed to resolve notification:", error);
         showMessage('Failed to resolve notification ' + error.message, false);
     }
+}
+
+async function addResolution(notificationId) {
+    try {
+        const response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}`, {method: 'GET'});
+        console.log(response);
+        openResolutionModal(response[0]);
+    } catch (error) {
+        console.error("Failed to open resolution:", error);
+        showMessage('Failed to open resolution ' + error.message, false);
+    }
+}
+
+async function openResolutionModal(response) {
+    try {
+        // Create modal container
+        let modal = document.createElement("div");
+        modal.id = "resolutionModal";
+        modal.style.position = "fixed";
+        modal.style.top = "50%";
+        modal.style.left = "50%";
+        modal.style.transform = "translate(-50%, -50%)";
+        modal.style.width = "50vw";
+        modal.style.backgroundColor = "white";
+        modal.style.padding = "20px";
+        modal.style.borderRadius = "10px";
+        modal.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+        modal.style.zIndex = "105";
+        modal.style.textAlign = "center";
+
+        // Modal content
+        modal.innerHTML = `
+            <h2 style="margin-bottom: 10px;">${response.resolution_hint_title}</h2>
+            <p style="font-size: 14px; color: #666;">${response.resolution_hint}</p>
+            <img src="data:image/png;base64,${response.error_data}" alt="Base64 Image" style="width: 100%; max-height: 200px; object-fit: contain; margin: 15px 0; border-radius: 5px; border: 1px solid #ddd;">
+            <textarea id="resolutionModalTextbox" placeholder="${response.resolution}" style="width: 100%; height: 80px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; resize: none;"></textarea>
+            <div style="margin-top: 15px;">
+                <button onclick="saveResolution('${response.notification_id}')" style="background-color: #2255ff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Save</button>
+                <button onclick="closeResolutionModal()" style="margin-left: 10px; background-color: #ff4d4f; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+            </div>
+        `;
+
+        // Create overlay
+        let overlay = document.createElement("div");
+        overlay.id = "resolutionModalOverlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+        overlay.style.zIndex = "104";
+        overlay.onclick = closeResolutionModal;
+
+        // Append modal and overlay to body
+        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
+    } catch (error) {
+        console.error('Failed to open the resolution modal:', error);
+        showMessage('Failed to open resolution modal' + error.message, false);
+    }
+}
+
+
+async function saveResolution(notificationId) {
+    try {
+        var formData = new FormData();
+        formData.append('resolution', document.getElementById('resolutionModalTextbox').value);
+        const response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}/add_resolution`, {method: 'POST', formData: formData});
+        console.log(response);
+        showMessage('Saved resolution', true);
+        await getNotifications();
+        createNotificationCards(); // Re-render the cards
+        closeResolutionModal();
+    } catch (error) {
+        console.error("Failed to save resolution:", error);
+        showMessage('Failed to save resolution ' + error.message, false);
+    }
+}
+
+function closeResolutionModal() {
+    const modal = document.getElementById('resolutionModal');
+    const overlay = document.getElementById('resolutionModalOverlay');
+    if (modal) modal.remove();
+    if (overlay) overlay.remove();
 }
 
 function closeNotificationBox() {
