@@ -330,6 +330,45 @@ div.display-flex {
   filter: none;
 }
 
+
+#tabs-container {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+.tab-button {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-button:hover {
+    background-color: #eaeaea;
+}
+
+.tab-button.active {
+    background-color: #2255ff;
+    color: #fafafa;
+    border-bottom: 2px solid #fff;
+    font-weight: bold;
+}
+
+#clientsDatatableContainer {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.tabulator .tabulator-footer .tabulator-page.active {
+  color: #fafafa!important;
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
@@ -398,7 +437,7 @@ div.display-flex {
     </div>
     <div class="uploadExisting" id="uploadReport" style="display: none;">
         <h2 class="heading">Upload Existing Reports</h2>
-        <div id="clientsUploadSection" style="margin-bottom: 2rem;width: fit-content;margin: auto">
+        <div id="clientsUploadSection" style="margin-bottom: 2rem;width: fit-content;margin: auto;position: relative;background: rgb(250, 250, 250);padding: 1px 1rem;border-radius: 1rem;">
           <div style="margin: auto">
               <h3 style="margin-bottom: 1rem">Upload Clients File</h3>
               <div id="clientsFileContainer" style="display: flex; align-items: center; padding: 0.5rem 0;border: 0.2rem solid #17161c;background-color: #fff;border-color: #ccc;margin-bottom: 1.5rem;">
@@ -412,7 +451,7 @@ div.display-flex {
             </div>
         </div>
 
-        <div class="dropZone" data-input="report_list" data-url="uploadreports/" style="overflow-y: auto;">
+        <div class="dropZone" data-input="report_list" data-url="uploadreports/" style="overflow-y: auto;position: relative;background: #fafafa;" id="uploadreportlistContainer">
             <div style="width: 100%;margin: auto"><div style="height:100%">
                 <div id="imagecontainer-imageuploadreports/" style="padding:2rem">
                   <img width="220px" id="upload-imageuploadreports/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
@@ -434,9 +473,12 @@ div.display-flex {
               <div>
                   <a id="replaceFileBtn" onclick="document.getElementById('replaceClientsFileInput').click()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Upload</a>    
                   <a id="addRowBtn" onclick="addNewRow()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add Row</a>
-                  <a id="addColumnBtn" onclick="addNewColumn()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add Column</a>
+                  {% comment %} TODO enable once I define what columns they can choose {% endcomment %}
+                  {% comment %} <a id="addColumnBtn" onclick="addNewColumn()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add Column</a> {% endcomment %}
+
               </div>
             </div>
+            <div id="tabs-container"></div>
             <div id="clientsDatatableContainer">
                 <!-- Datatable for Clients File will be dynamically rendered here -->
             </div>
@@ -633,19 +675,22 @@ document.getElementById('liveDataToggle').addEventListener('change', function() 
     }
 });
 
+
+var guideToShow = null;
 function selectOption(option) {
     document.getElementById('chooseoption').style.display = 'none';
     if (option === 'new') {
         document.getElementById('progressIcons').style.display = 'flex';
         document.getElementById('step1').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'new');
+        guideToShow = 'new';
     } else if (option === 'upload') {
         document.getElementById('uploadReport').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'upload');
+        guideToShow = 'upload';
     }
+    showGuideAfterSelection();
 }
-
-
 
 dropZones.forEach(dropZone => {
     const inputId = dropZone.getAttribute('data-input');
@@ -1020,11 +1065,14 @@ async function getClientsFile() {
 }
 getClientsFile();
 
-async function handleClientsUpload(input) {
+async function handleClientsUpload(input, additionalInfo) {
     const file = input.files[0];
     try {
         const formData = new FormData();
         formData.append('client_file', file);
+        formData.append('country', additionalInfo.country || '');
+        formData.append('wastestream', additionalInfo.wastestream || '');
+        formData.append('scheme', additionalInfo.scheme || '');
         const data = await unifiedSendRequest(CLIENTSFILE, { formData: formData });
         console.log(data);
         // Check if an error message already exists
@@ -1043,15 +1091,35 @@ async function handleClientsUpload(input) {
 }
 
 function handleClientsUploadReplacePrompt(input) {
-  showConfirmationMessage("Replace file", "Are you sure you want to replace the current clients file with the new one?",
-                          "Cancel", "Replace", function() {handleClientsUploadReplace(input)});
+  const modalContent = `
+        <div>
+            <label>Country: <input type="text" id="countryInput" placeholder="Enter country"></label><br>
+            <label>Wastestream: <input type="text" id="wastestreamInput" placeholder="Enter wastestream"></label><br>
+            <label>Scheme: <input type="text" id="schemeInput" placeholder="Enter scheme"></label>
+        </div>
+    `;
+
+    showConfirmationMessage(
+        "Replace file",
+        "Are you sure you want to replace the current clients file with the new one?" + modalContent,
+        "Cancel",
+        "Replace",
+        function () {
+            const additionalInfo = {
+                country: document.getElementById('countryInput').value,
+                wastestream: document.getElementById('wastestreamInput').value,
+                scheme: document.getElementById('schemeInput').value
+            };
+            handleClientsUploadReplace(input, additionalInfo);
+        },
+        true // Allow HTML content inside the modal
+    );
 }
 
-async function handleClientsUploadReplace(input) {
+async function handleClientsUploadReplace(input, additionalInfo) {
   closeConfirmationModal();
-  await handleClientsUpload(input);
+  await handleClientsUpload(input, additionalInfo);
   await openClientsModal();
-  showMessage('File updated successfully!', true);
 }
 
 var datatable = null;
@@ -1067,26 +1135,86 @@ async function openClientsModal() {
     }
 
     // Parse JSON data into an HTML table
+    const tabsContainer = document.getElementById('tabs-container');
     const dataContainer = document.getElementById('clientsDatatableContainer');
-    dataContainer.innerHTML = ''; // Clear any existing content
-    const table = new Tabulator("#clientsDatatableContainer", {
-        data: clientDataNew, // Array of client data
-        layout: Object.keys(clientDataNew[0]).length > 20 ? "fitDataFill" : "fitColumns",
-        pagination: clientDataNew.length > 30,
-        paginationCounter: "rows",
-        paginationSize: 30,
-        columns: Object.keys(clientDataNew[0]).map(header => ({
-            title: header,
-            field: header,
-            headerSort: false,
-            editor: "input",
-            // formatter: 'plaintext',
-            formatter: header.toLowerCase().includes('password') ? (cell) => `<div class="blurred" title="Content blurred for privacy">${cell.getValue()}</div>` : "plaintext",
-        })), // Generate columns dynamically
-    });
-    datatable = table;
+    tabsContainer.innerHTML = '';
+    dataContainer.innerHTML = '';
 
-    console.log('Clients table rendered and editable.');
+    const countries = Object.keys(clientDataNew);
+    countries.forEach((country, index) => {
+        const tabButton = document.createElement('button');
+        tabButton.textContent = country;
+        tabButton.className = 'tab-button';
+        tabButton.style.margin = '5px';
+        tabButton.dataset.country = country;
+
+        tabButton.addEventListener('click', () => {
+            dataContainer.innerHTML = '';
+            highlightActiveTab(index);
+            renderCountryData(clientDataNew[country], country);
+        });
+
+        tabsContainer.appendChild(tabButton);
+    });
+
+    // Auto-click the first tab if available
+    if (countries.length > 0) {
+        document.querySelector('.tab-button').click();
+    }
+
+    function highlightActiveTab(activeIndex) {
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach((btn, index) => {
+            btn.classList.toggle('active', index === activeIndex);
+        });
+    }
+
+    function renderCountryData(data, country) {
+        data = data.map(row => ({
+            ...row,
+            country: country
+        }));
+        if (data.length === 0) {
+            dataContainer.innerHTML = '<p>No client data available for this country.</p>';
+            return;
+        }
+
+        // Dynamically determine columns
+        const dynamicColumns = Object.keys(data[0])
+            .filter(key => key !== 'client')
+            .reduce((acc, field) => {
+                const baseField = field.split(' ')[1] + ' ' + field.split(' ').slice(2).join(' '); // Scheme + Wastestream
+                if (!acc[baseField]) acc[baseField] = {};
+                if (field.startsWith('Login')) acc[baseField]['Login'] = field;
+                if (field.startsWith('Password')) acc[baseField]['Password'] = field;
+                if (field.startsWith('Notes')) acc[baseField]['Notes'] = field;
+                return acc;
+            }, {});
+
+        // Generate Tabulator column definitions
+        const columns = [{ title: 'Client', field: 'client', headerSort: false, editor: 'input' },
+                         { title: 'Country', field: 'country', headerSort: false, visible: false }];
+        Object.keys(dynamicColumns).forEach((key) => {
+            const group = dynamicColumns[key];
+            if (group.Login) columns.push({ title: `Login ${key}`, field: group.Login, headerSort: false, editor: 'input' });
+            if (group.Password) columns.push({ title: `Password ${key}`, field: group.Password, headerSort: false, editor: 'input',
+              formatter: (cell) => {
+                  const value = cell.getValue();
+                  return `<div class="blurred" title="Content blurred for privacy">${value}</div>`;
+              }
+            });
+            if (group.Notes) columns.push({ title: `Notes ${key}`, field: group.Notes, headerSort: false, editor: 'input' });
+        });
+
+        const table = new Tabulator("#clientsDatatableContainer", {
+            data: data,
+            layout: "fitDataFill",
+            pagination: data.length > 10,
+            paginationSize: 10,
+            columns: columns,
+        });
+        datatable = table;
+    }
 }
 
 
@@ -1137,26 +1265,26 @@ async function saveClientsEdits() {
         // Get Tabulator instance
         const table = datatable;
 
-        // Retrieve all data from the table
+        // Retrieve all data from the table without transformation
         let data = table.getData();
 
         // Convert all inputs to strings and replace null with ''
-        data = data.map(row => {
-            const updatedRow = {};
-            for (const key in row) {
-                if (row.hasOwnProperty(key)) {
-                    val = row[key] === null ? '' : String(row[key]);
+        const formattedData = data.map(entry => {
+            const updatedEntry = {};
+            for (const key in entry) {
+                if (entry.hasOwnProperty(key)) {
+                    let val = entry[key] === null ? '' : String(entry[key]);
                     val = val.replace('undefined', '');
-                    updatedRow[key] = val;
-                    
+                    updatedEntry[key] = val;
                 }
+                entry['country'] = document.getElementsByClassName('tab-button active')[0].getAttribute('data-country');
             }
-            return updatedRow;
+            return updatedEntry;
         });
 
-        // Send the data to the backend
+        // Send the raw data to the backend
         const response = await unifiedSendRequest(CLIENTSFILEUPDATE, {
-            formData: JSON.stringify({ clients: data }),
+            formData: JSON.stringify({ clients: formattedData }),
             headerArgs: { 'Content-Type': 'application/json' }
         });
 
@@ -1358,20 +1486,35 @@ function repeatActionReport() {
 
 
 function showGuide() {
+  if(guideToShow == 'new') {// create new report 
     startGuide([
-        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' }
+        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' },
+        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' },
     ]);
-    setCookie('showedGuideReport', 'true', 300);
+  } else if (guideToShow == 'upload') {
+    startGuide([
+        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report page, where you have the option to upload any report to be submitted to the corresponding authority. Please make sure to configure the client credentials before uploading the report.", where: 'middle' },
+        { element: "#clientsUploadSection", group: "Clients", title: "Clients", text: "Here you can upload or modify the credentials for the clients for the different schemes.", where: 'below' },
+        // { element: "#editClientsModal", group: "Clients", title: "Clients", text: "Click into any field to update the existing value. You can add a new row to add new clients or add columns for additional schemes.", where: 'below' },
+        { element: "#uploadreportlistContainer", group: "Reports", title: "Upload Reports", text: "Drag and drop any report here to submit it to the corresponding authority. The format of the report does not matter as long as it includes some relevant information such as company name, date and the weights to report.", where: 'right' },
+        { element: "#notificationBell", group: "Reports", title: "Notifications", text: "If any error occurs with submitting the report, the error will be shown here. If configured, you can also receive an email with the error message.", where: 'below' },
+    ]);
+  } else {
+    startGuide([
+        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report page, please select one of the options, either creating a new report or submitting an existing one.", where: 'middle' },
+    ]);
+  }
+  setCookie('showedGuideReport', 'true', 300);
 }
 function showGuideFromButton(element) {
   showGuide();
-  element.style.display = "none";
 }
-document.addEventListener('DOMContentLoaded', function() {
+
+function showGuideAfterSelection() {
   if(readCookie('showedGuideReport') === null) {
-      setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
-    }
-  });
+    setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+  }
+}
 
 </script>
 

@@ -120,6 +120,218 @@ table {
     margin-bottom: 20px; /* Space below each row */
 }
 
+
+.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 120px;
+    height: 45px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+    px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+    px;
+  }
+
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}
+      px;
+      padding-bottom: {{ section.settings.padding_bottom }}
+      px;
+    }
+  }
+  .image-with-text p {
+    text-align: left;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  .border {
+    border: 0.2rem solid #17161c;
+  }
+  .bordertop {
+    border-top: 0.2rem solid #17161c;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    border: none !important;
+    border-top: 0.2rem solid #17161c !important;
+  }
+  td {
+    border: none !important;
+    border-top: 0.2rem solid #17161c !important;
+  }
+
+  .flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .table-header {
+    text-decoration: underline; /* Underline the text */
+    cursor: pointer; /* Change cursor to a hand pointer */
+    margin-left: 10px;
+  }
+  .icons {
+    margin-left: auto;
+    margin-right: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 35%; /* occupies 30% of the flex container */
+    justify-content: flex-end; /* aligns icons to the right within their space */
+    display: flex;
+  }
+
+  .arrow {
+    margin-left: 10px;
+    margin-right: 10px; /* Optional: Add some space between the arrow and the text */
+    transition: transform 0.3s ease;
+  }
+
+  .icons i {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  .flex-header.rotated .arrow {
+    transform: rotate(90deg);
+  }
+  .trashcan,
+  .info {
+    cursor: pointer;
+  }
+  .nonlivedata {
+    display: block;
+  }
+  .livedata {
+    display: none;
+  }
+
+  .toggle-container {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    /* margin-left: 10px; */
+    vertical-align: middle;
+    margin: auto;
+    flex-shrink: 0;
+}
+
+.toggle-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #2255ff;
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px #2255ff;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+  .toggle-options {
+  align-items: center;
+  display: flex;
+}
+div.display-flex {
+    display: flex;
+    align-items: center; /* Align items vertically in the middle */
+    justify-content: flex-start; /* Align items to the start of the container */
+    gap: 10px; /* Adjust as needed, adds space between children */
+}
+
+.tab {
+    cursor: pointer;
+    padding: 10px;
+    margin-right: 5px;
+    background-color: #f1f1f1;
+    border: solid 1px #ccc;
+    border-bottom: none;
+  }
+  .tab:hover {
+    background-color: #ddd;
+  }
+  .tab-content {
+    border: solid 1px #ccc;
+    padding: 10px;
+    display: none;
+  }
+  .active, .tab:hover {
+    background-color: #2255FF;
+    color: #fafafa;
+  }
+
+#countrySelectionContainer {
+  display: none; /* Start hidden */
+  position: absolute; /* Position it below the icon or wherever it fits */
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  z-index: 1; /* Make sure it's above other content */
+  border-radius: 1rem;
+}
+
+#countrySelectionContainer ul {
+  list-style: none; /* Remove default list styling */
+  margin: 0;
+  padding: 0;
+}
+
+#countrySelectionContainer li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer; /* Change cursor on hover */
+}
+
+#countrySelectionContainer li:hover {
+  background-color: #f6f6f6;
+}
+#countrySelectionContainer li:last-child {
+  border-bottom: none;
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
 
