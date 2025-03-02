@@ -207,7 +207,7 @@ tr {
     display: block!important;
 }
 
-.row {
+.history-row {
     border-top: 0.2rem solid #17161c; /* Full-width border for each row */
     padding: 2rem 0; /* Vertical padding for spacing */
     width: 100%; /* Ensure the row spans the full container width */
@@ -260,6 +260,46 @@ tr {
         border-radius: 8px;
         overflow: hidden;
     }
+
+    .filter-group {
+      margin: auto;
+    }
+    .dropdown {
+      margin-left: 0!important;
+    }
+    .glyphicon-ok:before {
+      content: "\2713";
+    }
+
+
+    /* Loading spinner */
+    #loadingSpinner, #loadingSpinnerCalendar {
+        border: 4px solid rgba(34, 85, 255, 0.1);
+        border-top: 4px solid #2255ff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: auto;
+        display: flex;
+    }
+    #loadingSpinnerContainer, #loadingSpinnerCalendarContainer {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .all-icons {
+      margin: auto;
+    }
+    #downloadAllReports {
+      cursor: pointer;
+    }
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
@@ -273,17 +313,75 @@ tr {
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
   <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+
+
+  {{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>-->
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+  integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+  crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
   {% render 'forsure-simple-notification' %}
   <div id="tooltipWarn" class="tooltip" style="display: none;">Tooltip content</div>
   <div id='tooltip' class="tooltipSave"></div>
   <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
     <div>
-      <h2 class="flex-header" style="margin-left: 2rem">
-        <span id="historyheader" class="table-header" style="cursor: default">
-          Report History
-        </span>
-      </h2>
-      <div id="reportshistory" class="table-header-title"></div>
+      <div style="display: flex">
+          <h2 class="flex-header" style="margin-left: 2rem">
+            <span id="historyheader" class="table-header" style="cursor: default">
+              Report History
+            </span>
+          </h2>
+          <div class="filter-group" id="profile-filter-guide">
+            <div class="filter-group-heading">Country</div>
+            <select
+              id="countryDropdown"
+              class="selectpicker"
+              multiple
+              data-live-search="true"></select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-heading">Report Type</div>
+            <select
+              id="reporttypeDropdown"
+              class="selectpicker"
+              multiple
+              data-live-search="true"></select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-heading">Reporting Period</div>
+            <select
+              id="periodDropdown"
+              class="selectpicker"
+              multiple
+              data-live-search="true"></select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-heading">Receipts only</div>
+            <select
+              id="receiptsDropdown"
+              class="selectpicker"
+              data-live-search="true"></select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-heading">Search</div>
+            <input type="text" id="companySearch" class="form-control" placeholder="Search" />
+        </div>
+          <span class="all-icons">
+            <!-- <i id="filter" class="icon-1"><img width="20px" src="{{ section.settings.filter | image_url }}" alt="{{ section.settings.filter.alt | escape }}" loading="lazy"></i> -->
+            <i id="downloadAllReports" class="icon-2"><img
+                width="20px"
+                src="{{ section.settings.download | image_url }}"
+                alt="{{ section.settings.download.alt | escape }}"
+                loading="lazy"></i>
+          </span>
+      </div>
+      <div id="reportshistory" class="table-header-title" style="min-height: 65px"></div>
     </div>
   </div>
   <div id="imageModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1000; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2);">
@@ -316,7 +414,6 @@ tr {
 
   {% render 'forsure-login' %}
   <script>
-
 async function checkHistoryVersion() {
     try {
         let data = await unifiedSendRequest(GETREPORTHISTORYVERSION, {method: 'GET'});
@@ -369,7 +466,7 @@ function createFolderStructure(configDiv, hierarchy, currentPath = '') {
         level[key].forEach(file => {
             const fullPath = `${path}/${file}`; // Construct full path
             const fileRow = document.createElement('div');
-            fileRow.className = 'row file-row'; // Add CSS class for consistent styling
+            fileRow.className = 'history-row file-row'; // Add CSS class for consistent styling
             fileRow.style.paddingLeft = `${depth * 2}rem`; // Offset based on depth
             fileRow.textContent = file;
             
@@ -391,7 +488,7 @@ function createFolderStructure(configDiv, hierarchy, currentPath = '') {
       } else {
         // Render folder
         const folderRow = document.createElement('div');
-        folderRow.className = 'row folder-row'; // Add CSS class for consistent styling
+        folderRow.className = 'history-row folder-row'; // Add CSS class for consistent styling
         folderRow.style.paddingLeft = `${depth * 2}rem`; // Offset text for hierarchy
 
         // Add the SVG arrow
@@ -685,22 +782,183 @@ function displayPdfInModal(pdfBlob) {
     modalOverlay.style.display = 'block';
 }
 
-async function getReports() {
+var reportFilters = {
+  'countries': [],
+  'report_types': [],
+  'reporting_periods': [],
+  'search_filter': [],
+  'receipt_only': '',
+}
+search_filter = [];
+
+var totalPossibleCompanies = new Set();
+var totalPossibleCountries = new Set();
+var totalPossibleReportTypes = new Set();
+var totalPossiblePeriods = new Set();
+var totalPossibleReceipts = ['All', 'Receipts only', 'Reports only'];
+var allReports = [];
+async function getReports(init=true) {
     try {
-    let data = await unifiedSendRequest(GETREPORTSONEDRIVE);
-    console.log(data);
     const configDiv = document.getElementById("reportshistory");
-    
-    const hierarchy = buildHierarchy(data);
-    console.log(hierarchy);
-
-    createFolderStructure(configDiv, hierarchy);
-
+    configDiv.innerHTML = '';
+    var loadingSpinnerContainer = document.createElement('div');
+    loadingSpinnerContainer.id = 'loadingSpinnerContainer';
+    var loadingSpinner = document.createElement('div');
+    loadingSpinner.id = 'loadingSpinner';
+    loadingSpinnerContainer.appendChild(loadingSpinner);
+    configDiv.appendChild(loadingSpinnerContainer);
+    let data = await unifiedSendRequest(GETREPORTSONEDRIVE, {method: 'POST', formData: JSON.stringify(reportFilters), 
+                                        headerArgs: {'Content-Type': 'application/json'}});
+    console.log(data);
+    allReports = data;
+    filterCompanySearch(document.getElementById("companySearch").value, init);
+    // createOverview(data, init);
     } catch (error) {
     console.error(error.message);
     TOKEN = false;
     }
 }
+
+function createOverview(data, init) {
+    const configDiv = document.getElementById("reportshistory");
+    const hierarchy = buildHierarchy(data);
+    console.log(hierarchy);
+
+    var possibleCompanies = new Set();
+    var possibleCountries = new Set();
+    var possibleReportTypes = new Set();
+    var possiblePeriods = new Set();
+    for (let filename of data) { // Corrected loop
+          let filename_split = filename.split('/');
+
+          possibleCompanies.add(filename_split[0]);
+          possibleCountries.add(filename_split[1]);
+          possibleReportTypes.add(filename_split[2]);
+
+          let possiblePeriod = filename_split[3];
+          if (filename_split.length > 5) {
+              possiblePeriod += ` ${filename_split[4]}`;
+          }
+          possiblePeriods.add(possiblePeriod);
+      }
+    if (init) {
+      totalPossibleCompanies = possibleCompanies;
+      totalPossibleCountries = possibleCountries;
+      totalPossibleReportTypes = possibleReportTypes;
+      totalPossiblePeriods = possiblePeriods;
+      
+      // TODO do this smart when selecting e.g. a country
+      fillDropdowns('countryDropdown', possibleCountries, 'countries');
+      fillDropdowns('reporttypeDropdown', possibleReportTypes, 'report_types');
+      fillDropdowns('receiptsDropdown', totalPossibleReceipts, 'receipt_only');
+    }
+    fillDropdowns('periodDropdown', possiblePeriods, 'reporting_periods');  // only reporting period currently really variable
+    createFolderStructure(configDiv, hierarchy);
+}
+
+document.getElementById("companySearch").addEventListener("input", function () {
+    filterCompanySearch(this.value, false);
+});
+
+function filterCompanySearch(searchQuery, init) {
+  searchQuery = searchQuery.toLowerCase().trim().replace(' ', '_').replace('.', '_').replace(',', '_').replace('/', '_'); // Get input and normalize case
+
+  let filteredData;
+
+  if (searchQuery === '') {
+      filteredData = allReports; // If empty input, show all reports
+  } else {
+      filteredData = allReports.filter(filename => 
+          filename.toLowerCase().includes(searchQuery) 
+      );
+  }
+  search_filter = filteredData;
+  createOverview(filteredData, init); // Refresh the overview
+}
+
+
+
+function fillDropdowns(dropdownId, entries, key) {
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.innerHTML = "";
+    console.log(`Filling dropdown ${key} with ${entries}`);
+
+    [...entries].sort().forEach(entry => {
+        const option = document.createElement("option");
+        option.value = entry;
+        option.textContent = entry;
+        if (reportFilters[key].includes(entry)) {
+            option.selected = true;
+        }
+        dropdown.appendChild(option);
+    });
+    $(`#${dropdownId}`).selectpicker('refresh');
+    let selectedOptions = $(`#${dropdownId}`).find('option:selected');
+    let displayText = selectedOptions.map(function() {
+        return $(this).text(); // or $(this).val() if you want to display the value
+    }).get().join(', ');
+    // Check if there is any selection, otherwise set to default text
+    displayText = displayText.length > 0 ? displayText : 'Nothing selected';
+
+    // Update the display text
+    $(`#${dropdownId}`).closest('.filter-group').find('.filter-option-inner-inner').text(displayText);
+}
+document.getElementById('countryDropdown').addEventListener('change', function() {
+  const selCountries = Array
+        .from(this.options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+    console.log(`Selected countries: ${selCountries}`);
+    reportFilters['countries'] = selCountries;
+    getReports(false);
+});
+
+document.getElementById('reporttypeDropdown').addEventListener('change', function() {
+  const selCountries = Array
+        .from(this.options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+    console.log(`Selected report_types: ${selCountries}`);
+    reportFilters['report_types'] = selCountries;
+    getReports(false);
+});
+
+document.getElementById('periodDropdown').addEventListener('change', function() {
+  const selCountries = Array
+        .from(this.options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+    console.log(`Selected reporting_periods: ${selCountries}`);
+    reportFilters['reporting_periods'] = selCountries;
+    getReports(false);
+});
+
+document.getElementById('receiptsDropdown').addEventListener('change', function() {
+  const selCountries = Array
+        .from(this.options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+    console.log(`Selected receipt_only: ${selCountries}`);
+    reportFilters['receipt_only'] = selCountries[0];
+    getReports(false);
+});
+
+document.getElementById('downloadAllReports').addEventListener('click', async function() {
+  try {
+    var reportFiltersDownload = reportFilters;
+    reportFiltersDownload['search_filter'] = search_filter;
+    this.style.cursor = 'not-allowed';
+    this.title = 'In Progress, this can take 1-2mins, please wait';
+    const data = await unifiedSendRequest(GETREPORTSDOWNLOADALL, {method: 'POST', formData: JSON.stringify(reportFiltersDownload), 
+                                          headerArgs: {'Content-Type': 'application/json'}});
+    console.log(data);
+    this.style.cursor = 'pointer';
+    this.title = '';
+  } catch (error) {
+    console.error(error.message);
+    TOKEN = false;
+  }
+});
 
 
 function hideImageModal() {
