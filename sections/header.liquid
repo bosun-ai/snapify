@@ -688,6 +688,13 @@
   {%- endif -%}
 {% endif %}
 
+<script>
+  if (window.location.search.includes('contact_options')) {
+      showContactOptions();
+      // showContactOptionsMobile();
+  }
+</script>
+
 
 <script type="application/ld+json">
   {
