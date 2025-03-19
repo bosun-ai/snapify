@@ -331,13 +331,13 @@ tr {
   <div id='tooltip' class="tooltipSave"></div>
   <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
     <div>
-      <div style="display: flex">
+      <div style="display: flex;background-color: #fafafa;position: relative;" id="filterContainer">
           <h2 class="flex-header" style="margin-left: 2rem">
             <span id="historyheader" class="table-header" style="cursor: default">
               Report History
             </span>
           </h2>
-          <div class="filter-group" id="profile-filter-guide">
+          <div class="filter-group" id="profile-filter-guide" style="margin-left: 4rem">
             <div class="filter-group-heading">Country</div>
             <select
               id="countryDropdown"
@@ -361,21 +361,21 @@ tr {
               multiple
               data-live-search="true"></select>
           </div>
-          <div class="filter-group">
+          <div class="filter-group" id="receiptsContainer" style="background-color: #fafafa;position: relative;">
             <div class="filter-group-heading">Receipts only</div>
             <select
               id="receiptsDropdown"
               class="selectpicker"
               data-live-search="true"></select>
           </div>
-          <div class="filter-group">
-            <div class="filter-group-heading">Search</div>
-            <input type="text" id="companySearch" class="form-control" placeholder="Search" />
+          <div class="filter-group" id="searchContainer" style="background-color: #fafafa;position: relative;">
+            <div class="filter-group-heading" style="width: 12rem">Search</div>
+            <input type="text" id="companySearch" class="form-control" placeholder="Search"  style="width: 12rem"/>
         </div>
-          <span class="all-icons">
+          <span class="all-icons" style="margin-right: 3rem;background-color: #fafafa;position: relative;padding: 1rem;" id="allIconsContainer">
             <!-- <i id="filter" class="icon-1"><img width="20px" src="{{ section.settings.filter | image_url }}" alt="{{ section.settings.filter.alt | escape }}" loading="lazy"></i> -->
-            <i id="downloadAllReports" class="icon-2"><img
-                width="20px"
+            <i id="downloadAllReports" class="icon-2" style="background-color: #fafafa;position: relative;"><img
+                width="30px"
                 src="{{ section.settings.download | image_url }}"
                 alt="{{ section.settings.download.alt | escape }}"
                 loading="lazy"></i>
@@ -987,49 +987,28 @@ document.getElementById('modalOverlayPdf').addEventListener('click', hidePdfModa
 
 getReports();
 
-// function showGuideReport() {
-//     startGuide([
-//         { element: "main", group: "{{ 'software.guide.download.welcome.group' | t }}", title: "{{ 'software.guide.download.welcome.title' | t }}", text: "{{ 'software.guide.download.welcome.text' | t }}", where: 'middle' },
-//         { element: "#inprogressbox", group: "{{ 'software.guide.download.inprogress.group' | t }}", title: "{{ 'software.guide.download.inprogress.title' | t }}", text: "{{ 'software.guide.download.inprogress.text' | t }}", where: 'below' },
-//         { element: "#historybox", group: "{{ 'software.guide.download.history.group' | t }}", title: "{{ 'software.guide.download.history.title' | t }}", text: "{{ 'software.guide.download.history.text' | t }}", where: 'inside' },
-//         { element: "#reportshistory", group: "{{ 'software.guide.download.country.group' | t }}", title: "{{ 'software.guide.download.country.title' | t }}", text: "{{ 'software.guide.download.country.text' | t }}", where: 'below', displayTemp: true },
-//         { element: "#reportshistory table tr:nth-child(3)", group: "{{ 'software.guide.download.debugger.group' | t }}", title: "{{ 'software.guide.download.debugger.title' | t }}", text: "{{ 'software.guide.download.debugger.text' | t }}", where: 'below', secondElement: '#downloads', displayTemp: true},
-//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.report.group' | t }}", title: "{{ 'software.guide.download.report.title' | t }}", text: "{{ 'software.guide.download.report.text' | t }}", where: 'below', secondElement: '#downloads', displayTemp: true},
-//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.open.group' | t }}", title: "{{ 'software.guide.download.open.title' | t }}", text: "{{ 'software.guide.download.open.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
-//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.download.group' | t }}", title: "{{ 'software.guide.download.download.title' | t }}", text: "{{ 'software.guide.download.download.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
-//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.share.group' | t }}", title: "{{ 'software.guide.download.share.title' | t }}", text: "{{ 'software.guide.download.open.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
-//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.delete.group' | t }}", title: "{{ 'software.guide.download.delete.title' | t }}", text: "{{ 'software.guide.download.delete.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
-//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.send.group' | t }}", title: "{{ 'software.guide.download.send.title' | t }}", text: "{{ 'software.guide.download.send.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true },
-//         { element: "#reportshistory table tr:nth-child(4)", group: "{{ 'software.guide.download.checkbox.group' | t }}", title: "{{ 'software.guide.download.checkbox.title' | t }}", text: "{{ 'software.guide.download.checkbox.text' | t }}", secondElement: '#downloads', where: 'below', displayTemp: true }
-//     ]);
-//     setCookie('showedGuideDownload', 'true', 300);
-// }
-// function showGuideFromButtonReport(element) {
-//     showGuideReport();
-// }
 
-// document.addEventListener('DOMContentLoaded', function() {
-//   if(readCookie('showedGuideDownload') === null) {
-//       setTimeout(showGuideReport, 1000); // Delay in milliseconds, adjust as necessary
-//     }
-//   });
 
-// window.addEventListener('scroll', function () {
-//   const guideButton = document.getElementById('guideButton');
-//   const footer = document.querySelector('footer'); // Adjust if your footer has a different tag or class
-//   const buttonHeight = guideButton.offsetHeight;
-//   const footerTop = footer.getBoundingClientRect().top;
-//   const viewportHeight = window.innerHeight;
+function showGuide() {
+    startGuide([
+        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report history page. All reports that were created or that you submitted are shown here as well as the confirmations if they were sent to the corresponding authority.", where: 'middle' },
+        { element: "#filterContainer", group: "Filters", title: "Filters", text: "Here you can filter the results shown below by the country, type of report and time.", where: 'below' },
+        { element: "#receiptsContainer", group: "Filters", title: "Receipts Only", text: "If you only want to see the report confirmations, you can select that here.", where: 'below' },
+        { element: "#searchContainer", group: "Filters", title: "Search", text: "Search for any company, report name or country using this search. The results are updated immediately.", where: 'below' },
+        { element: "#allIconsContainer", group: "Download", title: "Download", text: "To download all reports shown below (applying the filters that you've chosen), click this button. \n\nNote: This might take 1-2mins to get the zip file ready.", where: 'left'}
+    ]);
+    setCookie('showedGuideHistory', 'true', 300);
+}
+function showGuideFromButton(element) {
+  showGuide();
+}
 
-//   // Calculate if the button is overlapping the footer
-//   if (footerTop < viewportHeight - buttonHeight - 20) {
-//     guideButton.style.position = 'absolute';
-//     guideButton.style.bottom = `${viewportHeight - footerTop + 20}px`;
-//   } else {
-//     guideButton.style.position = 'fixed';
-//     guideButton.style.bottom = '2rem';
-//   }
-// });
+
+document.addEventListener('DOMContentLoaded', function() {
+  if(readCookie('showedGuideHistory') === null) {
+      setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    }
+  });
 
   </script>
 </div>

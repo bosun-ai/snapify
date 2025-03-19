@@ -921,11 +921,12 @@ fieldset[disabled] .btn-default:hover {
                       <option value="Partner">{{ 'templates.contact.form.source_partner' | t }}</option>
                       <option value="Social Media">{{ 'templates.contact.form.source_social_media' | t }}</option>
                       <option value="Search">{{ 'templates.contact.form.source_search' | t }}</option>
+                      <option value="Advertisement">Advertisement</option>
                       <option value="Friend">{{ 'templates.contact.form.source_friend' | t }}</option>
                       <option value="Other">{{ 'templates.contact.form.source_other' | t }}</option>
                     </select>
                     <label for="sourceSelect" class="field__label">
-                      {{- 'templates.contact.form.source_question' | t -}}
+                      {{- 'templates.contact.form.source_question' | t -}} <span aria-hidden="true">*</span>
                     </label>
                   </div>
                   <div class="field" id="partnerSelect" style="display:none;">
@@ -939,7 +940,7 @@ fieldset[disabled] .btn-default:hover {
                       <option value="Other">{{ 'templates.contact.form.source_partner_other' | t }}</option>
                     </select>
                     <label for="partnerDetails" class="field__label">
-                      {{- 'templates.contact.form.source_partner_selection' | t -}}
+                      {{- 'templates.contact.form.source_partner_selection' | t -}} <span aria-hidden="true">*</span>
                     </label>
                   </div>
                 </div>
@@ -947,6 +948,7 @@ fieldset[disabled] .btn-default:hover {
                   <input
                     class="field__input to_send"
                     type="text"
+                    name="contact[customPartner]"
                     id="customPartner"
                     placeholder="{{ 'templates.contact.form.source_partner_other_text' | t }}"
                   >
@@ -959,6 +961,7 @@ fieldset[disabled] .btn-default:hover {
                   <input
                     class="field__input to_send"
                     type="text"
+                    name="contact[otherSource]"
                     id="otherDetails"
                     placeholder="{{ 'templates.contact.form.source_other_text' | t }}"
                   >
@@ -1632,6 +1635,7 @@ function gtag_report_conversion() {
         gtag('js', new Date());
         gtag('config', 'G-TN3P2D6506');
         gtag_report_conversion();
+        window.lintrk('track', { conversion_id: 19886530 });
         showMessage("You are scheduled. A calendar invitation has been sent to your email address.", true);
       } catch (error) {
         console.error('Error submitting questions:', error);
@@ -1666,12 +1670,16 @@ function gtag_report_conversion() {
       // Reset partner dropdown in case it was changed to custom input before
       document.getElementById('customPartnerInput').style.display = 'none';
       document.getElementById('partnerDetails').value = '';
+      document.getElementById('partnerDetails').removeAttribute('required');
+      document.getElementById('otherDetails').removeAttribute('required');
 
       // Display the appropriate field based on selection
       if (value === 'Partner') {
         partnerSelect.style.display = 'block';
+        document.getElementById('partnerDetails').setAttribute('required');
       } else if (value === 'Other') {
         otherInput.style.display = 'block';
+        document.getElementById('otherDetails').setAttribute('required');
       }
       updateSourceValue(value);
     }
@@ -1679,8 +1687,11 @@ function gtag_report_conversion() {
     function showCustomPartnerInput(value) {
       var customInput = document.getElementById('customPartnerInput');
       customInput.style.display = value === 'Other' ? 'block' : 'none';
+      document.getElementById('customPartner').removeAttribute('required');
       if (value !== 'Other') {
         updateSourceValue(value);
+      } else {
+        document.getElementById('customPartner').setAttribute('required');
       }
     }
     document.getElementById('customPartner').addEventListener('input', function () {
@@ -1697,5 +1708,4 @@ function gtag_report_conversion() {
 
             // Initialize the timezone list on page load
   populateTimezones();
-  </script>
-  
+</script>

@@ -260,10 +260,11 @@
                     <option value="Partner">{{ 'templates.contact.form.source_partner' | t }}</option>
                     <option value="Social Media">{{ 'templates.contact.form.source_social_media' | t }}</option>
                     <option value="Search">{{ 'templates.contact.form.source_search' | t }}</option>
+                    <option value="Advertisement">Advertisement</option>
                     <option value="Friend">{{ 'templates.contact.form.source_friend' | t }}</option>
                     <option value="Other">{{ 'templates.contact.form.source_other' | t }}</option>
                     </select>
-                    <label for="sourceSelect" class="field__label">{{ 'templates.contact.form.source_question' | t }}</label>
+                    <label for="sourceSelect" class="field__label">{{ 'templates.contact.form.source_question' | t }} <span aria-hidden="true">*</span></label>
                 </div>
                 <div class="field" id="partnerSelect" style="display:none;">
                     <select id="partnerDetails" class="field__input contactGrey" onchange="showCustomPartnerInput(this.value)">
@@ -271,15 +272,15 @@
                     {% render 'partner' %}
                     <option value="Other">{{ 'templates.contact.form.source_partner_other' | t }}</option>
                     </select>
-                    <label for="partnerDetails" class="field__label">{{ 'templates.contact.form.source_partner_selection' | t }}</label>
+                    <label for="partnerDetails" class="field__label">{{ 'templates.contact.form.source_partner_selection' | t }} <span aria-hidden="true">*</span></label>
                 </div>
             </div>
                 <div class="field" id="customPartnerInput" style="display:none;">
-                    <input class="field__input" type="text" id="customPartner" placeholder="{{ 'templates.contact.form.source_partner_other_text' | t }}">
+                    <input class="field__input" type="text" id="customPartner" name="contact[customPartner]" placeholder="{{ 'templates.contact.form.source_partner_other_text' | t }}">
                     <label class="field__label" for="customPartner">{{ 'templates.contact.form.source_partner_other_text' | t }} <span aria-hidden="true">*</span></label>
                 </div>
             <div class="field" id="otherInput" style="display:none;">
-              <input class="field__input" type="text" id="otherDetails" placeholder="{{ 'templates.contact.form.source_other_text' | t }}">
+              <input class="field__input" type="text" id="otherDetails" name="contact[otherSource]" placeholder="{{ 'templates.contact.form.source_other_text' | t }}">
               <label class="field__label" for="otherDetails">{{ 'templates.contact.form.source_other_text' | t }} <span aria-hidden="true">*</span></label>
             </div>
 
@@ -309,7 +310,13 @@
                       'currency': 'EUR'
                   });
                 }
-                gtag_report_conversion();
+                function metrics() {
+                  gtag_report_conversion();
+                  window.lintrk('track', { conversion_id: 20281930 });
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                  setTimeout(metrics, 200);
+                });
                 </script>
             {%- endif -%}
             <div class="contact__button button-center" style="margin-top: 2rem;">
@@ -354,12 +361,15 @@ function handleSelection(value) {
   // Reset partner dropdown in case it was changed to custom input before
   document.getElementById('customPartnerInput').style.display = 'none';
   document.getElementById('partnerDetails').value = '';
-  
+  document.getElementById('partnerDetails').removeAttribute('required');
+  document.getElementById('otherDetails').removeAttribute('required');
   // Display the appropriate field based on selection
   if(value === "Partner") {
       partnerSelect.style.display = 'block';
+      document.getElementById('partnerDetails').setAttribute('required');
   } else if(value === "Other") {
       otherInput.style.display = 'block';
+      document.getElementById('otherDetails').setAttribute('required');
   }
   updateSourceValue(value);
 }
@@ -367,8 +377,11 @@ function handleSelection(value) {
 function showCustomPartnerInput(value) {
     var customInput = document.getElementById('customPartnerInput');
     customInput.style.display = value === "Other" ? 'block' : 'none';
+    document.getElementById('customPartner').removeAttribute('required');
     if(value !== "Other") {
         updateSourceValue(value);
+    } else {
+      document.getElementById('customPartner').setAttribute('required');
     }
 }
 document.getElementById('customPartner').addEventListener('input', function() {
