@@ -1,0 +1,266 @@
+{% style %}
+        .date {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .authors {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .author-group {
+            width: 45%;
+            text-align: center;
+        }
+        .author-group a {
+            text-decoration: none;
+            color: #0073e6;
+        }
+        .affiliation {
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .footnote {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .abstract {
+            font-weight: bold;
+            text-align: justify;
+            padding: 15px;
+            /* border: 1px solid #ccc; */
+            /* background-color: #f9f9f9; */
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 20px;
+            border-bottom: 2px solid black;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .two-columns {
+            column-count: 2;
+            column-gap: 40px;
+        }
+        .page-break {
+            page-break-before: always;
+            margin-top: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .citation {
+            font-size: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+{% endstyle %}
+<div class="page-width page-width--narrow" style="margin-top: 10rem">
+<h1 style="text-align: center;font-size: xx-large;">Automating Extended Producer Responsibility (EPR) Reporting: Leveraging AI for Eco-Modulation & Sustainability Compliance</h1>
+<div class="date">January 10th, 2025</div>
+
+<div class="authors">
+    <div class="author-group">
+        <a href="https://www.linkedin.com/in/daniel-hamandouche/" target="_blank">Daniel Hamandouche</a><br>
+        <a href="https://www.linkedin.com/in/niclas-brinkmann/" target="_blank">Niclas M.S.R.H. Brinkmann</a><br>
+        <div class="affiliation"><a href="https://for-sure.net" target="_blank">ForSURE</a></div>
+    </div>
+    <div class="author-group">
+        <a href="https://www.linkedin.com/in/tobyradcliffe/" target="_blank">Toby Radcliffe</a><br>
+        <a href="https://www.linkedin.com/in/heather-brett-pickering-22458a214/" target="_blank">Heather Brett-Pickering</a><br>
+        <div class="affiliation"><a href="https://www.zerobees.com" target="_blank">ZeroBees</a></div>
+    </div>
+</div>
+
+<h2>Abstract</h2>
+<div class="abstract">
+    In recent years, the tightening and proliferation of regulatory frameworks mandating Extended Producer Responsibility (EPR) compliance has introduced significant challenges for organizations. Navigating increasingly complex reporting guidelines while adapting products to accommodate eco-modulation fees requires innovative and scalable solutions to enhance circularity and sustainability. This paper explores how automation, powered by artificial intelligence (AI), can revolutionize compliance processes and support the development of more sustainable products. By fine-tuning Large Language Models (LLMs) to interpret complex regulations and integrating software for automated reporting, companies can significantly reduce operational burdens. Furthermore, real-time data analysis combined with regulatory insights provides businesses with actionable strategies to improve product circularity, identify quick wins, and lower their environmental impacts, all while minimizing eco-modulation fees. This approach enables companies to achieve regulatory compliance seamlessly, even when scaling to new markets, without hindering growth. Additionally, real-time data analysis equips businesses to improve sustainability without requiring in-house expertise, making it an ideal solution for small and medium-sized enterprises lacking dedicated compliance resources.
+</div>
+
+<div class="footnote">
+    Special thanks to Anna M. Walker (Joint Research Centre of the European Commission) <br> and Henrieke Bünger (ForSURE) for reviewing the paper.
+</div>
+
+
+
+<div class="page-break">Page 1</div>
+
+<h2>1. Introduction</h2>
+<div class="two-columns">
+    <p>Extended Producer Responsibility (EPR) has emerged as a critical regulatory instrument to promote circular economy. However, businesses face significant challenges, including increasing complexity of compliance, reporting burdens, and eco-modulation fees. This paper explores how AI-powered automation can address these challenges, reduce carbon footprints, and encourage innovation in green manufacturing.</p>
+    <h3>1.1 EPR in the EU</h3>
+    <p>EPR is an environmental policy instrument that assigns producers the responsibility for the lifecycle of their products, pushing businesses towards higher recycling rates and reduced hazardous waste. This includes the design, production, consumption, and post-consumer stages like recycling or disposal. EPR shifts waste management costs from local governments to producers to incentivize the creation of products that are easier to dismantle, recycle, or reuse. Traditionally, EPR is used to finance the end-of-life stage of a product, as waste management processes are often underfunded due to the declining market value of secondary products and the diminishing value of products over time. Consequently, more sustainable products that retain their value over time are less costly for producers, as they can partially offset waste management expenses. \cite{expra2016epr, pwc2024epr} 
+
+    For the European Union (EU), EPR is a crucial regulation for transforming into a circular economy. \cite{unido2023circular} Circular economy is an economic model that aims to eliminate waste and pollution by keeping products and materials in circulation through improved maintenance, reusing, refurbishing, and recycling. Contrary to the linear economy, which follows a take-make-waste model, the circular economy focuses on designing products in a way for them to return back into the economy thus encouraging sustainable consumption. \cite{ellenmacarthur2024principles, eu2024circular} This not only reduces the growing need for natural resources but also serves as a prerequisite for the goal of the EU to be climate neutral by 2050. \cite{pwc2024epr} By modulating the fees associated with EPR, the EU creates a competitive advantage for sustainable products and encourages innovation in this direction. This process, known as eco-modulation, aligns economic incentives with sustainability goals by offering lower EPR fees for products with a smaller environmental impact, while imposing higher fees on those that are more resource-intensive or polluting. This approach promotes greener alternatives and incentivizes businesses to reduce their ecological footprint. \cite{unido2023circular} </p>
+</div>
+<div class="page-break">Page 2</div>
+<h3>Circularity in the PCB Community</h3>
+<div class="two-columns">
+    <p>Circularity within the printed circuit board (PCB) community revolves around designing, producing, and managing PCBs in a manner that minimizes waste and extends the lifecycle of materials. This includes adopting modular designs that allow for easier disassembly and the recovery of valuable materials like copper, gold, and rare earth metals. However, the complex, multilayered structure of PCBs makes recycling costly and technically challenging. \cite{chakraborty2022electronic} 
+
+    Furthermore, earlier steps of the supply chain for creating PCB are important for a circular economy as well. Having an effective circular supply chain starts with the suppliers and Original Equipment Manufacturers (OEM) of the machines used to create PCBs. These machines should provide the manufacturers with meaningful data insights to enhance energy efficiency and reduce the usage of harmful resources. \cite{bain2024circular}
+    
+    In this paper, we propose a new AI-powered automation model designed as a transformative solution to address the challenges businesses, particularly small and medium enterprises (SMEs), face in complying with EPR regulations. Beyond ensuring compliance, this AI model offers tailored insights for optimizing product concept, design, and production stages, enabling SMEs to enhance their circularity within the PCB community while minimizing costs. 
+    
+    In the next section, we will explain these challenges further. In section 3, we will summarize the knowledge needed for the AI-powered automation model. Afterward, section 4 and 5 focus on presenting the details of a model that can be applied to the current challenges of a company. In section 6, we outline the steps that can be taken to start using technology to support circular practices within a company, from initial actions to adopting a full-fledged solution for automating compliance, tailored to the company’s current market presence. Finally, in section 7, we discuss the benefits and downsides of the model proposed in this paper and show potential future improvements. </p>
+</div>
+
+<div class="page-break">Page 3</div>
+
+<h2>2. EPR Compliance Challenges</h2>
+<div class="two-columns">
+    <p>As mentioned previously, EPR regulations aim to improve the sustainability of products. However, complying with them currently creates a suite of challenges for businesses. SMEs, which make up around 99\% of companies in the EU \cite{eu2024smes}, have a critical role in eco-innovation, such as being more flexible and innovation-oriented than larger companies, which enables them to be a playground for green growth. \cite{mady2023linking} However, SMEs report several systemic barriers to actioning sustainability strategies that must be overcome for this potential to be fully realized. Some of the key obstacles they face are: 
+    <ol>
+        <li>Limited technical adoption: Most SMEs have limited access to advanced technologies or automated solutions. Most tools for compliance reporting and sustainability assessments are designed for larger organizations. SMEs often lack the finances, the capacity or the infrastructure to gather the data needed to use these tools, causing them to risk falling short of compliance requirements or missing opportunities to innovate. \cite{oecd2024simplifying} </li>
+        <li>Limited legal knowledge: EPR regulations are complex and involve legal nuances that need to be interpreted by experts. SMEs often lack in-house legal expertise to navigate these frameworks, forcing them to hire external consultants, which can be expensive, or risk facing fines for unintentional non-compliance. \cite{ecommerce2022epr}</li>
+        <li>Country-specific Regulations (Regulatory Complexity): Currently, every country implements EPR with varying rules, reporting standards, and in some cases, eco-modulation fee structures across varying product categories. This means that companies operating across multiple countries need to comply with various regulations and reporting standards, causing additional complexity and costs. \cite{ecommerce2022epr}</li>
+    </ol>    
+    These barriers cause EPR reporting to be a manual, time-intensive, and error-prone task, where the employees manually gather product-specific details, calculate material usage, and report data. This is usually done by employees who do not have the expertise required to manage EPR compliance efficiently. \cite{moursellas2023sustainability} This not only affects day-to-day operations but also hinders long-term growth, as businesses are forced to divert attention and resources from innovation and scaling to compliance activities. Moreover, these inefficiencies increase the cost of compliance, straining businesses with limited budgets. Despite these challenges, maintaining compliance remains critical for long-term survival and competitiveness in the market. 
+    
+    This is also evident for SMEs in the PCB sector, as they face significant compliance burdens under EPR regulations, particularly regarding requirements for material recovery rates and eco-modulation fees. Many SMEs lack automated solutions, resulting in unanalyzed EPR report data and missed opportunities to extract valuable insights. These reports are intended by the EU to identify and improve inefficiencies in supply chains or product designs, but this opportunity to align with sustainability goals is missed, as companies see them merely as a compliance task incurring costs.   
+    
+    To overcome the barriers mentioned above, the market needs to have cost-effective, automated, and easy-to-use solutions that are tailored for SMEs faced with such regulations. While EPR is the focus of this paper, SMEs will face more regulations, both direct, such as the Corporate Sustainability Reporting Directive (CSRD) for listed SMEs active in the EU from between 2027 (for fiscal year 2026) and 2029 (for fiscal year 2028), as well as indirect, through larger companies requiring data from their SME suppliers for compliance. \cite{moursellas2024perceived} </p>
+</div>
+
+<div class="page-break">Page 4</div>
+
+<h2>3. The Role of AI-Powered Automation</h2>
+<div class="two-columns">
+    <p>AI-powered automation presents a transformative solution to these challenges. By utilizing AI to interpret and harmonize EPR regulations across different regions, SMEs can streamline compliance processes and reduce operational costs. AI tools can also analyze real-time data, offering actionable insights that help businesses optimize material recovery, reduce eco-modulation fees, and enhance product circularity. \cite{reuters2024ai} The model in this paper aims to allow PCB manufacturers to meet EPR requirements more efficiently, lower their negative environmental impacts, and innovate in green manufacturing practices. Ultimately, AI should be able to bridge the gap between regulatory compliance and sustainability goals, fostering a smoother transition to a circular economy while supporting SMEs in the PCB sector to remain competitive and responsible. In the following paragraphs, we present an overview of the foundational concepts related to the AI aspects of this paper. 
+
+    Machine Learning (ML) is a branch of AI that focuses on creating systems capable of learning and improving from data without being explicitly programmed. It involves training algorithms on datasets to identify patterns, make predictions, or perform tasks such as classification and clustering. For example, one use case could be to look at historical data and predict what the next value could be. \cite{ibm2024ml} 
+    
+    Large Language Models (LLMs) have received significant attention in recent years due to their ability to process and generate text with remarkable fluency. Tools like OpenAI’s ChatGPT have highlighted their potential to perform complex language-related tasks, such as summarizing documents and writing sophisticated texts on a high level. \cite{datacamp2024transformers}
+    
+    LLMs operate by analyzing patterns in language from vast amounts of written text during their training. At their core, they utilize an architecture called the Transformer, which allows them to process and understand the relationships between words and phrases within a given context. \cite{datacamp2024transformers}
+    
+    The functioning can be summarized in three main steps: 
+    <ol>
+        <li>Tokenization: The text is broken down into smaller units, such as individual words or word fragments, which the model can understand and analyze. For example, the sentence "EPR regulations are complex" would be divided into parts like "EPR," "regulations," "are," and "complex."  </li>
+        <li>Contextual Understanding: The model learns how these parts relate to each other, determining the meaning of a word based on its surroundings. This allows it to resolve ambiguities in language. For instance, the word "bank" could mean a financial institution or a riverbank, and the model decides the meaning based on context. </li>
+        <li>Prediction and Generation: Based on training, the model predicts the most likely sequence of words to follow in a given context or generates responses that align with the input it receives. This capability enables it to draft coherent text or answer questions effectively. \cite{datacamp2024transformers}</li>
+    </ol>
+
+    The true value of LLMs lies in their ability to rapidly process vast amounts of information and generate actionable insights. For industries dealing with complex regulations, such as EPR compliance, fine-tuned LLMs can simplify the interpretation of legal texts, bridge language barriers, and produce summaries. 
+    
+    LLM agents are advanced applications of LLMs designed to perform specific tasks autonomously by interacting with external tools, systems, or environments. These agents leverage the language understanding and generative capabilities of LLMs to take actions, make decisions, or process data in dynamic, task-specific ways. \cite{promptingguide2024llm}
+    
+    Applying LLM agents for compliance interpretation provides substantial benefits. LLMs can be fine-tuned for specific applications, such as processing regulatory texts, to identify relevant compliance obligations and clarify ambiguous language. \cite{hassani2024enhancing} Another key advantage of LLMs is their ability to analyze regulations written in multiple languages, ensuring seamless compliance across borders without the need for human translation. </p>
+</div>
+
+<div class="page-break">Page 5</div>
+<h3>Automated Reporting</h3>
+<div class="two-columns">
+    <p>
+        Compliance reporting is a labor-intensive process that demands extensive data aggregation, verification, and submission regularly. For this, many companies rely on varying Excel sheets tailored to the specific requirements of each report, which according to multiple clients gets difficult to maintain once they cover three or more countries. Automation significantly reduces these burdens by streamlining the entire reporting lifecycle. Automated connections to the database or ERP system allow the company to directly gather solely the relevant data for a given report. This is not only faster than manually selecting the data, but it also ensures that the report contains accurate data input. Machine learning models can then automatically validate the report data results based on historical data to mitigate errors by flagging anomalies and inconsistencies early on.  
+
+When regulatory bodies update the reporting formats and requirements, LLM agents, as described above, can be utilized to easily adapt to these changes, eliminating the need for manual review of regulations and adjustments to Excel calculations. Lastly, using automated reporting, it is possible to store not only the details of when and what was reported, but also the exact inputs, simplifying the audit preparation process. 
+    </p>
+</div>
+<h3>Scalability</h3>
+<div class="two-columns">
+    <p>One of the core benefits of AI-powered compliance tools is their scalability, which makes them accessible and effective for both small-scale manufacturers and multinational corporations. While EPR principles are similar across industries, specific requirements differ. AI solutions can be customized to align with sector-specific regulations, including electronics, packaging, and more. For companies planning to enter a new market, this scalability becomes a key advantage. Unlike traditional companies that must invest considerable time and resources to understand a country's legal regulations before selling their products, an AI-powered compliance tool simplifies the process. This tool already contains the necessary regulations, allowing relevant requirements to be quickly and easily extracted.</p>
+</div>
+
+<h2>4. Real-Time Data Analysis for Sustainability</h2>
+<div class="two-columns">
+    <p>One of the main goals of the EU is to use eco-modulation to make manufacturers consider the material input for their products and packaging. \cite{ecologic2024} Penalizing unsustainable products aims at encouraging producers to consistently improve their products, to not only pay less but also be more sustainable. However, many companies do not have the time and resources to invest in researching how to make their products more sustainable. Primarily, this stems from the lack of detailed information about what materials their products contain and how they are sustainability. That is where real-time data analysis for sustainability comes into play.  
+
+    Having the option to investigate their product details in such a way that also highlights the sustainability of each component, measured either through the carbon footprint of creating that component or the eco-modulation costs associated with the material of that component, allows companies to focus on the "quick wins". Ideally, companies would use only sustainable materials; however, this is often not feasible, especially when striving to remain competitive in the market. A more practical approach is to focus on "quick wins" by identifying products or materials that the company frequently uses and that have the most significant negative impact on both the carbon footprint and eco-modulation. Addressing these areas first provides an effective starting point for companies aiming to incrementally enhance their circularity. 
+    
+    Having a clear data-driven approach to EPR reporting allows businesses to integrate the results with the organizations’ greenhouse gas (GHG) reporting, enabling seamless, accurate, and transparent reporting. This will only increase in importance with the emerging trend of mandatory corporate sustainability reporting. Noting that there can often be a counter-intuitive GHG emission saving when moving from certain packaging materials to plastics, hence thinking about the impact of the whole lifecycle of packaging and products is critical.  
+    
+    Eco-modulation fees offer a business case driver for reducing the environmental impacts of products and packaging. However, for product and packaging design, the high costs and level of expertise required make in-house life cycle assessment (LCA) difficult. Current tools available in the marketplace are still limited in terms of efficacy without expertise, despite a recent move towards more simple interfaces and carbon-only approaches by several SaaS players disrupting the analyst-first approach of incumbent LCA software providers. Therefore, there is still a lot of innovation needed here to provide more SME-appropriate solutions to evidence their improvements at concept, design, and production stages. We propose one of these innovative possibilities using AI-powered automation and insights to offer better, personalized outcomes for SMEs while lowering cost and expertise barriers. </p>
+</div>
+
+<div class="page-break">Page 5</div>
+
+<h2>5. Bridging Technology and Sustainability</h2>
+<div class="two-columns">
+    <p>These tools bridge the gap between regulatory compliance and environmental goals. Using a compliance product as outlined in Figure \ref{fig:llm-system} below, the companies can simplify their regulatory reporting while staying up-to-date with the newest regulations. Additionally, by integrating technologies like chatbots within the system, companies can decide easily which changes not only make sense but also are easy to implement to improve the sustainability of their products.</p>
+    <img
+          srcset="{%- if section.settings.image.width >= 375 -%}{{ section.settings.image | image_url: width: 375 }} 375w,{%- endif -%}
+            {%- if section.settings.image.width >= 750 -%}{{ section.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+            {%- if section.settings.image.width >= 1100 -%}{{ section.settings.image | image_url: width: 1100 }} 1100w,{%- endif -%}
+            {%- if section.settings.image.width >= 1500 -%}{{ section.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
+            {%- if section.settings.image.width >= 1780 -%}{{ section.settings.image | image_url: width: 1780 }} 1780w,{%- endif -%}
+            {%- if section.settings.image.width >= 2000 -%}{{ section.settings.image | image_url: width: 2000 }} 2000w,{%- endif -%}
+            {%- if section.settings.image.width >= 3000 -%}{{ section.settings.image | image_url: width: 3000 }} 3000w,{%- endif -%}
+            {%- if section.settings.image.width >= 3840 -%}{{ section.settings.image | image_url: width: 3840 }} 3840w,{%- endif -%}
+            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w"
+          sizes="100vw"
+          src="{{ section.settings.image | image_url: width: 1500 }}"
+          loading="lazy"
+          alt="{{ section.settings.image.alt | escape }}"
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.width | divided_by: section.settings.image.aspect_ratio }}"
+        >
+
+    </div>
+
+<div class="page-break">Page 6</div>
+
+<h2>6. Implementation Steps</h2>
+<div class="two-columns">
+    <p>While AI-powered automation tools are still being developed and will only slowly be available to companies... (More content here).</p>
+</div>
+
+<div class="page-break">Page 7</div>
+
+<h2>7. Conclusion</h2>
+<div class="two-columns">
+    <p>The AI-powered automation presented in this paper shows a scalable solution to EPR compliance challenges... (More content here).</p>
+</div>
+
+<div class="citation">
+    References: <br>
+    [1] EXPRA, "EPR Systems and Their Contribution to Circular Economy," 2016. <br>
+    [2] PwC, "The Future of Extended Producer Responsibility," 2024.
+</div>
+</div>
+{% schema %}
+{
+  "name": "t:sections.research-paper.name",
+  "class": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Research Paper Image"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.research-paper.presets.name"
+    }
+  ]
+}
+{% endschema %}

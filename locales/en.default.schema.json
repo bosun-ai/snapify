@@ -2084,6 +2084,13 @@
         "name": "Iframe"
       }
     },
+    "research-paper": {
+      "name": "Research Paper",
+      "settings": {},
+      "presets": {
+        "name": "Research Paper"
+      }
+    },
     "forsure_agency_dashboard": {
       "name": "ForSURE Agency Dashboard",
       "settings": {},
