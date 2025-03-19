@@ -1,13 +1,13 @@
-var server_url = "https://api.for-sure.net:8123/";
-var websocket_url = 'ws://api.for-sure.net:8123';
-var auth_url = "http://api.for-sure.net:4534/realms/ForSURE/protocol/openid-connect/token"
-var client_secret = 'h1LqoPGk9EcCugp1I31JLYU16lJrYku5';
+// var server_url = "https://api.for-sure.net:8123/";
+// var websocket_url = 'ws://api.for-sure.net:8123';
+// var auth_url = "http://api.for-sure.net:4534/realms/ForSURE/protocol/openid-connect/token"
+// var client_secret = 'h1LqoPGk9EcCugp1I31JLYU16lJrYku5';
 
 // local:
-// var server_url = 'http://127.0.0.1:81/';
-// var websocket_url = 'ws://127.0.0.1:81';
-// var auth_url = 'http://127.0.0.1:8080/realms/ForSURE/protocol/openid-connect/token'
-// var client_secret = '40GYEkrGXYwijzE3A1LypMFo1UI6R7DR';
+var server_url = 'http://127.0.0.1:81/';
+var websocket_url = 'ws://127.0.0.1:81';
+var auth_url = 'http://127.0.0.1:8080/realms/ForSURE/protocol/openid-connect/token'
+var client_secret = '40GYEkrGXYwijzE3A1LypMFo1UI6R7DR';
 
 var TOKEN = false;
 var username = "test";
