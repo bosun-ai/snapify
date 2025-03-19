@@ -320,7 +320,23 @@ async function removeNotification(notificationId) {
 
 async function addResolution(notificationId) {
     try {
-        const response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}`, {method: 'GET'});
+        var response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}`, {method: 'GET'});
+        console.log(response);
+        response = [
+            {
+                "resolved": false,
+                "id": 83,
+                "resolution_hint_title": "Reports up to date",
+                "resolution_id": "allDataSubmittedLastYear",
+                "error_data": "",
+                "notification_id": 139,
+                "resolution": "",
+                "error_message": "The battery sales report associated with ADATA Technology Co., Ltd. for the period from 01 January 2024 to 31 January 2025 is missing data. Ensure all required sales information is included in your submission.",
+                "resolution_hint": "'Following the change of Battery vEMCs levels, any outstanding sales of Batteries from the period 01 January 2024 - 31 January 2025 must be reported as such.\\n\\n If you have already reported all such Battery sales, click Yes and make this months submission as normal.\\n\\n If you have additional sales for the period 01 January 2024 - 31 January 2025 which you have as yet failed to report, click No. An additional dropdown box will then be available when making this months submission, allowing you to identify the Battery vEMC period to which each line of sales information belongs.\\n You will be asked this question again at your next login.'",
+                "resolution_type": "{\"type\": \"options\", \"options\": [{\"value\": \"btnYes\", \"name\": \"Yes\"}, {\"value\": \"btnNo\", \"name\": \"No\"}]}",
+                "report_id": "0174LY274BRRTJLNTHD5EIMFO43APTHOXO"
+            }
+        ]
         console.log(response);
         openResolutionModal(response[0]);
     } catch (error) {
@@ -346,12 +362,33 @@ async function openResolutionModal(response) {
         modal.style.zIndex = "105";
         modal.style.textAlign = "center";
 
+        let resolutionOption = `<textarea id="resolutionModalTextbox" placeholder="${response.resolution}" style="width: 100%; height: 80px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; resize: none;"></textarea>`;
+
+        if (response.resolution_type) {
+            try {
+                let data = JSON.parse(response.resolution_type); // Ensure it's parsed correctly
+
+                if (data.type === "options") {
+                    resolutionOption = '<div style="justify-content: space-evenly;display: flex;"><input id="resolutionModalTextbox" type="hidden"/>';
+
+                    data.options.forEach(option => {
+                        resolutionOption += `<button class="button" value="${option.value}" onclick="document.getElementById('resolutionModalTextbox').value=this.value;">${option.name}</button>`;
+                    });
+
+                    resolutionOption += '</div>'; // Close the div
+                }
+            } catch (error) {
+                console.error("Error parsing resolution_type:", error);
+            }
+        }
+        var cleaned_resolution_hint = response.resolution_hint.replace(/\n/g, '<br>').replace(/\\n/g, '<br>');
+        console.log(cleaned_resolution_hint);
         // Modal content
         modal.innerHTML = `
             <h2 style="margin-bottom: 10px;">${response.resolution_hint_title}</h2>
-            <p style="font-size: 14px; color: #666;">${response.resolution_hint}</p>
+            <p style="font-size: 14px; color: #666;">${cleaned_resolution_hint}</p>
             <img src="data:image/png;base64,${response.error_data}" alt="Base64 Image" style="width: 100%; max-height: 200px; object-fit: contain; margin: 15px 0; border-radius: 5px; border: 1px solid #ddd;">
-            <textarea id="resolutionModalTextbox" placeholder="${response.resolution}" style="width: 100%; height: 80px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; resize: none;"></textarea>
+            ${resolutionOption}
             <div style="margin-top: 15px;">
                 <button onclick="saveResolution('${response.notification_id}')" style="background-color: #2255ff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Save</button>
                 <button onclick="closeResolutionModal()" style="margin-left: 10px; background-color: #ff4d4f; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Close</button>
