@@ -377,7 +377,7 @@ content: "\2713"
 
 
 
-#step3 .container {
+#step3 .container, #step4 .container {
   max-width: 1000px;
   margin: auto;
   margin-bottom: 4rem;
@@ -387,7 +387,7 @@ content: "\2713"
   box-shadow: 0 0 20px rgba(0,0,0,0.05);
 }
 
-#step3 h2.heading {
+#step3 h2.heading, #step4 h2.heading{
   font-size: 28px;
   font-weight: 600;
   text-align: center;
@@ -467,6 +467,50 @@ content: "\2713"
 
 #step4 h5 {
     width: 20rem;
+    margin-top: 1rem;
+}
+
+.card {
+  border: 0.2rem solid #17161c;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  background-color: #fafafa;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.list-group-item {
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem;
+  background-color: #fafafa;
+  transition: background-color 0.2s;
+}
+
+.list-group-item:last-child {
+  margin-bottom: 0;
+}
+.separator {
+  border-top: 1px solid #17161c;
+  display: block!important;
+  margin-bottom: 1rem;
 }
 
 {%- endstyle -%}
@@ -728,58 +772,68 @@ content: "\2713"
   <div class="step" id="step4" style="display: none;">
       <h2 class="heading">Confirm</h2>
 
+        <div class="container">
+          <div class="row mb-4">
+            <div class="col-12">
+              <h4 style="text-align: center;">Information</h4>
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Country</th>
+                    <th>Category</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Returns</th>
+                    <th>Orderlist</th>
+                    <th>Returnlist</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td id="confirm-country"></td>
+                    <td id="confirm-category"></td>
+                    <td id="confirm-start"></td>
+                    <td id="confirm-end"></td>
+                    <td id="confirm-returns"></td>
+                    <td id="confirm-orderlist"></td>
+                    <td id="confirm-returnlist"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-    <div class="row mb-3">
-        <div class="col-md-6">
-          <h5>Selected Country:</h5>
-          <p id="confirm-country"></p>
+        <h4 style="text-align: center;">Template Selection</h4>
+          <div class="row mb-4" style="gap:3rem">
+            <div class="col-md-4 mb-3">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-list"></i> Fields</h5>
+                  <div class="separator"></div>
+                  <ul id="confirm-fields" class="list-group list-group-flush"></ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-diagram-3"></i> Grouped By</h5>
+                  <div class="separator"></div>
+                  <ul id="confirm-groupby" class="list-group list-group-flush"></ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-funnel"></i> Selected Rules</h5>
+                  <div class="separator"></div>
+                  <ul id="confirm-rules" class="list-group list-group-flush"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6">
-          <h5>Selected Category:</h5>
-          <p id="confirm-category"></p>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <h5>Selected Start:</h5>
-          <p id="confirm-start"></p>
-        </div>
-        <div class="col-md-6">
-          <h5>Selected End:</h5>
-          <p id="confirm-end"></p>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <div class="col-md-4">
-          <h5>Fields:</h5>
-          <ul id="confirm-fields" class="list-group"></ul>
-        </div>
-        <div class="col-md-4">
-          <h5>Grouped By:</h5>
-          <ul id="confirm-groupby" class="list-group"></ul>
-        </div>
-        <div class="col-md-4">
-          <h5>Selected Rules:</h5>
-          <ul id="confirm-rules" class="list-group"></ul>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <div class="col-md-4">
-          <h5>Orderlist File:</h5>
-          <p id="confirm-orderlist"></p>
-        </div>
-        <div class="col-md-4">
-          <h5>Returnlist File:</h5>
-          <p id="confirm-returnlist"></p>
-        </div>
-        <div class="col-md-4">
-          <h5>Include Returns:</h5>
-          <p id="confirm-returns"></p>
-        </div>
-      </div>
 
       <div class="text-center mt-4" style="margin-bottom: 3rem;">
           <button class="prevButton button offbutton" onclick="prevStep(3)">Back</button>
