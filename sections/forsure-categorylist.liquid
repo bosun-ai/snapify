@@ -235,6 +235,38 @@
     margin-right: 0;
 }
 
+
+#tabs-container {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+.tab-button {
+    height: 40px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-button:hover {
+    background-color: #eaeaea;
+}
+
+.tab-button.active {
+    background-color: #2255ff;
+    color: #fafafa;
+    border-bottom: 2px solid #fff;
+    font-weight: bold;
+}
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
@@ -325,6 +357,14 @@
           <a id="deactivateEditModeSave" onclick="deactivateEditMode(true)" class="button" style="margin: 1rem;cursor: pointer;">Save</a>
         </div>
       </div>
+      <div style="display: flex;justify-content: space-between;">
+        <div id="tabs-container"></div>
+        <select
+              id="categorylistVersions"
+              class="selectpicker"
+              data-live-search="true">
+        </select>
+      </div>
       <div id="errorsDiv" style="color: red; display: none;text-align: center"></div>
       <table id="editableTable" style="width:100%; overflow-x: auto">
         <thead></thead>
@@ -367,6 +407,198 @@
     }
 
     document.getElementById('overlay').addEventListener('click', hideModal);
+
+async function selectCountries() {
+    const tabsContainer = document.getElementById('tabs-container');
+    tabsContainer.innerHTML = '';
+    try {
+        let data = await unifiedSendRequest(GETCATEGORYLABELS, {method: 'GET'});
+        console.log(data);
+        const countriesItem = data.find(item => item.key === 'countries');
+        if (!countriesItem || !countriesItem.value) {
+            console.error('No countries found in response');
+            showMessage('Failed to get countries ' + error.message, false);
+            return;
+        }
+        const countries = countriesItem.value;
+        const countryCodes = Object.keys(countries);
+        // Create buttons for first 3 countries
+        var lenDisplayedCountries = 20;
+        countryCodes.slice(0, lenDisplayedCountries).forEach((countryCode, index) => {
+            const tabButton = document.createElement('button');
+            tabButton.textContent = countryCode;
+            tabButton.className = 'tab-button';
+            tabButton.style.margin = '5px';
+            tabButton.dataset.country = countryCode;
+
+            tabButton.addEventListener('click', () => {
+                highlightActiveTab(index);
+                showCountryData(countries[countryCode], countryCode, data);
+            });
+
+            tabsContainer.appendChild(tabButton);
+        });
+
+        // Create dropdown for the remaining countries
+        if (countryCodes.length > lenDisplayedCountries) {
+            const dropdownButton = document.createElement('button');
+            dropdownButton.textContent = 'More';
+            dropdownButton.className = 'tab-button';
+            dropdownButton.style.margin = '5px';
+
+            tabsContainer.appendChild(dropdownButton);
+
+            const dropdownContent = document.createElement('div');
+            dropdownContent.className = 'dropdown-content';
+            dropdownContent.style.position = 'absolute';
+            dropdownContent.style.backgroundColor = '#f9f9f9';
+            dropdownContent.style.minWidth = '160px';
+            dropdownContent.style.boxShadow = '0px 8px 16px 0px rgba(0,0,0,0.2)';
+            dropdownContent.style.zIndex = '3';
+            dropdownContent.style.display = 'none';
+
+            countryCodes.slice(lenDisplayedCountries + 1).forEach((countryCode, index) => {
+                const option = document.createElement('a');
+                option.href = '#';
+                option.textContent = countryCode;
+                option.style.display = 'block';
+                option.style.padding = '5px 10px';
+
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    highlightActiveTab(index + 3);
+                    showCountryData(countries[countryCode], countryCode, data);
+                    dropdownContent.style.display = 'none';
+                });
+
+                dropdownContent.appendChild(option);
+            });
+
+            dropdownButton.addEventListener('click', () => {
+                console.log('Clicked More');
+                dropdownContent.style.display = dropdownContent.style.display === 'none' ? 'block' : 'none';
+            });
+
+            tabsContainer.appendChild(dropdownContent);
+        }
+    } catch (error) {
+        console.error(error.message);
+        showMessage('Failed to get countries ' + error.message, false);
+    }
+}
+selectCountries();
+
+function highlightActiveTab(activeIndex) {
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach((btn, index) => {
+        btn.classList.toggle('active', index === activeIndex);
+    });
+}
+
+let activeCountry = null;
+let previouslyHiddenColumns = new Set();
+function showCountryData(countryData, countryCode, data) {
+    const table = $('#editableTable').DataTable();
+
+    // If the same tab is clicked again -> show all columns
+    if (activeCountry === countryCode) {
+        highlightActiveTab(-1);  // unselect
+        previouslyHiddenColumns.forEach(column => {
+            column.visible(true);
+        });
+        previouslyHiddenColumns.clear();
+        activeCountry = null;
+        return;
+    }
+    // Otherwise, filter columns to match that country's labels
+    activeCountry = countryCode;
+    const countryLabels = getCountryColumnLabels(countryData);
+    const generalColumns = getGeneralColumns(data);
+
+    // Loop through datatable columns and show/hide based on country data
+    table.columns().every(function () {
+        const column = this;
+        const headerText = $(column.header()).text().trim();
+
+        if (countryLabels.includes(headerText) || generalColumns.includes(headerText)) {
+            column.visible(true);
+        } else {
+            if (column.visible()) {
+                column.visible(false);
+                previouslyHiddenColumns.add(column);
+            }
+        }
+    });
+}
+
+function getCountryColumnLabels(countryData) {
+    let labels = [];
+    Object.values(countryData).forEach(category => {
+        Object.values(category).forEach(value => {
+            if (typeof value === 'string') {
+                labels.push(value);
+            }
+        });
+    });
+    return labels;
+}
+
+function getGeneralColumns(data) {
+    return data
+        .filter(entry => typeof entry.value === 'string' && entry.key !== 'countries')
+        .map(entry => entry.value);
+}
+var versionId = null;
+async function fillVersionDropdown() {
+    try {
+        let data = await unifiedSendRequest(CATEGORYLISTVERSION, {method: 'GET'});
+        console.log(data);
+        if (!data || data.length === 0) {
+            console.log('No versions found, using mock data');
+            data = generateMockVersions();
+        }
+
+        const dropdown = document.getElementById('categorylistVersions');
+        dropdown.innerHTML = ''; // Clear existing options
+
+        data.forEach(item => {
+            const option = document.createElement('option');
+            const icon = item.approved ? '✅' : '❌';
+            option.value = item.version;
+            option.textContent = `${icon} ${item.version}`;
+            dropdown.appendChild(option);
+        });
+
+        // Refresh Bootstrap selectpicker UI
+        $('.selectpicker').selectpicker('refresh');
+
+        dropdown.addEventListener('change', async (event) => {
+            versionId = event.target.value;  // single value
+            await getCategorylistDetails();
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        showMessage('Failed to get versions ' + error.message, false);
+    }
+}
+fillVersionDropdown();
+
+// Optional mock data generator (last 5 months example)
+function generateMockVersions() {
+    const mock = [];
+    const now = new Date();
+    for (let i = 0; i < 5; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const version = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        mock.push({
+            version: version,
+            approved: Math.random() < 0.5  // random approval for mock
+        });
+    }
+    return mock;
+}
+
 
 async function fillDropdown(dropdownId, filters, key) {
   dropdownId = "profileDropdown", 
@@ -573,10 +805,14 @@ function updateActiveUsers(message) {
 }
 
 
-    let editMode = false;
-    var columnNames = {};
+let editMode = false;
+var columnNames = {};
 async function getCategorylistDetails() {
-      var data = await unifiedSendRequest(GETCATEGORYLISTDETAILS, {method: 'GET'});
+      let url = GETCATEGORYLISTDETAILS;
+      if (versionId !== null) {
+        url += `?version_id=${versionId}`;
+      }
+      var data = await unifiedSendRequest(url, {method: 'GET'});
       data = Object.values(data).map(item => {
           for (let i = 1; i <= 100; i++) {
               item[`HiddenColumn${i}`] = '';
@@ -586,7 +822,7 @@ async function getCategorylistDetails() {
       var headers = Object.keys(data[Object.keys(data)[0]]);
       var cols = headers.map(key => {
           return { data: key,
-                   visible: !key.startsWith('HiddenColumn') 
+                   visible: !key.startsWith('HiddenColumn')
           };
       });
       cols.forEach((col, index) => {
@@ -594,15 +830,15 @@ async function getCategorylistDetails() {
       });
       var idcol = await unifiedSendRequest(GETCATEGORYLISTIDCOL, {method: 'GET'});
       var thead = document.querySelector("#editableTable thead");
-
-// Clear existing content in thead
       thead.innerHTML = '';
 
-// Create and append the tr element
-      var tr = document.createElement("tr");
-      thead.appendChild(tr);
+      //var thead = document.createElement('thead');
 
-// Append th elements to the tr
+      // Create and append the tr element
+      var tr = document.createElement("tr");
+
+
+      // Append th elements to the tr
       headers.forEach(function(header) {
         var th = document.createElement("th");
         th.textContent = header;
@@ -617,13 +853,22 @@ async function getCategorylistDetails() {
         });
         tr.appendChild(th);
       });
+      thead.appendChild(tr);
+
+      if ( $.fn.DataTable.isDataTable('#editableTable') ) {
+            $('#editableTable').DataTable().destroy();
+            //$('#editableTable').empty();  // Clear existing DOM content
+            highlightActiveTab(-1);
+      }
+
+      //document.getElementById('editableTable').appendChild(thead);
       data = Object.values(data);
-      var categoryTable = $('#editableTable').DataTable({responsive: true, data: data, 
+      var categoryTable = $('#editableTable').DataTable({responsive: true, data: data,
             columns: cols,
             rowCallback: function(row, data, dataIndex) {
               $(row).attr('id', data[idcol]);
               const firstTd = row.querySelector('td');
-          
+
               if (firstTd) {
                   // Do something with the first td
                   firstTd.addEventListener('mouseenter', function() {
@@ -657,7 +902,7 @@ async function getCategorylistDetails() {
           return;
         }
         var cell = categoryTable.cell(this);
-        var originalContent = cell.data();       
+        var originalContent = cell.data();
 
         if (typeof originalContent === 'undefined'){
           return; // skip as it is error message
@@ -679,111 +924,111 @@ async function getCategorylistDetails() {
         $(this).empty().append(input);
         input.focus();
       });
-      
+
       $('#editableTable').wrap('<div class="custom-table-wrapper"></div>');
-    }
+}
 
-    $('#editableTable thead').on('click', 'th', function(e) {
-      if (editMode) {
-          // Prevent default sorting when in edit mode
-          
+$('#editableTable thead').on('click', 'th', function(e) {
+  if (editMode) {
+      // Prevent default sorting when in edit mode
 
-          var currentHeader = $(this);
-          var columnIndex = currentHeader.index();
-          if (currentHeader.find('input').length === 0) {
-            e.stopImmediatePropagation();
-            var currentText = currentHeader.text();
-            var inputField = $('<input>', {
-                type: 'text',
-                placeholder: currentText,
-                blur: function() {
-                    if (this.value !== '') {
-                      currentHeader.text(this.value);
-                      columnNames[columnIndex] = this.value;
-                    } else {
-                      currentHeader.text(currentText);
-                    }
-                    $(this).remove();
-                },
-                keyup: function(e) {
-                    if (e.which === 13) { // Enter key
-                        $(this).blur();
-                    }
+
+      var currentHeader = $(this);
+      var columnIndex = currentHeader.index();
+      if (currentHeader.find('input').length === 0) {
+        e.stopImmediatePropagation();
+        var currentText = currentHeader.text();
+        var inputField = $('<input>', {
+            type: 'text',
+            placeholder: currentText,
+            blur: function() {
+                if (this.value !== '') {
+                  currentHeader.text(this.value);
+                  columnNames[columnIndex] = this.value;
+                } else {
+                  currentHeader.text(currentText);
                 }
-            });
-
-            currentHeader.html(inputField);
-            inputField.focus();
-          }
-      }
-    });
-
-
-    function toggleSorting(enableSorting) {
-        var table = $('#editableTable').DataTable();
-        table.columns().every(function () {
-            var column = this;
-            column.settings()[0].aoColumns[column[0][0]].bSortable = enableSorting;
-        });
-    }
-
-    async function addNewRow() {
-        var table = $('#editableTable').DataTable();
-
-        // Get the number of columns in the table
-        var numberOfColumns = table.columns().count();
-
-        // Initialize an array to hold the new row data
-        var newRowData = {};
-        var data = await unifiedSendRequest(GETCATEGORYLISTDETAILS, {method: 'GET'});
-        var headers = Object.keys(data[Object.keys(data)[0]]);
-        var idcol = await unifiedSendRequest(GETCATEGORYLISTIDCOL, {method: 'GET'});
-        table.columns().every(function(index) {
-            var column = this;
-            var header = column.dataSrc();
-            if (header === idcol) {
-              newRowData[header] = header;
-            } else {
-              newRowData[header] = null;
+                $(this).remove();
+            },
+            keyup: function(e) {
+                if (e.which === 13) { // Enter key
+                    $(this).blur();
+                }
             }
         });
-        // Add the new row to the DataTable and draw it
-        table.row.add(newRowData).draw();
 
-        // Move to the last page where the new row is
-        table.page('last').draw('page');
-    }
-
-    function addNewColumn() {
-      var table = $('#editableTable').DataTable();
-
-      // Find the first hidden column
-      var hiddenColumnIndex = -1;
-      for (let i = 0; i < table.columns().nodes().length; i++) {
-          if (!table.column(i).visible()) {
-              hiddenColumnIndex = i;
-              break;
-          }
+        currentHeader.html(inputField);
+        inputField.focus();
       }
+  }
+});
 
-      // If a hidden column is found, make it visible and rename it
-      if (hiddenColumnIndex !== -1) {
-          // Make the column visible
-          table.column(hiddenColumnIndex).visible(true);
 
-          // Rename the column (updating the header in the DOM)
-          var header = $(table.column(hiddenColumnIndex).header());
-          header.text('New Column'); // If newColumnName is not provided, default to 'New Column'
-          columnNames[hiddenColumnIndex] = 'New Column';
-          var scrollBody = $(table.table().node()).parent();
-          scrollBody.animate({
-              scrollLeft: scrollBody.get(0).scrollWidth
-          }, 500); // 500ms for smooth scrolling animation
-          // Optionally, if the table needs to be redrawn for the changes to take effect
-          // table.draw();
+function toggleSorting(enableSorting) {
+    var table = $('#editableTable').DataTable();
+    table.columns().every(function () {
+        var column = this;
+        column.settings()[0].aoColumns[column[0][0]].bSortable = enableSorting;
+    });
+}
+
+async function addNewRow() {
+    var table = $('#editableTable').DataTable();
+
+    // Get the number of columns in the table
+    var numberOfColumns = table.columns().count();
+
+    // Initialize an array to hold the new row data
+    var newRowData = {};
+    var data = await unifiedSendRequest(GETCATEGORYLISTDETAILS, {method: 'GET'});
+    var headers = Object.keys(data[Object.keys(data)[0]]);
+    var idcol = await unifiedSendRequest(GETCATEGORYLISTIDCOL, {method: 'GET'});
+    table.columns().every(function(index) {
+        var column = this;
+        var header = column.dataSrc();
+        if (header === idcol) {
+          newRowData[header] = header;
+        } else {
+          newRowData[header] = null;
+        }
+    });
+    // Add the new row to the DataTable and draw it
+    table.row.add(newRowData).draw();
+
+    // Move to the last page where the new row is
+    table.page('last').draw('page');
+}
+
+function addNewColumn() {
+  var table = $('#editableTable').DataTable();
+
+  // Find the first hidden column
+  var hiddenColumnIndex = -1;
+  for (let i = 0; i < table.columns().nodes().length; i++) {
+      if (!table.column(i).visible()) {
+          hiddenColumnIndex = i;
+          break;
       }
+  }
 
-    }
+  // If a hidden column is found, make it visible and rename it
+  if (hiddenColumnIndex !== -1) {
+      // Make the column visible
+      table.column(hiddenColumnIndex).visible(true);
+
+      // Rename the column (updating the header in the DOM)
+      var header = $(table.column(hiddenColumnIndex).header());
+      header.text('New Column'); // If newColumnName is not provided, default to 'New Column'
+      columnNames[hiddenColumnIndex] = 'New Column';
+      var scrollBody = $(table.table().node()).parent();
+      scrollBody.animate({
+          scrollLeft: scrollBody.get(0).scrollWidth
+      }, 500); // 500ms for smooth scrolling animation
+      // Optionally, if the table needs to be redrawn for the changes to take effect
+      // table.draw();
+  }
+
+}
 
   let currentTh = null;
   async function deleteColumn() {
