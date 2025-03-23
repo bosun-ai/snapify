@@ -240,7 +240,6 @@
     display: flex;
     border-bottom: 2px solid #ddd;
     margin-bottom: 1rem;
-    overflow-x: auto;
 }
 
 .tab-button {
@@ -267,6 +266,12 @@
     font-weight: bold;
 }
 
+#tabs-container .dropdown-toggle {
+    width: 10rem;
+}
+#tabs-container .dropdown {
+    width: fit-content!important;
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
@@ -422,8 +427,8 @@ async function selectCountries() {
         }
         const countries = countriesItem.value;
         const countryCodes = Object.keys(countries);
-        // Create buttons for first 3 countries
-        var lenDisplayedCountries = 20;
+        // Create buttons for first x countries
+        var lenDisplayedCountries = 2;
         countryCodes.slice(0, lenDisplayedCountries).forEach((countryCode, index) => {
             const tabButton = document.createElement('button');
             tabButton.textContent = countryCode;
@@ -441,45 +446,66 @@ async function selectCountries() {
 
         // Create dropdown for the remaining countries
         if (countryCodes.length > lenDisplayedCountries) {
-            const dropdownButton = document.createElement('button');
-            dropdownButton.textContent = 'More';
-            dropdownButton.className = 'tab-button';
-            dropdownButton.style.margin = '5px';
+            const selectWrapper = document.createElement('div');
+            selectWrapper.style.display = 'inline-block';
+            selectWrapper.style.margin = '5px';
 
-            tabsContainer.appendChild(dropdownButton);
+            const selectElement = document.createElement('select');
+            selectElement.id = 'countryDropdownSelect';
+            selectElement.className = 'selectpicker';
+            selectElement.width = '5rem';
+            selectElement.setAttribute('data-live-search', 'true');
+            const option = document.createElement('option');
+            option.value = 'More';
+            option.textContent = 'More';
+            option.disabled = true;
+            selectElement.appendChild(option);
 
-            const dropdownContent = document.createElement('div');
-            dropdownContent.className = 'dropdown-content';
-            dropdownContent.style.position = 'absolute';
-            dropdownContent.style.backgroundColor = '#f9f9f9';
-            dropdownContent.style.minWidth = '160px';
-            dropdownContent.style.boxShadow = '0px 8px 16px 0px rgba(0,0,0,0.2)';
-            dropdownContent.style.zIndex = '3';
-            dropdownContent.style.display = 'none';
-
-            countryCodes.slice(lenDisplayedCountries + 1).forEach((countryCode, index) => {
-                const option = document.createElement('a');
-                option.href = '#';
+            countryCodes.slice(lenDisplayedCountries).forEach((countryCode) => {
+                const option = document.createElement('option');
+                option.value = countryCode;
                 option.textContent = countryCode;
-                option.style.display = 'block';
-                option.style.padding = '5px 10px';
-
-                option.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    highlightActiveTab(index + 3);
-                    showCountryData(countries[countryCode], countryCode, data);
-                    dropdownContent.style.display = 'none';
-                });
-
-                dropdownContent.appendChild(option);
+                selectElement.appendChild(option);
             });
 
-            dropdownButton.addEventListener('click', () => {
-                console.log('Clicked More');
-                dropdownContent.style.display = dropdownContent.style.display === 'none' ? 'block' : 'none';
-            });
+            selectWrapper.appendChild(selectElement);
+            tabsContainer.appendChild(selectWrapper);
 
-            tabsContainer.appendChild(dropdownContent);
+            // Refresh the selectpicker UI after adding options
+            $('.selectpicker').selectpicker('refresh');
+            $('#countryDropdownSelect').selectpicker('val', 'More');
+            // Add event listener for selection
+            $('#countryDropdownSelect').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+                const selectedCountry = $(this).val();
+                if (selectedCountry) {
+                    // Create a button for the selected country (if not already present)
+                    if (!tabsContainer.querySelector(`[data-country="${selectedCountry}"]`)) {
+                        const selectedButton = document.createElement('button');
+                        selectedButton.textContent = selectedCountry;
+                        selectedButton.className = 'tab-button';
+                        selectedButton.style.margin = '5px';
+                        selectedButton.dataset.country = selectedCountry;
+
+                        selectedButton.addEventListener('click', () => {
+                            let index = document.querySelectorAll('.tab-button').length;
+                            highlightActiveTab(index-1);
+                            showCountryData(countries[selectedCountry], selectedCountry, data);
+                        });
+
+                        tabsContainer.insertBefore(selectedButton, selectWrapper);
+                    }
+                    const allTabButtons = tabsContainer.querySelectorAll('.tab-button');
+                    const selectedButton = tabsContainer.querySelector(`[data-country="${selectedCountry}"]`);
+                    const index = Array.from(allTabButtons).indexOf(selectedButton);
+                    highlightActiveTab(index);
+
+                    // Call showCountryData immediately
+                    showCountryData(countries[selectedCountry], selectedCountry, data);
+
+                    // Reset the dropdown to not remain selected
+                    $(this).selectpicker('val', 'More');
+                }
+            });
         }
     } catch (error) {
         console.error(error.message);
@@ -593,7 +619,7 @@ function generateMockVersions() {
         const version = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         mock.push({
             version: version,
-            approved: Math.random() < 0.5  // random approval for mock
+            approved: Math.random() < 0.8  // random approval for mock
         });
     }
     return mock;
