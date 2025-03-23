@@ -269,6 +269,9 @@
 #tabs-container .dropdown-toggle {
     width: 10rem;
 }
+#versionsContainer .dropdown {
+    width: 15rem;
+}
 #tabs-container .dropdown {
     width: fit-content!important;
 }
@@ -364,11 +367,13 @@
       </div>
       <div style="display: flex;justify-content: space-between;">
         <div id="tabs-container"></div>
-        <select
-              id="categorylistVersions"
-              class="selectpicker"
-              data-live-search="true">
-        </select>
+        <div id="versionsContainer">
+            <select
+                  id="categorylistVersions"
+                  class="selectpicker"
+                  data-live-search="true">
+            </select>
+        </div>
       </div>
       <div id="errorsDiv" style="color: red; display: none;text-align: center"></div>
       <table id="editableTable" style="width:100%; overflow-x: auto">

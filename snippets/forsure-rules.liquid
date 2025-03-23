@@ -141,22 +141,29 @@ Usage:
     </div>
 </div>
 <script>
-    async function displayRules() {
+    var funcCallback = null;
+    async function displayRules(func=null) {
         document.getElementById('overlayRules').style.display = 'block';
         document.getElementById('rules-table').style.display = 'block';
         columns = await getColumns();
         rules = await getRules();
         loadRules(rules);
+        if (func) {
+            funcCallback = func;
+        }
     }
-    function hideModal() {
+    async function hideModal() {
         document.getElementById('overlayRules').style.display = 'none';
         document.getElementById('rules-table').style.display = 'none';
         excludedColumns = new Set();
+        if (funcCallback) {
+            await funcCallback();
+        }
     }
   document.getElementById('overlayRules').addEventListener('click', hideModal);
-  document.addEventListener('keydown', function(event) {
+  document.addEventListener('keydown', async function(event) {
     if (event.key === 'Escape') {
-      hideModal();
+      await hideModal();
     }
   });
 

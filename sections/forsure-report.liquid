@@ -74,7 +74,7 @@
 }
 #uploadSteps {
     position: relative;
-    height: 680px;
+    min-height: 680px;
 }
 .navButtons {
     position: absolute;
@@ -380,6 +380,7 @@ content: "\2713"
 #step3 .container {
   max-width: 1000px;
   margin: auto;
+  margin-bottom: 4rem;
   padding: 30px;
   background: #fafafa;
   border-radius: 12px;
@@ -464,6 +465,9 @@ content: "\2713"
   }
 }
 
+#step4 h5 {
+    width: 20rem;
+}
 
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
@@ -647,7 +651,7 @@ content: "\2713"
       <h2 class="heading">Select country and timeframe</h2>
 
 
-
+      {% render 'forsure-rules' %}
       <div class="container">
           <div class="row mb-3">
             <div class="col-md-6">
@@ -674,8 +678,7 @@ content: "\2713"
             </div>
             <div class="col-md-6">
               <label for="templateSelect" class="form-label">Load Predefined Template</label>
-              <select id="templateSelect" class="selectpicker form-select" data-live-search="false">
-                <option value="">-- Select a template --</option>
+              <select id="templateSelect" class="selectpicker form-select" data-live-search="true">
               </select>
             </div>
           </div>
@@ -693,52 +696,92 @@ content: "\2713"
 
           <div class="row mb-3">
             <div class="col-md-6 d-flex align-items-center">
+              <label for="ruleSelect" class="form-label">Rules</label>
+              <div style="display: flex">
+                  <select id="ruleSelect" class="selectpicker form-select wide-select" multiple data-live-search="true">
+                  </select>
+                  <div onclick="editRules()" style="cursor:pointer;margin: auto;margin-left: 1rem;">
+                      <a id="editIcon" href="#" title="Edit">
+                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+                    </a>
+                  </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6 d-flex align-items-center">
               <input type="checkbox" class="form-check-input me-2" id="useReturns">
               <label class="form-check-label" for="useReturns">Include Returns</label>
             </div>
           </div>
 
-          <div class="navButtons text-center mt-4">
+          <div class="text-center mt-4">
             <button class="prevButton button offbutton" onclick="prevStep(2)">Back</button>
             <button class="nextButton button button" onclick="nextStep(4)">Next</button>
           </div>
       </div>
-
   </div>
 
 
 
   <div class="step" id="step4" style="display: none;">
       <h2 class="heading">Confirm</h2>
-      <div id="confirmationDetails">
-        <table class="wrapper">
-          <tr class="trConfirm">
-            <td class="tdConfirm">Country</td>
-            <td class="tdConfirm" id="selectedCountry"></td>
-          </tr>
-          <tr class="trConfirm">
-            <td class="tdConfirm">Timerange</td>
-            <td class="tdConfirm"><span id="selectedStartDate"></span>-<span id="selectedEndDate"></span></td>
-          </tr>
-          <tr class="trConfirm">
-            <td class="tdConfirm">Category</td>
-            <td class="tdConfirm" id="selectedCategory"></td>
-          </tr>
-          <tr class="trConfirm">
-            <td class="tdConfirm">Debugger enabled</td>
-            <td class="tdConfirm" id="selectedDebugger"></td>
-          </tr>
-          <tr class="trConfirm">
-            <td class="tdConfirm">Orderlist</td>
-            <td class="tdConfirm" id="selectedOrderListFile"></td>
-          </tr>
-          <tr class="trConfirm">
-            <td class="tdConfirm">Returnlist</td>
-            <td class="tdConfirm" id="selectedReturnListFile"></td>
-          </tr>
-        </table>
+
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+          <h5>Selected Country:</h5>
+          <p id="confirm-country"></p>
+        </div>
+        <div class="col-md-6">
+          <h5>Selected Category:</h5>
+          <p id="confirm-category"></p>
+        </div>
       </div>
-      <div class="navButtons">
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <h5>Selected Start:</h5>
+          <p id="confirm-start"></p>
+        </div>
+        <div class="col-md-6">
+          <h5>Selected End:</h5>
+          <p id="confirm-end"></p>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <h5>Fields:</h5>
+          <ul id="confirm-fields" class="list-group"></ul>
+        </div>
+        <div class="col-md-4">
+          <h5>Grouped By:</h5>
+          <ul id="confirm-groupby" class="list-group"></ul>
+        </div>
+        <div class="col-md-4">
+          <h5>Selected Rules:</h5>
+          <ul id="confirm-rules" class="list-group"></ul>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <h5>Orderlist File:</h5>
+          <p id="confirm-orderlist"></p>
+        </div>
+        <div class="col-md-4">
+          <h5>Returnlist File:</h5>
+          <p id="confirm-returnlist"></p>
+        </div>
+        <div class="col-md-4">
+          <h5>Include Returns:</h5>
+          <p id="confirm-returns"></p>
+        </div>
+      </div>
+
+      <div class="text-center mt-4" style="margin-bottom: 3rem;">
           <button class="prevButton button offbutton" onclick="prevStep(3)">Back</button>
           <button class="nextButton button" onclick="createReport()">Create Report</button>
       </div>
@@ -1468,24 +1511,16 @@ function stepFunctions(stepNumber){
 }
 
 const reportTemplates = {
-  'Basic Summary': {
-    fields: ['SKU', 'Category', 'Weight', 'Value'],
-    groupBy: ['Category']
+  'IE Batteries': {
+    fields: ['amount_total', 'Batt Weight (g)'],
+    groupBy: ['Type of Batteries', 'b2b']
   },
-  'Financial Overview': {
-    fields: ['SKU', 'Value', 'Date'],
-    groupBy: ['Date']
-  },
-  'Logistics Focus': {
-    fields: ['SKU', 'Product Name', 'Country of Origin', 'Packaging Type', 'Weight'],
-    groupBy: ['Country of Origin']
+  'DE WEEE': {
+    fields: ['amount_total', 'Product Net Weight (g)'],
+    groupBy: ['DE']
   }
 };
 
-const availableColumns = [
-  'SKU', 'Product Name', 'Category', 'Weight', 'HS Tariff Code',
-  'Country of Origin', 'Packaging Type', 'Value', 'Date'
-];
 async function getTimesAndCountry() {
   try {
     var data = await unifiedSendRequest(GETREPORTTIMES, { method: 'GET' });
@@ -1539,8 +1574,9 @@ async function getTimesAndCountry() {
       locale: { format: 'DD/MM/YYYY' },
       ranges: ranges
     });
-
+    var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, { method: 'GET' });
     fillColumnSelectors(availableColumns);
+    await populateRulesDropdown();
     populateTemplateSelector();
   } catch (error) {
     console.error(error.message);
@@ -1554,19 +1590,69 @@ function fillColumnSelectors(columns) {
   fieldsDropdown.innerHTML = '';
   groupByDropdown.innerHTML = '';
 
-  columns.forEach(column => {
-    const fieldOption = document.createElement('option');
-    fieldOption.value = column;
-    fieldOption.textContent = column;
-    fieldsDropdown.appendChild(fieldOption);
+  Object.keys(columns).forEach(groupName => {
+    const fieldsOptGroup = document.createElement('optgroup');
+    fieldsOptGroup.label = groupName;
 
-    const groupOption = document.createElement('option');
-    groupOption.value = column;
-    groupOption.textContent = column;
-    groupByDropdown.appendChild(groupOption);
+    const groupOptGroup = document.createElement('optgroup');
+    groupOptGroup.label = groupName;
+
+    columns[groupName].forEach(column => {
+      const fieldOption = document.createElement('option');
+      fieldOption.value = column;
+      fieldOption.textContent = convertStringFormat(column);
+      fieldsOptGroup.appendChild(fieldOption);
+
+      const groupOption = document.createElement('option');
+      groupOption.value = column;
+      groupOption.textContent = convertStringFormat(column);
+      groupOptGroup.appendChild(groupOption);
+    });
+
+    fieldsDropdown.appendChild(fieldsOptGroup);
+    groupByDropdown.appendChild(groupOptGroup);
   });
 
+  // Refresh Bootstrap selectpicker
   $('.selectpicker').selectpicker('refresh');
+}
+
+
+  const name_mapper = {
+    'amount_total': 'Amount Total',
+    'amount_b2b': 'Amount B2B',
+    'amount_b2c': 'Amount B2C',
+    'weight_total': 'Weight Total (kg)',
+    'weight_b2b': 'Weight B2B (kg)',
+    'weight_b2c': 'Weight B2C (kg)',
+    'sku': 'SKU',
+    'orderid': 'OrderID',
+    'b2b': 'B2B'
+  };
+
+  function convertStringFormat(s) {
+    if (name_mapper.hasOwnProperty(s)) {
+      return name_mapper[s];
+    }
+    return s.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+
+
+async function populateRulesDropdown() {
+  const ruleSelect = document.getElementById('ruleSelect');
+  ruleOptions = await getRules();
+  ruleSelect.innerHTML = '';
+  ruleOptions.forEach(rule => {
+    const option = document.createElement('option');
+    option.value = rule.ruleID;
+    option.textContent = rule.ruleName;
+    ruleSelect.appendChild(option);
+  });
+  $('.selectpicker').selectpicker('refresh');
+}
+
+async function editRules() {
+    await displayRules(populateRulesDropdown);
 }
 
 function populateTemplateSelector() {
@@ -1592,33 +1678,55 @@ function populateTemplateSelector() {
   });
 }
 
-
-function convertDateFormat(dateString) {
-    const dateParts = dateString.split("-");
-    return `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
-}
-function showConfirmationDetails() {
+async function showConfirmationDetails() {
     // Get the selected values
-    const selectedCountryValue = document.getElementById('country').value;
-    const selectedCategoryValue = document.getElementById('category').value;
-    const selectedStartDateValue = convertDateFormat(document.getElementById('startDate').value);
-    const selectedEndDateValue = convertDateFormat(document.getElementById('endDate').value);
-    const selectedDebuggerValue = document.getElementById('debugger').checked ? 'Yes': 'No';
-    //const selectedOrderListFileValue = document.getElementById('order_list').files[0]?.name;
-    //const selectedReturnListFileValue = document.getElementById('return_list').files[0]?.name;
+    document.getElementById('confirm-country').textContent = $('#country').val();
+    document.getElementById('confirm-category').textContent = $('#category').val();
 
-    // Update the placeholders in the final step
-    document.getElementById('selectedCountry').textContent = selectedCountryValue;
-    document.getElementById('selectedStartDate').textContent = selectedStartDateValue;
-    document.getElementById('selectedEndDate').textContent = selectedEndDateValue;
-    document.getElementById('selectedCategory').textContent = selectedCategoryValue;
-    document.getElementById('selectedDebugger').textContent = selectedDebuggerValue;
+    const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
+    document.getElementById('confirm-start').textContent = selectedStartDateValue;
+    document.getElementById('confirm-end').textContent = selectedEndDateValue;
+    const selectedFields = $('#customFields').val() || [];
+    addOptionsConfirmation(selectedFields, 'confirm-fields');
+    const selectedGroupBy = $('#groupByFields').val() || [];
+    addOptionsConfirmation(selectedGroupBy, 'confirm-groupby');
+    const selectedRules = $('#ruleSelect').val() || [];
+    ruleOptions = await getRules();
+    const selectedRulesText = selectedRules
+      .map(r => {
+        const rule = ruleOptions.find(rule => String(rule.ruleID) === String(r));
+        return rule ? rule.ruleName : null;
+      })
+      .filter(name => name !== null);
+
+    addOptionsConfirmation(selectedRulesText, 'confirm-rules', false);
+    document.getElementById('confirm-returns').textContent = document.getElementById('useReturns').checked ? 'Yes': 'No';
+
     var selectedOrderListFileValue = Object.values(selectedFilesOrders).map(file => file.filename);
     var selectedReturnListFileValue = Object.values(selectedFilesReturns).map(file => file.filename);
     var textContentOrders = selectedOrderListFileValue.length > 0 ? selectedOrderListFileValue.join('<br>') : 'No file selected';
     var textContentReturns = selectedReturnListFileValue.length > 0 ? selectedReturnListFileValue.join('<br>') : 'No file selected';
-    document.getElementById('selectedOrderListFile').innerHTML = textContentOrders;
-    document.getElementById('selectedReturnListFile').innerHTML = textContentReturns;
+    document.getElementById('confirm-orderlist').innerHTML = textContentOrders;
+    document.getElementById('confirm-returnlist').innerHTML = textContentReturns;
+}
+
+function addOptionsConfirmation(selectedEntries, confirmationId, convert=true) {
+    const group = document.getElementById(confirmationId);
+    group.innerHTML = '';
+    selectedEntries.forEach(field => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item';
+      if (convert) {
+        field = convertStringFormat(field);
+      }
+      li.textContent = field;
+      group.appendChild(li);
+    });
+}
+
+function convertToISO(dateStr) {
+    const [day, month, year] = dateStr.split('/');
+    return `${year}-${month}-${day}`;
 }
 
 var failedCreation = false;
@@ -1626,7 +1734,6 @@ async function createReport() {
     failedCreation = false;
     steps.forEach(step => step.style.display = 'none');
     document.getElementById('stepDone').style.display = 'block';
-    repeatActionReport();
     const uploadStepsElem = document.getElementById('uploadSteps');
 
     // Add loading overlay
@@ -1642,11 +1749,19 @@ async function createReport() {
     try {
         const countryData = new FormData();
         countryData.append("country_id", document.getElementById('country').value);
-        countryData.append("start_date", document.getElementById('startDate').value);
-        countryData.append("report_id", '-1');
         countryData.append("category", document.getElementById('category').value);
-        countryData.append("end_date", document.getElementById('endDate').value);
-        countryData.append("use_debugger", document.getElementById('debugger').checked);
+        const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
+        countryData.append("start_date", convertToISO(selectedStartDateValue));
+        countryData.append("end_date", convertToISO(selectedEndDateValue));
+        countryData.append("report_id", '-1');
+        countryData.append("use_returns", document.getElementById('useReturns').checked);
+        const selectedFields = $('#customFields').val() || [];
+        countryData.append("output_fields", selectedFields.join(','));
+        const selectedGroupBy = $('#groupByFields').val() || [];
+        countryData.append("groupby_fields", selectedGroupBy.join(','));
+        const selectedRules = $('#ruleSelect').val() || [];
+        countryData.append("rules", selectedRules.join(','));
+
         data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});
         // Handle file response
         console.log(data);
