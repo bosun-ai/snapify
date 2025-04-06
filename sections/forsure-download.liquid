@@ -887,6 +887,7 @@ function showGuideFromButton(element) {
 document.addEventListener('DOMContentLoaded', function() {
   if(readCookie('showedGuideDownload') === null) {
       setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+      setCookie('showedGuideDownload', 'true', 300);
     }
   });
 

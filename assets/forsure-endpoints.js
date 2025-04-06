@@ -19,17 +19,17 @@ TOGGLEPIN = 'stats/charts/toggle'
 
 NEXTREPORTS = 'reports/deadlines?all_reports=true'
 
-GETREPORTNAMES = 'download/reports/'
-GETREPORTNAMESINPROGRESS = 'download/reports/inprogress'
+// GETREPORTNAMES = 'download/reports/'
+// GETREPORTNAMESINPROGRESS = 'download/reports/inprogress'
 GETREPORTSONEDRIVE = 'finishedreports/reportsDone'
 GETREPORTSDOWNLOADALL = 'finishedreports/multiple-reports'
 GETREPORTHISTORYVERSION = 'finishedreports/use-new-version'
 GETREPORTDETAILS = 'finishedreports/getdetails'
 CANCREATEREPORTS = 'finishedreports/can-create-reports'
-
-GETSINGLEREPORT = 'download/report/'
 CREATEDOWNLOADLINK = 'download/create-download-link'
-DELETEREPORT = 'history/delete-report'
+
+// GETSINGLEREPORT = 'download/report/'
+DELETEREPORT = 'finishedreports/delete-report'
 DOWNLOADMULTIPLEREPORTS = 'download/multiple-reports'
 DELETEMULTIPLEREPORTS = 'history/delete-multiple-reports'
 DISPLAYREPORT = 'history/get-report'
