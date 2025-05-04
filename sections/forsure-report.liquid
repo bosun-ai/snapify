@@ -513,6 +513,41 @@ content: "\2713"
   margin-bottom: 1rem;
 }
 
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .exclude {
+    text-decoration: line-through;
+  }
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
@@ -691,6 +726,49 @@ content: "\2713"
           <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns/">Next</button>
       </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div style="display: flex; justify-content: space-between;">
+        <h2>Select Mapping</h2>
+        <div id="profileDropdownContainer" style="margin: auto 0;border-radius: 4px;padding-right: 0.4rem;">
+          <select id="profileSelect" class="btn dropdown-toggle bs-placeholder btn-default" style="position: relative">
+          </select>
+          <a id="editIcon" href="#" title="Edit">
+            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+            </a>
+        </div>
+        <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
+      </div>
+      <div>Create the mapping you want to use for this orderlist, each dropdown value with a star is required to be mapped.
+        If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
+      </div>
+      <div id="profileDetails">
+        <div style="display:flex">
+          <strong>File:</strong>
+          <div id='profileFileName' style="margin-left:1rem"></div>
+        </div>
+        <table id="profileTable" style="margin: auto;">
+          <tr>
+            <th>Name</th>
+            <th>Preview</th>
+            <th>Mapping</th>
+            <th>Exclude</th>
+          </tr>
+          <tbody id="profileTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="confirmOverwriteModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+     background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
+    <h2>Confirm Overwrite</h2>
+    <p>Are you sure you want to overwrite the existing mapping?</p>
+    <button class="button" onclick="confirmOverwrite()">Yes</button>
+    <button class="button" onclick="closeConfirmOverwriteModal()">No</button>
+  </div>
   <div class="step" id="step3" style="display: none;">
       <h2 class="heading">Select country and timeframe</h2>
 
@@ -714,16 +792,16 @@ content: "\2713"
 
           <div class="row mb-3">
             <div class="col-md-6">
+              <label for="templateSelect" class="form-label">Load Predefined Template</label>
+              <select id="templateSelect" class="selectpicker form-select" data-live-search="true">
+              </select>
+            </div>
+            <div class="col-md-6">
               {{ 'daterangepicker.css' | asset_url | stylesheet_tag }}
               <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
               <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
               <label for="monthPicker" class="form-label">Select Timeframe</label>
               <input type="text" class="form-control small-date-input" style="width: fit-content;" id="monthPicker" placeholder="Choose date range" />
-            </div>
-            <div class="col-md-6">
-              <label for="templateSelect" class="form-label">Load Predefined Template</label>
-              <select id="templateSelect" class="selectpicker form-select" data-live-search="true">
-              </select>
             </div>
           </div>
 
@@ -948,13 +1026,17 @@ dropZones.forEach(dropZone => {
     fileInput.addEventListener('change', async function() {
         const fileList = document.getElementById('fileList_' + inputId);
         var availableProfiles  = null;
-        if (inputId !== 'report_list') {
-            availableProfiles = await getProfiles();
-        }
-
-        for (let i = 0; i < fileInput.files.length; i++) {
+        if (inputId === 'report_list') {
+          for (let i = 0; i < fileInput.files.length; i++) {
             const row = createNewFileRow(fileInput.files[i].name, availableProfiles, dropZone.getAttribute('data-url'), inputId, fileInput.files[i]);
             fileList.appendChild(row);
+          }
+        } else {
+          availableProfiles = await getProfiles();
+          for (let i = 0; i < fileInput.files.length; i++) {
+            const row = createNewFileRowCreation(fileInput.files[i].name, availableProfiles, dropZone.getAttribute('data-url'), inputId, fileInput.files[i]);
+            fileList.appendChild(row);
+          }
         }
     });
 });
@@ -1069,6 +1151,579 @@ function createNewFileRow(fileName, availableProfiles, dataUrl, inputId, file) {
     return row;
 }
 
+var dataUrlCurrent = '';
+
+function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId, file) {
+  dataUrlCurrent = dataUrl;
+  var orders = (dataUrl === 'uploadorders/');
+  var returns = (dataUrl === 'uploadreturns/');
+  var reports = false;
+
+  // Create a new "card" for the file
+  const row = document.createElement('div');
+  row.classList.add('file-row'); // Styled as a grid item
+  row.title = 'Click to create mapping';
+  const uniqueId = generateUniqueId();
+  row.id = uniqueId;
+
+  // Add filename
+  const nameCell = document.createElement('div');
+  const invisibleSpace = "\u200B"; // Unicode zero-width space
+  const updatedFileName = fileName.replace(/_/g, `_${invisibleSpace}`);
+  nameCell.textContent = updatedFileName;
+  nameCell.style.fontWeight = 'bold';
+  nameCell.style.marginBottom = '0.5rem';
+  nameCell.style.cursor = 'pointer';
+  nameCell.style.margin = 'auto';
+  nameCell.addEventListener('click', async () => {
+    await openProfileModal(availableProfiles, fileName, file, row.id);
+  });
+  row.appendChild(nameCell);
+
+  // Add profile name
+  const profileNameCell = document.createElement('div');
+  profileNameCell.classList.add('profile-name');
+  profileNameCell.textContent = 'Unmapped';
+  profileNameCell.style.fontWeight = 'bold';
+  profileNameCell.style.color = 'red';
+  profileNameCell.style.margin = 'auto';
+  profileNameCell.dataset.value = '';
+  profileNameCell.addEventListener('click', async () => {
+    await openProfileModal(availableProfiles, fileName, file, row.id);
+  });
+  row.appendChild(profileNameCell);
+
+  row.appendChild(deleteButton(uniqueId, orders, returns, reports, dataUrl, row));
+
+  // Adjust image width (if applicable)
+  updateImageWidth(dataUrl);
+
+  if (orders) {
+      selectedFilesOrders[uniqueId] = { file: file, filename: fileName };
+  } else if (returns) {
+      selectedFilesReturns[uniqueId] = { file: file, filename: fileName };
+  }
+  row.id = uniqueId;
+  return row;
+}
+
+function updateNextButton(dataUrl) {
+  var allFilesProfiles = true;
+  var allfiles = document.querySelectorAll('.file-row');
+  allfiles.forEach(file => {
+    if (file.querySelector('.profile-name').getAttribute('data-value') === '') {
+      allFilesProfiles = false;
+    }
+  });
+  if (allfiles.length === 0) {
+    allFilesProfiles = false;
+  }
+  if (allFilesProfiles) {
+    if (document.getElementById("nextBtn" + dataUrl)) {
+      document.getElementById("nextBtn" + dataUrl).disabled = false;
+      return;
+    }
+  }
+  document.getElementById("nextBtn" + dataUrl).disabled = true;
+}
+
+function updateImageWidth(dataUrl) {
+  var image = document.getElementById('upload-image' + dataUrl);
+  var currentWidth = image.clientWidth;
+  var decrement = 30; // define how much to decrease each time
+
+  var newWidth = currentWidth - decrement;
+  if (newWidth > 0) {
+      image.style.width = newWidth + 'px';
+  }
+}
+
+function deleteButton(uniqueId, orders, returns, reports, dataUrl, row) {
+  // Add delete button
+  const deleteCell = document.createElement('div');
+  deleteCell.style.margin = 'auto';
+  const deleteButton = document.createElement('button');
+  deleteButton.classList.add('deletebtn');
+  deleteButton.textContent = 'X';
+  deleteButton.style.margin = 'auto';
+  deleteButton.addEventListener('click', function () {
+      // Remove the row from the grid
+      row.remove();
+
+      // Additional logic to handle file deletion
+      handleFileDeletion(uniqueId, orders, returns, reports, dataUrl);
+      updateNextButton(dataUrl);
+  });
+  return deleteButton;
+}
+
+async function parseCSV(fileInput, nrows=3) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(fileInput, {
+      header: true,
+      skipEmptyLines: true,
+      preview: nrows,
+      complete: function(results) {
+        const data = results.data;
+        const columnDict = {};
+
+        if (data.length > 0) {
+          const keys = Object.keys(data[0]);
+          keys.forEach(key => {
+            columnDict[key] = data.map(row => row[key]);
+          });
+        }
+        console.log('columnDict', columnDict);
+        resolve(columnDict);
+      },
+      error: function(err) {
+        console.error(err);
+        showMessage('Error parsing file ' + err.message, false);
+        reject(err);
+      }
+    });
+  });
+}
+
+
+async function openProfileModal(availableProfiles, fileName, fileInput, rowId) {
+  const modal = document.getElementById('profileModal');
+  modal.dataset.row = rowId;
+  const profileSelect = document.getElementById('profileSelect');
+  const profileDetails = document.getElementById('profileDetails');
+  const profileFileName = document.getElementById('profileFileName');
+  {% comment %} try { {% endcomment %}
+    const csvData = await parseCSV(fileInput);
+    if (dataUrlCurrent == 'uploadorders/') {
+      var labelsV2Options = await getOrderlistLabelsV2Options();
+    } else {
+      var labelsV2Options = await getReturnlistLabelsV2Options();
+    }
+    profileFileName.textContent = fileName;
+    var profileTable = document.getElementById('profileTableBody');
+    profileTable.innerHTML = '';
+    Object.keys(csvData).forEach((key, index) => {
+      const tr = document.createElement('tr');
+      const tdKey = document.createElement('td');
+      tdKey.textContent = key;
+      tr.appendChild(tdKey);
+      const tdEntry = document.createElement('td');
+      var preview = csvData[key].join(', ');
+      console.log('preview', preview);
+      if (preview.length > 50) { // limit the preview to 100 characters
+        preview = preview.slice(0, 50) + '...';
+      }
+      tdEntry.textContent = preview;
+      tr.appendChild(tdEntry);
+
+      const tdMapping = document.createElement('td');
+      const selectMapping = document.createElement('select');
+      selectMapping.classList.add('btn', 'bs-placeholder', 'btn-default');
+      var defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Unmapped';
+      defaultOption.selected = true;
+      selectMapping.appendChild(defaultOption);
+      selectMapping.setAttribute('data-name', key);
+      labelsV2Options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.key;
+        var star = '';  
+        if (option.required) {
+          star = ' *';
+        }
+        optionElement.textContent = option.title + star;
+        optionElement.setAttribute('data-description', option.description);
+        optionElement.title = option.description;
+        selectMapping.appendChild(optionElement);
+      });
+      tdMapping.appendChild(selectMapping);
+      tr.appendChild(tdMapping);
+
+      const tdExclude = document.createElement('td');
+      const checkboxExclude = document.createElement('input');
+      checkboxExclude.type = 'checkbox';
+      checkboxExclude.title = 'Exclude this column from the upload';
+      checkboxExclude.addEventListener('change', function() {
+        toggleExclude(checkboxExclude);
+      });
+      tdExclude.appendChild(checkboxExclude);
+      tr.appendChild(tdExclude);
+      profileTable.appendChild(tr);
+    });
+  {% comment %} } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to parse file ' + fileName, false);
+    return;
+  } {% endcomment %}
+
+
+  // Populate the select dropdown
+  profileSelect.innerHTML = '';
+  availableProfiles.forEach(profile => {
+    const option = document.createElement('option');
+    option.value = profile.id;
+    option.textContent = profile.name;
+    profileSelect.appendChild(option);
+  });
+  addNewProfileOption(profileSelect);
+  if (dataUrlCurrent == 'uploadorders/') {
+    getOrderlistLabels(profileSelect.value);
+  } else {
+    getReturnlistLabels(profileSelect.value);
+  }
+  // Display column details (mockup for demonstration)
+
+  // Show the modal
+  modal.style.display = 'block';
+
+  // Close modal on click of close button
+  document.querySelector('.close').onclick = function() {
+    modal.style.display = 'none';
+  };
+
+}
+
+function toggleExclude(checkbox) {
+  const row = checkbox.parentElement.parentElement;
+  const exclude = checkbox.checked;
+  row.classList.toggle('exclude', exclude);
+  row.querySelector('select').disabled = exclude;
+}
+var request_data = {};
+
+async function saveMapping() {
+  const selectedProfile = document.getElementById('profileSelect').value;
+  console.log('Selected Profile:', selectedProfile);
+  const mapping = {};
+  const profileTable = document.getElementById('profileTableBody');
+  const rows = profileTable.querySelectorAll('tr');
+  rows.forEach(row => {
+    var dropdown = row.querySelector('select');
+    var key = dropdown.getAttribute('data-name');
+    if (!dropdown.disabled) {
+      var value = dropdown.value;
+      mapping[key] = value;
+    }
+  });
+  request_data = {'profile': selectedProfile, 'mapping': mapping};
+  console.log(request_data);
+  var url = GETORDERLISTLABELSV2COMPARE;
+  if (dataUrlCurrent == 'uploadreturns/') {
+    url = GETRETURNLISTLABELSV2COMPARE;
+  }
+
+  try {
+    var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+    console.log(response);
+    if (response) {
+      confirmOverwrite();
+    } else {
+      showConfirmOverwriteModal();
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+async function confirmOverwrite() {
+  try {
+    var url = GETORDERLISTLABELSV2;
+    if (dataUrlCurrent == 'uploadreturns/') {
+      url = GETRETURNLISTLABELSV2;
+    }
+    var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+    console.log(response);
+    document.getElementById('profileModal').style.display = 'none';
+    showMessage('Mapping saved successfully', true);
+    var fileId = document.getElementById('profileModal').dataset.row;
+    var rowElement = document.getElementById(fileId);
+    var profileName = document.getElementById('profileSelect').options[document.getElementById('profileSelect').selectedIndex].textContent;
+    rowElement.querySelector('.profile-name').textContent = profileName;
+    rowElement.querySelector('.profile-name').dataset.value = profileName;
+    rowElement.querySelector('.profile-name').dataset.id = document.getElementById('profileSelect').value;
+    rowElement.querySelector('.profile-name').style.color = 'green';
+    const filteredFile = await parseAndFilterCSV(selectedFilesOrders[fileId].file, request_data);
+    selectedFilesOrders[fileId]['fileFiltered'] = filteredFile;
+    closeConfirmOverwriteModal();
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+async function parseAndFilterCSV(fileInput, allowedColumns) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(fileInput, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const filteredData = results.data.map(row => {
+          const filteredRow = {};
+          for (const key in row) {
+            if (allowedColumns['mapping'].hasOwnProperty(key)) {
+              filteredRow[key] = row[key];
+            }
+          }
+          return filteredRow;
+        });
+        const csv = Papa.unparse(filteredData);
+        const blob = new File([csv], fileInput.name, {
+          type: fileInput.type,
+          lastModified: fileInput.lastModified,
+          lastModifiedDate: fileInput.lastModifiedDate,
+        });
+        resolve(blob);
+      },
+      error: function(err) {
+        console.error(err);
+        showMessage('Error parsing file ' + err.message, false);
+        reject(err);
+      }
+    });
+  });
+}
+
+
+async function closeConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'none';
+  updateNextButton(dataUrlCurrent);
+}
+async function showConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'block';
+}
+
+async function getOrderlistLabelsV2Options() {
+  try {
+    const data = await unifiedSendRequest(GETORDERLISTLABELSV2OPTIONS, {method: 'GET'});
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist label options ' + error.message, false);
+    TOKEN = false;
+  }
+}
+
+async function getReturnlistLabelsV2Options() {
+  try {
+    const data = await unifiedSendRequest(GETRETURNLISTLABELSV2OPTIONS, {method: 'GET'});
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist label options ' + error.message, false);
+    TOKEN = false;
+  }
+}
+
+
+
+function addNewProfileOption(profileSelect) {
+  const addProfileOption = document.createElement('option');
+  addProfileOption.value = 'add_new';
+  addProfileOption.textContent = 'Add New Profile';
+  profileSelect.appendChild(addProfileOption);
+}
+
+
+// Add an event listener to the SVG for click events
+document.getElementById("editIcon").addEventListener("click", async function() {
+  const dropdown = document.getElementById("profileSelect");
+  const selectedOption = dropdown.options[dropdown.selectedIndex];
+  const editIcon = document.getElementById("editIcon");
+
+  // Change the selected option to an input field to edit the name
+  const input = document.createElement("input");
+  input.value = selectedOption.text;
+  input.style.width = "70%";
+  input.style.marginRight = '1rem';
+  const checkIcon = document.createElement("span");
+  checkIcon.innerHTML = "✔";
+  checkIcon.style.cursor = "pointer";
+  checkIcon.style.marginRight = "5px";
+  const xIcon = document.createElement("span");
+  xIcon.innerHTML = "✖";
+  xIcon.style.cursor = "pointer";
+  xIcon.style.marginRight = "5px";
+  const deleteIcon = document.createElement("span");
+  deleteIcon.innerHTML = '<img width="20px" src="{{ section.settings.trashcan | image_url }}" alt="{{ section.settings.trashcan.alt | escape }}" loading="lazy">';
+  deleteIcon.style.cursor = "pointer";
+
+  input.addEventListener("keyup", async function(event) {
+      // If "Enter" key is pressed
+      if (event.key === "Enter") {
+          await handleSave();
+      }
+  });
+
+  checkIcon.addEventListener("click", async function() {
+      await handleSave();
+  });
+  async function handleSave() {
+      selectedOption.text = input.value;
+      try {
+              var profile = {
+                'id': selectedOption.value,
+                'name': input.value
+              }
+              var response = await unifiedSendRequest(PROFILERENAME, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
+              console.log(response);
+          } catch (error) {
+              console.error(error.message);
+              showMessage('Failed to rename profile ' + error.message, false);
+          }
+      revertToOriginalState();
+  }
+  xIcon.addEventListener("click", function() {
+      // Revert without changes
+      revertToOriginalState();
+  });
+  function revertToOriginalState() {
+    // Remove the input field and icons, show the dropdown and editIcon
+    dropdown.parentElement.removeChild(input);
+    dropdown.parentElement.removeChild(checkIcon);
+    dropdown.parentElement.removeChild(deleteIcon);
+    dropdown.parentElement.removeChild(xIcon);
+    dropdown.style.removeProperty('display');  // Remove the display style
+    editIcon.style.display = "inline";
+}
+deleteIcon.addEventListener("click", async function() {
+    const isConfirmed = confirm("Are you sure you want to delete this profile?");
+    if (isConfirmed) {
+        try {
+            // Send request to DELETEPROFILE endpoint
+            const profileIdToDelete = selectedOption.value;
+            const response = await unifiedSendRequest(DELETEPROFILE + `?profile_id=${profileIdToDelete}`, {method: 'DELETE'});
+
+            // Check if deletion was successful
+            if (response.success) {
+                // Remove the profile from the dropdown
+                dropdown.remove(dropdown.selectedIndex);
+                revertToOriginalState();
+            } else {
+                alert("Failed to delete the profile.");
+            }
+        } catch (error) {
+            console.error(error.message);
+            showMessage('Failed to delete profile ' + error.message, false);
+        }
+    }
+  });
+
+  // Hide the dropdown and editIcon, and insert the input and icons
+  dropdown.style.display = "none";
+  editIcon.style.display = "none";
+  dropdown.parentElement.insertBefore(input, dropdown);
+  dropdown.parentElement.insertBefore(checkIcon, dropdown);
+  dropdown.parentElement.insertBefore(xIcon, dropdown);
+  dropdown.parentElement.insertBefore(deleteIcon, dropdown);
+  input.focus();
+});
+
+document.getElementById("profileSelect").addEventListener("change", async function() {
+  const dropdown = this;
+  if (dropdown.value === "add_new") {
+      try {
+          // Send request to ADDPROFILE
+          const profileName = `Profile ${dropdown.options.length}`;
+          var profile = {
+            name: profileName,
+            liveData: false
+          }
+          var response = await unifiedSendRequest(ADDPROFILE, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
+          // Remove the "add_new" option that was selected
+          dropdown.remove(dropdown.selectedIndex);
+          // Assume the response contains the new profile's ID
+          const newProfileId = response.id;
+
+          // Create a new profile option
+          const newOption = document.createElement("option");
+          newOption.value = newProfileId;
+          newOption.text = response.name;
+          dropdown.appendChild(newOption);
+
+          // Re-add the "Add New Profile" option
+          const addProfileOption = document.createElement("option");
+          addProfileOption.value = "add_new";
+          addProfileOption.text = "Add New Profile";
+          dropdown.appendChild(addProfileOption);
+
+          // Optionally, select the newly added profile
+          newOption.selected = true;
+
+      } catch (error) {
+          console.error(error.message);
+          showMessage('Failed to add profile ' + error.message, false);
+      }
+  } else {
+    if (dataUrlCurrent == 'uploadorders/') {
+      getOrderlistLabels(dropdown.value);
+    } else {
+      getReturnlistLabels(dropdown.value);
+    }
+  }
+
+});
+
+async function getOrderlistLabels(profile) {
+  try {
+    var orderlistLabels = await unifiedSendRequest(GETORDERLISTLABELSV2 + `?profile=${profile}`, {method: 'GET'});
+    var profileTable = document.getElementById('profileTableBody');
+    if (Object.keys(orderlistLabels).length > 0) {
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        if (select.getAttribute('data-name') in orderlistLabels) {
+          select.value = orderlistLabels[select.getAttribute('data-name')];
+        } else {
+          row.querySelector('input').click(); // if the column is not in the orderlist labels, then it is excluded
+        }
+      });
+    } else {
+      // new profile, so set all to unmapped
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        select.value = '';
+        if (row.querySelector('input').checked) {
+          row.querySelector('input').click();
+        }
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist labels ' + error.message, false);
+  }
+}
+
+async function getReturnlistLabels(profile) {
+  try {
+    var returnlistLabels = await unifiedSendRequest(GETRETURNLISTLABELSV2 + `?profile=${profile}`, {method: 'GET'});
+    var profileTable = document.getElementById('profileTableBody');
+    if (Object.keys(returnlistLabels).length > 0) {
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        if (select.getAttribute('data-name') in returnlistLabels) {
+          select.value = returnlistLabels[select.getAttribute('data-name')];
+        } else {
+          row.querySelector('input').click(); // if the column is not in the orderlist labels, then it is excluded
+        }
+      });
+    } else {
+      // new profile, so set all to unmapped
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        select.value = '';
+        if (row.querySelector('input').checked) {
+          row.querySelector('input').click();
+        }
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get returnlist labels ' + error.message, false);
+  }
+}
 
 function handleFileDeletion(uniqueId, orders, returns, reports, dataUrl) {
   if (orders) {
@@ -1110,14 +1765,20 @@ async function uploadOrders(endpoint) {
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
     // Assuming each row in your table has a class 'file-row'
     const rows = document.querySelectorAll('.file-row');
-    console.log(rows);
-    rows.forEach((row, index)=> {
+    console.log('rows', rows);
+    rows.forEach(row => {
+        console.log('row', row);
         const fileId = row.id;
-        console.log(fileId);
+        console.log('fileId', fileId);
         if (selectedFilesOrders.hasOwnProperty(fileId)){
-            formData.append('order_lists', selectedFilesOrders[fileId].file);
-            formData.append('profiles', row.querySelector('select').value);
-            formData.append('fileId', fileId);
+          var file = selectedFilesOrders[fileId];
+          if (file.fileFiltered) {
+            formData.append('order_lists', file.fileFiltered);
+          } else {
+            formData.append('order_lists', file.file);
+          }
+          formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
+          formData.append('fileId', fileId);
         }
     });
     try {
@@ -1564,17 +2225,7 @@ function stepFunctions(stepNumber){
     }
 }
 
-const reportTemplates = {
-  'IE Batteries': {
-    fields: ['amount_total', 'Batt Weight (g)'],
-    groupBy: ['Type of Batteries', 'b2b']
-  },
-  'DE WEEE': {
-    fields: ['amount_total', 'Product Net Weight (g)'],
-    groupBy: ['DE']
-  }
-};
-
+let allTemplates = [];
 async function getTimesAndCountry() {
   try {
     var data = await unifiedSendRequest(GETREPORTTIMES, { method: 'GET' });
@@ -1631,7 +2282,7 @@ async function getTimesAndCountry() {
     var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, { method: 'GET' });
     fillColumnSelectors(availableColumns);
     await populateRulesDropdown();
-    populateTemplateSelector();
+    await populateTemplateSelector();
   } catch (error) {
     console.error(error.message);
     showMessage('Failed to retrieve countries from orders ' + error.message, false);
@@ -1709,28 +2360,151 @@ async function editRules() {
     await displayRules(populateRulesDropdown);
 }
 
-function populateTemplateSelector() {
+async function populateTemplateSelector() {
   const templateSelect = document.getElementById('templateSelect');
-  templateSelect.innerHTML = '<option value="">-- Select a template --</option>';
-
-  Object.keys(reportTemplates).forEach(templateName => {
-    const option = document.createElement('option');
-    option.value = templateName;
-    option.textContent = templateName;
-    templateSelect.appendChild(option);
-  });
-
+  templateSelect.innerHTML = '<option value="default">-- Select a template --</option>';
+  allTemplates = await unifiedSendRequest(GETTEMPLATES, { method: 'GET' });
+  updateTemplateOptions();
   $('.selectpicker').selectpicker('refresh');
 
   $('#templateSelect').on('changed.bs.select', function () {
     const selectedTemplate = $(this).val();
-    if (selectedTemplate && reportTemplates[selectedTemplate]) {
-      const templateData = reportTemplates[selectedTemplate];
-      $('#customFields').selectpicker('val', templateData.fields);
-      $('#groupByFields').selectpicker('val', templateData.groupBy);
+    const template = allTemplates.find(t => `${t.country}-${t.year}-${t.report_type}` === selectedTemplate);
+    if (!template || selectedTemplate === "default") {
+      document.getElementById('customFields').disabled = false;
+      $('#customFields').selectpicker('refresh');
+      document.getElementById('groupByFields').disabled = false;
+      $('#groupByFields').selectpicker('refresh');
+      return;
     }
+    $('#customFields').selectpicker('val', null);
+    document.getElementById('customFields').disabled = true;
+    $('#customFields').selectpicker('refresh');
+    $('#groupByFields').selectpicker('val', null);
+    document.getElementById('groupByFields').disabled = true;
+    $('#groupByFields').selectpicker('refresh');
+    let dynamicRanges = {};
+
+    if (template.deadlines) {
+      template.deadlines.forEach(deadline => {
+        if (!deadline.timeframeStart || !deadline.timeframeEnd || !deadline.recurrence) return;
+  
+        const recurrenceName = deadline.recurrence.replace('ly', ''); // Yearly -> Year, Monthly -> Month
+        const label = `Last ${recurrenceName}`;
+  
+        const now = moment();
+  
+        if (deadline.recurrence.toLowerCase() === "monthly") {
+          const lastMonth = now.clone().subtract(1, 'month');
+          periodStart = lastMonth.clone().startOf('month');
+          periodEnd = lastMonth.clone().endOf('month');
+      
+        } else if (deadline.recurrence.toLowerCase() === "quarterly") {
+          const currentQuarter = Math.floor((now.month()) / 3) + 1;
+          const lastQuarter = currentQuarter - 1 <= 0 ? 4 : currentQuarter - 1;
+          const lastQuarterYear = currentQuarter - 1 <= 0 ? now.year() - 1 : now.year();
+          const quarterStartMonth = (lastQuarter - 1) * 3;
+      
+          periodStart = moment({ year: lastQuarterYear, month: quarterStartMonth, day: 1 });
+          periodEnd = periodStart.clone().add(2, 'months').endOf('month');
+          // TODO periodEnd doesn't seem to be correct
+        } else if (deadline.recurrence.toLowerCase() === "semesterly") {
+          const month = now.month() + 1;
+          if (month >= 1 && month <= 6) {
+            // In Jan-Jun -> previous semester is July-Dec of last year
+            periodStart = moment({ year: now.year() - 1, month: 6, day: 1 }); // July
+            periodEnd = periodStart.clone().add(5, 'months').endOf('month'); // Dec
+          } else {
+            // In Jul-Dec -> previous semester is Jan-Jun this year
+            periodStart = moment({ year: now.year(), month: 0, day: 1 }); // January
+            periodEnd = periodStart.clone().add(5, 'months').endOf('month'); // June
+          }
+      
+        } else if (deadline.recurrence.toLowerCase() === "yearly") {
+          const lastYear = now.clone().subtract(1, 'year');
+          periodStart = moment({ year: lastYear.year(), month: 0, day: 1 });
+          periodEnd = moment({ year: lastYear.year(), month: 11, day: 31 });
+        }
+        const startDay = Number(deadline.timeframeStart.split('-')[2]);
+        const endDay = Number(deadline.timeframeEnd.split('-')[2]);
+
+        const from = periodStart.clone().date(startDay);
+
+        const to = (endDay >= 28)
+          ? periodEnd
+          : periodStart.clone().date(endDay);
+  
+        dynamicRanges[label] = [from, to];
+      });
+    }
+  
+    // Fallback: if no template deadlines, at least offer standard choices
+    if (Object.keys(dynamicRanges).length === 0) {
+      dynamicRanges = {
+        'Last Month': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
+        'Last Year': [
+          moment().subtract(1, 'year').startOf('year'),
+          moment().subtract(1, 'year').endOf('year')
+        ]
+      };
+    }
+
+    const sortedRangesArray = Object.entries(dynamicRanges).sort((a, b) => {
+      const [ , [aStart, aEnd] ] = a;
+      const [ , [bStart, bEnd] ] = b;
+    
+      const aDuration = aEnd.diff(aStart, 'days');
+      const bDuration = bEnd.diff(bStart, 'days');
+    
+      return aDuration - bDuration; // Shortest first
+    });
+    
+    // Step 2: Rebuild dynamicRanges object in sorted order
+    dynamicRanges = Object.fromEntries(sortedRangesArray);
+  
+    // Replace existing datepicker with new dynamic ranges
+    $('#monthPicker').daterangepicker({
+      startDate: Object.values(dynamicRanges)[0][0],  // Set first option as default
+      endDate: Object.values(dynamicRanges)[0][1],
+      minDate: moment().subtract(5, 'year'),
+      maxDate: moment().add(1, 'year'),
+      locale: { format: 'DD/MM/YYYY' },
+      ranges: dynamicRanges
+    });
   });
 }
+
+function updateTemplateOptions() {
+  const templateSelect = document.getElementById('templateSelect');
+  const selectedCountry = $('#country').val();
+  const selectedCategory = $('#category').val();
+
+  templateSelect.innerHTML = '<option value="default">-- Select a template --</option>'; // Clear
+
+  allTemplates.forEach(template => {
+    // Match filtering: if no selection, or matching the selected value
+    const matchCountry = !selectedCountry || template.country === selectedCountry;
+    const matchCategory = !selectedCategory || template.report_type === selectedCategory;
+
+    if (matchCountry && matchCategory) {
+      const option = document.createElement('option');
+      option.value = `${template.country}-${template.year}-${template.report_type}`;
+      option.textContent = `${template.country} ${template.year} ${template.report_type}`;
+      templateSelect.appendChild(option);
+    }
+  });
+  $('.selectpicker').selectpicker('refresh'); // Re-render
+}
+
+$('#country').on('changed.bs.select', function() {
+  updateTemplateOptions();
+});
+$('#category').on('changed.bs.select', function() {
+  updateTemplateOptions();
+});
 
 async function showConfirmationDetails() {
     // Get the selected values
@@ -1740,9 +2514,14 @@ async function showConfirmationDetails() {
     const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
     document.getElementById('confirm-start').textContent = selectedStartDateValue;
     document.getElementById('confirm-end').textContent = selectedEndDateValue;
-    const selectedFields = $('#customFields').val() || [];
+    var selectedFields = $('#customFields').val() || [];
+    var selectedGroupBy = $('#groupByFields').val() || [];
+    const selectedTemplate = $('#templateSelect').val();
+    if (selectedTemplate !== "default") {
+      selectedFields = [`Using template ${selectedTemplate}`];
+      selectedGroupBy = [`Using template ${selectedTemplate}`];
+    }
     addOptionsConfirmation(selectedFields, 'confirm-fields');
-    const selectedGroupBy = $('#groupByFields').val() || [];
     addOptionsConfirmation(selectedGroupBy, 'confirm-groupby');
     const selectedRules = $('#ruleSelect').val() || [];
     ruleOptions = await getRules();
@@ -1807,7 +2586,8 @@ async function createReport() {
         const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
         countryData.append("start_date", convertToISO(selectedStartDateValue));
         countryData.append("end_date", convertToISO(selectedEndDateValue));
-        countryData.append("report_id", '-1');
+        const selectedTemplate = $('#templateSelect').val();
+        countryData.append("template_id", selectedTemplate);
         countryData.append("use_returns", document.getElementById('useReturns').checked);
         const selectedFields = $('#customFields').val() || [];
         countryData.append("output_fields", selectedFields.join(','));

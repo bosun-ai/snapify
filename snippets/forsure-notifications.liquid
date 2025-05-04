@@ -369,7 +369,7 @@ async function openResolutionModal(response) {
                 let data = JSON.parse(response.resolution_type); // Ensure it's parsed correctly
 
                 if (data.type === "options") {
-                    resolutionOption = '<div style="justify-content: space-evenly;display: flex;"><input id="resolutionModalTextbox" type="hidden"/>';
+                    resolutionOption = '<div style="justify-content: space-evenly;display: flex;gap: 1rem;"><input id="resolutionModalTextbox" type="hidden"/>';
 
                     data.options.forEach(option => {
                         resolutionOption += `<button class="button" value="${option.value}" onclick="document.getElementById('resolutionModalTextbox').value=this.value;">${option.name}</button>`;

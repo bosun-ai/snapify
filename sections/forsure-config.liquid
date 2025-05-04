@@ -1218,43 +1218,43 @@ async function sendCategoryLabels() {
 
     // Event listener for when the dropdown value changes
     document.getElementById("profileDropdown").addEventListener("change", async function() {
-    const dropdown = this;
-    if (dropdown.value === "add_new") {
-        try {
-            // Send request to ADDPROFILE
-            const profileName = `Profile ${dropdown.options.length}`;
-            var profile = {
-              name: profileName,
-              liveData: false
+        const dropdown = this;
+        if (dropdown.value === "add_new") {
+            try {
+                // Send request to ADDPROFILE
+                const profileName = `Profile ${dropdown.options.length}`;
+                var profile = {
+                  name: profileName,
+                  liveData: false
+                }
+                var response = await unifiedSendRequest(ADDPROFILE, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
+                // Remove the "add_new" option that was selected
+                dropdown.remove(dropdown.selectedIndex);
+                // Assume the response contains the new profile's ID
+                const newProfileId = response.id;
+
+                // Create a new profile option
+                const newOption = document.createElement("option");
+                newOption.value = newProfileId;
+                newOption.text = response.name;
+                dropdown.appendChild(newOption);
+
+                // Re-add the "Add New Profile" option
+                const addProfileOption = document.createElement("option");
+                addProfileOption.value = "add_new";
+                addProfileOption.text = "Add New Profile";
+                dropdown.appendChild(addProfileOption);
+
+                // Optionally, select the newly added profile
+                newOption.selected = true;
+
+            } catch (error) {
+                console.error(error.message);
+                showMessage('Failed to add profile ' + error.message, false);
             }
-            var response = await unifiedSendRequest(ADDPROFILE, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
-            // Remove the "add_new" option that was selected
-            dropdown.remove(dropdown.selectedIndex);
-            // Assume the response contains the new profile's ID
-            const newProfileId = response.id;
-
-            // Create a new profile option
-            const newOption = document.createElement("option");
-            newOption.value = newProfileId;
-            newOption.text = response.name;
-            dropdown.appendChild(newOption);
-
-            // Re-add the "Add New Profile" option
-            const addProfileOption = document.createElement("option");
-            addProfileOption.value = "add_new";
-            addProfileOption.text = "Add New Profile";
-            dropdown.appendChild(addProfileOption);
-
-            // Optionally, select the newly added profile
-            newOption.selected = true;
-
-        } catch (error) {
-            console.error(error.message);
-            showMessage('Failed to add profile ' + error.message, false);
         }
-    }
-    onDropdownChange();
-});
+        onDropdownChange();
+    });
 
     // Event listener for when the DOM content is fully loaded
     document.addEventListener('DOMContentLoaded', (event) => {

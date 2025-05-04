@@ -243,6 +243,7 @@ tr {
         transition: background-color 0.2s ease, color 0.2s ease;
         margin-right: 5px;
         border-radius: 8px 8px 0 0;
+        flex: 0 0 auto;
     }
 
     .tab-button:hover {
@@ -266,6 +267,7 @@ tr {
     }
     .dropdown {
       margin-left: 0!important;
+      width: 15rem!important;
     }
     .glyphicon-ok:before {
       content: "\2713";
@@ -300,11 +302,6 @@ tr {
     #downloadAllReports {
       cursor: pointer;
     }
-
-  .dropdown {
-    width: 15rem!important;
-    margin-left: 1rem!important;
-  }
 
 .folderArrow svg {
   width: 30px!important;
@@ -346,7 +343,7 @@ tr {
   <div id='tooltip' class="tooltipSave"></div>
   <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
     <div>
-      <div style="display: flex;background-color: #fafafa;position: relative;" id="filterContainer">
+      <div style="display: flex;background-color: #fafafa;position: relative;border-radius: 1rem;" id="filterContainer">
           <h2 class="flex-header" style="margin-left: 2rem">
             <span id="historyheader" class="table-header" style="cursor: default">
               Report History
@@ -469,22 +466,43 @@ async function checkHistoryVersion() {
 }
 checkHistoryVersion();
 
+function extractBaseFilename(filename) {
+  const parts = filename.split('/');
+  const fullName = parts[parts.length - 1];
+
+  // Remove known prefixes
+  const base = fullName.replace(/^(Debugger_|Excluded_data_)/, '');
+  return base;
+}
+
 function buildHierarchy(paths) {
   const hierarchy = {};
 
+  const groupMap = {}; // baseFilename -> array of file entries
+
   paths.forEach(file => {
-    path = file['filename']
+    const path = file['filename'];
     const parts = path.split('/');
+    const baseName = extractBaseFilename(path);
+
+    const key = parts.slice(0, -1).join('/') + '/' + baseName;
+    if (!groupMap[key]) groupMap[key] = [];
+    groupMap[key].push(file);
+  });
+
+  Object.entries(groupMap).forEach(([basePath, groupFiles]) => {
+    const baseParts = basePath.split('/');
     let currentLevel = hierarchy;
 
-    parts.forEach((part, index) => {
-      if (index === parts.length - 1) {
-        // It's a file, store it in an array at the current level
+    baseParts.forEach((part, index) => {
+      if (index === baseParts.length - 1) {
         if (!Array.isArray(currentLevel.files)) currentLevel.files = [];
-        file['part'] = part;
-        currentLevel.files.push(file);
+        currentLevel.files.push({
+          type: 'group',
+          part: part,
+          children: groupFiles,
+        });
       } else {
-        // It's a folder, create a nested object if it doesn't exist
         if (!currentLevel[part]) currentLevel[part] = {};
         currentLevel = currentLevel[part];
       }
@@ -503,6 +521,86 @@ function createFolderStructure(configDiv, hierarchy, currentPath = '') {
       if (key === 'files') {
         // Render files
         level[key].forEach(file => {
+          if (file.type === 'group' && file.children.length > 1) {
+            // Grouped file rendering
+            const fileRow = document.createElement('div');
+            fileRow.className = 'history-row folder-row';
+            fileRow.style.paddingLeft = `${(depth + 1) * 2}rem`;
+            fileRow.style.display = 'inline-flex';
+      
+            const arrowSvg = `<svg class="svg-arrow collapsed" style="margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" version="1.1" fill="2255ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 66.91"><g><path fill="#2255ff" d="M11.68,1.95C8.95-0.7,4.6-0.64,1.95,2.08c-2.65,2.72-2.59,7.08,0.13,9.73l54.79,53.13l4.8-4.93l-4.8,4.95 c2.74,2.65,7.1,2.58,9.75-0.15c0.08-0.08,0.15-0.16,0.22-0.24l53.95-52.76c2.73-2.65,2.79-7.01,0.14-9.73 c-2.65-2.72-7.01-2.79-9.73-0.13L61.65,50.41L11.68,1.95L11.68,1.95z"/></g></svg>`;
+            fileRow.innerHTML = `${arrowSvg}`;
+            fileRow.style.cursor = 'pointer';
+
+            const fileName = document.createElement('div');
+            fileName.style.cssText = 'text-indent: 0 !important;';
+            fileName.className = 'report-group';
+
+            const fileNameSpan = document.createElement('span');
+            fileNameSpan.innerHTML = file.part;
+            fileName.appendChild(fileNameSpan);
+
+            const tags = document.createElement('div');
+            tags.style.marginRight = '5rem';
+            tags.style.marginLeft = '1rem';
+            tags.style.textIndent = 0;
+
+            // Optional: tag style wrapper
+            if (file.part.toLowerCase().includes('inprogress')) {
+              const inprogressTag = createColReport(`<svg height="12px" fill="#fafafa" title="In Progress" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M32 0C14.3 0 0 14.3 0 32S14.3 64 32 64l0 11c0 42.4 16.9 83.1 46.9 113.1L146.7 256 78.9 323.9C48.9 353.9 32 394.6 32 437l0 11c-17.7 0-32 14.3-32 32s14.3 32 32 32l32 0 256 0 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-11c0-42.4-16.9-83.1-46.9-113.1L237.3 256l67.9-67.9c30-30 46.9-70.7 46.9-113.1l0-11c17.7 0 32-14.3 32-32s-14.3-32-32-32L320 0 64 0 32 0zM96 75l0-11 192 0 0 11c0 19-5.6 37.4-16 53L112 128c-10.3-15.6-16-34-16-53zm16 309c3.5-5.3 7.6-10.3 12.1-14.9L192 301.3l67.9 67.9c4.6 4.6 8.6 9.6 12.1 14.9L112 384z"/></svg>`);
+              inprogressTag.style.background = '#2255ff';
+              inprogressTag.style.margin = 0;
+              inprogressTag.style.padding = '0.4rem 1rem';
+              inprogressTag.style.justifyContent = 'center';
+              inprogressTag.style.display = 'flex';
+              inprogressTag.style.borderRadius = '1rem';
+              inprogressTag.title = 'Inprogress';
+              tags.appendChild(inprogressTag);
+            }
+
+            fileRow.appendChild(fileName); // ← Filename block
+            fileRow.appendChild(tags);     // ← Tag rendered next to it, not inside
+
+      
+            const groupContainer = document.createElement('div');
+            groupContainer.style.display = 'none';
+      
+            fileRow.addEventListener('click', () => {
+              groupContainer.style.display = groupContainer.style.display === 'none' ? 'block' : 'none';
+              fileRow.querySelector('.svg-arrow').classList.toggle('collapsed');
+            });
+      
+            file.children.forEach(child => {
+              const childPath = child.filename;
+              const childFileName = childPath.split('/').pop();
+              const childRow = document.createElement('div');
+              childRow.className = 'history-row file-row';
+              childRow.style.paddingLeft = `${(depth + 1) * 2}rem`;
+              {% comment %} padding-left: 12rem;justify-content: space-between;align-items: center;padding-right: 5rem; {% endcomment %}
+              childRow.style.justifyContent = 'space-between';
+              childRow.style.alignItems = 'center';
+              childRow.style.paddingRight = '5rem';
+      
+              const fileNameDiv = document.createElement('div');
+              fileNameDiv.textContent = childFileName;
+      
+              const icons = document.createElement('div');
+              icons.style.display = 'flex';
+              icons.appendChild(addOpenIconReport(childFileName, childPath));
+              icons.appendChild(addDownloadIcon(childFileName, childPath));
+              icons.appendChild(addShareCol(childFileName, childPath));
+              icons.appendChild(child.can_delete ? addTrashIcon(childFileName) : emptyCol());
+              icons.appendChild(child.can_submit ? sendReportIcon(childFileName, childPath) : emptyCol());
+      
+              childRow.appendChild(fileNameDiv);
+              childRow.appendChild(icons);
+              groupContainer.appendChild(childRow);
+            });
+      
+            parentElement.appendChild(fileRow);
+            parentElement.appendChild(groupContainer);
+      
+          } else {
             console.log(file);
             filename = file['part'];
             const fullPath = `${path}/${filename}`; // Construct full path
@@ -567,6 +665,7 @@ function createFolderStructure(configDiv, hierarchy, currentPath = '') {
             fileRow.appendChild(fileNameDiv);
             fileRow.appendChild(icons);
             parentElement.appendChild(fileRow);
+          }
         });
       } else {
         // Render folder
@@ -781,6 +880,18 @@ function addCheckboxCol(fileName, fullPath) {
   return checkboxCol;
 }
 
+renames = {
+  'amount_total': 'Amount Total',
+  'amount_b2b': 'Amount B2B',
+  'amount_b2c': 'Amount B2C',
+  'weight_total': 'Weight Total (kg)',
+  'weight_b2b': 'Weight B2B (kg)',
+  'weight_b2c': 'Weight B2C (kg)',
+  'sku': 'SKU',
+  'orderid': 'OrderID',
+  'b2b': 'B2B',
+  'Column A': 'Index'
+};
 function displayExcelReport(data, submit, fileName, fullPath) {
     const modalOverlay = document.getElementById('modalOverlayExcel');
     const modal = document.getElementById('excelModal');
@@ -792,26 +903,66 @@ function displayExcelReport(data, submit, fileName, fullPath) {
     tableContainer.innerHTML = '';
 
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; // Alphabet for column headers
+    let sheets = Object.keys(data);
+    let groupedSheets = {};
+    const groupLabels = {};
+    var use_tabs = false;
 
-    // Generate Tabs for each sheet
-    const sheets = Object.keys(data); // Each key represents a sheet
-    sheets.forEach((sheetName, sheetIndex) => {
-        // Create Tab Button
-        const tabButton = document.createElement('button');
-        tabButton.textContent = sheetName;
-        tabButton.className = 'tab-button';
-        tabButton.style.margin = '5px';
-        tabButton.dataset.sheet = sheetName;
+    if (!use_tabs) {
+        const groups = {};
+        sheets.forEach((sheetName) => {
+            const rows = data[sheetName];
+            if (!rows || rows.length === 0) return;
 
-        tabButton.addEventListener('click', () => {
-            // Clear the table container
-            tableContainer.innerHTML = '';
-            highlightActiveTab(sheetIndex);
-            renderSheet(data[sheetName]); // Render the clicked sheet
+            const columnSignature = JSON.stringify(Object.keys(rows[0]).sort());
+            if (!groups[columnSignature]) {
+                groups[columnSignature] = [];
+                groupLabels[columnSignature] = [];
+            }
+
+            const taggedRows = rows.map(row => ({
+                ...row,
+                Category: sheetName
+            }));
+
+            groups[columnSignature].push(...taggedRows);
+            groupLabels[columnSignature].push(sheetName);
         });
 
-        tabsContainer.appendChild(tabButton);
-    });
+        groupedSheets = groups;
+    } else {
+        // Use original structure (each sheet separate)
+        groupedSheets = Object.fromEntries(sheets.map(s => [s, data[s]]));
+    }
+
+    const groupNames = Object.keys(groupedSheets);
+
+    if (groupNames.length > 1) {
+        // Generate Tabs only if more than 1 group
+        groupNames.forEach((groupName, index) => {
+            const tabButton = document.createElement('button');
+            tabButton.textContent = groupLabels[groupName][0];
+            tabButton.className = 'tab-button';
+            tabButton.style.margin = '5px';
+            tabButton.dataset.sheet = groupName;
+
+            tabButton.addEventListener('click', () => {
+                tableContainer.innerHTML = '';
+                highlightActiveTab(index);
+                renderSheet(groupedSheets[groupName]);
+            });
+
+            tabsContainer.appendChild(tabButton);
+        });
+
+        // Render the first one initially
+        renderSheet(groupedSheets[groupNames[0]]);
+        highlightActiveTab(0);
+    } else {
+        // Only one group, render directly without tabs
+        renderSheet(groupedSheets[groupNames[0]]);
+    }
+
 
     // Helper function to highlight active tab
     function highlightActiveTab(activeIndex) {
@@ -826,8 +977,9 @@ function displayExcelReport(data, submit, fileName, fullPath) {
     function renderSheet(sheetData) {
         console.log(sheetData[0]);
         const columns = Object.keys(sheetData[0]).map((key, idx) => {
+            const key_text = key in renames ? renames[key] : key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             return {
-                title: key, // Use alphabet for headers
+                title: key_text, // Use alphabet for headers
                 field: key,
                 headerSort: true, // Disable sorting
                 formatter: "plaintext", // Ensure raw text is displayed
@@ -860,23 +1012,32 @@ function displayExcelReport(data, submit, fileName, fullPath) {
             };
         });
 
+        const tableOptions = {
+          data: sheetData,
+          layout: columns.length > 10 ? "fitDataFill" : "fitColumns",
+          pagination: sheetData.length > 50,
+          paginationCounter: "rows",
+          paginationSize: 50,
+          columns: columns,
+      };
+      // Only add groupBy when not using tabs
+      if (!use_tabs) {
+          tableOptions.groupBy = "Category";
+          tableOptions.groupHeader = function (value, count, data, group) {
+              return value;
+          };
+      }
+
+
         // Initialize Tabulator for the sheet
-        new Tabulator("#report-table-data-excel", {
-            data: sheetData,
-            layout: columns.length > 20 ? "fitDataFill" : "fitColumns",
-            pagination: sheetData.length > 50, // Enable pagination for large sheets
-            paginationCounter: "rows",
-            paginationSize: 50,
-            columns: columns,
-        });
+        new Tabulator("#report-table-data-excel", tableOptions);
     }
 
     // Render the first sheet by default
-    if (sheets.length > 0) {
+    if (use_tabs && sheets.length > 0) {
         renderSheet(data[sheets[0]]);
         highlightActiveTab(0);
     }
-    console.log(`Submitting ${submit}`);
     if (submit) {
       document.getElementById('send-report').style.display = 'block';
       document.getElementById('send-report').onclick = function() {
