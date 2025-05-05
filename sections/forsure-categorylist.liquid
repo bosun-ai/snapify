@@ -275,6 +275,66 @@
 #tabs-container .dropdown {
     width: fit-content!important;
 }
+
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .exclude {
+    text-decoration: line-through;
+  }
+
+  /* Loading spinner */
+#loadingSpinner, #loadingSpinnerCalendar {
+    border: 4px solid rgba(34, 85, 255, 0.1);
+    border-top: 4px solid #2255ff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+    display: flex;
+}
+#loadingSpinnerContainer, #loadingSpinnerCalendarContainer {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
@@ -296,6 +356,9 @@
   <button id="deleteButton" style="position: absolute;display:none;z-index:2" onclick="deleteColumn()">X</button>
   <button id="deleteButtonRow" style="position: absolute;display:none;z-index:2" onclick="deleteRow()">X</button>
   {% render 'forsure-rules' %}
+  <div id="loadingSpinnerContainer" style="display: none;">
+    <div id="loadingSpinner" style="display: block!important;"></div>
+  </div>
   <div style="padding: 3rem;margin: 3rem;border-radius: 2rem;border:0.2rem solid #17161c">
     <div id="overlay"></div>
     <div id="popup" style="z-index:50;display: none">
@@ -381,57 +444,336 @@
       </table>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <span id="closeMapping" class="close">&times;</span>
+      <div style="display: flex; justify-content: space-between;">
+        <h2>Select Mapping</h2>
+        <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
+      </div>
+      <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
+        If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
+      </div>
+      <div id="profileDetails">
+        <div style="display:flex">
+          <strong>File:</strong>
+          <div id='profileFileName' style="margin-left:1rem"></div>
+        </div>
+        <table id="profileTable" style="margin: auto;">
+          <tr>
+            <th>Name</th>
+            <th>Preview</th>
+            <th>Mapping</th>
+            <th width="10%">Exclude</th>
+          </tr>
+          <tbody id="profileTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="confirmOverwriteModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+     background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
+    <h2>Confirm Overwrite</h2>
+    <p>Are you sure you want to overwrite the existing mapping?</p>
+    <div style="display: flex; justify-content: space-between;">
+      <button class="button" onclick="confirmOverwrite()">Yes</button>
+      <button class="button" style="background-color: #17161c;"onclick="closeConfirmOverwriteModal()">No</button>
+    </div>
+  </div>
   <script>
-    document.getElementById('category_list').addEventListener('change', uploadCategoryList);
-    $(document).ready(getCategorylistDetails);
+    document.getElementById('category_list').addEventListener('change', openProfileModal);
 
-    async function uploadCategoryList() {
-      var errorDiv = document.getElementById('errorsDiv');
-      errorDiv.style.display = 'none';
-      var files = event.target.files;
-      if (files.length) {
-        try {
-          const file = event.target.files[0];
-          const formData = new FormData();
-          formData.append('category_list', file);
+async function parseCSV(fileInput, nrows=3) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(fileInput, {
+      header: true,
+      skipEmptyLines: true,
+      preview: nrows,
+      complete: function(results) {
+        const data = results.data;
+        const columnDict = {};
 
-// TODO remove profile
-          await unifiedSendRequest(UPLOADCATEGORYLIST + `?profile=1`, {formData: formData});
-          // window.location.reload();
-
-        } catch (error) {
-          console.error(error);
-          errorDiv.style.display = 'block';
-          errorDiv.innerText = error;
+        if (data.length > 0) {
+          const keys = Object.keys(data[0]);
+          keys.forEach(key => {
+            columnDict[key] = data.map(row => row[key]);
+          });
         }
+        console.log('columnDict', columnDict);
+        resolve(columnDict);
+      },
+      error: function(err) {
+        console.error(err);
+        showMessage('Error parsing file ' + err.message, false);
+        reject(err);
       }
-    }
+    });
+  });
+}
 
-    function openImportFromStorePopup() {
-      document.getElementById('popup').style.display = 'block';
-      document.getElementById('overlay').style.display = 'block';
-    }
-    function hideModal() {
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('popup').style.display = 'none';
-    }
+    
+async function openProfileModal(event) {
+  const fileInput = event.target.files[0];
+  if (!fileInput) {
+    return;
+  }
+  var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+  loadingSpinnerContainer.style.display = 'block';
+  console.log('fileInput', fileInput);
+  const fileName = fileInput.name;
+  console.log('fileName', fileName);
+  const modal = document.getElementById('profileModal');
+  const profileSelect = document.getElementById('profileSelect');
+  const profileDetails = document.getElementById('profileDetails');
+  const profileFileName = document.getElementById('profileFileName');
+  {% comment %} try { {% endcomment %}
+    const csvData = await parseCSV(fileInput);
+    var labelsV2Options = await getCategorylistLabelsV2Options();
+    profileFileName.textContent = fileName;
+    var profileTable = document.getElementById('profileTableBody');
+    profileTable.innerHTML = '';
+    Object.keys(csvData).forEach((key, index) => {
+      const tr = document.createElement('tr');
+      const tdKey = document.createElement('td');
+      tdKey.textContent = key;
+      tr.appendChild(tdKey);
+      const tdEntry = document.createElement('td');
+      var preview = csvData[key].join(', ');
+      if (preview.length > 50) { // limit the preview to 100 characters
+        preview = preview.slice(0, 50) + '...';
+      }
+      tdEntry.textContent = preview;
+      tr.appendChild(tdEntry);
 
-    document.getElementById('overlay').addEventListener('click', hideModal);
+      const tdMapping = document.createElement('td');
+      const selectMapping = document.createElement('select');
+      selectMapping.classList.add('btn', 'bs-placeholder', 'btn-default');
+      var defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Unmapped';
+      defaultOption.selected = true;
+      selectMapping.appendChild(defaultOption);
+      selectMapping.setAttribute('data-name', key);
+      Object.keys(labelsV2Options).forEach(key => {
+        var optionGroup = document.createElement('optgroup');
+        optionGroup.label = key;
+        optionGroup.setAttribute('data-name', key);
+        labelsV2Options[key].forEach(option => {
+          const optionElement = document.createElement('option');
+          optionElement.value = option.key;
+          optionElement.setAttribute('data-units', option.options);
+          var star = '';  
+          if (option.required) {
+            star = ' *';
+          }
+          optionElement.textContent = option.title + star;
+          optionElement.setAttribute('data-description', option.description);
+          optionElement.title = option.description;
+          optionGroup.appendChild(optionElement);
+        });
+        selectMapping.appendChild(optionGroup);
+      });
+      tdMapping.appendChild(selectMapping);
+      tr.appendChild(tdMapping);
+
+      const tdExclude = document.createElement('td');
+      const checkboxExclude = document.createElement('input');
+      checkboxExclude.type = 'checkbox';
+      checkboxExclude.title = 'Exclude this column from the upload';
+      checkboxExclude.addEventListener('change', function() {
+        toggleExclude(checkboxExclude);
+      });
+      tdExclude.appendChild(checkboxExclude);
+      tr.appendChild(tdExclude);
+      profileTable.appendChild(tr);
+    });
+  {% comment %} } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to parse file ' + fileName, false);
+    return;
+  } {% endcomment %}
+
+
+    getCategorylistLabels();
+  // Display column details (mockup for demonstration)
+
+  // Show the modal
+  modal.style.display = 'block';
+
+  // Close modal on click of close button
+  document.getElementById('closeMapping').onclick = function() {
+    closeMappingModal();
+  };
+
+}
+
+function toggleExclude(checkbox) {
+  const row = checkbox.parentElement.parentElement;
+  const exclude = checkbox.checked;
+  row.classList.toggle('exclude', exclude);
+  row.querySelector('select').disabled = exclude;
+}
+
+async function getCategorylistLabelsV2Options() {
+  try {
+    const data = await unifiedSendRequest(GETCATEGORYLISTLABELSV2OPTIONS, {method: 'GET'});
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get categorylist label options ' + error.message, false);
+    return [];
+  }
+}
+
+
+async function getCategorylistLabels() {
+  try {
+    var categorylistLabels = await unifiedSendRequest(GETCATEGORYLISTLABELSV2, {method: 'GET'});
+    console.log('categorylistLabels', categorylistLabels);
+    var profileTable = document.getElementById('profileTableBody');
+    if (Object.keys(categorylistLabels).length > 0) {
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        if (select.getAttribute('data-name') in categorylistLabels) {
+          select.value = categorylistLabels[select.getAttribute('data-name')];
+        } else {
+          row.querySelector('input').click(); // if the column is not in the orderlist labels, then it is excluded
+        }
+      });
+    } else {
+      // new profile, so set all to unmapped
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        select.value = '';
+        if (row.querySelector('input').checked) {
+          row.querySelector('input').click();
+        }
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist labels ' + error.message, false);
+  }
+}
+
+
+var request_data = {};
+    
+
+async function saveMapping() {
+  const mapping = {};
+  const profileTable = document.getElementById('profileTableBody');
+  const rows = profileTable.querySelectorAll('tr');
+  rows.forEach(row => {
+    var dropdown = row.querySelector('select');
+    var key = dropdown.getAttribute('data-name');
+    if (!dropdown.disabled) {
+      var value = dropdown.value;
+      mapping[key] = value;
+    }
+  });
+  request_data = {'mapping': mapping};
+  console.log(request_data);
+  try {
+    var response = await unifiedSendRequest(GETCATEGORYLISTLABELSV2COMPARE, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+    console.log(response);
+    if (response) {
+      confirmOverwrite();
+    } else {
+      showConfirmOverwriteModal();
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+
+async function closeConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'none';
+}
+
+async function showConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'block';
+}
+
+async function closeMappingModal() {
+  document.getElementById('profileModal').style.display = 'none';
+  document.getElementById('loadingSpinnerContainer').style.display = 'none';
+}
+
+
+async function confirmOverwrite() {
+  try {
+    {% comment %} var response = await unifiedSendRequest(GETCATEGORYLISTLABELSV2, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}}); {% endcomment %}
+    {% comment %} console.log(response); {% endcomment %}
+    await uploadCategoryList();
+    closeConfirmOverwriteModal();
+    closeMappingModal();
+    {% comment %} showMessage('Mapping saved successfully', true); {% endcomment %}
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+async function uploadCategoryList() {
+  var errorDiv = document.getElementById('errorsDiv');
+  errorDiv.style.display = 'none';
+  var files = document.getElementById('category_list').files;
+  if (files.length) {
+    try {
+      const file = files[0];
+      const formData = new FormData();
+      formData.append('category_list', file);
+      formData.append('categorylabels', JSON.stringify(request_data));
+
+      // TODO remove profile
+      await unifiedSendRequest(UPLOADCATEGORYLIST, {formData: formData});
+      // window.location.reload();
+      showMessage('Categorylist uploaded successfully', true);
+    } catch (error) {
+      console.error(error);
+      errorDiv.style.display = 'block';
+      errorDiv.innerText = error;
+    }
+  }
+}
+
+function openImportFromStorePopup() {
+  document.getElementById('popup').style.display = 'block';
+  document.getElementById('overlay').style.display = 'block';
+}
+function hideModalCategorylist() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('popup').style.display = 'none';
+}
+
+document.getElementById('overlay').addEventListener('click', hideModalCategorylist);
 
 async function selectCountries() {
     const tabsContainer = document.getElementById('tabs-container');
     tabsContainer.innerHTML = '';
     try {
-        let data = await unifiedSendRequest(GETCATEGORYLABELS, {method: 'GET'});
-        console.log(data);
-        const countriesItem = data.find(item => item.key === 'countries');
-        if (!countriesItem || !countriesItem.value) {
-            console.error('No countries found in response');
-            showMessage('Failed to get countries ' + error.message, false);
-            return;
+        const countryDict = {};
+        const generalDict = {};
+        for (const [entry, value] of Object.entries(categorylistLabels)) {
+            const group = value.group || 'Ungrouped';
+            if (group == 'General') {
+              generalDict[entry] = value;
+            } else {
+              if (!countryDict[group]) {
+                  countryDict[group] = {};
+              }
+              countryDict[group][entry] = value;
+            }
         }
-        const countries = countriesItem.value;
-        const countryCodes = Object.keys(countries);
+        console.log('countryDict', countryDict);
+        console.log('generalDict', generalDict);
+        const countryCodes = Object.keys(countryDict);
         // Create buttons for first x countries
         var lenDisplayedCountries = 2;
         countryCodes.slice(0, lenDisplayedCountries).forEach((countryCode, index) => {
@@ -443,7 +785,7 @@ async function selectCountries() {
 
             tabButton.addEventListener('click', () => {
                 highlightActiveTab(index);
-                showCountryData(countries[countryCode], countryCode, data);
+                showCountryData(countryDict[countryCode], countryCode, generalDict);
             });
 
             tabsContainer.appendChild(tabButton);
@@ -494,7 +836,7 @@ async function selectCountries() {
                         selectedButton.addEventListener('click', () => {
                             let index = document.querySelectorAll('.tab-button').length;
                             highlightActiveTab(index-1);
-                            showCountryData(countries[selectedCountry], selectedCountry, data);
+                            showCountryData(countryDict[selectedCountry], selectedCountry, generalDict);
                         });
 
                         tabsContainer.insertBefore(selectedButton, selectWrapper);
@@ -505,7 +847,7 @@ async function selectCountries() {
                     highlightActiveTab(index);
 
                     // Call showCountryData immediately
-                    showCountryData(countries[selectedCountry], selectedCountry, data);
+                    showCountryData(countryDict[selectedCountry], selectedCountry, generalDict);
 
                     // Reset the dropdown to not remain selected
                     $(this).selectpicker('val', 'More');
@@ -517,7 +859,6 @@ async function selectCountries() {
         showMessage('Failed to get countries ' + error.message, false);
     }
 }
-selectCountries();
 
 function highlightActiveTab(activeIndex) {
     const buttons = document.querySelectorAll('.tab-button');
@@ -528,7 +869,7 @@ function highlightActiveTab(activeIndex) {
 
 let activeCountry = null;
 let previouslyHiddenColumns = new Set();
-function showCountryData(countryData, countryCode, data) {
+function showCountryData(countryData, countryCode, generalDict) {
     const table = $('#editableTable').DataTable();
 
     // If the same tab is clicked again -> show all columns
@@ -543,8 +884,8 @@ function showCountryData(countryData, countryCode, data) {
     }
     // Otherwise, filter columns to match that country's labels
     activeCountry = countryCode;
-    const countryLabels = getCountryColumnLabels(countryData);
-    const generalColumns = getGeneralColumns(data);
+    const countryLabels = Object.keys(countryData);
+    const generalColumns = Object.keys(generalDict);
 
     // Loop through datatable columns and show/hide based on country data
     table.columns().every(function () {
@@ -562,23 +903,6 @@ function showCountryData(countryData, countryCode, data) {
     });
 }
 
-function getCountryColumnLabels(countryData) {
-    let labels = [];
-    Object.values(countryData).forEach(category => {
-        Object.values(category).forEach(value => {
-            if (typeof value === 'string') {
-                labels.push(value);
-            }
-        });
-    });
-    return labels;
-}
-
-function getGeneralColumns(data) {
-    return data
-        .filter(entry => typeof entry.value === 'string' && entry.key !== 'countries')
-        .map(entry => entry.value);
-}
 var versionId = null;
 async function fillVersionDropdown() {
     try {
@@ -605,8 +929,10 @@ async function fillVersionDropdown() {
 
         dropdown.addEventListener('change', async (event) => {
             versionId = event.target.value;  // single value
-            await getCategorylistDetails();
+            await getCategorylistDetails(versionId);
         });
+        versionId = data[0].version;
+        await getCategorylistDetails(versionId);
 
     } catch (error) {
         console.error(error.message);
@@ -630,70 +956,6 @@ function generateMockVersions() {
     return mock;
 }
 
-
-async function fillDropdown(dropdownId, filters, key) {
-  dropdownId = "profileDropdown", 
-  filters = {
-      'country': [],
-      'start_time': null,
-      'end_time': null,
-      'profile': [],
-      'report_name': [],
-      'categories': []
-  };
-  key = 'profile'
-  try {
-      const response = await unifiedSendRequest(STATSREPORTS, {formData: JSON.stringify(filters), 
-          headerArgs: {'Content-Type': 'application/json'}});
-      console.log(response);
-
-      const dropdown = document.getElementById(dropdownId);
-
-      dropdown.innerHTML = "";
-
-      const entries = response[key];
-      console.log(`Filling dropdown ${key} with ${entries}`);
-      
-      entries.forEach(entry => {
-          const option = document.createElement("option");
-          if(key === 'profile'){
-              option.value = entry['profile_id'];
-              option.textContent = entry['profile_name'];
-          } else {
-              option.value = entry;
-              option.textContent = entry;
-          }
-          if (filters[key].includes(entry)) {
-              option.selected = true;
-          }
-          dropdown.appendChild(option);
-      });
-      $(`#${dropdownId}`).selectpicker('refresh');
-      let selectedOptions = $(`#${dropdownId}`).find('option:selected');
-      let displayText = selectedOptions.map(function() {
-          return $(this).text(); // or $(this).val() if you want to display the value
-      }).get().join(', ');
-      // Check if there is any selection, otherwise set to default text
-      displayText = displayText.length > 0 ? displayText : 'Nothing selected';
-
-      // Update the display text
-      $(`#${dropdownId}`).closest('.filter-group').find('.filter-option-inner-inner').text(displayText);
-  } catch (error) {
-      console.error(error.message);
-      TOKEN = false;
-  }
-}
-document.addEventListener('DOMContentLoaded', fillDropdown);
-var currentProfile = null;
-function updateProfile() {
-  const selProfiles = Array
-        .from(this.options)
-        .filter(option => option.selected)
-        .map(option => option.value);
-    console.log(`Selected profiles: ${selProfiles}`);
-    currentProfile = selProfiles;
-}
-document.getElementById('profileDropdown').addEventListener('change', updateProfile);
 
 var importStoreUpdateInterval = null;
 async function importFromStore() {
@@ -724,7 +986,7 @@ async function importFromStoreUpdates() {
             showMessage('Fetched categorylist successfully', true);
             updateProgressBar(100);
             clearInterval(importStoreUpdateInterval);
-            hideModal();
+            hideModalCategorylist();
         } else if (response.status == 'in_progress') {
             console.log(response);
             current_element = response.message[0];
@@ -838,17 +1100,33 @@ function updateActiveUsers(message) {
 
 let editMode = false;
 var columnNames = {};
+var categorylistLabels = {};
+var col_order = [];
 async function getCategorylistDetails() {
+      var catlabels = await unifiedSendRequest(GETCATEGORYLISTLABELSV2DETAILS += `?version_id=${versionId}`, {method: 'GET'});
+      col_order = catlabels['col_order'];
+      categorylistLabels = catlabels['output_dict'];
       let url = GETCATEGORYLISTDETAILS;
-      if (versionId !== null) {
-        url += `?version_id=${versionId}`;
-      }
+      url += `?version_id=${versionId}`;
       var data = await unifiedSendRequest(url, {method: 'GET'});
       data = Object.values(data).map(item => {
           for (let i = 1; i <= 100; i++) {
               item[`HiddenColumn${i}`] = '';
           }
-          return item;
+          const reorderedItem = {};
+          // Add keys from col_order first
+          col_order.forEach(key => {
+              reorderedItem[key] = item.hasOwnProperty(key) ? item[key] : '';
+          });
+
+          // Add remaining keys (not in col_order) after
+          Object.keys(item).forEach(key => {
+              if (!col_order.includes(key)) {
+                  reorderedItem[key] = item[key];
+              }
+          });
+
+          return reorderedItem;
       });
       var headers = Object.keys(data[Object.keys(data)[0]]);
       var cols = headers.map(key => {
@@ -864,10 +1142,8 @@ async function getCategorylistDetails() {
       thead.innerHTML = '';
 
       //var thead = document.createElement('thead');
-
       // Create and append the tr element
       var tr = document.createElement("tr");
-
 
       // Append th elements to the tr
       headers.forEach(function(header) {
@@ -875,6 +1151,9 @@ async function getCategorylistDetails() {
         th.textContent = header;
         th.addEventListener('mouseenter', function() {
             currentTh = this;
+            if (categorylistLabels[header]) {
+              th.title = categorylistLabels[header]['description'];
+            }
             deleteColumnButton();
         });
         th.addEventListener('mouseleave', function() {
@@ -957,13 +1236,13 @@ async function getCategorylistDetails() {
       });
 
       $('#editableTable').wrap('<div class="custom-table-wrapper"></div>');
+      selectCountries();
+
 }
 
 $('#editableTable thead').on('click', 'th', function(e) {
   if (editMode) {
       // Prevent default sorting when in edit mode
-
-
       var currentHeader = $(this);
       var columnIndex = currentHeader.index();
       if (currentHeader.find('input').length === 0) {

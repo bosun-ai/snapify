@@ -74,7 +74,7 @@ Usage:
         chartBig.resize();
     }
     const params = widgetChartParams[widgetId];
-    drawChart(params, chartBig, true);
+    drawChart(params, 'widgetPopup', chartBig, true);
     let tableContainer = document.getElementById('chartInfo');
     tableContainer.innerHTML = '';
     await generateTable(params);

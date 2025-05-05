@@ -741,7 +741,7 @@ content: "\2713"
         </div>
         <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
       </div>
-      <div>Create the mapping you want to use for this orderlist, each dropdown value with a star is required to be mapped.
+      <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
         If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
       </div>
       <div id="profileDetails">
@@ -1444,8 +1444,14 @@ async function confirmOverwrite() {
     rowElement.querySelector('.profile-name').dataset.value = profileName;
     rowElement.querySelector('.profile-name').dataset.id = document.getElementById('profileSelect').value;
     rowElement.querySelector('.profile-name').style.color = 'green';
-    const filteredFile = await parseAndFilterCSV(selectedFilesOrders[fileId].file, request_data);
-    selectedFilesOrders[fileId]['fileFiltered'] = filteredFile;
+    if (dataUrlCurrent == 'uploadreturns/') {
+      const filteredFile = await parseAndFilterCSV(selectedFilesReturns[fileId].file, request_data);
+      selectedFilesReturns[fileId]['fileFiltered'] = filteredFile;
+    } else {
+      const filteredFile = await parseAndFilterCSV(selectedFilesOrders[fileId].file, request_data);
+      selectedFilesOrders[fileId]['fileFiltered'] = filteredFile;
+    }
+
     closeConfirmOverwriteModal();
   } catch (error) {
     console.error(error.message);
@@ -1517,7 +1523,6 @@ async function getReturnlistLabelsV2Options() {
     TOKEN = false;
   }
 }
-
 
 
 function addNewProfileOption(profileSelect) {
@@ -1764,7 +1769,7 @@ async function uploadOrders(endpoint) {
     const formData = new FormData();
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
     // Assuming each row in your table has a class 'file-row'
-    const rows = document.querySelectorAll('.file-row');
+    const rows = document.querySelectorAll('#fileList_order_list .file-row');
     console.log('rows', rows);
     rows.forEach(row => {
         console.log('row', row);
@@ -1819,21 +1824,24 @@ async function uploadOrders(endpoint) {
 }
 
 async function uploadReturns(endpoint) {
+  document.getElementById('uploadSteps').style.cursor = 'wait';
     document.getElementById('nextBtnuploadreturns/').disabled = true;
-    document.getElementById('uploadSteps').style.cursor = 'wait';
     document.getElementsByClassName('dropZone')[1].style.cursor = 'wait';
     const formData = new FormData();
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
     // Assuming each row in your table has a class 'file-row'
-    const rows = document.querySelectorAll('.file-row');
-    console.log(rows);
+    const rows = document.querySelectorAll('#fileList_return_list .file-row');
     rows.forEach((row, index)=> {
         const fileId = row.id;
-        console.log(fileId);
         if (selectedFilesReturns.hasOwnProperty(fileId)){
-            formData.append('return_lists', selectedFilesReturns[fileId].file);
-            formData.append('profiles', row.querySelector('select').value);
-            formData.append('fileId', fileId);
+          var file = selectedFilesReturns[fileId];
+          if (file.fileFiltered) {
+            formData.append('return_lists', file.fileFiltered);
+          } else {
+            formData.append('return_lists', file.file);
+          }
+          formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
+          formData.append('fileId', fileId);
         }
     });
     try {

@@ -409,7 +409,7 @@ Object.keys(tableData).forEach(country => {
     });
 
     // List the Debugger and filename entries
-    ['Excluded_data', 'Debugger', 'filename'].forEach(type => {
+    ['Excluded_data', 'Debugger', 'Audit_Trail', 'filename'].forEach(type => {
       if (categoryData[type]) {
         const tableRow = document.createElement('tr');
         tableRow.classList.add(`${addInprogress}row-${country}_${index}`, `${addInprogress}row-${country}`); // Class for toggling visibility

@@ -471,7 +471,7 @@ function extractBaseFilename(filename) {
   const fullName = parts[parts.length - 1];
 
   // Remove known prefixes
-  const base = fullName.replace(/^(Debugger_|Excluded_data_)/, '');
+  const base = fullName.replace(/^(Debugger_|Excluded_data_|Audit_Trail_)/, '');
   return base;
 }
 
