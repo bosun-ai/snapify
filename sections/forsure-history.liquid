@@ -449,7 +449,7 @@ tr {
 async function checkHistoryVersion() {
     try {
         {% comment %} let data = await unifiedSendRequest(GETREPORTHISTORYVERSION, {method: 'GET'});
-        console.log(data); {% endcomment %}
+        {% endcomment %}
         document.getElementById('newUploadHistory').style.display = 'block';
 
         {% comment %} if (data) {
@@ -512,7 +512,7 @@ function buildHierarchy(paths) {
   return hierarchy;
 }
 
-function createFolderStructure(configDiv, hierarchy, currentPath = '') {
+function createFolderStructure(configDiv, hierarchy, accessControl, currentPath = '') {
   configDiv.innerHTML = ''; // Clear existing content
 
   // Recursive function to create the structure
@@ -588,9 +588,15 @@ function createFolderStructure(configDiv, hierarchy, currentPath = '') {
               icons.style.display = 'flex';
               icons.appendChild(addOpenIconReport(childFileName, childPath));
               icons.appendChild(addDownloadIcon(childFileName, childPath));
-              icons.appendChild(addShareCol(childFileName, childPath));
-              icons.appendChild(child.can_delete ? addTrashIcon(childFileName) : emptyCol());
-              icons.appendChild(child.can_submit ? sendReportIcon(childFileName, childPath) : emptyCol());
+              if (accessControl.sharereport) {
+                icons.appendChild(addShareCol(childFileName, childPath));
+              }
+              if (accessControl.deletereport) {
+                icons.appendChild(child.can_delete ? addTrashIcon(childFileName) : emptyCol());
+              }
+              if (accessControl.filereport) {
+                icons.appendChild(child.can_submit ? sendReportIcon(childFileName, childPath) : emptyCol());
+              }
       
               childRow.appendChild(fileNameDiv);
               childRow.appendChild(icons);
@@ -601,7 +607,6 @@ function createFolderStructure(configDiv, hierarchy, currentPath = '') {
             parentElement.appendChild(groupContainer);
       
           } else {
-            console.log(file);
             filename = file['part'];
             const fullPath = `${path}/${filename}`; // Construct full path
             const fileRow = document.createElement('div');
@@ -754,7 +759,6 @@ async function displayReport(fileName, fullPath, submit) {
             modalOverlay.style.display = 'block';
         } else if (extension === 'xlsx' || extension === 'csv') {
             const data = await unifiedSendRequest(GETREPORTDETAILS, {method: 'POST', formData: formData});
-            console.log(data);
             displayExcelReport(data, submit, fileName, fullPath);
         } else if (extension === 'pdf') {
             const blob = await unifiedSendRequestBlob(GETREPORTDETAILS, {method: 'POST', formData: formData});
@@ -818,7 +822,6 @@ function addShareCol(fileName, fullPath) {
   const shareCol = createColReport('<i class="share"><img width="20px" src="                         {{ section.settings.share | image_url }} " alt="                         {{ section.settings.share.alt | escape }}" loading="lazy"></i>', "Share report"); // Placeholder icon
         shareCol.addEventListener('click', async function() {
           try {
-            console.log(data);
             const reportData = new FormData();
             reportData.append("file_name", fileName);
             reportData.append("full_path", fullPath);
@@ -975,7 +978,6 @@ function displayExcelReport(data, submit, fileName, fullPath) {
 
     // Function to render a single sheet
     function renderSheet(sheetData) {
-        console.log(sheetData[0]);
         const columns = Object.keys(sheetData[0]).map((key, idx) => {
             const key_text = key in renames ? renames[key] : key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             return {
@@ -1190,9 +1192,8 @@ async function getReports(init=true) {
     configDiv.appendChild(loadingSpinnerContainer);
     let data = await unifiedSendRequest(GETREPORTSONEDRIVE, {method: 'POST', formData: JSON.stringify(reportFilters), 
                                         headerArgs: {'Content-Type': 'application/json'}});
-    console.log(data);
     allReports = data;
-    filterCompanySearch(document.getElementById("companySearch").value, init);
+    await filterCompanySearch(document.getElementById("companySearch").value, init);
     // createOverview(data, init);
     } catch (error) {
     console.error(error.message);
@@ -1200,10 +1201,9 @@ async function getReports(init=true) {
     }
 }
 
-function createOverview(data, init) {
+function createOverview(data, init, accessControl) {
     const configDiv = document.getElementById("reportshistory");
     const hierarchy = buildHierarchy(data);
-    console.log(hierarchy);
 
     var possibleCompanies = new Set();
     var possibleCountries = new Set();
@@ -1211,7 +1211,6 @@ function createOverview(data, init) {
     var possiblePeriods = new Set();
     for (let file of data) { // Corrected loop
           filename = file['filename'];
-          console.log(filename);
           let filename_split = filename.split('/');
 
           possibleCompanies.add(filename_split[0]);
@@ -1236,14 +1235,15 @@ function createOverview(data, init) {
       fillDropdowns('receiptsDropdown', totalPossibleReceipts, 'receipt_only');
     }
     fillDropdowns('periodDropdown', possiblePeriods, 'reporting_periods');  // only reporting period currently really variable
-    createFolderStructure(configDiv, hierarchy);
+    createFolderStructure(configDiv, hierarchy, accessControl);
 }
 
-document.getElementById("companySearch").addEventListener("input", function () {
-    filterCompanySearch(this.value, false);
+document.getElementById("companySearch").addEventListener("input", async function () {
+    await filterCompanySearch(this.value, false);
 });
 
-function filterCompanySearch(searchQuery, init) {
+async function filterCompanySearch(searchQuery, init) {
+  var accessControl = await unifiedSendRequest(GETACCESSREPORTS, {method: 'GET'});
   searchQuery = searchQuery.toLowerCase().trim().replace(' ', '_').replace('.', '_').replace(',', '_').replace('/', '_'); // Get input and normalize case
 
   let filteredData;
@@ -1256,7 +1256,7 @@ function filterCompanySearch(searchQuery, init) {
       );
   }
   search_filter = filteredData;
-  createOverview(filteredData, init); // Refresh the overview
+  createOverview(filteredData, init, accessControl); // Refresh the overview
 }
 
 
@@ -1264,7 +1264,6 @@ function filterCompanySearch(searchQuery, init) {
 function fillDropdowns(dropdownId, entries, key) {
     const dropdown = document.getElementById(dropdownId);
     dropdown.innerHTML = "";
-    console.log(`Filling dropdown ${key} with ${entries}`);
 
     [...entries].sort().forEach(entry => {
         const option = document.createElement("option");
@@ -1291,7 +1290,6 @@ document.getElementById('countryDropdown').addEventListener('change', function()
         .from(this.options)
         .filter(option => option.selected)
         .map(option => option.value);
-    console.log(`Selected countries: ${selCountries}`);
     reportFilters['countries'] = selCountries;
     getReports(false);
 });
@@ -1301,7 +1299,6 @@ document.getElementById('reporttypeDropdown').addEventListener('change', functio
         .from(this.options)
         .filter(option => option.selected)
         .map(option => option.value);
-    console.log(`Selected report_types: ${selCountries}`);
     reportFilters['report_types'] = selCountries;
     getReports(false);
 });
@@ -1311,7 +1308,6 @@ document.getElementById('periodDropdown').addEventListener('change', function() 
         .from(this.options)
         .filter(option => option.selected)
         .map(option => option.value);
-    console.log(`Selected reporting_periods: ${selCountries}`);
     reportFilters['reporting_periods'] = selCountries;
     getReports(false);
 });
@@ -1321,7 +1317,6 @@ document.getElementById('receiptsDropdown').addEventListener('change', function(
         .from(this.options)
         .filter(option => option.selected)
         .map(option => option.value);
-    console.log(`Selected receipt_only: ${selCountries}`);
     reportFilters['receipt_only'] = selCountries[0];
     getReports(false);
 });
@@ -1334,7 +1329,6 @@ document.getElementById('downloadAllReports').addEventListener('click', async fu
     this.title = 'In Progress, this can take 1-2mins, please wait';
     const data = await unifiedSendRequest(GETREPORTSDOWNLOADALL, {method: 'POST', formData: JSON.stringify(reportFiltersDownload), 
                                           headerArgs: {'Content-Type': 'application/json'}});
-    console.log(data);
     this.style.cursor = 'pointer';
     this.title = '';
   } catch (error) {

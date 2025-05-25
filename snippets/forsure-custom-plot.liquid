@@ -360,7 +360,6 @@ Usage:
     var data = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, {method: 'GET'});
     var columnsDiv = document.getElementById('columnsContentLeft');
     columnsDiv.innerHTML = ``;
-    console.log(data);
     var table = document.createElement('table');
     for(var key in data) {
         // Check if the key is actually a property of the data object
@@ -521,7 +520,6 @@ function getChartTypes() {
       listItem.classList.add('selected-chart-option');
       selectChartType = listItem.textContent;
       selectedChartTypeId = listItem.id;
-      console.log(chart);
       func(chart);
       if ('widgetCustom' in widgetChartParams) {
         // Access the 'widgetCustom' object
@@ -615,7 +613,6 @@ function disableChartTypeEnableRest() {
 var draggedElementId = null;
 // drag and drop
 function handleDragStart(e) {
-  console.log('Name');
   draggedElementId = e.target.id;
   e.dataTransfer.setData('text/plain', e.target.id);
 }
@@ -670,7 +667,6 @@ var trashIconContainer = document.getElementById("trashIconContainer");
     e.preventDefault();
     dragLeave(dropZone);
     var itemId = e.dataTransfer.getData('text/plain');
-    console.log('Dropped item on', dropZone.id, itemId);
     if(dropZone === columnsLeft) {
       var element = document.getElementById(itemId);
       if(element.classList.contains('moved')) {
@@ -698,7 +694,6 @@ function dragLeave(dropZone) {
 }
 
 function displayTooltip(id, message) {
-  console.log(message);
   // TODO enable tooltip (positioning not working)
   // var boundingBox = document.getElementById(id).getBoundingClientRect();
   // tooltip.style.display = 'block';
@@ -742,7 +737,6 @@ var pieChartOnly = false;
 async function createPlot(){
   var xValues = getValues('chosenX');
   var yValues = getValues('chosenY');
-  console.log(`Selected the following values: X: ${xValues}, Y: ${yValues}`);
   if (xValues.length == 0 || yValues.length == 0) { // disabled because of pieplot
     pieChartOnly = true;
     return;
@@ -763,7 +757,6 @@ async function createPlot(){
   };
   try {
       var data = await unifiedSendRequest(CUSTOMCHARTCREATE, {formData: JSON.stringify(chartDataNew), headerArgs: {'Content-Type': 'application/json'}});
-      console.log(data);
       // chartData = data;
       lastX = xValues;
       lastY = yValues;
@@ -822,7 +815,6 @@ async function saveChart() {
     showTooltip("Cannot save: No data selected", false);
     return;
   }
-  console.log(`Saving the following values: X: ${xValues}, Y: ${yValues}`);
 
   let chartData = {
     chart_type: selectChartType,
@@ -833,7 +825,6 @@ async function saveChart() {
 };
   try {
     var data = await unifiedSendRequest(CUSTOMCHARTADD, {formData: JSON.stringify(chartData), headerArgs: {'Content-Type': 'application/json'}});
-    console.log(data);
     showTooltip("Chart saved successfully!", true);
     redraw();
   } catch (error) {

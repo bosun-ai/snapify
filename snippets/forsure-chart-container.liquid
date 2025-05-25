@@ -18,7 +18,6 @@ Usage:
       update: function(event, ui) {
         const order = [];
         $("#widgetContainer").children(":not(:first-child)").each(function(index) {
-          console.log($(this).attr('id'));
           if ($(this).attr('id') in widgetChartParams) {
             order.push($(this).attr('id').replace('widget', ''));
           }
@@ -38,8 +37,6 @@ Usage:
 
     let preferredWidth = 0.3 * containerWidth - 10;
     let widgetWidth = Math.max(WIDGET_MIN_WIDTH, preferredWidth);
-    console.log("Calculated container width");
-    console.log(widgetWidth);
 
     let widgetsPerRow = Math.floor(containerWidth / widgetWidth);
 
@@ -59,7 +56,6 @@ Usage:
 
   async function redraw(event = null, hard = false) {
     let containerId = 'widgetContainer';
-    console.log(`Redrawing with: ${hard}`);
     if (hard) { // Clear the contents of widgetContainer
       document.getElementById(containerId).innerHTML = '';
       var reportsDue = createCanvasElement('widgetReportsDue');
@@ -70,14 +66,12 @@ Usage:
       });
     }
     let availableCharts = await getPinnedCharts();
-    console.log(availableCharts);
     await drawCharts(availableCharts, containerId, hard);
 
     let count = document.querySelectorAll(`#${containerId} > li`).length;
     var widgetContainerHeight = `${
       calculateContainerHeight(count) // TODO remove 1 once add more is elsewhere
     }px`;
-    console.log(widgetContainerHeight);
     document.getElementById(containerId).style.height = widgetContainerHeight;
   }
 </script>

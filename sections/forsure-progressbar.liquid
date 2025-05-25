@@ -65,20 +65,19 @@
     function repeatAction() {
         unifiedSendRequest(GETREPORTPROGRESS, {method: 'GET'})
             .then(data => {
-                if (data === "1") {
-                    document.getElementById('report-status').style.display = 'flex';
-                    document.getElementById('loading-icon').style.display = 'block';
-                    document.getElementById('report-message').style.display = 'block';
-                    document.getElementById('report-link').style.display = 'none';
-                    timeout = 1000;
-                } else if (data === "0") {
-                    document.getElementById('loading-icon').style.display = 'none';
-                    document.getElementById('report-message').style.display = 'none';
-                    document.getElementById('report-link').style.display = 'block';
-                    timeout = 5000; // set higher, as it will run continuously
-                }
-    
-                setTimeout(repeatAction, timeout); // Call the function again after the specified timeout
+              if (data['progress'] === 100) {
+                document.getElementById('loading-icon').style.display = 'none';
+                document.getElementById('report-message').style.display = 'none';
+                document.getElementById('report-link').style.display = 'block';
+              } else {
+                  document.getElementById('report-status').style.display = 'flex';
+                  document.getElementById('loading-icon').style.display = 'block';
+                  document.getElementById('report-message').style.display = 'block';
+                  document.getElementById('report-message').innerText = data['description'];
+                  document.getElementById('report-link').style.display = 'none';
+                  timeout = 1000;
+                  setTimeout(repeatAction, timeout); // Call the function again after the specified timeout
+              }
             })
             .catch(error => {
                 console.error(error);

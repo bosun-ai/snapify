@@ -527,7 +527,6 @@ content: "\2713"
   }
   .modal-content {
     background-color: #fefefe;
-    margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
@@ -537,6 +536,9 @@ content: "\2713"
     float: right;
     font-size: 28px;
     font-weight: bold;
+    top: 1.5rem;
+    position: absolute;
+    right: 1.5rem;
   }
   .close:hover,
   .close:focus {
@@ -548,6 +550,34 @@ content: "\2713"
   .exclude {
     text-decoration: line-through;
   }
+
+
+  .modal-content {
+  background-color: #fefefe;
+  padding: 1rem 2rem;
+  border: 1px solid #888;
+  width: fit-content;
+  max-width: 80vw;
+  margin: 15% auto;
+  box-sizing: border-box;
+}
+
+.profile-wrapper {
+  display: inline-block;
+  max-width: 100%;
+  padding: 2rem;
+  padding-top: 0;
+}
+
+#profileTable {
+  width: 100%;
+  table-layout: auto;
+}
+
+#profileTable th, #profileTable td {
+  white-space: nowrap;
+  padding: 0.5rem;
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
@@ -616,7 +646,7 @@ content: "\2713"
             <!-- Option: Upload Existing Reports -->
              <div id="uploadExistingReportsWrapper" style="position: relative">
               <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
-                <div id="uploadExistingReports" class="option-card" onclick="selectOption('upload')">
+                <div id="uploadExistingReports" class="option-card greyed_out" onclick="selectOption('upload')">
                     <h3>Submit Reports</h3>
                     <p>Upload one or more completed<br>reports for submission.</p>
                     <div style="height: 50%;margin-top: 5rem">
@@ -686,11 +716,15 @@ content: "\2713"
     <div class="step" id="step1" style="display: none;">
         <h2 class="heading">Select Orderlist</h2>
         <div class="display-flex" style="margin: auto;width: fit-content;display:flex">
-        <h3 id="liveDataText" class="toggle-options">Use live data</h3>
+          <h3 id="liveDataText" class="toggle-options">Use live data</h3>
           <label id="liveData" class="toggle-container">
             <input type="checkbox" id="liveDataToggle">
-            <span class="toggle-slider"></span>
+            <span id="liveDataToggleSlider" class="toggle-slider">
+              <div class="greyedout-tooltip">Contact us to set up live data</div>
+            </span>
           </label>
+        </div>
+        <div id="ordersReceived" style="margin: auto;width: fit-content;display: none;">
         </div>
         <div class="dropZone" data-input="order_list" data-url="uploadorders/">
             <div>
@@ -730,35 +764,37 @@ content: "\2713"
   <div id="profileModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <div style="display: flex; justify-content: space-between;">
-        <h2>Select Mapping</h2>
-        <div id="profileDropdownContainer" style="margin: auto 0;border-radius: 4px;padding-right: 0.4rem;">
-          <select id="profileSelect" class="btn dropdown-toggle bs-placeholder btn-default" style="position: relative">
-          </select>
-          <a id="editIcon" href="#" title="Edit">
-            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
-            </a>
+      <div class="profile-wrapper">
+        <div style="display: flex; justify-content: space-between;">
+          <h2>Select Mapping</h2>
+          <div id="profileDropdownContainer" style="margin: auto 0;border-radius: 4px;padding-right: 0.4rem;">
+            <select id="profileSelect" class="btn dropdown-toggle bs-placeholder btn-default" style="position: relative">
+            </select>
+            <a id="editIcon" href="#" title="Edit">
+              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+              </a>
+          </div>
+          <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
         </div>
-        <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
-      </div>
-      <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
-        If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
-      </div>
-      <div id="profileDetails">
-        <div style="display:flex">
-          <strong>File:</strong>
-          <div id='profileFileName' style="margin-left:1rem"></div>
+        <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
+          If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
         </div>
-        <table id="profileTable" style="margin: auto;">
-          <tr>
-            <th>Name</th>
-            <th>Preview</th>
-            <th>Mapping</th>
-            <th>Exclude</th>
-          </tr>
-          <tbody id="profileTableBody">
-          </tbody>
-        </table>
+        <div id="profileDetails">
+          <div style="display:flex;padding: 1rem 0;">
+            <strong>File:</strong>
+            <div id='profileFileName' style="margin-left:1rem"></div>
+          </div>
+          <table id="profileTable" style="margin: auto;">
+            <tr>
+              <th>Name</th>
+              <th>Preview</th>
+              <th>Mapping</th>
+              <th>Exclude</th>
+            </tr>
+            <tbody id="profileTableBody">
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -792,8 +828,8 @@ content: "\2713"
 
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="templateSelect" class="form-label">Load Predefined Template</label>
-              <select id="templateSelect" class="selectpicker form-select" data-live-search="true">
+              <label for="proSelect" class="form-label">Select PRO</label>
+              <select id="proSelect" class="selectpicker form-select" data-live-search="true">
               </select>
             </div>
             <div class="col-md-6">
@@ -805,7 +841,7 @@ content: "\2713"
             </div>
           </div>
 
-          <div class="row mb-3">
+          <div id="customFieldsContainer" class="row mb-3" style="display: none;">
             <div class="col-md-6">
               <label for="customFields" class="form-label">Select Fields for Report</label>
               <select id="customFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
@@ -816,10 +852,15 @@ content: "\2713"
             </div>
           </div>
 
-          <div class="row mb-3">
-            <div class="col-md-6 d-flex align-items-center">
+          <div id="templateContainer" class="row mb-3" style="display: none;">
+            <div class="col-md-6">
+              <label for="templateSelect" class="form-label">Load Predefined Template</label>
+              <select id="templateSelect" class="selectpicker form-select" data-live-search="true">
+              </select>
+            </div>
+            <div class="col-md-6">
               <label for="ruleSelect" class="form-label">Rules</label>
-              <div style="display: flex">
+              <div style="display: flex;width: 220px;">
                   <select id="ruleSelect" class="selectpicker form-select wide-select" multiple data-live-search="true">
                   </select>
                   <div onclick="editRules()" style="cursor:pointer;margin: auto;margin-left: 1rem;">
@@ -831,7 +872,7 @@ content: "\2713"
             </div>
           </div>
 
-          <div class="row mb-3">
+          <div id="includeReturnsContainer" class="row mb-3" style="display: none">
             <div class="col-md-6 d-flex align-items-center">
               <input type="checkbox" class="form-check-input me-2" id="useReturns">
               <label class="form-check-label" for="useReturns">Include Returns</label>
@@ -861,7 +902,7 @@ content: "\2713"
                     <th>Category</th>
                     <th>Start</th>
                     <th>End</th>
-                    <th>Returns</th>
+                    {% comment %} <th>Returns</th> {% endcomment %}
                     <th>Orderlist</th>
                     <th>Returnlist</th>
                   </tr>
@@ -872,7 +913,7 @@ content: "\2713"
                     <td id="confirm-category"></td>
                     <td id="confirm-start"></td>
                     <td id="confirm-end"></td>
-                    <td id="confirm-returns"></td>
+                    {% comment %} <td id="confirm-returns"></td> {% endcomment %}
                     <td id="confirm-orderlist"></td>
                     <td id="confirm-returnlist"></td>
                   </tr>
@@ -881,8 +922,8 @@ content: "\2713"
             </div>
           </div>
 
-        <h4 style="text-align: center;">Template Selection</h4>
-          <div class="row mb-4" style="gap:3rem">
+          <div id="confirmNoAgency" class="row mb-4" style="gap:3rem;display: none;">
+            <h4 style="text-align: center;">Template Selection</h4>
             <div class="col-md-4 mb-3">
               <div class="card shadow-sm">
                 <div class="card-body">
@@ -911,6 +952,17 @@ content: "\2713"
               </div>
             </div>
           </div>
+          <div id="confirmAgency" class="row mb-3" style="gap:3rem;display: none;">
+            <div class="col-mb-6 d-flex align-items-center">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-diagram-3"></i> Template Overview</h5>
+                  <div class="separator"></div>
+                  <ul id="confirm-template" class="list-group list-group-flush"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
       <div class="text-center mt-4" style="margin-bottom: 3rem;">
@@ -932,6 +984,12 @@ content: "\2713"
       </div>
   </div>
 </div>
+<div id="excelModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+  <div id="tabs-container" style="display: flex; margin-bottom: 1rem; border-bottom: 1px solid #ddd;"></div>
+  <div id="report-table-data-excel"></div>
+  <span id="closeExcelModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;">&times;</span>
+</div>
+<div id="modalOverlayExcel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;"></div>
 </div>
 {% render 'forsure-login' %}
 
@@ -940,21 +998,61 @@ content: "\2713"
 async function cancreatereports() {
     try {
         let data = await unifiedSendRequest(CANCREATEREPORTS, {method: 'GET'});
-        console.log(data);
-        if (data) {
+        if (data['create_reports'] === true) {
             document.getElementById('createNewReport').classList.remove('greyed_out');
             document.getElementById('createNewReportWrapper').classList.remove('greyed_out_wrapper');
         } else {
             document.getElementById('createNewReport').classList.add('greyed_out');
             document.getElementById('createNewReportWrapper').classList.add('greyed_out_wrapper');
         }
+        if (data['upload_reports'] === true) {
+            document.getElementById('uploadExistingReports').classList.remove('greyed_out');
+            document.getElementById('uploadExistingReportsWrapper').classList.remove('greyed_out_wrapper');
+        } else {
+            document.getElementById('uploadExistingReports').classList.add('greyed_out');
+            document.getElementById('uploadExistingReportsWrapper').classList.add('greyed_out_wrapper');
+        }
     } catch (error) {
         console.error(error.message);
         showMessage('Failed to get history ' + error.message, false);
     }
+    canuselivedata();
 }
+
 cancreatereports();
 
+
+async function canuselivedata() {
+  try {
+    var data = await unifiedSendRequest(CATEGORYLISTACCESS, {method: 'GET'});
+    if (data['livedata'] === false) {
+      document.getElementById('liveDataToggleSlider').style.cursor = 'not-allowed';
+      document.getElementById('liveDataToggleSlider').style.backgroundColor = '#ddd';
+      document.getElementById('liveDataToggle').disabled = true;
+      document.getElementById('liveDataToggleSlider').onclick = null;
+      document.getElementById('liveDataToggleSlider').classList.add('greyed_out_wrapper');
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+var ordersReceived = 0;
+async function getOrdersReceived() {
+  try {
+    let data = await unifiedSendRequest(UPLOADORDERSRECEIVED, {method: 'GET'});
+    ordersReceived = data['total'];
+    if (data['total'] > 0) {
+      document.getElementById('nextBtnuploadorders/').disabled = false;
+    } else {
+      document.getElementById('ordersReceived').innerHTML = 'No Orders Received yet';
+      document.getElementById('nextBtnuploadorders/').disabled = true;
+    }
+    document.getElementById('ordersReceived').style.display = 'block';
+  } catch (error) {
+    console.error(error.message);
+  }
+}
 
 const createReportBtn = document.getElementById('createReport');
 
@@ -975,13 +1073,14 @@ document.getElementById('liveDataToggle').addEventListener('change', function() 
 
 
 var guideToShow = null;
-function selectOption(option) {
+async function selectOption(option) {
     document.getElementById('chooseoption').style.display = 'none';
     if (option === 'new') {
         document.getElementById('progressIcons').style.display = 'flex';
         document.getElementById('step1').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'new');
         guideToShow = 'new';
+        await getOrdersReceived();
     } else if (option === 'upload') {
         document.getElementById('uploadReport').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'upload');
@@ -1037,6 +1136,7 @@ dropZones.forEach(dropZone => {
             const row = createNewFileRowCreation(fileInput.files[i].name, availableProfiles, dropZone.getAttribute('data-url'), inputId, fileInput.files[i]);
             fileList.appendChild(row);
           }
+          updateNextButton(dropZone.getAttribute('data-url'));
         }
     });
 });
@@ -1051,7 +1151,6 @@ document.querySelectorAll('.fileList').forEach(fileList => {
 async function getProfiles() {
   try {
     const data = await unifiedSendRequest(GETPROFILES, {method: 'GET'});
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error.message);
@@ -1162,23 +1261,36 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
   // Create a new "card" for the file
   const row = document.createElement('div');
   row.classList.add('file-row'); // Styled as a grid item
-  row.title = 'Click to create mapping';
   const uniqueId = generateUniqueId();
+  row.style.display = 'block';
   row.id = uniqueId;
-
+  var filePartTitle = document.createElement('div');
+  filePartTitle.style.display = 'flex';
+  filePartTitle.classList.add('file-part-title');
+  var filePartProfile = document.createElement('div');
+  filePartProfile.title = 'Click to create mapping';
+  filePartProfile.classList.add('file-part-profile');
+  var filePartError = document.createElement('div');
+  filePartError.classList.add('file-part-error');
   // Add filename
   const nameCell = document.createElement('div');
-  const invisibleSpace = "\u200B"; // Unicode zero-width space
-  const updatedFileName = fileName.replace(/_/g, `_${invisibleSpace}`);
+  {% comment %} const invisibleSpace = "\u200B"; // Unicode zero-width space
+  const updatedFileName = fileName.replace(/_/g, `_${invisibleSpace}`); {% endcomment %}
+  var updatedFileName = fileName;
+  if (updatedFileName.length > 20) {
+    updatedFileName = updatedFileName.slice(0, 10) + '...' + updatedFileName.slice(-10);
+  }
   nameCell.textContent = updatedFileName;
   nameCell.style.fontWeight = 'bold';
   nameCell.style.marginBottom = '0.5rem';
   nameCell.style.cursor = 'pointer';
   nameCell.style.margin = 'auto';
   nameCell.addEventListener('click', async () => {
-    await openProfileModal(availableProfiles, fileName, file, row.id);
+    await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
   });
-  row.appendChild(nameCell);
+  filePartTitle.appendChild(nameCell);
+
+  filePartTitle.appendChild(deleteButton(uniqueId, orders, returns, reports, dataUrl, row));
 
   // Add profile name
   const profileNameCell = document.createElement('div');
@@ -1189,11 +1301,9 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
   profileNameCell.style.margin = 'auto';
   profileNameCell.dataset.value = '';
   profileNameCell.addEventListener('click', async () => {
-    await openProfileModal(availableProfiles, fileName, file, row.id);
+    await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
   });
-  row.appendChild(profileNameCell);
-
-  row.appendChild(deleteButton(uniqueId, orders, returns, reports, dataUrl, row));
+  filePartProfile.appendChild(profileNameCell);
 
   // Adjust image width (if applicable)
   updateImageWidth(dataUrl);
@@ -1203,7 +1313,9 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
   } else if (returns) {
       selectedFilesReturns[uniqueId] = { file: file, filename: fileName };
   }
-  row.id = uniqueId;
+  row.appendChild(filePartTitle);
+  row.appendChild(filePartProfile);
+  row.appendChild(filePartError);
   return row;
 }
 
@@ -1215,7 +1327,7 @@ function updateNextButton(dataUrl) {
       allFilesProfiles = false;
     }
   });
-  if (allfiles.length === 0) {
+  if (allfiles.length === 0 && ordersReceived == 0) {
     allFilesProfiles = false;
   }
   if (allFilesProfiles) {
@@ -1257,9 +1369,9 @@ function deleteButton(uniqueId, orders, returns, reports, dataUrl, row) {
   return deleteButton;
 }
 
-async function parseCSV(fileInput, nrows=3) {
+async function parseCSV(text, nrows=3) {
   return new Promise((resolve, reject) => {
-    Papa.parse(fileInput, {
+    Papa.parse(text, {
       header: true,
       skipEmptyLines: true,
       preview: nrows,
@@ -1273,7 +1385,6 @@ async function parseCSV(fileInput, nrows=3) {
             columnDict[key] = data.map(row => row[key]);
           });
         }
-        console.log('columnDict', columnDict);
         resolve(columnDict);
       },
       error: function(err) {
@@ -1286,14 +1397,34 @@ async function parseCSV(fileInput, nrows=3) {
 }
 
 
-async function openProfileModal(availableProfiles, fileName, fileInput, rowId) {
+async function openProfileModal(availableProfiles, fileName, fileInput, rowId, orders, returns) {
+  if (fileInput.type !== 'text/csv') {
+    showMessage('Please upload a CSV file', false);
+    return;
+  }
   const modal = document.getElementById('profileModal');
   modal.dataset.row = rowId;
   const profileSelect = document.getElementById('profileSelect');
   const profileDetails = document.getElementById('profileDetails');
   const profileFileName = document.getElementById('profileFileName');
   {% comment %} try { {% endcomment %}
-    const csvData = await parseCSV(fileInput);
+    var text;
+    if (orders) {
+      if (rowId in selectedFilesOrders && selectedFilesOrders[rowId].text) {
+        text = selectedFilesOrders[rowId].text;
+      } else {
+        text = await fileInput.text();
+        selectedFilesOrders[rowId].text = text;
+      }
+    } else if (returns) {
+      if (rowId in selectedFilesReturns && selectedFilesReturns[rowId].text) {
+        text = selectedFilesReturns[rowId].text;
+      } else {
+        text = await fileInput.text();
+        selectedFilesReturns[rowId].text = text;
+      }
+    }
+    var csvData = await parseCSV(text);
     if (dataUrlCurrent == 'uploadorders/') {
       var labelsV2Options = await getOrderlistLabelsV2Options();
     } else {
@@ -1309,7 +1440,6 @@ async function openProfileModal(availableProfiles, fileName, fileInput, rowId) {
       tr.appendChild(tdKey);
       const tdEntry = document.createElement('td');
       var preview = csvData[key].join(', ');
-      console.log('preview', preview);
       if (preview.length > 50) { // limit the preview to 100 characters
         preview = preview.slice(0, 50) + '...';
       }
@@ -1394,7 +1524,6 @@ var request_data = {};
 
 async function saveMapping() {
   const selectedProfile = document.getElementById('profileSelect').value;
-  console.log('Selected Profile:', selectedProfile);
   const mapping = {};
   const profileTable = document.getElementById('profileTableBody');
   const rows = profileTable.querySelectorAll('tr');
@@ -1407,7 +1536,6 @@ async function saveMapping() {
     }
   });
   request_data = {'profile': selectedProfile, 'mapping': mapping};
-  console.log(request_data);
   var url = GETORDERLISTLABELSV2COMPARE;
   if (dataUrlCurrent == 'uploadreturns/') {
     url = GETRETURNLISTLABELSV2COMPARE;
@@ -1415,7 +1543,6 @@ async function saveMapping() {
 
   try {
     var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
-    console.log(response);
     if (response) {
       confirmOverwrite();
     } else {
@@ -1434,7 +1561,6 @@ async function confirmOverwrite() {
       url = GETRETURNLISTLABELSV2;
     }
     var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
-    console.log(response);
     document.getElementById('profileModal').style.display = 'none';
     showMessage('Mapping saved successfully', true);
     var fileId = document.getElementById('profileModal').dataset.row;
@@ -1445,23 +1571,29 @@ async function confirmOverwrite() {
     rowElement.querySelector('.profile-name').dataset.id = document.getElementById('profileSelect').value;
     rowElement.querySelector('.profile-name').style.color = 'green';
     if (dataUrlCurrent == 'uploadreturns/') {
-      const filteredFile = await parseAndFilterCSV(selectedFilesReturns[fileId].file, request_data);
+      const filteredFile = await parseAndFilterCSV(selectedFilesReturns[fileId].text, request_data, selectedFilesReturns[fileId].file.name, selectedFilesReturns[fileId].file.type, selectedFilesReturns[fileId].file.lastModified, selectedFilesReturns[fileId].file.lastModifiedDate);
       selectedFilesReturns[fileId]['fileFiltered'] = filteredFile;
+      selectedFilesReturns[fileId]['profileId'] = document.getElementById('profileSelect').value;
     } else {
-      const filteredFile = await parseAndFilterCSV(selectedFilesOrders[fileId].file, request_data);
+      const filteredFile = await parseAndFilterCSV(selectedFilesOrders[fileId].text, request_data, selectedFilesOrders[fileId].file.name, selectedFilesOrders[fileId].file.type, selectedFilesOrders[fileId].file.lastModified, selectedFilesOrders[fileId].file.lastModifiedDate);
       selectedFilesOrders[fileId]['fileFiltered'] = filteredFile;
+      selectedFilesOrders[fileId]['profileId'] = document.getElementById('profileSelect').value;
     }
-
     closeConfirmOverwriteModal();
+    if (dataUrlCurrent == 'uploadreturns/') {
+      await checkReturnsFile(fileId, rowElement);
+    } else {
+      await checkOrdersFile(fileId, rowElement);
+    }
   } catch (error) {
     console.error(error.message);
     showMessage('Failed to save mapping ' + error.message, false);
   }
 }
 
-async function parseAndFilterCSV(fileInput, allowedColumns) {
+async function parseAndFilterCSV(text, allowedColumns, fileName, fileType, lastModified, lastModifiedDate) {
   return new Promise((resolve, reject) => {
-    Papa.parse(fileInput, {
+    Papa.parse(text, {
       header: true,
       skipEmptyLines: true,
       complete: function(results) {
@@ -1475,10 +1607,10 @@ async function parseAndFilterCSV(fileInput, allowedColumns) {
           return filteredRow;
         });
         const csv = Papa.unparse(filteredData);
-        const blob = new File([csv], fileInput.name, {
-          type: fileInput.type,
-          lastModified: fileInput.lastModified,
-          lastModifiedDate: fileInput.lastModifiedDate,
+        const blob = new File([csv], fileName, {
+          type: fileType,
+          lastModified: lastModified,
+          lastModifiedDate: lastModifiedDate,
         });
         resolve(blob);
       },
@@ -1489,6 +1621,222 @@ async function parseAndFilterCSV(fileInput, allowedColumns) {
       }
     });
   });
+}
+
+async function checkOrdersFile(fileId, rowElement) {
+  var file = selectedFilesOrders[fileId];
+  var formData = new FormData();
+  formData.append('order_list', file.fileFiltered);
+  formData.append('profile', file.profileId);
+  formData.append('file_id', fileId);
+  var response = await unifiedSendRequest(CHECKORDERSFILE, {formData: formData});
+  if (response.success) {
+    selectedFilesOrders[fileId]['failed'] = {};
+    rowElement.querySelector('.file-part-error').textContent = '';
+    rowElement.querySelector('.file-part-error').style.display = 'none';
+    rowElement.style.color = '#17161c';
+  } else {
+    var details = {};
+    for (const [k, v] of Object.entries(response.details)) {
+      details[k] = JSON.parse(v);
+    }
+    selectedFilesOrders[fileId]['failed'] = details;
+    rowElement.querySelector('.file-part-error').textContent = `${response.missing_orders}/${response.total_orders} orders failed`;
+    rowElement.querySelector('.file-part-error').style.display = 'block';
+    rowElement.style.cursor = 'pointer';
+    rowElement.style.color = 'red';
+
+    rowElement.onclick = function() {
+      displayExcelReport(details, file.file.name, file.file.path);
+    }
+  }
+  updateNextButton(dataUrlCurrent);
+}
+
+
+async function checkReturnsFile(fileId, rowElement) {
+  var file = selectedFilesReturns[fileId];
+  var formData = new FormData();
+  formData.append('return_list', file.fileFiltered);
+  formData.append('profile', file.profileId);
+  formData.append('file_id', fileId);
+  var response = await unifiedSendRequest(CHECKRETURNSFILE, {formData: formData});
+  if (response.success) {
+    selectedFilesReturns[fileId]['failed'] = {};
+    rowElement.querySelector('.file-part-error').textContent = '';
+    rowElement.querySelector('.file-part-error').style.display = 'none';
+    rowElement.style.color = '#17161c';
+  } else {
+    var details = {};
+    for (const [k, v] of Object.entries(response.details)) {
+      details[k] = JSON.parse(v);
+    }
+    selectedFilesReturns[fileId]['failed'] = details;
+    rowElement.querySelector('.file-part-error').textContent = `${response.missing_returns}/${response.total_returns} returns failed`;
+    rowElement.querySelector('.file-part-error').style.display = 'block';
+    rowElement.style.cursor = 'pointer';
+    rowElement.style.color = 'red';
+
+    rowElement.onclick = function() {
+      displayExcelReport(details, file.file.name, file.file.path);
+    }
+  }
+  updateNextButton(dataUrlCurrent);
+}
+
+
+function displayExcelReport(data, fileName, fullPath) {
+  const modalOverlay = document.getElementById('modalOverlayExcel');
+  const modal = document.getElementById('excelModal');
+  const tabsContainer = document.getElementById('tabs-container');
+  const tableContainer = document.getElementById('report-table-data-excel');
+
+  // Reset modal content
+  tabsContainer.innerHTML = '';
+  tableContainer.innerHTML = '';
+
+  let sheets = Object.keys(data);
+  let groupedSheets = {};
+  const groupLabels = {};
+  var use_tabs = false;
+
+  if (!use_tabs) {
+      const groups = {};
+      sheets.forEach((sheetName) => {
+          const rows = data[sheetName];
+          if (!rows || rows.length === 0) return;
+
+          const columnSignature = JSON.stringify(Object.keys(rows[0]).sort());
+          if (!groups[columnSignature]) {
+              groups[columnSignature] = [];
+              groupLabels[columnSignature] = [];
+          }
+
+          const taggedRows = rows.map(row => ({
+              ...row,
+              Category: sheetName
+          }));
+
+          groups[columnSignature].push(...taggedRows);
+          groupLabels[columnSignature].push(sheetName);
+      });
+
+      groupedSheets = groups;
+  } else {
+      // Use original structure (each sheet separate)
+      groupedSheets = Object.fromEntries(sheets.map(s => [s, data[s]]));
+  }
+
+  const groupNames = Object.keys(groupedSheets);
+
+  if (groupNames.length > 1) {
+      // Generate Tabs only if more than 1 group
+      groupNames.forEach((groupName, index) => {
+          const tabButton = document.createElement('button');
+          tabButton.textContent = groupLabels[groupName][0];
+          tabButton.className = 'tab-button';
+          tabButton.style.margin = '5px';
+          tabButton.dataset.sheet = groupName;
+
+          tabButton.addEventListener('click', () => {
+              tableContainer.innerHTML = '';
+              highlightActiveTab(index);
+              renderSheet(groupedSheets[groupName]);
+          });
+
+          tabsContainer.appendChild(tabButton);
+      });
+
+      // Render the first one initially
+      renderSheet(groupedSheets[groupNames[0]]);
+      highlightActiveTab(0);
+  } else {
+      // Only one group, render directly without tabs
+      renderSheet(groupedSheets[groupNames[0]]);
+  }
+
+
+  // Helper function to highlight active tab
+  function highlightActiveTab(activeIndex) {
+      const buttons = document.querySelectorAll('.tab-button');
+      buttons.forEach((btn, index) => {
+          btn.classList.toggle('active', index === activeIndex);
+      });
+  }
+
+
+  // Function to render a single sheet
+  function renderSheet(sheetData) {
+      const columns = Object.keys(sheetData[0]).map((key, idx) => {
+          const key_text = key in renames ? renames[key] : key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+          return {
+              title: key_text, // Use alphabet for headers
+              field: key,
+              headerSort: true, // Disable sorting
+              formatter: "plaintext", // Ensure raw text is displayed
+              cellMouseOver: (e, cell) => {
+                  // Add tooltip on hover for full entry
+                  const tooltip = document.createElement('div');
+                  tooltip.id = 'hover-tooltip';
+                  tooltip.style.position = 'absolute';
+                  tooltip.style.padding = '8px';
+                  tooltip.style.background = '#333';
+                  tooltip.style.color = '#fff';
+                  tooltip.style.borderRadius = '4px';
+                  tooltip.style.pointerEvents = 'none';
+                  tooltip.style.zIndex = '9999';
+                  tooltip.textContent = cell.getValue();
+
+                  document.body.appendChild(tooltip);
+                  document.body.addEventListener('mousemove', moveTooltip);
+
+                  function moveTooltip(event) {
+                      tooltip.style.left = `${event.pageX + 10}px`;
+                      tooltip.style.top = `${event.pageY + 10}px`;
+                  }
+
+                  cell.getElement().addEventListener('mouseout', () => {
+                      document.body.removeEventListener('mousemove', moveTooltip);
+                      document.body.removeChild(tooltip);
+                  });
+              },
+          };
+      });
+
+      const tableOptions = {
+        data: sheetData,
+        layout: columns.length > 10 ? "fitDataFill" : "fitColumns",
+        pagination: sheetData.length > 50,
+        paginationCounter: "rows",
+        paginationSize: 50,
+        columns: columns,
+    };
+    // Only add groupBy when not using tabs
+    if (!use_tabs) {
+        tableOptions.groupBy = "Category";
+        tableOptions.groupHeader = function (value, count, data, group) {
+            return value;
+        };
+    }
+
+
+      // Initialize Tabulator for the sheet
+      new Tabulator("#report-table-data-excel", tableOptions);
+  }
+
+  // Render the first sheet by default
+  if (use_tabs && sheets.length > 0) {
+      renderSheet(data[sheets[0]]);
+      highlightActiveTab(0);
+  }
+  // Show the modal
+  modal.style.display = 'block';
+  modalOverlay.style.display = 'block';
+}
+
+function hideExcelModal() {
+  document.getElementById('excelModal').style.display = 'none';
+  document.getElementById('modalOverlayExcel').style.display = 'none';
 }
 
 
@@ -1503,7 +1851,6 @@ async function showConfirmOverwriteModal() {
 async function getOrderlistLabelsV2Options() {
   try {
     const data = await unifiedSendRequest(GETORDERLISTLABELSV2OPTIONS, {method: 'GET'});
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error.message);
@@ -1515,7 +1862,6 @@ async function getOrderlistLabelsV2Options() {
 async function getReturnlistLabelsV2Options() {
   try {
     const data = await unifiedSendRequest(GETRETURNLISTLABELSV2OPTIONS, {method: 'GET'});
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error.message);
@@ -1574,7 +1920,6 @@ document.getElementById("editIcon").addEventListener("click", async function() {
                 'name': input.value
               }
               var response = await unifiedSendRequest(PROFILERENAME, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
-              console.log(response);
           } catch (error) {
               console.error(error.message);
               showMessage('Failed to rename profile ' + error.message, false);
@@ -1770,11 +2115,8 @@ async function uploadOrders(endpoint) {
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
     // Assuming each row in your table has a class 'file-row'
     const rows = document.querySelectorAll('#fileList_order_list .file-row');
-    console.log('rows', rows);
     rows.forEach(row => {
-        console.log('row', row);
         const fileId = row.id;
-        console.log('fileId', fileId);
         if (selectedFilesOrders.hasOwnProperty(fileId)){
           var file = selectedFilesOrders[fileId];
           if (file.fileFiltered) {
@@ -1788,11 +2130,9 @@ async function uploadOrders(endpoint) {
     });
     try {
         const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 400) {
           data['data'].forEach(failedData => {
-            console.log(failedData['file_id']);
             var failedRow = document.getElementById(failedData['file_id']);
             failedRow.style.color = 'red';
             let errorMessage = failedRow.querySelector('.upload-error-message');
@@ -1846,11 +2186,9 @@ async function uploadReturns(endpoint) {
     });
     try {
         const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 400) {
           data['data'].forEach(failedData => {
-            console.log(failedData['id']);
             var failedRow = document.getElementById(failedData['id']);
             failedRow.style.color = 'red';
             let errorMessage = failedRow.querySelector('.upload-error-message');
@@ -1890,10 +2228,8 @@ async function uploadReports() {
     const formData = new FormData();
     // Assuming each row in your table has a class 'file-row'
     const rows = document.querySelectorAll('.file-row');
-    console.log(rows);
     rows.forEach((row, index)=> {
         const fileId = row.id;
-        console.log(fileId);
         if (selectedFilesReports.hasOwnProperty(fileId)){
             formData.append('reports', selectedFilesReports[fileId].file);
             formData.append('fileId', fileId);
@@ -1901,11 +2237,9 @@ async function uploadReports() {
     });
     try {
         const data = await unifiedSendRequest(UPLOADREPORTS, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 400) {
           data['data'].forEach(failedData => {
-            console.log(failedData['file_id']);
             var failedRow = document.getElementById(failedData['file_id']);
             failedRow.style.color = 'red';
             let errorMessage = failedRow.querySelector('.upload-error-message');
@@ -1935,7 +2269,6 @@ var clientData = null;
 async function getClientsFile() {
   try {
         const data = await unifiedSendRequest(CLIENTSFILE, {method: 'GET'});
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 200) {
           var data_found = data['data'];
@@ -1963,7 +2296,6 @@ async function handleClientsUpload(input, additionalInfo) {
         formData.append('wastestream', additionalInfo.wastestream || '');
         formData.append('scheme', additionalInfo.scheme || '');
         const data = await unifiedSendRequest(CLIENTSFILE, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 200) {
             document.getElementById('clientsFileName').textContent = file.name;
@@ -2140,7 +2472,6 @@ function addNewColumn() {
     table.setColumns(columns); // Update column definitions
     table.replaceData(data);
 
-    console.log(`New column "${columnName}" added.`);
 }
 
 
@@ -2179,7 +2510,6 @@ async function saveClientsEdits() {
 
         // Handle response
         if (response.status_code === 200) {
-            console.log('Data saved successfully:', response);
             showMessage('Clients data saved successfully.', true);
             closeClientsModal();
         } else {
@@ -2289,8 +2619,17 @@ async function getTimesAndCountry() {
     });
     var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, { method: 'GET' });
     fillColumnSelectors(availableColumns);
-    await populateRulesDropdown();
+    var accessControl = await unifiedSendRequest(GETTEMPLATESACCESS, { method: 'GET' });
     await populateTemplateSelector();
+    if (!accessControl.reporttemplate) {
+      document.getElementById('confirmAgency').style.display = 'block';
+      return;
+    }
+    document.getElementById('confirmNoAgency').style.display = 'block';
+    document.getElementById('customFieldsContainer').style.display = 'flex';
+    document.getElementById('templateContainer').style.display = 'flex';
+    document.getElementById('includeReturnsContainer').style.display = 'flex';
+    await populateRulesDropdown();
   } catch (error) {
     console.error(error.message);
     showMessage('Failed to retrieve countries from orders ' + error.message, false);
@@ -2377,7 +2716,7 @@ async function populateTemplateSelector() {
 
   $('#templateSelect').on('changed.bs.select', function () {
     const selectedTemplate = $(this).val();
-    const template = allTemplates.find(t => `${t.country}-${t.year}-${t.report_type}` === selectedTemplate);
+    const template = allTemplates.find(t => `${t.country}-${t.year}-${t.report_type}-${t.pro}` === selectedTemplate);
     if (!template || selectedTemplate === "default") {
       document.getElementById('customFields').disabled = false;
       $('#customFields').selectpicker('refresh');
@@ -2485,22 +2824,36 @@ async function populateTemplateSelector() {
   });
 }
 
-function updateTemplateOptions() {
+function updateTemplateOptions(refreshPRO=true) {
   const templateSelect = document.getElementById('templateSelect');
+  const proDropdown = document.getElementById('proSelect');
+  var initPro = false;
+  if (refreshPRO) {
+    $('#proSelect').val('');
+    proDropdown.innerHTML = '<option value="">-- Select a PRO --</option>';
+  }
+  const selectedPro = $('#proSelect').val();
   const selectedCountry = $('#country').val();
   const selectedCategory = $('#category').val();
 
   templateSelect.innerHTML = '<option value="default">-- Select a template --</option>'; // Clear
-
+  
   allTemplates.forEach(template => {
     // Match filtering: if no selection, or matching the selected value
     const matchCountry = !selectedCountry || template.country === selectedCountry;
     const matchCategory = !selectedCategory || template.report_type === selectedCategory;
+    const matchPro = !selectedPro || template.pro === selectedPro;
 
-    if (matchCountry && matchCategory) {
+    if (matchCountry && matchCategory && refreshPRO) {
       const option = document.createElement('option');
-      option.value = `${template.country}-${template.year}-${template.report_type}`;
-      option.textContent = `${template.country} ${template.year} ${template.report_type}`;
+      option.value = template.pro;
+      option.textContent = template.pro;
+      proDropdown.appendChild(option);
+    }
+    if (matchCountry && matchCategory && matchPro) {
+      const option = document.createElement('option');
+      option.value = `${template.country}-${template.year}-${template.report_type}-${template.pro}`;
+      option.textContent = `${template.country} ${template.year} ${template.report_type} ${template.pro}`;
       templateSelect.appendChild(option);
     }
   });
@@ -2514,6 +2867,10 @@ $('#category').on('changed.bs.select', function() {
   updateTemplateOptions();
 });
 
+$('#proSelect').on('changed.bs.select', function() {
+  updateTemplateOptions(refreshPRO=false);
+});
+
 async function showConfirmationDetails() {
     // Get the selected values
     document.getElementById('confirm-country').textContent = $('#country').val();
@@ -2524,13 +2881,30 @@ async function showConfirmationDetails() {
     document.getElementById('confirm-end').textContent = selectedEndDateValue;
     var selectedFields = $('#customFields').val() || [];
     var selectedGroupBy = $('#groupByFields').val() || [];
-    const selectedTemplate = $('#templateSelect').val();
-    if (selectedTemplate !== "default") {
+    var selectedTemplate = $('#templateSelect').val();
+    var accessControl = await unifiedSendRequest(GETTEMPLATESACCESS, { method: 'GET' });
+    if (!accessControl.reporttemplate) {
+      var year = moment().year();
+      selectedTemplate = `${$('#country').val()}-${year}-${$('#category').val()}-${$('#proSelect').val()}`;
+    }
+    if (selectedTemplate !== "default" && selectedTemplate !== null) {
       selectedFields = [`Using template ${selectedTemplate}`];
       selectedGroupBy = [`Using template ${selectedTemplate}`];
+      var pro = $('#proSelect').val();
+      selectedTemplateName = [$('#country').val(), $('#category').val()];
+      if (pro !== "default" && pro !== null) {
+        selectedTemplateName.push(pro);
+      }
     }
-    addOptionsConfirmation(selectedFields, 'confirm-fields');
-    addOptionsConfirmation(selectedGroupBy, 'confirm-groupby');
+    if (selectedFields.length > 0) {
+      addOptionsConfirmation(selectedFields, 'confirm-fields');
+    }
+    if (selectedGroupBy.length > 0) {
+      addOptionsConfirmation(selectedGroupBy, 'confirm-groupby');
+    }
+    if (selectedTemplateName !== null) {
+      addOptionsConfirmation(selectedTemplateName, 'confirm-template');
+    }
     const selectedRules = $('#ruleSelect').val() || [];
     ruleOptions = await getRules();
     const selectedRulesText = selectedRules
@@ -2540,9 +2914,11 @@ async function showConfirmationDetails() {
       })
       .filter(name => name !== null);
 
-    addOptionsConfirmation(selectedRulesText, 'confirm-rules', false);
-    document.getElementById('confirm-returns').textContent = document.getElementById('useReturns').checked ? 'Yes': 'No';
+    if (selectedRules.length > 0) {
+      addOptionsConfirmation(selectedRulesText, 'confirm-rules', false);
+    }
 
+    {% comment %} document.getElementById('confirm-returns').textContent = document.getElementById('useReturns').checked ? 'Yes': 'No'; {% endcomment %}
     var selectedOrderListFileValue = Object.values(selectedFilesOrders).map(file => file.filename);
     var selectedReturnListFileValue = Object.values(selectedFilesReturns).map(file => file.filename);
     var textContentOrders = selectedOrderListFileValue.length > 0 ? selectedOrderListFileValue.join('<br>') : 'No file selected';
@@ -2594,7 +2970,12 @@ async function createReport() {
         const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
         countryData.append("start_date", convertToISO(selectedStartDateValue));
         countryData.append("end_date", convertToISO(selectedEndDateValue));
-        const selectedTemplate = $('#templateSelect').val();
+        var selectedTemplate = $('#templateSelect').val();
+        var accessControl = await unifiedSendRequest(GETTEMPLATESACCESS, { method: 'GET' });
+        if (!accessControl.reporttemplate) {
+          var year = moment().year();
+          selectedTemplate = `${$('#country').val()}-${year}-${$('#category').val()}-${$('#proSelect').val()}`;
+        }
         countryData.append("template_id", selectedTemplate);
         countryData.append("use_returns", document.getElementById('useReturns').checked);
         const selectedFields = $('#customFields').val() || [];
@@ -2603,10 +2984,8 @@ async function createReport() {
         countryData.append("groupby_fields", selectedGroupBy.join(','));
         const selectedRules = $('#ruleSelect').val() || [];
         countryData.append("rules", selectedRules.join(','));
-
-        data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});
-        // Handle file response
-        console.log(data);
+        setTimeout(repeatAction, 100);
+        data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});        // Handle file response
     } catch (error) {
         console.error(error.message);
         TOKEN = false;
@@ -2620,30 +2999,6 @@ async function createReport() {
     document.getElementById('uploadSteps').style.cursor = 'default';
     document.querySelectorAll('.nextButton').forEach(node => {node.disabled = false;})
     document.querySelectorAll('.prevButton').forEach(node => {node.disabled = false;})
-}
-
-var timeout = 1000;
-var inprogress = false;
-
-function repeatActionReport() {
-  unifiedSendRequest(GETREPORTPROGRESS, {method: 'GET'}).then(data => {
-    console.log(data);
-    if (data === "1") {
-      setTimeout(repeatActionReport, timeout); // Call the function again after the specified timeout
-      inprogress = true;
-    } else if (data === "0" && inprogress) {
-      if (!failedCreation) {
-        document.getElementById('reportInProgress').style.display = 'none';
-        document.getElementById('showReport').style.display = 'block';
-      }
-      inprogress = false;
-    } else if (data === "0") {
-      setTimeout(repeatActionReport, timeout);
-    }
-  }).catch(error => {
-    console.error(error);
-    setTimeout(repeatActionReport, timeout); // Ensure the function is called again even if there's an error
-  });
 }
 
 

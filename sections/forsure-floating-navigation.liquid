@@ -117,6 +117,7 @@
     color: white;
     padding: 0.5rem;
     font-size: 0.9rem;
+    font-weight: 100;
     border-radius: 5px;
     white-space: nowrap;
     z-index: 1000;
@@ -231,7 +232,6 @@
         async function getNavbarElements() {
             try {
                 var data = await unifiedSendRequest(NAVBAR, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
-                console.log(data);
                 var available_url = null;
                 for (const [nav_element, show] of Object.entries(data)) {
                       if (!show) {
@@ -247,7 +247,6 @@
                       }
                  }
                 if (data['{{ currentLink }}'] === false) {
-                    console.log("You don't have access to this site, redirecting you.");
                     if (available_url === null) {
                       window.location.href = '/';
                     }
@@ -255,7 +254,6 @@
                     window.location.href = `{{ currentPath }}/${available_url}`;
                 }
                 if (data['{{ currentLink }}?logged_in'] === false) {
-                  console.log("You don't have access to this site, redirecting you.");
                   if (available_url === null) {
                       window.location.href = '/';
                     }
@@ -266,7 +264,7 @@
                 showMessage('Failed to get navigation: ' + error.message, false);
             }
         }
-        getNavbarElements()
+        document.addEventListener('DOMContentLoaded', getNavbarElements);
       </script>
       {%- if show_mobile_slider -%}
         <div class="slider-buttons no-js-hidden">
@@ -306,12 +304,15 @@
           </g>
           </svg>
       </div>
-      <div style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;" id="notificationBell">
+      <div style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;position: relative;" id="notificationBell">
           <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
             <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"></path>
           </svg>
-          <div id="notification-badge" class="badgeNotification" style="top: 8px">1</div>
-        </div>
+          <div id="notification-badge" class="badgeNotification hidden" style="top: -1px">1</div>
+      </div>
+      <div id="user-icon" style="margin: auto;margin-left: 1rem;margin-top: 7px;cursor: pointer;" onclick="window.location.href='/account?logged_in'">
+        {% render 'icon-user' %}
+      </div>
       {% else %}
       <!-- temporary mockup -->
           <div id="headerIcons">
@@ -364,6 +365,9 @@
                 <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"/>
                 <div id="notification-badge" class="badgeNotification hidden" style="top: 16px;">0</div>
               </svg>
+      <div id="user-icon" style="cursor: pointer;" onclick="window.location.href='/account?logged_in'">
+        {% render 'icon-user' %}
+      </div>
 
   <!-- end mockup -->
       {% endunless %}

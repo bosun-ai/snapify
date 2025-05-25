@@ -411,7 +411,6 @@ async function getUsers() {
     try {
         var data = await unifiedSendRequest(ACCESS_MANAGER, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
         document.getElementById('userList').innerHTML = '';
-        console.log(data);
         for (user of data) {
             addToTable(user);
         }
@@ -510,7 +509,6 @@ async function deleteUser(userId) {
         var formData = new FormData();
         formData.append('user_id_to_remove', userId);
         const response = await unifiedSendRequest(ACCESS_DELETE_USER, {formData: formData});
-        console.log(response);
         if (response.status == 'success') {
             showMessage('User deleted successfully!', true);
             closeConfirmationModal();
@@ -546,7 +544,6 @@ async function addUser(userEmail) {
         }
         formData.append('user_email', userEmail);
         const response = await unifiedSendRequest(ACCESS_ADD_USER, {formData: formData});
-        console.log(response);
         if (response.status == 'success') {
             showMessage('User added successfully!', true);
             const addUserButton = document.getElementById('addUserButton');
@@ -587,7 +584,6 @@ async function saveChanges(userId) {
     }
     try {
         const response = await unifiedSendRequest(ACCESS_EDIT, {formData: formData});
-        console.log(response);
         if (response.status == 'success') {
             showMessage('Updated roles successfully', true);
             getUsers();

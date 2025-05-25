@@ -126,9 +126,7 @@ function createCanvasElement(widgetDivId, idprefix=false) {
 
 var temp = null;
 function createEmptyChartDraw(chartTag, bigmode=false) {
-    console.log(`Creating empty chart for ${chartTag}`);
     var ctx = document.getElementById(chartTag).getContext('2d');
-    console.log(ctx);
     temp = ctx;
     var myChart = new Chart(ctx, {
         type: 'bar', // or 'line', 'pie', etc.
@@ -196,7 +194,6 @@ async function getData(chart, emptyChart, widgetDivId) {
     try {
         chart['filters'] = filterData;
         var data = await unifiedSendRequest(GETCHARTDATA, {formData: JSON.stringify(chart), headerArgs: {'Content-Type': 'application/json'}});
-        console.log(data);
         return {
             widgetDivId: widgetDivId,
             chart: chart,
@@ -225,7 +222,6 @@ async function fillPlaceholder(result) {
     }
     if (placeholder && canvas) {
         placeholder.replaceWith(canvas);
-        console.log("Drawing chart");
         var chartDrawn = await drawComponentWrapper(result);
         if (!chartDrawn) {
             canvas.style.display = 'none';
@@ -260,11 +256,9 @@ function drawComponentWrapper(result) {
 async function drawChart(result, titleId, useChartCanvas=false, bigmode=false) {
     var chartCanvas = result.emptyChart;
     if (useChartCanvas) {
-        console.log(`Using chart ${useChartCanvas}`);
         chartCanvas = useChartCanvas;
     }
     updateChartNew(result.data, chartCanvas, titleId, bigmode, result.chart.title);
-    console.log(`Setting chart type to ${result.chart.chart_type}`);
     chartTypesNew[result.chart.chart_type](chartCanvas);
 }
 
@@ -272,7 +266,6 @@ async function drawChart(result, titleId, useChartCanvas=false, bigmode=false) {
 async function getReportsDue(widgetDivId) {
     try {
         var data = await unifiedSendRequest(NEXTREPORTS, {method: 'GET'});
-        console.log(data);
         return data;
     } catch(error){
         console.error(`Failed to get data, received error ${error}`);
@@ -326,8 +319,6 @@ function createReportsDueWidget(results) {
     deadlinesList.style.listStyle = 'none';
     deadlinesList.style.padding = '1rem 1rem 0 1rem';
     deadlinesList.style.textAlign = 'left';
-
-    console.log(results);
 
     let pastDeadlines = [];
     let displayedDeadlines = [];
@@ -395,7 +386,6 @@ function createReportsDueWidget(results) {
     //     }
     // });
     function loadOlderDeadlines() {
-        console.log(pastDeadlines);
         if (pastDeadlines.length === 0) return;
 
         const scrollYBeforeAdding = container.scrollHeight - container.scrollTop;

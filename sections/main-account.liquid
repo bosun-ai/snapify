@@ -18,6 +18,9 @@
         window.location.href = "{{ pages['forsure-report'].url }}";
     }
 </script>
+{% if customer.tags contains 'member' %}
+  {% render 'forsure-login' %}
+{% endif %}
 <div class="customer account section-{{ section.id }}-padding">
   <div>
     <div>

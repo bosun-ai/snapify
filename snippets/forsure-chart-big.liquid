@@ -89,7 +89,6 @@ Usage:
       try {
           var chartData = params.chart;
           tabulatorData = await unifiedSendRequest(GETSTATSDETAILS, {formData: JSON.stringify(chartData), headerArgs: {'Content-Type': 'application/json'}});
-          console.log(chartData.x_columns[0]);
           drawTable(tabulatorData, chartData.x_columns[0]);
       } catch (error) {
         console.error(error);
@@ -103,10 +102,7 @@ Usage:
     } else {
       excludedColumns.delete(legendItem.text);
     }
-    console.log(excludedColumns);
-    console.log(tabulatorData);
     filteredData = tabulatorData.filter(item => ! excludedColumns.has(item.Category) && ! excludedColumns.has(item.Country) && ! excludedColumns.has(item.Profile));
-    console.log(filteredData);
     drawTable(filteredData);
   }
 
@@ -130,13 +126,10 @@ function getGroupby(tabulatorData, groupbyCol=false) {
         groupby = 'Category';
       }
     }
-    console.log(`Table groupby: ${groupby}`);
-    console.log(groupby);
     return groupby;
 }
 
   function drawTable(tabulatorData, groupbyCol=false) {
-    console.log(`Using groupby ${groupbyCol}`);
     if (tabulatorData.length == 0) {
       return;
     }

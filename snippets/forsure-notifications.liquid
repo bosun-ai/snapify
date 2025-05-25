@@ -231,7 +231,6 @@ async function saveNotificationSettings() {
         settings['send_email'] = true;
     }
     try {
-        console.log(settings);
         await unifiedSendRequest(NOTIFICATIONSETTINGS, { method: 'POST', formData: JSON.stringify(settings), headerArgs: { 'Content-Type': 'application/json' }});
         showMessage('Successfully saved notification settings.', true);
     } catch (error) {
@@ -265,7 +264,6 @@ function updateNotificationBadge(messageList) {
 async function getNotifications() {
     try {
         notifications = await unifiedSendRequest(NOTIFICATIONS, {method: 'GET'});
-        console.log(notifications);
         updateNotificationBadge(notifications);
     } catch (error) {
         console.error(error);
@@ -308,7 +306,6 @@ function createNotificationCards() {
 async function removeNotification(notificationId) {
     try {
         const response = await unifiedSendRequest(NOTIFICATIONS + `/${notificationId}/resolve`, {method: 'PUT'});
-        console.log(response);
         await getNotifications();
         createNotificationCards(); // Re-render the cards
         showMessage('Resolved notification', true);
@@ -321,7 +318,6 @@ async function removeNotification(notificationId) {
 async function addResolution(notificationId) {
     try {
         var response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}`, {method: 'GET'});
-        console.log(response);
         response = [
             {
                 "resolved": false,
@@ -337,7 +333,6 @@ async function addResolution(notificationId) {
                 "report_id": "0174LY274BRRTJLNTHD5EIMFO43APTHOXO"
             }
         ]
-        console.log(response);
         openResolutionModal(response[0]);
     } catch (error) {
         console.error("Failed to open resolution:", error);
@@ -382,7 +377,6 @@ async function openResolutionModal(response) {
             }
         }
         var cleaned_resolution_hint = response.resolution_hint.replace(/\n/g, '<br>').replace(/\\n/g, '<br>');
-        console.log(cleaned_resolution_hint);
         // Modal content
         modal.innerHTML = `
             <h2 style="margin-bottom: 10px;">${response.resolution_hint_title}</h2>
@@ -422,7 +416,6 @@ async function saveResolution(notificationId) {
         var formData = new FormData();
         formData.append('resolution', document.getElementById('resolutionModalTextbox').value);
         const response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}/add_resolution`, {method: 'POST', formData: formData});
-        console.log(response);
         showMessage('Saved resolution', true);
         await getNotifications();
         createNotificationCards(); // Re-render the cards

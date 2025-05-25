@@ -93,6 +93,9 @@
           {%- when 'heading' -%}
             <{{ block.settings.heading_size_google }} class="banner__heading a {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
               <span>{{ block.settings.heading | newline_to_br }}</span>
+              {% if current_page > 1 %}
+                <div id="dynamic-heading" class="h2">{{ section.settings.page }} {{ current_page }}</div>
+              {% endif %}
             </{{ block.settings.heading_size_google }}>
           {%- when 'text' -%}
             <div class="banner__text {{ block.settings.text_style }}" {{ block.shopify_attributes }}>
@@ -124,6 +127,12 @@
       "type": "image_picker",
       "id": "image",
       "label": "t:sections.image-banner.settings.image.label"
+    },
+    { 
+      "type": "text",
+      "id": "page",
+      "label": "Page",
+      "default": "Page"
     },
     {
       "type": "image_picker",

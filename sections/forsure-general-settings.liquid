@@ -162,6 +162,38 @@
       gap: 10px; /* Adjust as needed, adds space between children */
   }
 
+
+#tabs-container {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+.tab-button {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-button:hover {
+    background-color: #eaeaea;
+}
+
+.tab-button.active {
+    background-color: #2255ff;
+    color: #fafafa;
+    border-bottom: 2px solid #fff;
+    font-weight: bold;
+}
+
+
   .tab {
       cursor: pointer;
       padding: 10px;
@@ -185,8 +217,9 @@
 
   #countrySelectionContainer {
     display: none; /* Start hidden */
-    position: absolute; /* Position it below the icon or wherever it fits */
+    position: relative; /* Position it below the icon or wherever it fits */
     background-color: #fff;
+    top: 1rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 10px;
@@ -278,8 +311,6 @@
   {% render 'forsure-login' %}
   {% comment %} {% render 'forsure-guide' %} {% endcomment %}
   {% render 'forsure-simple-notification' %}
-  <div id="countrySelectionContainer" style="margin: auto;width:fit-content"></div>
-
   <div>
     <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem;">
@@ -287,25 +318,15 @@
       </div>
       <div class="display-flex" style="margin: auto;width: fit-content;display:flex"></div>
       <div id="generalConfig" class="bordertop" style="background-color: #fafafa;">
-        <h3 class="flex-header" style="margin-left: 2rem">
-          <span class="table-header">Company Information</span>
-          <span class="icons">
-            <!-- <i class="icon-1">🔷</i><i class="icon-2">🔶</i> -->
-            <i id="emptyGeneral" class="icon-3"
-              ><img
-                width="20px"
-                src="{{ section.settings.trashcan | image_url }}"
-                alt="{{ section.settings.trashcan.alt | escape }}"
-                loading="lazy"
-            ></i>
-            <i class="icon-4 arrow"
-              ><img
-                width="20px"
-                src="{{ section.settings.arrow | image_url }}"
-                alt="{{ section.settings.arrow.alt | escape }}"
-                loading="lazy"
-            ></i>
-          </span>
+        <div style="display: flex;">
+          <h3 style="margin-left: 2rem;width: 50%;display:flex;align-items:center;gap:3rem">Demo Data<div style="background-color: #2255ff;color:#fafafa;padding:0.5rem;border-radius:1rem;" id="demoDataStatus"></div></h3>
+          <div style="margin: auto;margin-right: 2rem;display:flex;gap:2rem">
+            <button class="button" id="createDemoDataButton" onclick="createDemoData()" style="display:none;">Create Demo Data</button>
+            <button class="button" id="deleteDemoDataButton" onclick="deleteDemoData()" style="display:none;background-color:red;">Delete Demo Data</button>
+          </div>
+        </div>
+        <hr style="width: 100%; border-top: 0.2rem solid #17161c;">
+        <h3 class="flex-header" style="margin-left: 2rem">Company Information
         </h3>
         <div id="configurationGeneral" style="padding: 20px; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9;">
           <table style="width: 100%; border-collapse: collapse;">
@@ -322,7 +343,7 @@
           <div class="tab-container">
             <div id="countryTabs" class="display-flex" style="margin: auto; width: fit-content;"></div>
             <div id="countrySelectionContainer" style="margin: auto; width: fit-content"></div>
-            <div id="reportDataContainer" style="margin: auto; width: fit-content;"></div>
+            <div id="reportDataContainer" style="margin: auto; width: 50%;"></div>
           </div>
         </div>
       </div>
@@ -350,11 +371,51 @@
     </div>
   </div>
   <script>
+
+    async function createDemoData() {
+      try {
+        let data = await unifiedSendRequest(DEMODATA, { method: 'POST' });
+        getDemoDataStatus();
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    async function deleteDemoData() {
+      try {
+        let data = await unifiedSendRequest(DEMODATA, { method: 'DELETE' });
+        getDemoDataStatus();
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    async function getDemoDataStatus() {
+      try {
+        let data = await unifiedSendRequest(DEMODATASTATUS, { method: 'GET' });
+        if (data) {
+          document.getElementById('demoDataStatus').textContent = 'Active';
+          document.getElementById('demoDataStatus').style.backgroundColor = '#2255ff';
+          document.getElementById('createDemoDataButton').innerHTML = 'Recreate Demo Data';
+          document.getElementById('createDemoDataButton').style.display = 'block';
+          document.getElementById('deleteDemoDataButton').style.display = 'block';
+        } else {
+          document.getElementById('demoDataStatus').textContent = 'Inactive';
+          document.getElementById('demoDataStatus').style.backgroundColor = '#ccc';
+          document.getElementById('createDemoDataButton').innerHTML = 'Create Demo Data';
+          document.getElementById('createDemoDataButton').style.display = 'block';
+          document.getElementById('deleteDemoDataButton').style.display = 'none';
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+    getDemoDataStatus();
+    
     async function getGeneralSettingsDefinition() {
       try {
         let data = await unifiedSendRequest(GETGENERALSETTINGSDEFINITION, { method: 'GET' });
-        console.log(data);
-        return data;
+        return data;  
       } catch (error) {
         console.error(error.message);
         showMessage('Failed to get settings definition ' + error.message, false);
@@ -364,7 +425,6 @@
     async function getGeneralSettings() {
       try {
         let data = await unifiedSendRequest(GETGENERALCONFIG, { method: 'GET' });
-        console.log(data);
         return data;
       } catch (error) {
         console.error(error.message);
@@ -375,7 +435,6 @@
     async function getAvailableCountries() {
       try {
         let data = await unifiedSendRequest(GETGENERALCONFIGCOUNTRIES, { method: 'GET' });
-        console.log(data);
         return data;
       } catch (error) {
         console.error(error.message);
@@ -386,7 +445,6 @@
     async function getCountryLabels(country) {
       try {
         let data = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY + '?country=' + country, { method: 'GET' });
-        console.log(data);
         return data;
       } catch (error) {
         console.error(error.message);
@@ -395,7 +453,7 @@
     }
     var generalSettingsDefinition;
     var generalSettings;
-    var availableCountries;
+    var availableCountries = {};
   
     async function initializeSettings() {
       try {
@@ -404,7 +462,7 @@
         availableCountries = await getAvailableCountries();
   
         renderGeneralSettings();
-        renderCountryTabs();
+        await renderCountryTabs();
       } catch (error) {
         console.error('Failed to initialize settings:', error);
       }
@@ -466,91 +524,198 @@
     }
 
   
-  function renderCountryTabs() {
+  async function renderCountryTabs() {
     const countryTabs = document.getElementById('countryTabs');
     countryTabs.innerHTML = '';
-
-    availableCountries.forEach(country => {
-      const tab = document.createElement('div');
-      tab.className = 'tab';
-      tab.textContent = country.country;
-      tab.onclick = () => selectCountry(country.country);
-      countryTabs.appendChild(tab);
+    Object.keys(availableCountries).forEach(country => {
+      if (availableCountries[country].recommended) {
+        const tab = document.createElement('div');
+        tab.className = 'tab';
+        tab.classList.add('tab-button');
+        tab.textContent = country;
+        tab.onclick = async () => {
+          await selectCountry(tab, country);
+        };
+        countryTabs.appendChild(tab);
+      }
     });
 
     const addCountryTab = document.createElement('div');
     addCountryTab.className = 'tab';
+    addCountryTab.classList.add('tab-button');
     addCountryTab.textContent = 'Add Country';
-    addCountryTab.onclick = showCountrySelection;
+    addCountryTab.onclick = () => showCountrySelection();
     countryTabs.appendChild(addCountryTab);
   }
 
   function showCountrySelection() {
     const container = document.getElementById('countrySelectionContainer');
-    container.style.display = 'block';
-    container.innerHTML = '<ul>' + availableCountries.map(country => `
-      <li onclick="addCountry('${country.country}')">${country.country}</li>
+    const alreadySelected = [...document.getElementById('countryTabs').querySelectorAll('.tab')].map(tab => tab.textContent);
+    const avail = Object.keys(availableCountries).filter(country => !availableCountries[country].recommended && !alreadySelected.includes(country));
+    if (avail.length === 0) {
+      showMessage('No available countries, please contact support at info@for-sure.net if you need to add a country.', false);
+      return;
+    }
+    container.innerHTML = '<ul>' + avail.map(country => `
+      <li onclick="addCountry('${country}')">${country}</li>
     `).join('') + '</ul>';
+    container.style.display = 'block';
+    container.addEventListener('clickOutside', () => {
+      container.style.display = 'none';
+    });
   }
 
-  function addCountry(country) {
+  async function addCountry(country) {
     // Logic to add the selected country
-    console.log('Country added:', country);
+    const countryTabs = document.getElementById('countryTabs');
+    const tab = document.createElement('div');
+    tab.className = 'tab';
+    tab.classList.add('tab-button');
+    tab.textContent = country;
+    tab.onclick = async () => {
+      await selectCountry(tab, country);
+    };
+    tab.click();
+    countryTabs.insertBefore(tab, countryTabs.firstChild);
     // Hide the selection container after adding
     document.getElementById('countrySelectionContainer').style.display = 'none';
   }
-  async function selectCountry(country) {
+
+
+  async function selectCountry(tab, country) {
     try {
-      console.log('Country selected:', country);
-      var labels = await getCountryLabels(country);
-      console.log('Country labels:', labels);
-  
-      // Update the UI with the retrieved labels
+      // remove active class from all tabs
+      countryTabs.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      tab.classList.add('active');
       const container = document.getElementById('reportDataContainer');
+      container.style.border = '1px solid #ddd';
+      container.style.borderRadius = '8px';
+      container.style.overflow = 'hidden';
+      container.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
       container.innerHTML = ''; // Clear previous content
-  
-      Object.keys(labels).forEach(reportType => {
+      var labels = await getCountryLabels(country);
+      Object.keys(availableCountries[country]).forEach(reportType => {
+        if (reportType === 'recommended') {
+          return;
+        }
+        const reportTypeContainer = document.createElement('div');  
+        reportTypeContainer.className = 'report-type-container';
         const reportHeader = document.createElement('h4');
+        reportHeader.style.textAlign = 'center';
         reportHeader.textContent = reportType;
-        container.appendChild(reportHeader);
-  
-        const reportData = labels[reportType]["null"];
-        console.log('Report data:', reportData);
-        Object.keys(reportData).forEach(key => {
-          const field = reportData[key];
-          const fieldContainer = document.createElement('div');
-          fieldContainer.className = 'field-container';
-  
-          const label = document.createElement('label');
-          label.textContent = field.title;
-          fieldContainer.appendChild(label);
-  
-          let inputElement;
-          if (field.input_type === 'dropdown') {
-            inputElement = document.createElement('select');
-            field.options.forEach(option => {
-              const optionElement = document.createElement('option');
-              optionElement.value = option;
-              optionElement.textContent = option;
-              inputElement.appendChild(optionElement);
-            });
-          } else if (field.input_type === 'input') {
-            inputElement = document.createElement('input');
-            inputElement.type = 'text';
-            inputElement.value = field.default || '';
-          }
-  
-          // Add data attributes for later data collection
-          inputElement.setAttribute('data-category', reportType);
-          inputElement.setAttribute('data-country', country);
-          inputElement.setAttribute('data-name', field.key);
-  
-          fieldContainer.appendChild(inputElement);
-          container.appendChild(fieldContainer);
+        reportTypeContainer.appendChild(reportHeader);
+        
+        const pros = availableCountries[country][reportType];
+        const optionsTable = document.createElement('table');
+        optionsTable.className = 'options-table';
+        const optionsTableRow = document.createElement('tr');
+        optionsTableRow.className = 'options-table-row';
+        const label = document.createElement('td');
+        label.style.height = '6rem';
+        label.style.width = '50%';
+        label.style.padding = '2rem';
+        label.textContent = 'PRO';
+        optionsTableRow.appendChild(label);
+        const proSelectContainer = document.createElement('td');
+        proSelectContainer.style.padding = '2rem';
+        const proSelect = document.createElement('select');
+        proSelect.className = 'pro-select selectpicker';
+        proSelect.style.padding = '0.5rem';
+        proSelect.onchange = async () => {
+          const selectedPro = proSelect.value;
+          renderProLabels(labels[reportType][selectedPro], optionsTable, country, reportType);
+        };
+        pros.forEach(pro => {
+          const option = document.createElement('option');
+          option.value = pro;
+          option.textContent = pro;
+          proSelect.appendChild(option);
         });
+        proSelectContainer.appendChild(proSelect);
+        optionsTableRow.appendChild(proSelectContainer);
+        optionsTable.appendChild(optionsTableRow);
+        reportTypeContainer.appendChild(optionsTable);
+        var proLabels = labels[reportType][proSelect.value];
+        renderProLabels(proLabels, optionsTable, country, reportType);
+        container.appendChild(reportTypeContainer);
       });
     } catch (error) {
       console.error('Failed to get country labels:', error);
+    }
+  }
+
+  function renderProLabels(proLabels, proLabelContainer, country, reportType) {
+    // remove all children of proLabelContainer except the class options-table-row
+    for (let i = proLabelContainer.children.length - 1; i >= 0; i--) {
+      if (proLabelContainer.children[i].className !== 'options-table-row') {
+        proLabelContainer.removeChild(proLabelContainer.children[i]);
+      }
+    } 
+    Object.keys(proLabels).forEach(key => {
+      const field = proLabels[key];
+      const fieldContainer = document.createElement('tr');
+      fieldContainer.className = 'field-container';
+
+      const label = document.createElement('td');
+      label.style.height = '6rem';
+      label.style.padding = '2rem';
+      label.textContent = field.title;
+      label.title = field.description;
+      fieldContainer.appendChild(label);
+
+      let inputElement;
+      const optionContainer = document.createElement('td');
+      optionContainer.style.padding = '2rem';
+      if (field.input_type === 'dropdown') {
+        inputElement = document.createElement('select');
+        inputElement.style.padding = '0.5rem';
+        field.options.forEach(option => {
+          const optionElement = document.createElement('option');
+          optionElement.value = option;
+          optionElement.textContent = option;
+          inputElement.appendChild(optionElement);
+        });
+      } else if (field.input_type === 'select') {
+        inputElement = document.createElement('select');
+        inputElement.style.padding = '0.5rem';
+        field.options.forEach(option => {
+          const optionElement = document.createElement('option');
+          optionElement.value = option['name'];
+          optionElement.textContent = option['name'];
+          inputElement.appendChild(optionElement);
+        });
+      } else if (field.input_type === 'input' || field.input_type === 'text') {
+        inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.value = field.default || '';
+      } else if (field.input_type === 'textarea') {
+        inputElement = document.createElement('textarea');
+        inputElement.value = field.default || '';
+      } else if (field.input_type === 'checkbox') {
+        inputElement = document.createElement('input');
+        inputElement.type = 'checkbox';
+        inputElement.checked = field.default || false;
+      }
+
+      // Add data attributes for later data collection
+      inputElement.setAttribute('data-category', reportType);
+      inputElement.setAttribute('data-country', country);
+      inputElement.setAttribute('data-name', field.key);
+      optionContainer.appendChild(inputElement);
+      fieldContainer.appendChild(optionContainer);
+      proLabelContainer.appendChild(fieldContainer);
+    });
+  }
+
+
+  async function getProLabels(country, pro, reportType) {
+    try {
+      const response = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY + '?country=' + country, { method: 'GET' });
+      return response;
+    } catch (error) {
+      console.error('Failed to get pro labels:', error);
     }
   }
 
@@ -609,7 +774,6 @@
       }
     });
   
-    console.log('dataToSend', dataToSend);
     try {
       var response = await unifiedSendRequest(GETGENERALCONFIG, {
         method: 'POST',  // Ensure the method is POST for sending data

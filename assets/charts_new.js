@@ -26,8 +26,6 @@ function updateChartNew(chartData, chartCanvas, titleId=false, bigmode=false, se
         })
     }
     // datasets = createDatasets(dataObj);
-    console.log("Got datasets");
-    console.log(datasets);
     chartCanvas.data.labels = subGroupList;
     chartCanvas.data.datasets = datasets;
     var title = columnNamesYOutput.join(" - ") + ' per ' + columnNamesXOutput.join(" per ");
