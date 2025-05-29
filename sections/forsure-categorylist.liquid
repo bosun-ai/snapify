@@ -373,6 +373,9 @@
   border: 0.2rem solid red!important;
 }
 
+td input {
+  width: 100%;
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
@@ -459,9 +462,6 @@
               </a>
           </div>
         </div>
-        <div id="useSampleCategorylist" style="display: none">
-          <a id="useSampleCategorylistButton" onclick="useSampleCategorylist()" class="button button--secondary" style="margin: 1rem;cursor: pointer;background-color: #fafafa;position: relative">Use Sample</a>
-        </div>
         <div id="onlinePeople">
         </div>
         <div id="editButton">
@@ -483,7 +483,9 @@
             <select
                   id="categorylistVersions"
                   class="selectpicker"
-                  data-live-search="true">
+                  data-live-search="true"
+                  data-dropup-auto="false"
+                  data-dropdown-align-right="true">
             </select>
         </div>
       </div>
@@ -622,7 +624,7 @@ async function openProfileModal(event) {
   if (!fileInput) {
     return;
   }
-  if (fileInput.type !== 'text/csv') {
+  if (fileInput.type !== 'text/csv' && fileInput.type !== 'application/vnd.ms-excel') {
     showMessage('Please upload a CSV file', false);
     return;
   }
@@ -1079,7 +1081,6 @@ async function fillVersionDropdown() {
             document.getElementById('activateEditMode').style.backgroundColor = '#ddd';
             document.getElementById('activateEditMode').style.cursor = 'not-allowed';
             document.getElementById('activateEditMode').onclick = null;
-            document.getElementById('useSampleCategorylist').style.display = 'block';
             return;
         }
         const dropdown = document.getElementById('categorylistVersions');
@@ -1108,6 +1109,9 @@ async function fillVersionDropdown() {
         document.getElementById('activateEditMode').onclick = function() {
             activateEditMode();
         };
+        if (document.getElementById('tabs-container').children[0]) {
+          document.getElementById('tabs-container').children[0].click();
+        }
     } catch (error) {
         console.error(error.message);
         {% comment %} showMessage('Failed to get versions ' + error.message, false); {% endcomment %}
@@ -1361,9 +1365,9 @@ async function getCategorylistDetails() {
                         $('#deleteButtonRow').hide();
                     }, 1000);
                   });
-                  $(row).find('td').each(function(colIdx) {
-                    
+                  $(row).find('td').each(function() {
                     var cell = api.cell(this);
+                    var colIdx = cell.index().column;
                     var columnName = api.column(colIdx).header().textContent.trim();
                     var subentries = categorylistLabels[columnName]?.subentries || [];
                 
@@ -1401,6 +1405,7 @@ async function getCategorylistDetails() {
         if ($(this).find('input').length > 0) {
           return;
         }
+        closeCurrentEditor();
         var cell = categoryTable.cell(this);
         var originalContent = cell.data();
 
@@ -1479,19 +1484,36 @@ async function getCategorylistDetails() {
               }
             });
 
+            let keepDropdownOpen = false;
+
+            dropdown.on('mousedown', function () {
+              keepDropdownOpen = true;
+            });
+
             input.on('blur', function () {
-              setTimeout(saveValue, 150); // slight delay to allow click selection
+              if (!keepDropdownOpen) {
+                saveValue();
+              }
+              setTimeout(() => {
+                keepDropdownOpen = false; // reset
+              }, 200);
             });
 
             input.on('keydown', function (e) {
               if (e.key === 'Enter') {
                 saveValue();
               }
+              if (e.key === 'Escape') {
+                dropdown.remove();
+                td.empty().text(originalContent);
+              }
             });
 
             $(this).append(input);
             $(this).append(dropdown);
             input.focus();
+            currentEditor = input;
+            currentDropdown = dropdown;
         } else {
           input = $('<input>', {
             type: 'text',
@@ -1508,6 +1530,8 @@ async function getCategorylistDetails() {
           });  
           $(this).empty().append(input);
           input.focus();
+          currentEditor = input;
+          currentDropdown = null;
         }
 
       });
@@ -1535,8 +1559,42 @@ async function getCategorylistDetails() {
 
       $('#editableTable').wrap('<div class="custom-table-wrapper"></div>');
       selectCountries();
-
+      function closeCurrentEditor() {
+        if (currentEditor && currentEditor.length > 0) {
+          const tdElement = currentEditor.closest('td');
+          if (tdElement && tdElement.length > 0) {
+            const cell = categoryTable.cell(tdElement);
+            const newValue = currentEditor.val();
+            cell.data(newValue).draw(false);
+            tdElement.empty().text(newValue);
+          }
+        }
+      
+        if (currentDropdown && currentDropdown.length > 0) {
+          currentDropdown.remove();
+        }
+      
+        // Reset references
+        currentEditor = null;
+        currentDropdown = null;
+    }
+    
+    $(document).on('mousedown', function (e) {
+      const clickedInsideEditor = $(e.target).closest('td').find('.inline-editor').length > 0;
+      const clickedInsideDropdown = $(e.target).closest('.suggestion-box').length > 0;
+    
+      if (!clickedInsideEditor && !clickedInsideDropdown) {
+        try {
+          closeCurrentEditor();
+        } catch (error) {
+        }
+      }
+    });
 }
+
+let currentEditor = null;
+let currentDropdown = null;
+
 
 $('#editableTable thead').on('click', 'th', async function(e) {
   if (editMode) {
@@ -1849,19 +1907,6 @@ async function addNewColumn() {
         console.error(error);
         showMessage('Failed to save changes ' + error.message, false);
       }
-  }
-
-  async function useSampleCategorylist() {
-    try { 
-      var data = await unifiedSendRequest(USESAMPLECATEGORYLIST, {method: 'GET'});
-      if (data['status']) {
-        showMessage(data['description'], true);
-        await fillVersionDropdown();
-      }
-    } catch (error) {
-      console.error(error);
-      showMessage('Failed to use sample categorylist ' + error.message, false);
-    }
   }
 
   function showGuide() {

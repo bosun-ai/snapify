@@ -285,7 +285,7 @@
             </div>
 
             <input class="field__input" type="hidden" id="cookies" name="contact[questionnaire_answers]" placeholder="">
-            
+            <input class="field__input" type="hidden" id="cookiesPreviousPages" name="contact[previous_pages]" placeholder="">
             <div class="field">
               <textarea
                 rows="10"
@@ -345,6 +345,11 @@ function sendCookies() {
     }
   }
   document.getElementById('cookies').value = cookies.join(',');
+
+  var previousPages = readCookie('previousPages');
+  if (previousPages) {
+    document.getElementById('cookiesPreviousPages').value = previousPages;
+  }
 }
 document.addEventListener('DOMContentLoaded', function() {
     sendCookies();

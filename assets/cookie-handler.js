@@ -28,3 +28,31 @@ function setCookieShort(name, value, seconds) {
   }
   document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
+
+function addPageVisit() {
+  var page = window.location.pathname;
+  var timestamp = new Date().toISOString();
+
+  // Read existing visits
+  var visits = readCookie("previousPages");
+  var visitArray = [];
+  if (visits) {
+    try {
+      visitArray = JSON.parse(decodeURIComponent(visits));
+    } catch (e) {
+      console.warn("Corrupted cookie, resetting.");
+      visitArray = [];
+    }
+  }
+
+  // Add new visit
+  visitArray.push([page, timestamp]);
+
+  // Trim if too long to fit in cookie (optional)
+  if (JSON.stringify(visitArray).length > 3500) {
+    visitArray.shift();  // drop the oldest
+  }
+
+  // Save back
+  setCookie("previousPages", JSON.stringify(visitArray), 30); // keep 1 day
+}

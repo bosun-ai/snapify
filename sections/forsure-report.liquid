@@ -540,8 +540,15 @@ content: "\2713"
     position: absolute;
     right: 1.5rem;
   }
+  .closeError {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    top: 0.5rem;
+  }
   .close:hover,
-  .close:focus {
+  .close:focus, .closeError:hover, .closeError:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
@@ -578,6 +585,13 @@ content: "\2713"
   white-space: nowrap;
   padding: 0.5rem;
 }
+#resolutionSelect {
+  padding: 1rem;
+}
+.disableclicks {
+  pointer-events: none;
+}
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
@@ -984,12 +998,23 @@ content: "\2713"
       </div>
   </div>
 </div>
-<div id="excelModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
-  <div id="tabs-container" style="display: flex; margin-bottom: 1rem; border-bottom: 1px solid #ddd;"></div>
-  <div id="report-table-data-excel"></div>
-  <span id="closeExcelModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;">&times;</span>
+<div id="errorModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+  <div style="display:flex;gap:1rem;">
+    <h2 id="error-modal-title">Errors</h2>
+    <div style="display:flex;gap:1rem;margin: auto;margin-right: 1rem;height: fit-content;">
+      <select id="resolutionSelect" style="padding 1rem">
+      </select>
+      <button id="nextErrorButton" class="nextButton button">Next</button>
+    </div>
+    <span class="closeError" onclick="closeErrorModal()">&times;</span>
+  </div>
+  <div id="error-description">
+  </div>
+  <div id="error-table-data"></div>
+  <input id="fileid" type="hidden" style="display:none;">
+  <input id="orders" type="hidden" style="display:none;">
 </div>
-<div id="modalOverlayExcel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;"></div>
+<div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
 </div>
 {% render 'forsure-login' %}
 
@@ -1316,21 +1341,31 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
   row.appendChild(filePartTitle);
   row.appendChild(filePartProfile);
   row.appendChild(filePartError);
+  const resolvedCell = document.createElement('div');
+  resolvedCell.classList.add('resolve-cell');
+  resolvedCell.textContent = 'Click to resolve';
+  resolvedCell.addEventListener('click', async () => {
+    await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
+  });
+  row.appendChild(resolvedCell);
   return row;
 }
 
 function updateNextButton(dataUrl) {
-  var allFilesProfiles = true;
+  var allFilesValid = true;
   var allfiles = document.querySelectorAll('.file-row');
   allfiles.forEach(file => {
     if (file.querySelector('.profile-name').getAttribute('data-value') === '') {
-      allFilesProfiles = false;
+      allFilesValid = false;
+    }
+    if (file.querySelector('.file-part-error').getAttribute('data-value') === 'error') {
+      allFilesValid = false;
     }
   });
   if (allfiles.length === 0 && ordersReceived == 0) {
-    allFilesProfiles = false;
+    allFilesValid = false;
   }
-  if (allFilesProfiles) {
+  if (allFilesValid) {
     if (document.getElementById("nextBtn" + dataUrl)) {
       document.getElementById("nextBtn" + dataUrl).disabled = false;
       return;
@@ -1358,7 +1393,8 @@ function deleteButton(uniqueId, orders, returns, reports, dataUrl, row) {
   deleteButton.classList.add('deletebtn');
   deleteButton.textContent = 'X';
   deleteButton.style.margin = 'auto';
-  deleteButton.addEventListener('click', function () {
+  deleteButton.addEventListener('click', function (event) {
+    event.stopPropagation();
       // Remove the row from the grid
       row.remove();
 
@@ -1398,7 +1434,7 @@ async function parseCSV(text, nrows=3) {
 
 
 async function openProfileModal(availableProfiles, fileName, fileInput, rowId, orders, returns) {
-  if (fileInput.type !== 'text/csv') {
+  if (fileInput.type !== 'text/csv' && fileInput.type !== 'application/vnd.ms-excel') {
     showMessage('Please upload a CSV file', false);
     return;
   }
@@ -1634,6 +1670,7 @@ async function checkOrdersFile(fileId, rowElement) {
     selectedFilesOrders[fileId]['failed'] = {};
     rowElement.querySelector('.file-part-error').textContent = '';
     rowElement.querySelector('.file-part-error').style.display = 'none';
+    rowElement.querySelector('.resolve-cell').style.display = 'none';
     rowElement.style.color = '#17161c';
   } else {
     var details = {};
@@ -1641,14 +1678,19 @@ async function checkOrdersFile(fileId, rowElement) {
       details[k] = JSON.parse(v);
     }
     selectedFilesOrders[fileId]['failed'] = details;
+    selectedFilesOrders[fileId]['failedDescription'] = response.description;
     rowElement.querySelector('.file-part-error').textContent = `${response.missing_orders}/${response.total_orders} orders failed`;
     rowElement.querySelector('.file-part-error').style.display = 'block';
     rowElement.style.cursor = 'pointer';
     rowElement.style.color = 'red';
-
+    rowElement.querySelector('.file-part-error').setAttribute('data-value', 'error');
     rowElement.onclick = function() {
-      displayExcelReport(details, file.file.name, file.file.path);
+      displayErrorReport(details, fileId, true);
     }
+    rowElement.querySelector('.file-part-profile').classList.add('disableclicks');
+    rowElement.querySelector('.file-part-title div').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').style.display = 'block';
   }
   updateNextButton(dataUrlCurrent);
 }
@@ -1665,6 +1707,7 @@ async function checkReturnsFile(fileId, rowElement) {
     selectedFilesReturns[fileId]['failed'] = {};
     rowElement.querySelector('.file-part-error').textContent = '';
     rowElement.querySelector('.file-part-error').style.display = 'none';
+    rowElement.querySelector('.resolve-cell').style.display = 'none';
     rowElement.style.color = '#17161c';
   } else {
     var details = {};
@@ -1672,171 +1715,147 @@ async function checkReturnsFile(fileId, rowElement) {
       details[k] = JSON.parse(v);
     }
     selectedFilesReturns[fileId]['failed'] = details;
+    selectedFilesReturns[fileId]['failedDescription'] = response.description;
     rowElement.querySelector('.file-part-error').textContent = `${response.missing_returns}/${response.total_returns} returns failed`;
     rowElement.querySelector('.file-part-error').style.display = 'block';
     rowElement.style.cursor = 'pointer';
     rowElement.style.color = 'red';
-
+    rowElement.querySelector('.file-part-error').setAttribute('data-value', 'error');
     rowElement.onclick = function() {
-      displayExcelReport(details, file.file.name, file.file.path);
+      displayErrorReport(details, fileId, false);
     }
+    rowElement.querySelector('.file-part-profile').classList.add('disableclicks');
+    rowElement.querySelector('.file-part-title div').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').style.display = 'block';
   }
   updateNextButton(dataUrlCurrent);
 }
 
 
-function displayExcelReport(data, fileName, fullPath) {
-  const modalOverlay = document.getElementById('modalOverlayExcel');
-  const modal = document.getElementById('excelModal');
-  const tabsContainer = document.getElementById('tabs-container');
-  const tableContainer = document.getElementById('report-table-data-excel');
+let currentErrorIndex = 0;
+var resolutionMap = {};
 
-  // Reset modal content
-  tabsContainer.innerHTML = '';
-  tableContainer.innerHTML = '';
+function displayErrorReport(data, fileId, orders) {
+  currentErrorIndex = 0;
+  resolutionMap = {};  // Reset previous selections
 
-  let sheets = Object.keys(data);
-  let groupedSheets = {};
-  const groupLabels = {};
-  var use_tabs = false;
-
-  if (!use_tabs) {
-      const groups = {};
-      sheets.forEach((sheetName) => {
-          const rows = data[sheetName];
-          if (!rows || rows.length === 0) return;
-
-          const columnSignature = JSON.stringify(Object.keys(rows[0]).sort());
-          if (!groups[columnSignature]) {
-              groups[columnSignature] = [];
-              groupLabels[columnSignature] = [];
-          }
-
-          const taggedRows = rows.map(row => ({
-              ...row,
-              Category: sheetName
-          }));
-
-          groups[columnSignature].push(...taggedRows);
-          groupLabels[columnSignature].push(sheetName);
-      });
-
-      groupedSheets = groups;
-  } else {
-      // Use original structure (each sheet separate)
-      groupedSheets = Object.fromEntries(sheets.map(s => [s, data[s]]));
-  }
-
-  const groupNames = Object.keys(groupedSheets);
-
-  if (groupNames.length > 1) {
-      // Generate Tabs only if more than 1 group
-      groupNames.forEach((groupName, index) => {
-          const tabButton = document.createElement('button');
-          tabButton.textContent = groupLabels[groupName][0];
-          tabButton.className = 'tab-button';
-          tabButton.style.margin = '5px';
-          tabButton.dataset.sheet = groupName;
-
-          tabButton.addEventListener('click', () => {
-              tableContainer.innerHTML = '';
-              highlightActiveTab(index);
-              renderSheet(groupedSheets[groupName]);
-          });
-
-          tabsContainer.appendChild(tabButton);
-      });
-
-      // Render the first one initially
-      renderSheet(groupedSheets[groupNames[0]]);
-      highlightActiveTab(0);
-  } else {
-      // Only one group, render directly without tabs
-      renderSheet(groupedSheets[groupNames[0]]);
-  }
-
-
-  // Helper function to highlight active tab
-  function highlightActiveTab(activeIndex) {
-      const buttons = document.querySelectorAll('.tab-button');
-      buttons.forEach((btn, index) => {
-          btn.classList.toggle('active', index === activeIndex);
-      });
-  }
-
-
-  // Function to render a single sheet
-  function renderSheet(sheetData) {
-      const columns = Object.keys(sheetData[0]).map((key, idx) => {
-          const key_text = key in renames ? renames[key] : key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-          return {
-              title: key_text, // Use alphabet for headers
-              field: key,
-              headerSort: true, // Disable sorting
-              formatter: "plaintext", // Ensure raw text is displayed
-              cellMouseOver: (e, cell) => {
-                  // Add tooltip on hover for full entry
-                  const tooltip = document.createElement('div');
-                  tooltip.id = 'hover-tooltip';
-                  tooltip.style.position = 'absolute';
-                  tooltip.style.padding = '8px';
-                  tooltip.style.background = '#333';
-                  tooltip.style.color = '#fff';
-                  tooltip.style.borderRadius = '4px';
-                  tooltip.style.pointerEvents = 'none';
-                  tooltip.style.zIndex = '9999';
-                  tooltip.textContent = cell.getValue();
-
-                  document.body.appendChild(tooltip);
-                  document.body.addEventListener('mousemove', moveTooltip);
-
-                  function moveTooltip(event) {
-                      tooltip.style.left = `${event.pageX + 10}px`;
-                      tooltip.style.top = `${event.pageY + 10}px`;
-                  }
-
-                  cell.getElement().addEventListener('mouseout', () => {
-                      document.body.removeEventListener('mousemove', moveTooltip);
-                      document.body.removeChild(tooltip);
-                  });
-              },
-          };
-      });
-
-      const tableOptions = {
-        data: sheetData,
-        layout: columns.length > 10 ? "fitDataFill" : "fitColumns",
-        pagination: sheetData.length > 50,
-        paginationCounter: "rows",
-        paginationSize: 50,
-        columns: columns,
-    };
-    // Only add groupBy when not using tabs
-    if (!use_tabs) {
-        tableOptions.groupBy = "Category";
-        tableOptions.groupHeader = function (value, count, data, group) {
-            return value;
-        };
-    }
-
-
-      // Initialize Tabulator for the sheet
-      new Tabulator("#report-table-data-excel", tableOptions);
-  }
-
-  // Render the first sheet by default
-  if (use_tabs && sheets.length > 0) {
-      renderSheet(data[sheets[0]]);
-      highlightActiveTab(0);
-  }
-  // Show the modal
-  modal.style.display = 'block';
-  modalOverlay.style.display = 'block';
+  document.getElementById('errorModal').style.display = 'block';
+  document.getElementById('modalOverlayError').style.display = 'block';
+  document.getElementById('fileid').value = fileId;
+  document.getElementById('orders').value = orders;
+  loadErrorAtIndex(currentErrorIndex);
 }
 
-function hideExcelModal() {
-  document.getElementById('excelModal').style.display = 'none';
-  document.getElementById('modalOverlayExcel').style.display = 'none';
+function loadErrorAtIndex(index) {
+  const tableContainer = document.getElementById('error-table-data');
+  tableContainer.innerHTML = ''; // Clear previous table
+  var orders = document.getElementById('orders').value;
+  var fileId = document.getElementById('fileid').value;
+  var file = {};
+  if (orders == 'true') {
+    file = selectedFilesOrders[fileId];
+  } else {
+    file = selectedFilesReturns[fileId];
+  }
+  var errorTypes = Object.keys(file['failed']);
+  if (index >= errorTypes.length) {
+    file['resolutions'] = resolutionMap;
+    var row = document.getElementById(fileId);
+    row.style.color = '#17161c';
+    var errorRow = row.querySelector('.file-part-error');
+    errorRow.textContent = 'Resolved';
+    errorRow.setAttribute('data-value', 'resolved');
+    closeErrorModal();
+    row.querySelector('.file-part-profile').classList.remove('disableclicks');
+    row.querySelector('.file-part-title div').classList.remove('disableclicks');
+    row.querySelector('.resolve-cell').classList.remove('disableclicks');
+    row.querySelector('.resolve-cell').style.display = 'none';
+    row.onclick = null;
+    updateNextButton(dataUrlCurrent);
+    return;
+  }
+  if (index == errorTypes.length - 1) {
+    document.getElementById('nextErrorButton').textContent = 'Save';
+  } else {
+    document.getElementById('nextErrorButton').textContent = 'Next';
+  }
+  const errorType = errorTypes[index];
+  const entries = file['failed'][errorType];
+  var defaultResolution = 'ignore';
+  document.getElementById('error-description').textContent = file['failedDescription'][errorType];
+  // Update title
+  if (errorType.includes('Duplicated')) {
+    // update resolutionSelect to contain keep first and keep last
+    const resolutionSelect = document.getElementById('resolutionSelect');
+    resolutionSelect.innerHTML = '';
+    const option1 = document.createElement('option');
+    option1.value = 'keep_first';
+    option1.textContent = 'Keep First';
+    option1.title = 'Keep the first value and ignore the other values';
+    resolutionSelect.appendChild(option1);
+    const option2 = document.createElement('option');
+    option2.value = 'keep_last';
+    option2.textContent = 'Keep Last';
+    option2.title = 'Keep the last value and ignore the other values';
+    resolutionSelect.appendChild(option2);
+    defaultResolution = 'keep_first';
+  } else {
+    resolutionSelect.innerHTML = '';
+    const option1 = document.createElement('option');
+    option1.value = 'ignore';
+    option1.textContent = 'Keep old';
+    option1.title = 'Keep the old values and ignore the new values';
+    resolutionSelect.appendChild(option1);
+    const option2 = document.createElement('option');
+    option2.value = 'replace';
+    option2.textContent = 'Replace';
+    option2.title = 'Replace the old values with the new values';
+    resolutionSelect.appendChild(option2);
+    defaultResolution = 'ignore';
+  }
+  document.getElementById('error-modal-title').innerText = `Error: ${errorType}`;
+
+  // Default resolution (if not set before)
+  document.getElementById('resolutionSelect').value = resolutionMap[errorType] || defaultResolution;
+  var sheetData = Object.values(entries);
+  // Render Tabulator table
+  new Tabulator("#error-table-data", {
+    data: sheetData,
+    layout: "fitDataFill",
+    responsiveLayout: false,
+    autoColumns: true,
+    pagination: sheetData.length > 10,
+    paginationCounter: "rows",
+    paginationSize: 10
+  });
+}
+
+// Save resolution and show next error
+document.getElementById('nextErrorButton').addEventListener('click', () => {
+  const resolution = document.getElementById('resolutionSelect').value;
+  var orders = document.getElementById('orders').value;
+  var fileId = document.getElementById('fileid').value;
+  var file = {};
+  if (orders == 'true') {
+    file = selectedFilesOrders[fileId];
+  } else {
+    file = selectedFilesReturns[fileId];
+  }
+  const currentError = Object.keys(file['failed'])[currentErrorIndex];
+  resolutionMap[currentError] = resolution;
+
+  currentErrorIndex++;
+  loadErrorAtIndex(currentErrorIndex);
+});
+
+document.getElementById('modalOverlayError').addEventListener('click', function() {
+  closeErrorModal();
+});
+
+function closeErrorModal() {
+  document.getElementById('errorModal').style.display = 'none';
+  document.getElementById('modalOverlayError').style.display = 'none';
 }
 
 
@@ -2124,6 +2143,11 @@ async function uploadOrders(endpoint) {
           } else {
             formData.append('order_lists', file.file);
           }
+          if (file.resolutions) {
+            formData.append('resolutions', JSON.stringify(file.resolutions));
+          } else {
+            formData.append('resolutions', '{}');
+          }
           formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
           formData.append('fileId', fileId);
         }
@@ -2179,6 +2203,11 @@ async function uploadReturns(endpoint) {
             formData.append('return_lists', file.fileFiltered);
           } else {
             formData.append('return_lists', file.file);
+          }
+          if (file.resolutions) {
+            formData.append('resolutions', JSON.stringify(file.resolutions));
+          } else {
+            formData.append('resolutions', '{}');
           }
           formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
           formData.append('fileId', fileId);

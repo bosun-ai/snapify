@@ -966,6 +966,13 @@ fieldset[disabled] .btn-default:hover {
                   name="contact[questionnaire_answers]"
                   placeholder=""
                 >
+                  <input
+                    class="field__input to_send"
+                    type="hidden"
+                    id="cookiesPreviousPages"
+                    name="contact[previous_pages]"
+                    placeholder=""
+                  >
                 <input
                   class="field__input to_send"
                   type="hidden"
@@ -1644,6 +1651,11 @@ function gtag_report_conversion() {
         }
       }
       document.getElementById('cookies').value = cookies.join(',');
+
+      var previousPages = readCookie('previousPages');
+      if (previousPages) {
+        document.getElementById('cookiesPreviousPages').value = previousPages;
+      }
     }
 
     function handleSelection(value) {

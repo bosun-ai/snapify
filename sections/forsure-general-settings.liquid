@@ -51,7 +51,13 @@
     }
     td {
       border: none !important;
-      border-top: 0.2rem solid #17161c !important;
+      /* border-top: 0.2rem solid #17161c !important; */
+    }
+    .report-type-container {
+      border-top: 0.2rem solid #17161c;
+    }
+    .report-type-container:first-child {
+      border-top: none;
     }
 
     .flex-header {
@@ -189,7 +195,6 @@
 .tab-button.active {
     background-color: #2255ff;
     color: #fafafa;
-    border-bottom: 2px solid #fff;
     font-weight: bold;
 }
 
@@ -311,24 +316,24 @@
   {% render 'forsure-login' %}
   {% comment %} {% render 'forsure-guide' %} {% endcomment %}
   {% render 'forsure-simple-notification' %}
-  <div>
-    <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
+  <div style="padding-bottom: 5rem;" id="generalSettingsContainer">
+    <div class="configbox page-width border" style="padding: 0;border-radius:1rem;padding:3px;">
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem;">
         <h2>Configure General Settings</h2>
       </div>
       <div class="display-flex" style="margin: auto;width: fit-content;display:flex"></div>
       <div id="generalConfig" class="bordertop" style="background-color: #fafafa;">
-        <div style="display: flex;">
+        <div style="display: none" >
           <h3 style="margin-left: 2rem;width: 50%;display:flex;align-items:center;gap:3rem">Demo Data<div style="background-color: #2255ff;color:#fafafa;padding:0.5rem;border-radius:1rem;" id="demoDataStatus"></div></h3>
           <div style="margin: auto;margin-right: 2rem;display:flex;gap:2rem">
             <button class="button" id="createDemoDataButton" onclick="createDemoData()" style="display:none;">Create Demo Data</button>
             <button class="button" id="deleteDemoDataButton" onclick="deleteDemoData()" style="display:none;background-color:red;">Delete Demo Data</button>
           </div>
         </div>
-        <hr style="width: 100%; border-top: 0.2rem solid #17161c;">
+        <hr style="width: 100%; border-top: 0.2rem solid #17161c;display:none;">
         <h3 class="flex-header" style="margin-left: 2rem">Company Information
         </h3>
-        <div id="configurationGeneral" style="padding: 20px; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9;">
+        <div id="configurationGeneral" style="padding: 20px; border-radius: 10px; background-color: #f9f9f9;">
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
               <tr>
@@ -410,7 +415,6 @@
         console.error(error.message);
       }
     }
-    getDemoDataStatus();
     
     async function getGeneralSettingsDefinition() {
       try {
@@ -457,9 +461,16 @@
   
     async function initializeSettings() {
       try {
+        var hasAccess = await unifiedSendRequest(GETGENERALSETTINGSACCESS, { method: 'GET' });
+        if (!hasAccess['generalsettings']) {
+          document.getElementById('generalSettingsContainer').style.display = 'none';
+          return;
+        }
+        document.getElementById('generalSettingsContainer').style.display = 'block';
         generalSettingsDefinition = await getGeneralSettingsDefinition();
         generalSettings = await getGeneralSettings();
         availableCountries = await getAvailableCountries();
+        await getDemoDataStatus();
   
         renderGeneralSettings();
         await renderCountryTabs();
@@ -590,7 +601,7 @@
       });
       tab.classList.add('active');
       const container = document.getElementById('reportDataContainer');
-      container.style.border = '1px solid #ddd';
+      container.style.border = '0.2rem solid #17161c';
       container.style.borderRadius = '8px';
       container.style.overflow = 'hidden';
       container.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
@@ -612,14 +623,20 @@
         optionsTable.className = 'options-table';
         const optionsTableRow = document.createElement('tr');
         optionsTableRow.className = 'options-table-row';
+        const placeholder = document.createElement('td');
+        placeholder.style.width = '15%';
+        placeholder.style.padding = '2rem';
+        optionsTableRow.appendChild(placeholder);
         const label = document.createElement('td');
         label.style.height = '6rem';
-        label.style.width = '50%';
         label.style.padding = '2rem';
+        label.style.width = '35%';
         label.textContent = 'PRO';
         optionsTableRow.appendChild(label);
         const proSelectContainer = document.createElement('td');
         proSelectContainer.style.padding = '2rem';
+        proSelectContainer.style.display = 'flex';
+        proSelectContainer.style.alignItems = 'center';
         const proSelect = document.createElement('select');
         proSelect.className = 'pro-select selectpicker';
         proSelect.style.padding = '0.5rem';
@@ -635,6 +652,10 @@
         });
         proSelectContainer.appendChild(proSelect);
         optionsTableRow.appendChild(proSelectContainer);
+        const placeholder2 = document.createElement('td');
+        placeholder2.style.width = '15%';
+        placeholder2.style.padding = '2rem';
+        optionsTableRow.appendChild(placeholder2);
         optionsTable.appendChild(optionsTableRow);
         reportTypeContainer.appendChild(optionsTable);
         var proLabels = labels[reportType][proSelect.value];
@@ -657,10 +678,14 @@
       const field = proLabels[key];
       const fieldContainer = document.createElement('tr');
       fieldContainer.className = 'field-container';
-
+      const placeholder = document.createElement('td');
+      placeholder.style.width = '15%';
+      placeholder.style.padding = '2rem';
+      fieldContainer.appendChild(placeholder);
       const label = document.createElement('td');
       label.style.height = '6rem';
       label.style.padding = '2rem';
+      label.style.width = '35%';
       label.textContent = field.title;
       label.title = field.description;
       fieldContainer.appendChild(label);
@@ -668,6 +693,8 @@
       let inputElement;
       const optionContainer = document.createElement('td');
       optionContainer.style.padding = '2rem';
+      optionContainer.style.display = 'flex';
+      optionContainer.style.alignItems = 'center';
       if (field.input_type === 'dropdown') {
         inputElement = document.createElement('select');
         inputElement.style.padding = '0.5rem';
@@ -704,7 +731,11 @@
       inputElement.setAttribute('data-country', country);
       inputElement.setAttribute('data-name', field.key);
       optionContainer.appendChild(inputElement);
+      const placeholder3 = document.createElement('td');
+      placeholder3.style.width = '15%';
+      placeholder3.style.padding = '2rem';
       fieldContainer.appendChild(optionContainer);
+      fieldContainer.appendChild(placeholder3);
       proLabelContainer.appendChild(fieldContainer);
     });
   }

@@ -70,6 +70,7 @@ GETGENERALCONFIG = 'settings/labels/general'
 GETGENERALCONFIGCOUNTRIES = 'settings/labels/general/countries'
 GETGENERALCONFIGCOUNTRY = 'settings/labels/general/countrylabels'
 GETGENERALSETTINGSDEFINITION = 'settings/labels/general/definition'
+GETGENERALSETTINGSACCESS = 'settings/labels/general/access'
 
 UPLOADCATEGORYLIST = 'categorylist'
 UPLOADCATEGORYLISTSTORE = 'categorylist/from-store'

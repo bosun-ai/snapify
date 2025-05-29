@@ -148,6 +148,19 @@
     display: none; /* Hide the line break on larger screens */
   }
 }
+
+#errorMessage {
+  position: fixed;
+  top: 25rem;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  margin-left: -5px;
+  color: #fafafa;
+  z-index: 102;
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color:red;
+}
 {%- endstyle -%}
 
 <script src="{{ 'details-disclosure.js' | asset_url }}" defer="defer"></script>
@@ -259,6 +272,9 @@
                   </ul>
                 </nav>
                 {% if customer.tags contains 'member' %}
+                  {% if section.settings.show_error_warning %}
+                    <div id="errorMessage">{{ section.settings.error_warning }}</div>
+                  {% endif %}
                   <a href="{{ pages['forsure-statistics'].url }}" id="disappearbuttMobile" class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
                 {% elsif customer.tags contains 'vendor' %}
                   <a href="{{ pages['forsure-categorylist-editor'].url }}" id="disappearbuttMobile" class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
@@ -521,6 +537,9 @@
         {% if customer.tags contains 'subscription-ended' %}
          <a href="{{ pages['subscription-ended'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
        {% elsif customer.tags contains 'member' %}
+          {% if section.settings.show_error_warning %}
+            <div id="errorMessage">{{ section.settings.error_warning }}</div>
+          {% endif %}
          <a href="{{ pages['forsure-statistics'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
        {% elsif customer.tags contains 'vendor' %}
          <a href="{{ pages['forsure-categorylist-editor'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
@@ -693,6 +712,9 @@
       showContactOptions();
       // showContactOptionsMobile();
   }
+  document.addEventListener('DOMContentLoaded', function() {
+    addPageVisit();
+  });
 </script>
 
 
@@ -891,6 +913,18 @@
       "id": "free_plan",
       "default": "Free Plan",
       "label": "Free Plan Button Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_error_warning",
+      "default": false,
+      "label": "Show Error Warning (shown everywhere)"
+    },
+    {
+      "type": "text",
+      "id": "error_warning",
+      "default": "The software is currently down, please don't upload any reports. For urgent things, or to upload reports, please contact daniel.dev@for-sure.net",
+      "label": "Error Warning (shown everywhere)"
     },
     {
       "type": "checkbox",
