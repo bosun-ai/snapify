@@ -5,456 +5,629 @@ Usage:
 {% render 'forsure-notifications' %}
 {% endcomment %}
 <style>
-#notificationBox {
-    width: 30%;
-    height: 100%;
-    position: fixed;
-    right: 0;
-    top: 0;
-    background-color: #fafafa;
-    /* transform: translate(-50%, -50%); */
-    /* left: 50%; */
-    /* margin-left: -5px; */
-    z-index: 102;
-    overflow: hidden;
-    border: 0.1rem solid #17161c;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-#notificationBoxBackground {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 101;
-    display: none;
-}
-#notificationBoxHeader {
-      background-color: #2255ff;
-      color: white;
-      padding: 2rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-  }
-
-  #notificationBoxHeader span {
-      cursor: pointer;
-      font-size: 2.2rem;
-  }
-
-  /* Scrollable content area */
-  #notificationBoxContent {
-      padding: 1rem;
-      height: calc(100% - 3.5rem);
-      overflow-y: auto;
-  }
-
-  /* Notification card styling */
-  .notificationCard {
-      background-color: #f9f9f9;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border-radius: 6px;
-      border: 1px solid #e0e0e0;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-  }
-
-  .notificationDetails {
-      max-width: 85%;
-  }
-
-  .notificationDetails h4 {
-      margin: 0 0 0.5rem 0;
-  }
-
-  .notificationDetails p {
-      margin: 0 0 0.5rem 0;
-  }
-
-  .notificationDetails .date {
-      text-align: right;
-  }
-
-  .removeButton {
-      background-color: transparent;
-      border: none;
-      color: #ff4d4f;
-      font-size: 1.2rem;
-      cursor: pointer;
-  }
-
-  .removeButton:hover {
-      color: #ff0000;
-  }
-
-  .icon-container {
-      position: relative;
-      display: inline-block;
+    #notificationBox {
+        width: 30%;
+        height: 100%;
+        position: fixed;
+        right: 0;
+        top: 0;
+        background-color: #fafafa;
+        /* transform: translate(-50%, -50%); */
+        /* left: 50%; */
+        /* margin-left: -5px; */
+        z-index: 102;
+        overflow: hidden;
+        border: 0.1rem solid #17161c;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-
-    .icon {
-      width: 50px;
-      height: 50px;
+    #notificationBoxBackground {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 101;
+        display: none;
     }
-
-    .badgeNotification {
-      position: absolute;
-      top: 10px;
-      right: -2px;
-      background-color: #a80000;
-      color: white;
-      border-radius: 50%;
-      font-size: 12px;
-      min-width: 20px;
-      height: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
+    #notificationBoxHeader {
+          background-color: #2255ff;
+          color: white;
+          padding: 2rem;
+          font-size: 1.5rem;
+          font-weight: bold;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+    
+      #notificationBoxHeader span {
+          cursor: pointer;
+          font-size: 2.2rem;
+      }
+    
+      /* Scrollable content area */
+      #notificationBoxContent {
+          padding: 1rem;
+          height: calc(100% - 3.5rem);
+          overflow-y: auto;
+      }
+    
+      /* Notification card styling */
+      .notificationCard {
+          background-color: #f9f9f9;
+          margin-bottom: 1rem;
+          padding: 1rem;
+          border-radius: 6px;
+          border: 1px solid #e0e0e0;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+      }
+    
+      .notificationDetails {
+          max-width: 85%;
+      }
+    
+      .notificationDetails h4 {
+          margin: 0 0 0.5rem 0;
+      }
+    
+      .notificationDetails p {
+          margin: 0 0 0.5rem 0;
+      }
+    
+      .notificationDetails .date {
+          text-align: right;
+      }
+    
+      .removeButton {
+          background-color: transparent;
+          border: none;
+          color: #ff4d4f;
+          font-size: 1.2rem;
+          cursor: pointer;
+      }
+    
+      .removeButton:hover {
+          color: #ff0000;
+      }
+    
+      .icon-container {
+          position: relative;
+          display: inline-block;
+        }
+    
+        .icon {
+          width: 50px;
+          height: 50px;
+        }
+    
+        .badgeNotification {
+          position: absolute;
+          top: 10px;
+          right: -2px;
+          background-color: #a80000;
+          color: white;
+          border-radius: 50%;
+          font-size: 12px;
+          min-width: 20px;
+          height: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-weight: bold;
+        }
+    
+        .badgeNotification.hidden {
+          display: none;
+        }
+        .button-color {
+            background-color: #17161c;
+        }
+        .active {
+            background-color: #2255ff !important;
+        }
+    
+    
+    .zoom-box {
+        overflow: hidden;
+        height: 300px; /* Adjust as needed */
+        position: relative;
+        cursor: zoom-in;
     }
-
-    .badgeNotification.hidden {
-      display: none;
+    
+    .zoom-box img {
+        width: 100%;
+        transition: transform 0.1s ease-in-out;
+        transform-origin: center;
     }
-    .button-color {
-        background-color: #17161c;
-    }
-    .active {
-        background-color: #2255ff !important;
-    }
-</style>
-<div id="notificationBox" style="display: none">
-    <div id="notificationBoxHeader">
-      Notifications
-      <div id="notificationIcons" style="display: flex">
-        <svg width="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="cursor: pointer;margin-right: 1rem" onclick="openNotificationSettings()"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#fafafa" d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg>
-        <span onclick="closeNotificationBox()">✖</span>
+    
+    </style>
+    <div id="notificationBox" style="display: none">
+        <div id="notificationBoxHeader">
+          Notifications
+          <div id="notificationIcons" style="display: flex">
+            <svg width="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="cursor: pointer;margin-right: 1rem" onclick="openNotificationSettings()"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#fafafa" d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg>
+            <span onclick="closeNotificationBox()">✖</span>
+        </div>
+    
+      </div>
+      <div id="notificationBoxContent">
+          <!-- Notification cards will be inserted here -->
+      </div>
     </div>
-      
-  </div>
-  <div id="notificationBoxContent">
-      <!-- Notification cards will be inserted here -->
-  </div>
-</div>
-<div id="notificationBoxBackground" style="display: none"></div>
-<script>
-var notifications = [];
-async function openNotificationSettings() {
-    try {
-        let notificationSettings = await unifiedSendRequest(NOTIFICATIONSETTINGS, { method: 'GET' });
-        if (!notificationSettings) {
-            notificationSettings = {
-                send_email: true,
-                send_all_notifications: false,
-                show_all_notifications: false
-            };
-        }
-        let modal = document.createElement("div");
-        modal.id = "notificationSettingsModal";
-        modal.style.position = "fixed";
-        modal.style.top = "50%";
-        modal.style.left = "50%";
-        modal.style.transform = "translate(-50%, -50%)";
-        modal.style.width = "400px";
-        modal.style.backgroundColor = "white";
-        modal.style.padding = "20px";
-        modal.style.borderRadius = "10px";
-        modal.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
-        modal.style.zIndex = "105";
-        modal.style.textAlign = "center";
-        
-        let showAll = notificationSettings['show_all_notifications'] ? "active" : "";
-        let personal = notificationSettings['show_all_notifications'] ? "" : "active";
-        let emailsNone = notificationSettings['send_email'] ? "" : "active";
-        let emailsPersonal = (notificationSettings['send_email'] && !notificationSettings['send_all_notifications']) ? "active" : "";
-        let emailsAll = (notificationSettings['send_email'] && notificationSettings['send_all_notifications']) ? "active" : "";    
-        
-        modal.innerHTML = `
-            <h2>Notification Settings</h2>
-            <h3>Notifications</h3>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-                <button class="toggle-button button button-color ${personal}" data-group="notifications" data-type="show_all_notifications" data-value=false onclick="updateActiveButton(this)">Only Yours</button>
-                <button class="toggle-button button button-color ${showAll}" data-group="notifications" data-type="show_all_notifications" data-value=true onclick="updateActiveButton(this)">All</button>
-            </div>
-            <h3>Email</h3>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-                <button class="toggle-button button button-color ${emailsNone}" data-group="email" data-type="send_email" data-value=false onclick="updateActiveButton(this)">None</button>
-                <button class="toggle-button button button-color ${emailsPersonal}" data-group="email" data-type="send_email" data-value=true onclick="updateActiveButton(this)">Only Yours</button>
-                <button class="toggle-button button button-color ${emailsAll}" data-group="email" data-type="send_all_notifications" data-value=true onclick="updateActiveButton(this)">All</button>
-            </div>
-            <button onclick="saveNotificationSettings()" style="background-color: #2255ff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Save</button>
-            <button onclick="closeNotificationSettings()" style="margin-left: 10px; background-color: #ff4d4f; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-        `;
-    
-        let overlay = document.createElement("div");
-        overlay.id = "notificationSettingsOverlay";
-        overlay.style.position = "fixed";
-        overlay.style.top = "0";
-        overlay.style.left = "0";
-        overlay.style.width = "100%";
-        overlay.style.height = "100%";
-        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-        overlay.style.zIndex = "104";
-        overlay.onclick = closeNotificationSettings;
-    
-        document.body.appendChild(overlay);
-        document.body.appendChild(modal);
-    } catch (error) {
-        showMessage('Failed to retrieve notification settings. Please try again.', false);
-        console.error(error);
-    }
-}
-
-function updateActiveButton(element) {
-    let type = element.getAttribute("data-group");
-    let value = element.getAttribute("data-value") === "true";
-    
-    document.querySelectorAll(`[data-group="${type}"]`).forEach(button => {
-        button.classList.remove("active");
-    });
-    element.classList.add("active");
-}
-
-async function saveNotificationSettings() {
-    let settings = {
-        send_email: document.querySelector(".toggle-button[data-type='send_email'].active")?.getAttribute("data-value") === "true",
-        send_all_notifications: document.querySelector(".toggle-button[data-type='send_all_notifications'].active")?.getAttribute("data-value") === "true",
-        show_all_notifications: document.querySelector(".toggle-button[data-type='show_all_notifications'].active")?.getAttribute("data-value") === "true"
-    };
-    if (settings['send_all_notifications'] === true) {
-        settings['send_email'] = true;
-    }
-    try {
-        await unifiedSendRequest(NOTIFICATIONSETTINGS, { method: 'POST', formData: JSON.stringify(settings), headerArgs: { 'Content-Type': 'application/json' }});
-        showMessage('Successfully saved notification settings.', true);
-    } catch (error) {
-        showMessage('Failed to save notification settings. Please try again.', false);
-        console.error(error);
-    }
-    
-    closeNotificationSettings();
-}
-
-function closeNotificationSettings() {
-    let modal = document.getElementById("notificationSettingsModal");
-    let overlay = document.getElementById("notificationSettingsOverlay");
-    if (modal) modal.remove();
-    if (overlay) overlay.remove();
-}
-
-
-function updateNotificationBadge(messageList) {
-    const badge = document.getElementById('notification-badge');
-
-    const count = messageList.length;
-    if (count > 0) {
-      badge.textContent = count > 9 ? '9+' : count;
-      badge.classList.remove('hidden');
-    } else {
-      badge.classList.add('hidden');
-    }
-  }
-
-async function getNotifications() {
-    try {
-        notifications = await unifiedSendRequest(NOTIFICATIONS, {method: 'GET'});
-        updateNotificationBadge(notifications);
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    getNotifications();
-    setInterval(getNotifications, 5000); // fetch notifications every 30seconda
-});
-
-function createNotificationCards() {
-    const contentBox = document.getElementById("notificationBoxContent");
-    contentBox.innerHTML = ""; // Clear existing content
-    if (notifications.length === 0) {
-        contentBox.innerHTML = "<p style='margin: auto;margin-top: 2rem;width: fit-content;'>No notifications</p>";
-        return;
-    }
-
-    notifications.forEach((notification, index) => {
-        const card = document.createElement("div");
-        card.className = "notificationCard";
-        resolution_button = '';
-        if (notification.allow_custom_resolution) {
-            resolution_button = `<button onclick="addResolution(${notification.id})">Add Resolution</button>`;
-        }
-
-        card.innerHTML = `
-            <div class="notificationDetails">
-                <h4>${notification.title}</h4>
-                <p><strong>Company:</strong> ${notification.user}</p>
-                <p><strong>Type of Report:</strong> ${notification.type_of_report}</p>
-                <p><strong>Error:</strong> ${notification.error_message}</p>
-                ${resolution_button}
-                <div class="date">${notification.date_of_notification}</div>
-            </div>
-            <button class="removeButton" onclick="removeNotification(${notification.id})">✖</button>
-        `;
-
-        contentBox.appendChild(card);
-    });
-}
-
-async function removeNotification(notificationId) {
-    try {
-        const response = await unifiedSendRequest(NOTIFICATIONS + `/${notificationId}/resolve`, {method: 'PUT'});
-        await getNotifications();
-        createNotificationCards(); // Re-render the cards
-        showMessage('Resolved notification', true);
-    } catch (error) {
-        console.error("Failed to resolve notification:", error);
-        showMessage('Failed to resolve notification ' + error.message, false);
-    }
-}
-
-async function addResolution(notificationId) {
-    try {
-        var response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}`, {method: 'GET'});
-        response = [
-            {
-                "resolved": false,
-                "id": 83,
-                "resolution_hint_title": "Reports up to date",
-                "resolution_id": "allDataSubmittedLastYear",
-                "error_data": "",
-                "notification_id": 139,
-                "resolution": "",
-                "error_message": "The battery sales report associated with ADATA Technology Co., Ltd. for the period from 01 January 2024 to 31 January 2025 is missing data. Ensure all required sales information is included in your submission.",
-                "resolution_hint": "'Following the change of Battery vEMCs levels, any outstanding sales of Batteries from the period 01 January 2024 - 31 January 2025 must be reported as such.\\n\\n If you have already reported all such Battery sales, click Yes and make this months submission as normal.\\n\\n If you have additional sales for the period 01 January 2024 - 31 January 2025 which you have as yet failed to report, click No. An additional dropdown box will then be available when making this months submission, allowing you to identify the Battery vEMC period to which each line of sales information belongs.\\n You will be asked this question again at your next login.'",
-                "resolution_type": "{\"type\": \"options\", \"options\": [{\"value\": \"btnYes\", \"name\": \"Yes\"}, {\"value\": \"btnNo\", \"name\": \"No\"}]}",
-                "report_id": "0174LY274BRRTJLNTHD5EIMFO43APTHOXO"
+    <div id="notificationBoxBackground" style="display: none"></div>
+    <script>
+    var notifications = [];
+    async function openNotificationSettings() {
+        try {
+            let notificationSettings = await unifiedSendRequest(NOTIFICATIONSETTINGS, { method: 'GET' });
+            if (!notificationSettings) {
+                notificationSettings = {
+                    send_email: true,
+                    send_all_notifications: false,
+                    show_all_notifications: false
+                };
             }
-        ]
-        openResolutionModal(response[0]);
-    } catch (error) {
-        console.error("Failed to open resolution:", error);
-        showMessage('Failed to open resolution ' + error.message, false);
+            let modal = document.createElement("div");
+            modal.id = "notificationSettingsModal";
+            modal.style.position = "fixed";
+            modal.style.top = "50%";
+            modal.style.left = "50%";
+            modal.style.transform = "translate(-50%, -50%)";
+            modal.style.width = "400px";
+            modal.style.backgroundColor = "white";
+            modal.style.padding = "20px";
+            modal.style.borderRadius = "10px";
+            modal.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+            modal.style.zIndex = "105";
+            modal.style.textAlign = "center";
+    
+            let showAll = notificationSettings['show_all_notifications'] ? "active" : "";
+            let personal = notificationSettings['show_all_notifications'] ? "" : "active";
+            let emailsNone = notificationSettings['send_email'] ? "" : "active";
+            let emailsPersonal = (notificationSettings['send_email'] && !notificationSettings['send_all_notifications']) ? "active" : "";
+            let emailsAll = (notificationSettings['send_email'] && notificationSettings['send_all_notifications']) ? "active" : "";
+    
+            modal.innerHTML = `
+                <h2>Notification Settings</h2>
+                <h3>Notifications</h3>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                    <button class="toggle-button button button-color ${personal}" data-group="notifications" data-type="show_all_notifications" data-value=false onclick="updateActiveButton(this)">Only Yours</button>
+                    <button class="toggle-button button button-color ${showAll}" data-group="notifications" data-type="show_all_notifications" data-value=true onclick="updateActiveButton(this)">All</button>
+                </div>
+                <h3>Email</h3>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                    <button class="toggle-button button button-color ${emailsNone}" data-group="email" data-type="send_email" data-value=false onclick="updateActiveButton(this)">None</button>
+                    <button class="toggle-button button button-color ${emailsPersonal}" data-group="email" data-type="send_email" data-value=true onclick="updateActiveButton(this)">Only Yours</button>
+                    <button class="toggle-button button button-color ${emailsAll}" data-group="email" data-type="send_all_notifications" data-value=true onclick="updateActiveButton(this)">All</button>
+                </div>
+                <button onclick="saveNotificationSettings()" style="background-color: #2255ff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Save</button>
+                <button onclick="closeNotificationSettings()" style="margin-left: 10px; background-color: #ff4d4f; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+            `;
+    
+            let overlay = document.createElement("div");
+            overlay.id = "notificationSettingsOverlay";
+            overlay.style.position = "fixed";
+            overlay.style.top = "0";
+            overlay.style.left = "0";
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+            overlay.style.zIndex = "104";
+            overlay.onclick = closeNotificationSettings;
+    
+            document.body.appendChild(overlay);
+            document.body.appendChild(modal);
+        } catch (error) {
+            showMessage('Failed to retrieve notification settings. Please try again.', false);
+            console.error(error);
+        }
     }
-}
-
-async function openResolutionModal(response) {
-    try {
-        // Create modal container
-        let modal = document.createElement("div");
-        modal.id = "resolutionModal";
-        modal.style.position = "fixed";
-        modal.style.top = "50%";
-        modal.style.left = "50%";
-        modal.style.transform = "translate(-50%, -50%)";
-        modal.style.width = "50vw";
-        modal.style.backgroundColor = "white";
-        modal.style.padding = "20px";
-        modal.style.borderRadius = "10px";
-        modal.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
-        modal.style.zIndex = "105";
-        modal.style.textAlign = "center";
-
-        let resolutionOption = `<textarea id="resolutionModalTextbox" placeholder="${response.resolution}" style="width: 100%; height: 80px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; resize: none;"></textarea>`;
-
-        if (response.resolution_type) {
-            try {
-                let data = JSON.parse(response.resolution_type); // Ensure it's parsed correctly
-
-                if (data.type === "options") {
-                    resolutionOption = '<div style="justify-content: space-evenly;display: flex;gap: 1rem;"><input id="resolutionModalTextbox" type="hidden"/>';
-
-                    data.options.forEach(option => {
-                        resolutionOption += `<button class="button" value="${option.value}" onclick="document.getElementById('resolutionModalTextbox').value=this.value;">${option.name}</button>`;
-                    });
-
-                    resolutionOption += '</div>'; // Close the div
+    
+    function updateActiveButton(element) {
+        let type = element.getAttribute("data-group");
+        let value = element.getAttribute("data-value") === "true";
+    
+        document.querySelectorAll(`[data-group="${type}"]`).forEach(button => {
+            button.classList.remove("active");
+        });
+        element.classList.add("active");
+    }
+    
+    async function saveNotificationSettings() {
+        let settings = {
+            send_email: document.querySelector(".toggle-button[data-type='send_email'].active")?.getAttribute("data-value") === "true",
+            send_all_notifications: document.querySelector(".toggle-button[data-type='send_all_notifications'].active")?.getAttribute("data-value") === "true",
+            show_all_notifications: document.querySelector(".toggle-button[data-type='show_all_notifications'].active")?.getAttribute("data-value") === "true"
+        };
+        if (settings['send_all_notifications'] === true) {
+            settings['send_email'] = true;
+        }
+        try {
+            await unifiedSendRequest(NOTIFICATIONSETTINGS, { method: 'POST', formData: JSON.stringify(settings), headerArgs: { 'Content-Type': 'application/json' }});
+            showMessage('Successfully saved notification settings.', true);
+        } catch (error) {
+            showMessage('Failed to save notification settings. Please try again.', false);
+            console.error(error);
+        }
+    
+        closeNotificationSettings();
+    }
+    
+    function closeNotificationSettings() {
+        let modal = document.getElementById("notificationSettingsModal");
+        let overlay = document.getElementById("notificationSettingsOverlay");
+        if (modal) modal.remove();
+        if (overlay) overlay.remove();
+    }
+    
+    
+    function updateNotificationBadge(messageList) {
+        const badge = document.getElementById('notification-badge');
+    
+        const count = messageList.length;
+        if (count > 0) {
+          badge.textContent = count > 9 ? '9+' : count;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    
+    async function getNotifications() {
+        try {
+            notifications = await unifiedSendRequest(NOTIFICATIONS, {method: 'GET'});
+            updateNotificationBadge(notifications);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        getNotifications();
+        setInterval(getNotifications, 5000); // fetch notifications every 30seconda
+    });
+    
+    function createNotificationCards() {
+        const contentBox = document.getElementById("notificationBoxContent");
+        contentBox.innerHTML = ""; // Clear existing content
+        if (notifications.length === 0) {
+            contentBox.innerHTML = "<p style='margin: auto;margin-top: 2rem;width: fit-content;'>No notifications</p>";
+            return;
+        }
+    
+        notifications.forEach((notification, index) => {
+            const card = document.createElement("div");
+            card.className = "notificationCard";
+            resolution_button = '';
+            if (notification.allow_custom_resolution) {
+                resolution_button = `<button onclick="addResolution(${notification.id})">Add Resolution</button>`;
+            }
+    
+            card.innerHTML = `
+                <div class="notificationDetails">
+                    <h4>${notification.title}</h4>
+                    <p><strong>Company:</strong> ${notification.user}</p>
+                    <p><strong>Type of Report:</strong> ${notification.type_of_report}</p>
+                    <p><strong>Error:</strong> ${notification.error_message}</p>
+                    ${resolution_button}
+                    <div class="date">${notification.date_of_notification}</div>
+                </div>
+                <button class="removeButton" onclick="removeNotification(${notification.id})">✖</button>
+            `;
+    
+            contentBox.appendChild(card);
+        });
+    }
+    
+    async function removeNotification(notificationId) {
+        try {
+            const response = await unifiedSendRequest(NOTIFICATIONS + `/${notificationId}/resolve`, {method: 'PUT'});
+            await getNotifications();
+            createNotificationCards(); // Re-render the cards
+            showMessage('Resolved notification', true);
+        } catch (error) {
+            console.error("Failed to resolve notification:", error);
+            showMessage('Failed to resolve notification ' + error.message, false);
+        }
+    }
+    
+    async function addResolution(notificationId) {
+        try {
+            const response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}`, {method: 'GET'});
+            console.log(response);
+            openResolutionModal(response[0]);
+        } catch (error) {
+            console.error("Failed to open resolution:", error);
+            showMessage('Failed to open resolution ' + error.message, false);
+        }
+    }
+    
+    async function openResolutionModal(response) {
+        try {
+            // Create modal container
+            let modal = document.createElement("div");
+            modal.id = "resolutionModal";
+            modal.style.position = "fixed";
+            modal.style.top = "50%";
+            modal.style.left = "50%";
+            modal.style.transform = "translate(-50%, -50%)";
+            modal.style.width = "50vw";
+            modal.style.backgroundColor = "white";
+            modal.style.padding = "20px";
+            modal.style.borderRadius = "10px";
+            modal.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+            modal.style.zIndex = "105";
+            modal.style.textAlign = "center";
+    
+            let resolutionOption = `<textarea id="resolutionModalTextbox" placeholder="${response.resolution}" style="width: 100%; height: 80px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; resize: none;"></textarea>`;
+    
+            if (response.resolution_type) {
+                try {
+                    let data = JSON.parse(response.resolution_type); // Ensure it's parsed correctly
+    
+                    if (data.type === "options") {
+                        resolutionOption = '<div style="display: flex;justify-content:space-evenly;gap: 1rem;"><input id="resolutionModalTextbox" type="hidden"/>';
+    
+                        data.options.forEach(option => {
+                            resolutionOption += `<button class="button resolutionButtons" value="${option.value}" onclick="updateResolutionButtons(this)" style="background-color: #17161c">${option.name}</button>`;
+                        });
+    
+                        resolutionOption += '</div>'; // Close the div
+                    }
+                    if (data.type === "questions") {
+                        resolutionOption = `<div style="overflow: auto;    height: 60vh;"><input id="resolutionModalTextbox" type="hidden"/>`;
+    
+                        data.options.forEach((question, index) => {
+                            resolutionOption += generateQuestionHTML(question, `q-${index}`);
+                        });
+                        resolutionOption += `</div>`;
+                    }
+                } catch (error) {
+                    console.error("Error parsing resolution_type:", error);
                 }
-            } catch (error) {
-                console.error("Error parsing resolution_type:", error);
             }
+            let resolutionImg = '';
+            if (response.error_data) {
+              resolutionImg = `<div class="zoom-box"><img src="data:image/png;base64,${response.error_data}" id="zoomable-image" class="zoom-image" alt="Base64 Image" style="width: 100%; max-height: 200px; object-fit: contain; margin: 15px 0; border-radius: 5px; border: 1px solid #ddd"></div>`;
+            }
+            resolutionHint = response.resolution_hint.replace(/\n/g, '<br>').replace(/\\n/g, '<br>');
+            // Modal content
+            modal.innerHTML = `
+                <h2 style="margin-bottom: 10px;">${response.resolution_hint_title}</h2>
+                <p style="font-size: 14px; color: #666;">${resolutionHint}</p>
+                ${resolutionImg}
+                ${resolutionOption}
+                <div style="margin-top: 15px;">
+                    <button onclick="saveResolution('${response.notification_id}')" style="background-color: #2255ff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Save</button>
+                    <button onclick="closeResolutionModal()" style="margin-left: 10px; background-color: #ff4d4f; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+                </div>
+            `;
+    
+            // Create overlay
+            let overlay = document.createElement("div");
+            overlay.id = "resolutionModalOverlay";
+            overlay.style.position = "fixed";
+            overlay.style.top = "0";
+            overlay.style.left = "0";
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+            overlay.style.zIndex = "104";
+            overlay.onclick = closeResolutionModal;
+    
+            // Append modal and overlay to body
+            document.body.appendChild(overlay);
+            document.body.appendChild(modal);
+            if (response.error_data) {
+              const image = document.getElementById("zoomable-image");
+              document.querySelector(".zoom-box").addEventListener("mousemove", function(event) {
+                let rect = this.getBoundingClientRect();
+                let x = (event.clientX - rect.left) / this.offsetWidth * 100;
+                let y = (event.clientY - rect.top) / this.offsetHeight * 100;
+    
+                image.style.transformOrigin = `${x}% ${y}%`;
+                image.style.transform = "scale(3)"; /* Adjust scale */
+              });
+    
+              document.querySelector(".zoom-box").addEventListener("mouseleave", function() {
+                image.style.transform = "scale(1)";
+              });
+            }
+        } catch (error) {
+            console.error('Failed to open the resolution modal:', error);
+            showMessage('Failed to open resolution modal' + error.message, false);
         }
-        var cleaned_resolution_hint = response.resolution_hint.replace(/\n/g, '<br>').replace(/\\n/g, '<br>');
-        // Modal content
-        modal.innerHTML = `
-            <h2 style="margin-bottom: 10px;">${response.resolution_hint_title}</h2>
-            <p style="font-size: 14px; color: #666;">${cleaned_resolution_hint}</p>
-            <img src="data:image/png;base64,${response.error_data}" alt="Base64 Image" style="width: 100%; max-height: 200px; object-fit: contain; margin: 15px 0; border-radius: 5px; border: 1px solid #ddd;">
-            ${resolutionOption}
-            <div style="margin-top: 15px;">
-                <button onclick="saveResolution('${response.notification_id}')" style="background-color: #2255ff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Save</button>
-                <button onclick="closeResolutionModal()" style="margin-left: 10px; background-color: #ff4d4f; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-            </div>
-        `;
-
-        // Create overlay
-        let overlay = document.createElement("div");
-        overlay.id = "resolutionModalOverlay";
-        overlay.style.position = "fixed";
-        overlay.style.top = "0";
-        overlay.style.left = "0";
-        overlay.style.width = "100%";
-        overlay.style.height = "100%";
-        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-        overlay.style.zIndex = "104";
-        overlay.onclick = closeResolutionModal;
-
-        // Append modal and overlay to body
-        document.body.appendChild(overlay);
-        document.body.appendChild(modal);
-    } catch (error) {
-        console.error('Failed to open the resolution modal:', error);
-        showMessage('Failed to open resolution modal' + error.message, false);
     }
-}
-
-
-async function saveResolution(notificationId) {
-    try {
-        var formData = new FormData();
-        formData.append('resolution', document.getElementById('resolutionModalTextbox').value);
-        const response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}/add_resolution`, {method: 'POST', formData: formData});
-        showMessage('Saved resolution', true);
-        await getNotifications();
-        createNotificationCards(); // Re-render the cards
-        closeResolutionModal();
-    } catch (error) {
-        console.error("Failed to save resolution:", error);
-        showMessage('Failed to save resolution ' + error.message, false);
+    
+    
+    // Recursively generate question blocks and subquestion blocks
+    function generateQuestionHTML(question, questionIdPrefix) {
+        let html = `<div style="margin-bottom: 1em"><h5>${question.question}</h5>`;
+        html += `<input type="hidden" name="${questionIdPrefix}" id="${questionIdPrefix}" value="">`;
+        html += `<div style="display: flex; justify-content: space-evenly; flex-wrap: wrap;">`;
+    
+        question.options.forEach((option, i) => {
+            const subId = `${questionIdPrefix}-option-${i}-sub`;
+    
+            html += `<button
+                        class="button resolutionButtons"
+                        value="${option.id}"
+                        onclick="toggleSubquestion('${subId}', this)"
+                        data-type="${option.type}"
+                        style="background-color: #17161c; color: white; margin: 0.5em;">
+                        ${option.label}
+                     </button>`;
+        });
+    
+        html += `</div>`;
+    
+        // Now loop again to create hidden subquestions
+        question.options.forEach((option, i) => {
+            const subId = `${questionIdPrefix}-option-${i}-sub`;
+            if (option.subquestion && option.subquestion.length > 0) {
+                html += `<div id="${subId}" style="display: none; margin-left: 1em;">`;
+                option.subquestion.forEach((subq, subIndex) => {
+                    html += generateQuestionHTML(subq, `${subId}-subq-${subIndex}`);
+                });
+                html += `</div>`;
+            }
+        });
+    
+        html += `</div>`;
+        return html;
     }
-}
-
-function closeResolutionModal() {
-    const modal = document.getElementById('resolutionModal');
-    const overlay = document.getElementById('resolutionModalOverlay');
-    if (modal) modal.remove();
-    if (overlay) overlay.remove();
-}
-
-function closeNotificationBox() {
-    const notificationBox = document.getElementById("notificationBox");
-    notificationBox.style.display = "none";
-    var notificationBoxBackground = document.getElementById('notificationBoxBackground');
-    notificationBoxBackground.style.display = 'none';
-}
-
-  // Initialize the notification cards
-
-function displayNotificationBox() {
-    var notificationBox = document.getElementById('notificationBox');
-    var notificationBoxBackground = document.getElementById('notificationBoxBackground');
-
-    notificationBox.style.display = 'block';
-    notificationBoxBackground.style.display = 'block';
-    createNotificationCards();
-
-    // Close the notification box when the background is clicked
-    notificationBoxBackground.onclick = closeNotificationBox;
-}
-</script>
+    
+    // function toggleSubquestion(subId, button) {
+    //     const buttonContainer = button.parentElement;
+    //     console.log(button.getAttribute('data-type'));
+    //     const siblingButtons = buttonContainer.querySelectorAll('button');
+    //     siblingButtons.forEach(btn => {
+    //         btn.style.backgroundColor = '#17161c';
+    //         const btnSubIdMatch = btn.getAttribute("onclick")?.match(/'(.*?)'/);
+    //         if (btnSubIdMatch) {
+    //             const btnSubId = btnSubIdMatch[1];
+    //             const el = document.getElementById(btnSubId);
+    //             if (el) el.style.display = 'none';
+    //         }
+    //     });
+    
+    //     button.style.backgroundColor = '#2255ff';
+    
+    //     // ✅ Set value of the corresponding hidden input
+    //     const questionContainer = buttonContainer.parentElement;
+    //     const hiddenInput = questionContainer.querySelector('input[type="hidden"]');
+    //     if (hiddenInput) {
+    //         hiddenInput.value = button.value;
+    //         document.getElementById('resolutionModalTextbox').value = JSON.stringify(getSelectedAnswers());
+    //     }
+    
+    //     const subEl = document.getElementById(subId);
+    //     if (subEl) {
+    //         subEl.style.display = 'block';
+    //     }
+    // }
+    
+    function getSelectedAnswers() {
+        const inputs = document.querySelectorAll('input[type="hidden"][name^="q-"]');
+        const result = {};
+        inputs.forEach(input => {
+            if (input.value) {
+                result[input.name] = input.value;
+            }
+        });
+        return result;
+    }
+    
+    function toggleSubquestion(subId, button) {
+      const type = button.getAttribute('data-type'); // 'radio' or 'checkbox'
+      const buttonContainer = button.parentElement;
+      const questionContainer = buttonContainer.parentElement;
+      const hiddenInput = questionContainer.querySelector('input[type="hidden"]');
+    
+      if (type === 'radio') {
+          // Deselect all buttons in the same container
+          const siblingButtons = buttonContainer.querySelectorAll('button');
+          siblingButtons.forEach(btn => {
+              btn.style.backgroundColor = '#17161c';
+              const btnSubIdMatch = btn.getAttribute("onclick")?.match(/'(.*?)'/);
+              if (btnSubIdMatch) {
+                  const btnSubId = btnSubIdMatch[1];
+                  const el = document.getElementById(btnSubId);
+                  if (el) el.style.display = 'none';
+              }
+          });
+    
+          // Select the clicked button
+          button.style.backgroundColor = '#2255ff';
+          if (hiddenInput) hiddenInput.value = button.value;
+    
+          // Show corresponding subquestion
+          const subEl = document.getElementById(subId);
+          if (subEl) subEl.style.display = 'block';
+    
+      } else if (type === 'checkbox') {
+          const isSelected = button.style.backgroundColor === 'rgb(34, 85, 255)'; // #2255ff
+          if (isSelected) {
+              button.style.backgroundColor = '#17161c';
+              const subEl = document.getElementById(subId);
+              if (subEl) subEl.style.display = 'none';
+          } else {
+              button.style.backgroundColor = '#2255ff';
+              const subEl = document.getElementById(subId);
+              if (subEl) subEl.style.display = 'block';
+          }
+    
+          // Update hidden input with all selected values
+          if (hiddenInput) {
+              const selectedValues = Array.from(buttonContainer.querySelectorAll('button'))
+                  .filter(btn => btn.style.backgroundColor === 'rgb(34, 85, 255)')
+                  .map(btn => btn.value);
+              hiddenInput.value = JSON.stringify(selectedValues);
+          }
+      }
+    
+      // Always update modal textbox
+      document.getElementById('resolutionModalTextbox').value = JSON.stringify(getSelectedAnswers());
+    }
+    
+    
+    function updateResolutionButtons(selectedButton) {
+        // Set hidden input value
+        document.getElementById('resolutionModalTextbox').value = selectedButton.value;
+    
+        // Reset all buttons to default background color
+        let buttons = document.getElementsByClassName('resolutionButtons');
+        for (let button of buttons) {
+            button.style.backgroundColor = '#17161c'; // Reset color
+        }
+    
+        // Highlight the selected button
+        selectedButton.style.backgroundColor = '#2255ff';
+    }
+    
+    async function saveResolution(notificationId) {
+        try {
+            var formData = new FormData();
+            formData.append('resolution', document.getElementById('resolutionModalTextbox').value);
+            const response = await unifiedSendRequest(ERRORRESOLUTION + `/${notificationId}/add_resolution`, {method: 'POST', formData: formData});
+            showMessage('Saved resolution', true);
+            await getNotifications();
+            createNotificationCards(); // Re-render the cards
+            closeResolutionModal();
+        } catch (error) {
+            console.error("Failed to save resolution:", error);
+            showMessage('Failed to save resolution ' + error.message, false);
+        }
+    }
+    
+    function closeResolutionModal() {
+        const modal = document.getElementById('resolutionModal');
+        const overlay = document.getElementById('resolutionModalOverlay');
+        if (modal) modal.remove();
+        if (overlay) overlay.remove();
+    }
+    
+    function closeNotificationBox() {
+        const notificationBox = document.getElementById("notificationBox");
+        notificationBox.style.display = "none";
+        var notificationBoxBackground = document.getElementById('notificationBoxBackground');
+        notificationBoxBackground.style.display = 'none';
+    }
+    
+      // Initialize the notification cards
+    
+    function displayNotificationBox() {
+        var notificationBox = document.getElementById('notificationBox');
+        var notificationBoxBackground = document.getElementById('notificationBoxBackground');
+    
+        notificationBox.style.display = 'block';
+        notificationBoxBackground.style.display = 'block';
+        createNotificationCards();
+    
+        // Close the notification box when the background is clicked
+        notificationBoxBackground.onclick = closeNotificationBox;
+    }
+    </script>

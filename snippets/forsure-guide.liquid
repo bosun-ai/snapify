@@ -128,6 +128,8 @@ function showGuideStep(step) {
   if(step < guideSteps.length) {
     if (step == guideSteps.length -1 ) {
       document.getElementById('nextButton').innerText = 'Finish';
+    } else {
+      document.getElementById('nextButton').innerText = 'Next';
     }
     const targetElement = document.querySelector(guideSteps[step].element);
     if(targetElement) {

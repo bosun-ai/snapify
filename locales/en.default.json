@@ -510,22 +510,27 @@
             "statistics": {
                 "welcome": {
                     "title": "Welcome",
-                    "text": "We're thrilled you've chosen ForSURE!\\n\\nHere's a concise guide to help you navigate through the software with ease.",
+                    "text": "Welcome to ForSURE, your EPR Reporting tool. To introduce you to the platform, we’ll start by taking you on a tour across it’s pages and functions. The onboarding will take about 10 minutes, and afterwards you’ll know what steps to take to generate and submit your EPR reports efficiently.",
                     "group": "Introduction"
                 },
                 "help": {
                     "title": "Help",
-                    "text": "Should you have any question, feel free to revisit this guide at any point by clicking here",
+                    "text": "Should you have any question later on, feel free to revisit this guide at any point by clicking here. This tour will give a general overview of each page and its function, but pressing this button on the other pages will explain the functionalities in depth.",
                     "group": "Navigation Bar"
                 },
                 "overview": {
                     "title": "Overview",
-                    "text": "Welcome to your homepage! This space provides a snapshot of your data through various statistics, offering insights at a glance.",
+                    "text": "This to your Overview page. This space provides a snapshot of your data through various statistics, offering insights at a glance. There’s also a table with upcoming EPR deadlines.",
+                    "group": "Navigation Bar"
+                },
+                "categorylist": {
+                    "title": "Categorylist",
+                    "text": "Utilize this page to upload and modify your category list. Your category list contains your product information. It serves as the foundation for all reports and charts, so ensuring its accuracy and currency is crucial.",
                     "group": "Navigation Bar"
                 },
                 "report": {
                     "title": "Create Report",
-                    "text": "This area allows you to either create a new report from scratch or upload existing data to be incorporated into your reports.",
+                    "text": "This area allows you to either create a new report from scratch or upload existing data to be incorporated into your reports. You can also use this page to submit created reports.",
                     "group": "Navigation Bar"
                 },
                 "history": {
@@ -533,29 +538,29 @@
                     "text": "This page houses a comprehensive history of all your reports, enabling you to delve deep into the data for detailed analysis of each report.",
                     "group": "Navigation Bar"
                 },
-                "categorylist": {
-                    "title": "Categorylist",
-                    "text": "Utilize this page to upload and modify your category list. It serves as the foundation for all reports and charts, so ensuring its accuracy and currency is crucial.",
-                    "group": "Navigation Bar"
-                },
                 "settings": {
                     "title": "Settings",
-                    "text": "Given that your existing order list or category list may differ in format, this section allows you to customize the labels for each value to ensure consistency.",
+                    "text": "On this page, you can configure your ForSURE account. This includes managing the access of the different users and setting country specific settings.",
                     "group": "Navigation Bar"
                 },
                 "account": {
                     "title": "Account",
-                    "text": "Visit this section to review your account information and subscription details.",
+                    "text": "Finally, this is the account section. Visit this section to review your account information and subscription details.",
+                    "group": "Navigation Bar"
+                },
+                "overviewReportEnd": {
+                    "title": "Overview Report End",
+                    "text": "Now that we’ve shown you all the pages, let’s dive a little deeper into how to use the functionalities.",
                     "group": "Navigation Bar"
                 },
                 "createChart": {
                     "title": "Create Chart",
-                    "text": "This section enables you to craft customized charts tailored to your preferences, using the data you supply.",
+                    "text": "In the overview page you’ll be able to see various statistics gathered from your data. This can give you concrete overviews related to your waste metrics. There are various ways you can view this using our interactive graph.",
                     "group": "Create Chart"
                 },
                 "yAxis": {
                     "title": "Select Y-Axis",
-                    "text": "To try it out, start by dragging this element to the Y Axis",
+                    "text": "To try it out, start by dragging this element to the Y Axis.",
                     "group": "Create Chart"
                 },
                 "xAxis": {
@@ -602,8 +607,75 @@
             "report": {
                 "welcome": {
                     "title": "Welcome",
-                    "text": "Welcome to the report page, where you have the flexibility to upload data from various sources and generate custom reports at your convenience.\\n\\nTo ensure a smooth process, please make sure to define the labels beforehand in the settings. \\n\\nYou can either use the live data using the toggle or drag and drop a file here. After you select the profile and click next, the file will be uploaded and an error might be displayed. The uploading process can take a few minutes depending on the size of the dataset.",
+                    "text": "Welcome to the report page, please select one of the options, either creating a new report or submitting an existing one.",
                     "group": "Introduction"
+                },
+                "upload": {
+                    "title": "Upload Reports",
+                    "text": "Here you can upload finished reports in different formats to be submitted directly to the corresponding scheme.",
+                    "group": "Upload"
+                },
+                "clients": {
+                    "title": "Clients",
+                    "text": "Here you can configure the client credentials for the different schemes.",
+                    "group": "Upload"
+                },
+                "uploadFile": {
+                    "title": "Upload Reports",
+                    "text": "Drag and drop any report here to submit it to the corresponding authority. The format of the report does not matter as long as it includes some relevant information such as company name, date and the weights to report.",
+                    "group": "Upload"
+                },
+                "notifications": {
+                    "title": "Notifications",
+                    "text": "If any error occurs, the error will be shown here. If configured, you can also receive an email with the error message.",
+                    "group": "Upload"
+                },
+                "create": {
+                    "title": "Create New Report",
+                    "text": "Click here to create a new report. Here you have the ability to upload data from various sources and generate custom reports at your convenience.",
+                    "group": "Create"
+                },
+                "liveData": {
+                    "title": "Live Data",
+                    "text": "If you want to use live data, you can turn on the live data toggle. This will connect to your online stores and use the latest data for the report.",
+                    "group": "Create"
+                },
+                "orderListDropZone": {
+                    "title": "Order List Drop Zone",
+                    "text": "If you want to manually upload orders, you can drag and drop them here. The uploading process can take a few minutes depending on the size of the dataset. Once you have uploaded the orders, you have to map the data to the labels you want to use for the data. You can select different variables in the dropdown, which should correspond with the dataset.",
+                    "group": "Create"
+                },
+                "next": {
+                    "title": "Next",
+                    "text": "In the next step you can add return data to the report. If you have chosen live data, the returns received from it will be used automatically, but you can also upload additionalreturns manually.\\n\\nIn the third step, you can select the country, report type and timeframe that you want to create the report for. Finally, you will see an overview of the report details and allow you to create the report you chose. The report will be shown in the history as soon as it is available.",
+                    "group": "Create"
+                }
+            },
+            "history": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "This is the report history page. All reports that were created or that you submitted are shown here as well as the confirmations if they were sent to the corresponding authority.",
+                    "group": "Introduction"
+                },
+                "filters": {
+                    "title": "Filters",
+                    "text": "Here you can filter the results shown below by the country, type of report and time.",
+                    "group": "Filters"
+                },
+                "receipts": {
+                    "title": "Receipts Only",
+                    "text": "If you only want to see the report confirmations, you can select that here. That gives you a quick overview of the reports that were sent to the corresponding authority.",
+                    "group": "Filters"
+                },
+                "search": {
+                    "title": "Search",
+                    "text": "Search for any company, report name or country using this search. The results are updated immediately.",
+                    "group": "Filters"
+                },
+                "download": {
+                    "title": "Download",
+                    "text": "To download all reports shown below (applying the filters that you've chosen), click this button. \\n\\nNote: This might take 1-2mins to get the compressed file ready.",
+                    "group": "Download"
                 }
             },
             "download": {

@@ -1398,11 +1398,11 @@ getReports();
 
 function showGuide() {
     startGuide([
-        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report history page. All reports that were created or that you submitted are shown here as well as the confirmations if they were sent to the corresponding authority.", where: 'middle' },
-        { element: "#filterContainer", group: "Filters", title: "Filters", text: "Here you can filter the results shown below by the country, type of report and time.", where: 'below' },
-        { element: "#receiptsContainer", group: "Filters", title: "Receipts Only", text: "If you only want to see the report confirmations, you can select that here.", where: 'below' },
-        { element: "#searchContainer", group: "Filters", title: "Search", text: "Search for any company, report name or country using this search. The results are updated immediately.", where: 'below' },
-        { element: "#allIconsContainer", group: "Download", title: "Download", text: "To download all reports shown below (applying the filters that you've chosen), click this button. \n\nNote: This might take 1-2mins to get the zip file ready.", where: 'left'}
+        { element: "main", group: "{{ 'software.guide.history.welcome.group' | t }}", title: "{{ 'software.guide.history.welcome.title' | t }}", text: "{{ 'software.guide.history.welcome.text' | t }}", where: 'middle' },
+        { element: "#filterContainer", group: "{{ 'software.guide.history.filters.group' | t }}", title: "{{ 'software.guide.history.filters.title' | t }}", text: "{{ 'software.guide.history.filters.text' | t }}", where: 'below' },
+        { element: "#receiptsContainer", group: "{{ 'software.guide.history.receipts.group' | t }}", title: "{{ 'software.guide.history.receipts.title' | t }}", text: "{{ 'software.guide.history.receipts.text' | t }}", where: 'below' },
+        { element: "#searchContainer", group: "{{ 'software.guide.history.search.group' | t }}", title: "{{ 'software.guide.history.search.title' | t }}", text: "{{ 'software.guide.history.search.text' | t }}", where: 'below' },
+        { element: "#allIconsContainer", group: "{{ 'software.guide.history.download.group' | t }}", title: "{{ 'software.guide.history.download.title' | t }}", text: "{{ 'software.guide.history.download.text' | t }}", where: 'left'}
     ]);
     setCookie('showedGuideHistory', 'true', 300);
 }

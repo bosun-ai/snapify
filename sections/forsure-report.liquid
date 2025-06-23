@@ -295,7 +295,7 @@ div.display-flex {
 
 .greyed_out {
     cursor: not-allowed;
-    background-color: grey;
+    background-color: grey!important;
     opacity: 0.5;
     position: relative; /* Needed for positioning the tooltip */
     pointer-events: none; /* Disable clicks on links */
@@ -648,7 +648,7 @@ content: "\2713"
             <!-- Option: Create New Report -->
              <div id="createNewReportWrapper" style="position: relative">
               <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
-                <div id="createNewReport" class="option-card greyed_out" onclick="selectOption('new')">
+                <div id="createNewReport" class="option-card greyed_out" style="position: relative;background-color: #fafafa;" onclick="selectOption('new')">
                     <h3>Create New Report</h3>
                     <p>Start a new report by selecting<br>the required files and settings.</p>
                     <div style="height: 50%;margin-top: 5rem">
@@ -660,7 +660,7 @@ content: "\2713"
             <!-- Option: Upload Existing Reports -->
              <div id="uploadExistingReportsWrapper" style="position: relative">
               <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
-                <div id="uploadExistingReports" class="option-card greyed_out" onclick="selectOption('upload')">
+                <div id="uploadExistingReports" class="option-card greyed_out" style="position: relative;background-color: #fafafa;" onclick="selectOption('upload')">
                     <h3>Submit Reports</h3>
                     <p>Upload one or more completed<br>reports for submission.</p>
                     <div style="height: 50%;margin-top: 5rem">
@@ -737,10 +737,11 @@ content: "\2713"
               <div class="greyedout-tooltip">Contact us to set up live data</div>
             </span>
           </label>
+
         </div>
         <div id="ordersReceived" style="margin: auto;width: fit-content;display: none;">
         </div>
-        <div class="dropZone" data-input="order_list" data-url="uploadorders/">
+        <div class="dropZone" data-input="order_list" data-url="uploadorders/" id="orderListDropZone" style="position: relative;background: #fafafa;">
             <div>
               <div style="padding:2rem">
                 <img width="220px" id="upload-imageuploadorders/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
@@ -751,14 +752,14 @@ content: "\2713"
         </div>
         <input type="file" id="order_list" style="display: none" multiple>
         <div id="errorsorder_list"></div>
-        <div class="navButtons">
-            <button class="nextButton button" onclick="uploadOrders('uploadorders/')" id="nextBtnuploadorders/" disabled>Next</button>
+        <div class="navButtons" id="navButtonsStep1">
+            <button class="nextButton button" onclick="uploadOrders('uploadorders/')" id="nextBtnuploadorders" style="position: relative;" disabled>Next</button>
         </div>
     </div>
 
   <div class="step" id="step2" style="display: none">
       <h2 class="heading">Select Returnlist</h2>
-      <div class="dropZone" data-input="return_list" data-url="uploadreturns/">
+      <div class="dropZone" data-input="return_list" data-url="uploadreturns/" id="returnListDropZone">
         <div>
           <div style="padding:2rem">
             <img width="220px" id="upload-imageuploadreturns/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
@@ -771,7 +772,7 @@ content: "\2713"
       <div id="errorsreturn_list"></div>
       <div class="navButtons">
           <button class="prevButton button offbutton" onclick="prevStep(1)">Back</button>
-          <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns/">Next</button>
+          <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns">Next</button>
       </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
@@ -1016,10 +1017,18 @@ content: "\2713"
 </div>
 <div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
 </div>
+<div id="liveDataSettingsModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:30%; background:white; padding:2rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+  <h2>Live Data Settings</h2>
+  <div id="liveDataSettingsContent">
+    <p>Select the live data settings you want to use:</p>
+  </div>
+</div>
+<div id="modalOverlayLiveData" onclick="closeLiveDataSettingsModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
+</div>
 {% render 'forsure-login' %}
 
 <script>
-
+let allowedToCreateReports = {create_report: false, upload_report: false};
 async function cancreatereports() {
     try {
         let data = await unifiedSendRequest(CANCREATEREPORTS, {method: 'GET'});
@@ -1037,6 +1046,7 @@ async function cancreatereports() {
             document.getElementById('uploadExistingReports').classList.add('greyed_out');
             document.getElementById('uploadExistingReportsWrapper').classList.add('greyed_out_wrapper');
         }
+        allowedToCreateReports = data;
     } catch (error) {
         console.error(error.message);
         showMessage('Failed to get history ' + error.message, false);
@@ -1068,15 +1078,25 @@ async function getOrdersReceived() {
     let data = await unifiedSendRequest(UPLOADORDERSRECEIVED, {method: 'GET'});
     ordersReceived = data['total'];
     if (data['total'] > 0) {
-      document.getElementById('nextBtnuploadorders/').disabled = false;
+      document.getElementById('nextBtnuploadorders').disabled = false;
     } else {
       document.getElementById('ordersReceived').innerHTML = 'No Orders Received yet';
-      document.getElementById('nextBtnuploadorders/').disabled = true;
+      document.getElementById('nextBtnuploadorders').disabled = true;
     }
     document.getElementById('ordersReceived').style.display = 'block';
   } catch (error) {
     console.error(error.message);
   }
+}
+
+function openLiveDataSettingsModal() {
+  document.getElementById('liveDataSettingsModal').style.display = 'block';
+  document.getElementById('modalOverlayLiveData').style.display = 'block';
+}
+
+function closeLiveDataSettingsModal() {
+  document.getElementById('liveDataSettingsModal').style.display = 'none';
+  document.getElementById('modalOverlayLiveData').style.display = 'none';
 }
 
 const createReportBtn = document.getElementById('createReport');
@@ -1089,10 +1109,10 @@ document.getElementById('liveDataToggle').addEventListener('change', function() 
     var liveDataText = document.getElementById('liveDataText');
     if (this.checked) {
       liveDataText.innerText = "Using live data";
-      document.getElementById('nextBtnuploadorders/').disabled = false;
+      document.getElementById('nextBtnuploadorders').disabled = false;
     } else {
       liveDataText.innerText = "Use live data";
-      document.getElementById('nextBtnuploadorders/').disabled = true; // todo check if file was added
+      document.getElementById('nextBtnuploadorders').disabled = true; // todo check if file was added
     }
 });
 
@@ -1101,15 +1121,23 @@ var guideToShow = null;
 async function selectOption(option) {
     document.getElementById('chooseoption').style.display = 'none';
     if (option === 'new') {
-        document.getElementById('progressIcons').style.display = 'flex';
+      document.getElementById('uploadReport').style.display = 'none';
+      document.getElementById('progressIcons').style.display = 'flex';
         document.getElementById('step1').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'new');
         guideToShow = 'new';
         await getOrdersReceived();
     } else if (option === 'upload') {
+        document.getElementById('progressIcons').style.display = 'none';
+        document.getElementById('step1').style.display = 'none';
         document.getElementById('uploadReport').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'upload');
         guideToShow = 'upload';
+    } else if (option === 'overview') {
+      document.getElementById('progressIcons').style.display = 'none';
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('uploadReport').style.display = 'none';
+      document.getElementById('chooseoption').style.display = 'block';
     }
     showGuideAfterSelection();
 }
@@ -1261,8 +1289,8 @@ function createNewFileRow(fileName, availableProfiles, dataUrl, inputId, file) {
     if (!reports && newWidth > 0) {
         image.style.width = newWidth + 'px';
     }
-    if (document.getElementById("nextBtn" + dataUrl)) {
-        document.getElementById("nextBtn" + dataUrl).disabled = false;
+    if (document.getElementById("nextBtn" + dataUrl.replace('/', ''))) {
+        document.getElementById("nextBtn" + dataUrl.replace('/', '')).disabled = false;
     }
     if (orders) {
         selectedFilesOrders[uniqueId] = { file: file, filename: fileName };
@@ -1366,12 +1394,12 @@ function updateNextButton(dataUrl) {
     allFilesValid = false;
   }
   if (allFilesValid) {
-    if (document.getElementById("nextBtn" + dataUrl)) {
-      document.getElementById("nextBtn" + dataUrl).disabled = false;
+    if (document.getElementById("nextBtn" + dataUrl.replace('/', ''))) {
+      document.getElementById("nextBtn" + dataUrl.replace('/', '')).disabled = false;
       return;
     }
   }
-  document.getElementById("nextBtn" + dataUrl).disabled = true;
+  document.getElementById("nextBtn" + dataUrl.replace('/', '')).disabled = true;
 }
 
 function updateImageWidth(dataUrl) {
@@ -2128,7 +2156,7 @@ function handleFileDeletion(uniqueId, orders, returns, reports, dataUrl) {
 
 async function uploadOrders(endpoint) {
     document.getElementById('uploadSteps').style.cursor = 'wait';
-    document.getElementById('nextBtnuploadorders/').disabled = true;
+    document.getElementById('nextBtnuploadorders').disabled = true;
     document.getElementsByClassName('dropZone')[0].style.cursor = 'wait';
     const formData = new FormData();
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
@@ -2173,13 +2201,13 @@ async function uploadOrders(endpoint) {
         } else {
           nextStep(2);
         }
-        document.getElementById('nextBtnuploadorders/').disabled = false;
+        document.getElementById('nextBtnuploadorders').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
     } catch (error) {
         console.error(error);
-        document.getElementById('nextBtnuploadorders/').disabled = false;
+        document.getElementById('nextBtnuploadorders').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
@@ -2189,7 +2217,7 @@ async function uploadOrders(endpoint) {
 
 async function uploadReturns(endpoint) {
   document.getElementById('uploadSteps').style.cursor = 'wait';
-    document.getElementById('nextBtnuploadreturns/').disabled = true;
+    document.getElementById('nextBtnuploadreturns').disabled = true;
     document.getElementsByClassName('dropZone')[1].style.cursor = 'wait';
     const formData = new FormData();
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
@@ -2234,13 +2262,13 @@ async function uploadReturns(endpoint) {
         } else {
           nextStep(3);
         }
-        document.getElementById('nextBtnuploadreturns/').disabled = false;
+        document.getElementById('nextBtnuploadreturns').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
     } catch (error) {
         console.error(error);
-        document.getElementById('nextBtnuploadreturns/').disabled = false;
+        document.getElementById('nextBtnuploadreturns').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
@@ -2438,6 +2466,7 @@ async function openClientsModal() {
                 if (field.startsWith('Login')) acc[baseField]['Login'] = field;
                 if (field.startsWith('Password')) acc[baseField]['Password'] = field;
                 if (field.startsWith('Notes')) acc[baseField]['Notes'] = field;
+                if (field.startsWith('ExtraInfo')) acc[baseField]['ExtraInfo'] = field;
                 return acc;
             }, {});
 
@@ -2454,6 +2483,7 @@ async function openClientsModal() {
               }
             });
             if (group.Notes) columns.push({ title: `Notes ${key}`, field: group.Notes, headerSort: false, editor: 'input' });
+            if (group.ExtraInfo) columns.push({ title: `Extra Info ${key}`, field: group.ExtraInfo, headerSort: false, editor: 'input' });
         });
 
         const table = new Tabulator("#clientsDatatableContainer", {
@@ -3033,22 +3063,37 @@ async function createReport() {
 
 function showGuide() {
   if(guideToShow == 'new') {// create new report 
-    startGuide([
-        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' },
-        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' },
-    ]);
+    var guideSteps = [];
+    guideSteps.push({ element: "main", group: "{{ 'software.guide.report.create.group' | t }}", title: "{{ 'software.guide.report.create.title' | t }}", text: "{{ 'software.guide.report.create.text' | t }}", where: 'middle'});
+    guideSteps.push({ element: "#liveDataToggleSlider", group: "{{ 'software.guide.report.liveData.group' | t }}", title: "{{ 'software.guide.report.liveData.title' | t }}", text: "{{ 'software.guide.report.liveData.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    guideSteps.push({ element: "#orderListDropZone", group: "{{ 'software.guide.report.orderListDropZone.group' | t }}", title: "{{ 'software.guide.report.orderListDropZone.title' | t }}", text: "{{ 'software.guide.report.orderListDropZone.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    guideSteps.push({ element: "#navButtonsStep1", group: "{{ 'software.guide.report.next.group' | t }}", title: "{{ 'software.guide.report.next.title' | t }}", text: "{{ 'software.guide.report.next.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    startGuide(guideSteps);
   } else if (guideToShow == 'upload') {
-    startGuide([
-        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report page, where you have the option to upload any report to be submitted to the corresponding authority. Please make sure to configure the client credentials before uploading the report.", where: 'middle' },
-        { element: "#clientsUploadSection", group: "Clients", title: "Clients", text: "Here you can upload or modify the credentials for the clients for the different schemes.", where: 'below' },
-        // { element: "#editClientsModal", group: "Clients", title: "Clients", text: "Click into any field to update the existing value. You can add a new row to add new clients or add columns for additional schemes.", where: 'below' },
-        { element: "#uploadreportlistContainer", group: "Reports", title: "Upload Reports", text: "Drag and drop any report here to submit it to the corresponding authority. The format of the report does not matter as long as it includes some relevant information such as company name, date and the weights to report.", where: 'right' },
-        { element: "#notificationBell", group: "Reports", title: "Notifications", text: "If any error occurs with submitting the report, the error will be shown here. If configured, you can also receive an email with the error message.", where: 'below' },
-    ]);
+    var guideSteps = [];
+    guideSteps.push({ element: "main", group: "{{ 'software.guide.report.upload.group' | t }}", title: "{{ 'software.guide.report.upload.title' | t }}", text: "{{ 'software.guide.report.upload.text' | t }}", where: 'middle'});
+    guideSteps.push({ element: "#clientsUploadSection", group: "{{ 'software.guide.report.clients.group' | t }}", title: "{{ 'software.guide.report.clients.title' | t }}", text: "{{ 'software.guide.report.clients.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')} });
+    guideSteps.push({ element: "#uploadreportlistContainer", group: "{{ 'software.guide.report.uploadFile.group' | t }}", title: "{{ 'software.guide.report.uploadFile.title' | t }}", text: "{{ 'software.guide.report.uploadFile.text' | t }}", where: 'right', runBefore: function() {selectOption('upload')}  });
+    guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  });
+    startGuide(guideSteps);
   } else {
-    startGuide([
-        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report page, please select one of the options, either creating a new report or submitting an existing one.", where: 'middle' },
-    ]);
+    var guideSteps = [
+      { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle', runBefore: function() {selectOption('overview')} }
+
+    ];
+    if (allowedToCreateReports['create_reports']) {
+      guideSteps.push({ element: "#createNewReport", group: "{{ 'software.guide.report.create.group' | t }}", title: "{{ 'software.guide.report.create.title' | t }}", text: "{{ 'software.guide.report.create.text' | t }}", where: 'right', runBefore: function() {selectOption('overview')} });
+      guideSteps.push({ element: "#liveDataToggleSlider", group: "{{ 'software.guide.report.liveData.group' | t }}", title: "{{ 'software.guide.report.liveData.title' | t }}", text: "{{ 'software.guide.report.liveData.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+      guideSteps.push({ element: "#orderListDropZone", group: "{{ 'software.guide.report.orderListDropZone.group' | t }}", title: "{{ 'software.guide.report.orderListDropZone.title' | t }}", text: "{{ 'software.guide.report.orderListDropZone.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+      guideSteps.push({ element: "#navButtonsStep1", group: "{{ 'software.guide.report.next.group' | t }}", title: "{{ 'software.guide.report.next.title' | t }}", text: "{{ 'software.guide.report.next.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    }
+    if (allowedToCreateReports['upload_reports']) {
+      guideSteps.push({ element: "#uploadExistingReports", group: "{{ 'software.guide.report.upload.group' | t }}", title: "{{ 'software.guide.report.upload.title' | t }}", text: "{{ 'software.guide.report.upload.text' | t }}", where: 'left', runBefore: function() {selectOption('overview')} });
+      guideSteps.push({ element: "#clientsUploadSection", group: "{{ 'software.guide.report.clients.group' | t }}", title: "{{ 'software.guide.report.clients.title' | t }}", text: "{{ 'software.guide.report.clients.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')} });
+      guideSteps.push({ element: "#uploadreportlistContainer", group: "{{ 'software.guide.report.uploadFile.group' | t }}", title: "{{ 'software.guide.report.uploadFile.title' | t }}", text: "{{ 'software.guide.report.uploadFile.text' | t }}", where: 'right', runBefore: function() {selectOption('upload')}  });
+      guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  });
+    }
+    startGuide(guideSteps);
   }
   setCookie('showedGuideReport', 'true', 300);
 }
