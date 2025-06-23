@@ -278,6 +278,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function createNotificationCards() {
     const contentBox = document.getElementById("notificationBoxContent");
     contentBox.innerHTML = ""; // Clear existing content
+    if (notifications.length === 0) {
+        contentBox.innerHTML = "<p style='margin: auto;margin-top: 2rem;width: fit-content;'>No notifications</p>";
+        return;
+    }
 
     notifications.forEach((notification, index) => {
         const card = document.createElement("div");

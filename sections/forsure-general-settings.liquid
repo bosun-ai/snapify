@@ -333,7 +333,7 @@
         <hr style="width: 100%; border-top: 0.2rem solid #17161c;display:none;">
         <h3 class="flex-header" style="margin-left: 2rem">Company Information
         </h3>
-        <div id="configurationGeneral" style="padding: 20px; border-radius: 10px; background-color: #f9f9f9;">
+        <div id="configurationGeneral" style="padding: 20px; border-radius: 10px; background-color: #fafafa;position:relative;">
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
               <tr>
@@ -346,7 +346,7 @@
             </tbody>
           </table>
           <div class="tab-container">
-            <div id="countryTabs" class="display-flex" style="margin: auto; width: fit-content;"></div>
+            <div id="countryTabs" class="display-flex" style="margin: auto; width: fit-content;position:relative;"></div>
             <div id="countrySelectionContainer" style="margin: auto; width: fit-content"></div>
             <div id="reportDataContainer" style="margin: auto; width: 50%;"></div>
           </div>
@@ -357,7 +357,7 @@
       <button
         id="submitChanges"
         class="button"
-        style="margin-top: 1rem;z-index: 1"
+        style="margin-top: 1rem;position:relative;"
         onclick="submitSettings()"
       >
         Submit Changes
@@ -740,7 +740,6 @@
     });
   }
 
-
   async function getProLabels(country, pro, reportType) {
     try {
       const response = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY + '?country=' + country, { method: 'GET' });
@@ -817,6 +816,29 @@
       showMessage('Failed to submit settings ' + error.message, false);
     }
   }
+
+  
+  function showGuide() {
+    startGuide([
+        { element: "main", group: "{{ 'software.guide.general.welcome.group' | t }}", title: "{{ 'software.guide.general.welcome.title' | t }}", text: "{{ 'software.guide.general.welcome.text' | t }}", where: 'middle' },
+        { element: "#accessManagement", group: "{{ 'software.guide.general.users.group' | t }}", title: "{{ 'software.guide.general.users.title' | t }}", text: "{{ 'software.guide.general.users.text' | t }}", where: 'below' },
+        { element: "#addUserButton", group: "{{ 'software.guide.general.addUser.group' | t }}", title: "{{ 'software.guide.general.addUser.title' | t }}", text: "{{ 'software.guide.general.addUser.text' | t }}", where: 'right' },
+        { element: "#addApiTokenButton", group: "{{ 'software.guide.general.addAPIToken.group' | t }}", title: "{{ 'software.guide.general.addAPIToken.title' | t }}", text: "{{ 'software.guide.general.addAPIToken.text' | t }}", where: 'left' },
+        { element: "#configurationGeneral", group: "{{ 'software.guide.general.configuration.group' | t }}", title: "{{ 'software.guide.general.configuration.title' | t }}", text: "{{ 'software.guide.general.configuration.text' | t }}", where: 'below' },
+        { element: "#countryTabs", group: "{{ 'software.guide.general.countryTabs.group' | t }}", title: "{{ 'software.guide.general.countryTabs.title' | t }}", text: "{{ 'software.guide.general.countryTabs.text' | t }}", where: 'left' },
+        { element: "#submitChanges", group: "{{ 'software.guide.general.saveChanges.group' | t }}", title: "{{ 'software.guide.general.saveChanges.title' | t }}", text: "{{ 'software.guide.general.saveChanges.text' | t }}", where: 'left' },
+    ]);
+    setCookie('showedGuideGeneral', 'true', 300);
+}
+function showGuideFromButton(element) {
+  showGuide();
+}
+document.addEventListener('DOMContentLoaded', function() {
+  if(readCookie('showedGuideGeneral') === null) {
+      setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    }
+  });
+
   
     // Initialize the settings
     initializeSettings();

@@ -99,6 +99,7 @@ ACCESS_TO = 'access/accessto'
 ACCESS_EDIT = 'access/edit'
 ACCESS_ROLES = 'access/roles'
 ACCESS_ADD_USER = 'access/add'
+ACCESS_ADD_API_TOKEN = 'access/add-api-token'
 ACCESS_DELETE_USER = 'access/delete'
 
 CATEGORYLISTWEBSOCKET = 'categorylist/ws'

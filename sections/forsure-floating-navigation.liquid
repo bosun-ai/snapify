@@ -151,7 +151,7 @@
   <slider-component class="slider-mobile-gutter" style="display: flex;">
     <ul
       class="color-{{ section.settings.color_scheme }} grid--peek grid--3-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop slider slider--tablet collection-list--{{ section.blocks.size }}-items"
-      style="border-radius:1rem;padding:0;overflow-x: auto;list-style-type: none;width:fit-content;margin:auto;border:0.2rem solid #17161c"
+      style="border-radius:1rem;padding:0;overflow-x: auto;list-style-type: none;width:fit-content;margin:auto;border:0.2rem solid #17161c;margin-right: 1rem;"
       id="ul-submenu"
       role="list">
       {% assign foundCurrent = false %}
@@ -361,11 +361,13 @@
           </g>
           </svg>
       </div>
-      <svg id="notificationBell" onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+      <div style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;position: relative;" id="notificationBell">
+        <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                 <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"/>
-                <div id="notification-badge" class="badgeNotification hidden" style="top: 16px;">0</div>
               </svg>
-      <div id="user-icon" style="cursor: pointer;" onclick="window.location.href='/account?logged_in'">
+              <div id="notification-badge" class="badgeNotification hidden" style="top: -1px">1</div>
+      </div>
+      <div id="user-icon"  style="margin: auto;margin-left: 1rem;margin-top: 16px;cursor: pointer;" onclick="window.location.href='/account?logged_in'">
         {% render 'icon-user' %}
       </div>
 

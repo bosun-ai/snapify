@@ -1737,6 +1737,7 @@ async function addNewColumn() {
   document.getElementById('editableTable').style.cursor = 'wait';
   document.body.style.cursor = 'wait';
   var labelsV2Options = await getCategorylistLabelsV2Options();
+  document.getElementById('addColumnMapping').innerHTML = '';
   Object.keys(labelsV2Options).forEach(groupKey => {
     var optionGroup = document.createElement('optgroup');
     optionGroup.label = groupKey;
@@ -1913,7 +1914,13 @@ async function addNewColumn() {
     startGuide([
         { element: "main", group: "{{ 'software.guide.categorylist.welcome.group' | t }}", title: "{{ 'software.guide.categorylist.welcome.title' | t }}", text: "{{ 'software.guide.categorylist.welcome.text' | t }}", where: 'middle' },
         { element: "#activateCategoryMode", group: "{{ 'software.guide.categorylist.upload.group' | t }}", title: "{{ 'software.guide.categorylist.upload.title' | t }}", text: "{{ 'software.guide.categorylist.upload.text' | t }}", where: 'below' },
-        { element: "#editButton", group: "{{ 'software.guide.categorylist.edit.group' | t }}", title: "{{ 'software.guide.categorylist.edit.title' | t }}", text: "{{ 'software.guide.categorylist.edit.text' | t }}", where: 'below', secondElement: '#editModeActivated' }
+        { element: "#editButton", group: "{{ 'software.guide.categorylist.edit.group' | t }}", title: "{{ 'software.guide.categorylist.edit.title' | t }}", text: "{{ 'software.guide.categorylist.edit.text' | t }}", where: 'below', secondElement: '#editModeActivated', runBefore: activateEditMode},
+        { element: "#addRowBtn", group: "{{ 'software.guide.categorylist.addRow.group' | t }}", title: "{{ 'software.guide.categorylist.addRow.title' | t }}", text: "{{ 'software.guide.categorylist.addRow.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#addColumnBtn", group: "{{ 'software.guide.categorylist.addColumn.group' | t }}", title: "{{ 'software.guide.categorylist.addColumn.title' | t }}", text: "{{ 'software.guide.categorylist.addColumn.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#addRuleBtn", group: "{{ 'software.guide.categorylist.addRule.group' | t }}", title: "{{ 'software.guide.categorylist.addRule.title' | t }}", text: "{{ 'software.guide.categorylist.addRule.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#deactivateEditModeSave", group: "{{ 'software.guide.categorylist.save.group' | t }}", title: "{{ 'software.guide.categorylist.save.title' | t }}", text: "{{ 'software.guide.categorylist.save.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#tabs-container", group: "{{ 'software.guide.categorylist.tabs.group' | t }}", title: "{{ 'software.guide.categorylist.tabs.title' | t }}", text: "{{ 'software.guide.categorylist.tabs.text' | t }}", where: 'below'},
+        { element: "#versionsContainer", group: "{{ 'software.guide.categorylist.versions.group' | t }}", title: "{{ 'software.guide.categorylist.versions.title' | t }}", text: "{{ 'software.guide.categorylist.versions.text' | t }}", where: 'below'},
     ]);
     setCookie('showedGuideCategory', 'true', 300);
 }
