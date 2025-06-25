@@ -176,7 +176,7 @@
     overflow-x: auto;
 }
 
-.tab-button {
+.tab-button, .tab-button-credentials {
     padding: 10px 15px;
     border: 1px solid #ddd;
     border-bottom: none;
@@ -188,16 +188,27 @@
     border-radius: 8px 8px 0 0;
 }
 
-.tab-button:hover {
+.tab-button:hover, .tab-button-credentials:hover {
     background-color: #eaeaea;
 }
 
-.tab-button.active {
+.tab-button.active, .tab-button-credentials.active {
     background-color: #2255ff;
     color: #fafafa;
     font-weight: bold;
 }
 
+.tab-button, .tab-button-credentials {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
 
   .tab {
       cursor: pointer;
@@ -253,7 +264,9 @@
   }
 
  
-  
+  .setting {
+    width: fit-content;
+  }
 
   .setting-item {
     position: relative;
@@ -306,6 +319,15 @@
     display: none;
     margin-left: 20px;
   }
+  
+#tabs-container {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
   <!-- Load d3.js -->
@@ -313,6 +335,19 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
   <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+  <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>-->
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+  integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+  crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
   {% render 'forsure-login' %}
   {% comment %} {% render 'forsure-guide' %} {% endcomment %}
   {% render 'forsure-simple-notification' %}
@@ -343,6 +378,21 @@
             </thead>
             <tbody id="settingsTableBody">
               <!-- General Settings Inputs will be dynamically inserted here -->
+            </tbody>
+            <tbody id="credentialsTableBody">
+              <tr class="setting-item">
+                <td>
+                  <label style="width: fit-content;">Login Details
+                    <div class="tooltip">
+                      <p>Enter or update the login details for the PROs.</p>
+                    </div>
+                  </label>
+                </td>
+                <td><div id="editIconClients" href="#" title="Edit" onclick="openClientsModal()" style="cursor: pointer;">
+                  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+                </div></td>
+              </tr>
+              <!-- Credentials will be dynamically inserted here -->
             </tbody>
           </table>
           <div class="tab-container">
@@ -375,7 +425,89 @@
       <button type="button" onclick="closeProModal()">Cancel</button>
     </div>
   </div>
-  <script>
+  
+  <div id="editClientsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
+    <div style="display: flex;justify-content: space-between;">
+      <h3>Edit Credentials</h3>
+      <div>
+          <div id="addRowBtn" onclick="addNewPRO()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add PRO</div>
+          {% comment %} TODO columns and countries should be added automatically based on the PROs selected below {% endcomment %}
+      </div>
+    </div>
+    <div id="tabs-container"></div>
+    <div id="clientsDatatableContainer">
+        <!-- Datatable for Clients File will be dynamically rendered here -->
+    </div>
+    <div style="margin-top: 1rem;">
+        <button class="button" onclick="saveClientsEdits()">Save</button>
+        <button class="button" onclick="closeClientsModal()" style="background-color: #17161c;">Cancel</button>
+    </div>
+</div>
+<div id="clientsModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeClientsModal()"></div>
+<div id="addPROModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
+  <h3>Add PRO</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Country</th>
+        <th>Wastestream</th>
+        <th>Scheme</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <select id="countrySelect" class="selectpicker">
+            <option value="">Select Country</option>
+          </select>
+        </td>
+        <td>
+          <select id="wastestreamSelect" class="selectpicker" disabled>
+            <option value="">Select Wastestream</option>
+          </select>
+        </td>
+        <td>
+          <select id="schemeSelect" class="selectpicker" disabled>
+            <option value="">Select Scheme</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <thead>
+      <tr>
+        <th>Login</th>
+        <th>Password</th>
+        <th>Notes</th>
+        <th>ExtraInfo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <input type="text" id="loginInput">
+        </td>
+        <td>
+          <input type="text" id="passwordInput">
+        </td>
+        <td>
+          <input type="text" id="notesInput">
+        </td>
+        <td>
+          <input type="text" id="extraInfoInput">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="margin-top: 1rem;">
+    <button class="button" onclick="saveAddPRO()">Save</button>
+    <button class="button" onclick="closeAddPROModal()" style="background-color: #17161c;">Cancel</button>
+  </div>
+</div>
+<div id="addPROModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeAddPROModal()"></div>
+
+<script>
 
     async function createDemoData() {
       try {
@@ -491,9 +623,9 @@
   
         if (setting.input_type === 'input') {
           if (typeof setting.default === 'number') {
-            inputElement = `<input class=\"setting\" type=\"number\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
+            inputElement = `<input class=\"setting form-control\" type=\"number\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
           } else {
-            inputElement = `<input class=\"setting\" type=\"text\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
+            inputElement = `<input class=\"setting form-control\" type=\"text\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
           }
         } else if (setting.input_type === 'checkbox') {
           inputElement = `<input class=\"setting\" type=\"checkbox\" id=\"${setting.key}\" name=\"${setting.key}\" ${currentValue ? 'checked' : ''} onchange=\"toggleSubentries('${setting.key}', this.checked)\">`;
@@ -534,8 +666,285 @@
       });
     }
 
+
+async function openClientsModal() {
+  var clientDataNew = await getClientsFile();
+  document.getElementById('editClientsModal').style.display = 'block';
+  document.getElementById('clientsModalOverlay').style.display = 'block';
+
+  if (!clientDataNew) {
+      console.error('No client data to display.');
+      return;
+  }
+
+  // Parse JSON data into an HTML table
+  const tabsContainer = document.getElementById('tabs-container');
+  const dataContainer = document.getElementById('clientsDatatableContainer');
+  tabsContainer.innerHTML = '';
+  dataContainer.innerHTML = '';
+
+  const countries = Object.keys(clientDataNew);
+  console.log(countries);
+  countries.forEach((country, index) => {
+      const tabButton = document.createElement('button');
+      tabButton.textContent = country;
+      tabButton.className = 'tab-button-credentials';
+      tabButton.style.margin = '5px';
+      tabButton.dataset.country = country;
+
+      tabButton.addEventListener('click', () => {
+          dataContainer.innerHTML = '';
+          highlightActiveTab(index);
+          renderCountryData(clientDataNew[country], country);
+      });
+
+      tabsContainer.appendChild(tabButton);
+  });
+
+  // Auto-click the first tab if available
+  if (countries.length > 0) {
+      document.querySelector('.tab-button-credentials').click();
+  }
+
+  function highlightActiveTab(activeIndex) {
+      const buttons = document.querySelectorAll('.tab-button-credentials');
+      buttons.forEach((btn, index) => {
+          btn.classList.toggle('active', index === activeIndex);
+      });
+  }
+
+  function renderCountryData(data, country) {
+      data = data.map(row => ({
+          ...row,
+          country: country
+      }));
+      if (data.length === 0) {
+          dataContainer.innerHTML = '<p>No client data available for this country.</p>';
+          return;
+      }
+
+      // Dynamically determine columns
+      const dynamicColumns = Object.keys(data[0])
+          .filter(key => key !== 'client')
+          .reduce((acc, field) => {
+              const baseField = field.split(' ')[1] + ' ' + field.split(' ').slice(2).join(' '); // Scheme + Wastestream
+              if (!acc[baseField]) acc[baseField] = {};
+              if (field.startsWith('Login')) acc[baseField]['Login'] = field;
+              if (field.startsWith('Password')) acc[baseField]['Password'] = field;
+              if (field.startsWith('Notes')) acc[baseField]['Notes'] = field;
+              if (field.startsWith('ExtraInfo')) acc[baseField]['ExtraInfo'] = field;
+              return acc;
+          }, {});
+
+      // Generate Tabulator column definitions
+      const columns = [{ title: 'Client', field: 'client', headerSort: false, editor: 'input' },
+                       { title: 'Country', field: 'country', headerSort: false, visible: false }];
+      Object.keys(dynamicColumns).forEach((key) => {
+          const group = dynamicColumns[key];
+          if (group.Login) columns.push({ title: `Login ${key}`, field: group.Login, headerSort: false, editor: 'input' });
+          if (group.Password) columns.push({ title: `Password ${key}`, field: group.Password, headerSort: false, editor: 'input',
+            formatter: (cell) => {
+                const value = cell.getValue();
+                return `<div class="blurred" title="Content blurred for privacy">${value}</div>`;
+            }
+          });
+          if (group.Notes) columns.push({ title: `Notes ${key}`, field: group.Notes, headerSort: false, editor: 'input' });
+          if (group.ExtraInfo) columns.push({ title: `Extra Info ${key}`, field: group.ExtraInfo, headerSort: false, editor: 'input' });
+      });
+
+      const table = new Tabulator("#clientsDatatableContainer", {
+          data: data,
+          layout: "fitDataFill",
+          pagination: data.length > 10,
+          paginationSize: 10,
+          columns: columns,
+      });
+      datatable = table;
+  }
+}
+
+async function getClientsFile() {
+  try {
+        const data = await unifiedSendRequest(CLIENTSFILE, {method: 'GET'});
+        // Check if an error message already exists
+        if (data['status_code'] === 200) {
+          return data['data']['data'];
+        }
+    } catch (error) {
+        console.error(error);
+        showMessage('Failed to fetch clients file ' + error.message, false);
+    }
+}
+
+function closeClientsModal() {
+  document.getElementById('editClientsModal').style.display = 'none';
+  document.getElementById('clientsModalOverlay').style.display = 'none';
+}
+
+var pros = null;
+async function addNewPRO() {
+  try {
+    document.body.style.cursor = 'wait';
+    pros = await unifiedSendRequest(GETPROS, { method: 'GET' });
+    renderCountryDropdown();
+    document.body.style.cursor = 'default';
+  } catch (error) {
+    console.error(error);
+    showMessage('Failed to get pros', false);
+    document.body.style.cursor = 'default';
+  }
+  document.getElementById('addPROModal').style.display = 'block';
+  document.getElementById('addPROModalOverlay').style.display = 'block';
+}
+
+function closeAddPROModal() {
+  document.getElementById('addPROModal').style.display = 'none';
+  document.getElementById('addPROModalOverlay').style.display = 'none';
+}
+
+function renderCountryDropdown() {
+  const countrySelect = document.getElementById('countrySelect');
+  countrySelect.innerHTML = '';
+  countrySelect.appendChild(document.createElement('option'));
+  countrySelect.options[0].value = '';
+  countrySelect.options[0].textContent = 'Select Country';
+  Object.keys(pros).forEach(country => {
+    const option = document.createElement('option');
+    option.value = country;
+    option.textContent = country;
+    countrySelect.appendChild(option);
+  });
+  countrySelect.onchange = function () {
+    renderWastestreamDropdown(countrySelect.value);
+  };
+  document.getElementById('wastestreamSelect').value = '';
+  document.getElementById('schemeSelect').value = '';
+  document.getElementById('wastestreamSelect').disabled = true;
+  document.getElementById('schemeSelect').disabled = true;
+  $('.selectpicker').selectpicker('refresh');
+}
+
+function renderWastestreamDropdown(country) {
+  const wastestreamSelect = document.getElementById('wastestreamSelect');
+  document.getElementById('wastestreamSelect').disabled = false;
+  wastestreamSelect.innerHTML = '';
+  wastestreamSelect.appendChild(document.createElement('option'));
+  wastestreamSelect.options[0].value = '';
+  wastestreamSelect.options[0].textContent = 'Select Wastestream';
+  Object.keys(pros[country]).forEach(wastestream => {
+    const option = document.createElement('option');
+    option.value = wastestream;
+    option.textContent = wastestream;
+    wastestreamSelect.appendChild(option);
+  });
+  wastestreamSelect.onchange = function () {
+    renderSchemeDropdown(country, wastestreamSelect.value);
+  }
+  document.getElementById('schemeSelect').value = '';
+  document.getElementById('schemeSelect').disabled = true;
+  $('.selectpicker').selectpicker('refresh');
+}
+
+function renderSchemeDropdown(country, wastestream) {
+  const schemeSelect = document.getElementById('schemeSelect');
+  document.getElementById('schemeSelect').disabled = false;
+  schemeSelect.innerHTML = '';
+  schemeSelect.appendChild(document.createElement('option'));
+  schemeSelect.options[0].value = '';
+  schemeSelect.options[0].textContent = 'Select Scheme';
+  // list of schemes
+  const schemes = pros[country][wastestream];
+  // sort schemes by name
+  schemes.sort((a, b) => a.localeCompare(b));
+  // add schemes to dropdown
+  schemes.forEach((scheme, idx) => {
+    const option = document.createElement('option');
+    option.value = scheme;
+    option.textContent = scheme;
+    schemeSelect.appendChild(option);
+  });
+  $('.selectpicker').selectpicker('refresh');
+}
+
+
+async function saveAddPRO() {
+  try {
+    const login = document.getElementById('loginInput').value;
+    const password = document.getElementById('passwordInput').value;
+    const notes = document.getElementById('notesInput').value;
+    const extraInfo = document.getElementById('extraInfoInput').value;
+    const country = document.getElementById('countrySelect').value;
+    const wastestream = document.getElementById('wastestreamSelect').value;
+    const scheme = document.getElementById('schemeSelect').value;
+    const formData = new FormData();
+    formData.append('country', country);
+    formData.append('wastestream', wastestream);
+    formData.append('scheme', scheme);
+    formData.append('login', login);
+    formData.append('password', password);
+    formData.append('notes', notes);
+    formData.append('extra_info', extraInfo);
+    const data = await unifiedSendRequest(CLIENTSFILEADD, { formData: formData });
+    if (data['success']) {
+      showMessage('PRO added successfully', true);
+      closeAddPROModal();
+      openClientsModal();
+    } else if (data['success'] == false) {
+      showMessage(data['detail'], false);
+    } else {
+      showMessage('Failed to add PRO', false);
+    }
+  } catch (error) {
+    console.error('Failed to save PRO:', error);
+    showMessage('Failed to save PRO', false);
+  }
+}
+
+
+async function saveClientsEdits() {
+  try {
+      // Get Tabulator instance
+      const table = datatable;
+
+      // Retrieve all data from the table without transformation
+      let data = table.getData();
+
+      // Convert all inputs to strings and replace null with ''
+      const formattedData = data.map(entry => {
+          const updatedEntry = {};
+          for (const key in entry) {
+              if (entry.hasOwnProperty(key)) {
+                  let val = entry[key] === null ? '' : String(entry[key]);
+                  val = val.replace('undefined', '');
+                  updatedEntry[key] = val;
+              }
+              entry['country'] = document.getElementsByClassName('tab-button-credentials active')[0].getAttribute('data-country');
+          }
+          return updatedEntry;
+      });
+      console.log(formattedData);
+      // Send the raw data to the backend
+      const response = await unifiedSendRequest(CLIENTSFILEUPDATE, {
+          formData: JSON.stringify({ clients: formattedData }),
+          headerArgs: { 'Content-Type': 'application/json' }
+      });
+
+      // Handle response
+      if (response.status_code === 200) {
+          showMessage('Clients data saved successfully.', true);
+          closeClientsModal();
+      } else {
+          console.error('Error saving data:', response);
+          showMessage('Failed to save clients data.', false);
+      }
+  } catch (error) {
+      console.error('Error in saveClientsEdits:', error);
+      showMessage('Failed to save clients data: ' + error.message, false);
+  }
+}
+
   
-  async function renderCountryTabs() {
+async function renderCountryTabs() {
     const countryTabs = document.getElementById('countryTabs');
     countryTabs.innerHTML = '';
     Object.keys(availableCountries).forEach(country => {
@@ -662,6 +1071,7 @@
         renderProLabels(proLabels, optionsTable, country, reportType);
         container.appendChild(reportTypeContainer);
       });
+      $('.selectpicker').selectpicker('refresh');
     } catch (error) {
       console.error('Failed to get country labels:', error);
     }
@@ -697,6 +1107,7 @@
       optionContainer.style.alignItems = 'center';
       if (field.input_type === 'dropdown') {
         inputElement = document.createElement('select');
+        inputElement.className = 'selectpicker';
         inputElement.style.padding = '0.5rem';
         field.options.forEach(option => {
           const optionElement = document.createElement('option');
@@ -706,6 +1117,7 @@
         });
       } else if (field.input_type === 'select') {
         inputElement = document.createElement('select');
+        inputElement.className = 'selectpicker';
         inputElement.style.padding = '0.5rem';
         field.options.forEach(option => {
           const optionElement = document.createElement('option');
@@ -738,6 +1150,7 @@
       fieldContainer.appendChild(placeholder3);
       proLabelContainer.appendChild(fieldContainer);
     });
+    $('.selectpicker').selectpicker('refresh');
   }
 
   async function getProLabels(country, pro, reportType) {

@@ -43,6 +43,7 @@ CHECKORDERSFILE = 'v2/reports/checkorders'
 CHECKRETURNSFILE = 'v2/reports/checkreturns'
 CLIENTSFILE = 'finishedreports/clients'
 CLIENTSFILEUPDATE = 'finishedreports/clientsupdate'
+CLIENTSFILEADD = 'finishedreports/clientsadd'
 
 CONNECTORCONFIG = 'live/shopify/config'
 
@@ -69,6 +70,7 @@ GETRETURNLISTLABELSV2COMPARE = 'settings/labelsv2/returnlist/compare'
 GETGENERALCONFIG = 'settings/labels/general'
 GETGENERALCONFIGCOUNTRIES = 'settings/labels/general/countries'
 GETGENERALCONFIGCOUNTRY = 'settings/labels/general/countrylabels'
+GETPROS = 'settings/labels/general/pros'
 GETGENERALSETTINGSDEFINITION = 'settings/labels/general/definition'
 GETGENERALSETTINGSACCESS = 'settings/labels/general/access'
 

@@ -1017,14 +1017,7 @@ content: "\2713"
 </div>
 <div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
 </div>
-<div id="liveDataSettingsModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:30%; background:white; padding:2rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
-  <h2>Live Data Settings</h2>
-  <div id="liveDataSettingsContent">
-    <p>Select the live data settings you want to use:</p>
-  </div>
-</div>
-<div id="modalOverlayLiveData" onclick="closeLiveDataSettingsModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
-</div>
+
 {% render 'forsure-login' %}
 
 <script>
@@ -1087,16 +1080,6 @@ async function getOrdersReceived() {
   } catch (error) {
     console.error(error.message);
   }
-}
-
-function openLiveDataSettingsModal() {
-  document.getElementById('liveDataSettingsModal').style.display = 'block';
-  document.getElementById('modalOverlayLiveData').style.display = 'block';
-}
-
-function closeLiveDataSettingsModal() {
-  document.getElementById('liveDataSettingsModal').style.display = 'none';
-  document.getElementById('modalOverlayLiveData').style.display = 'none';
 }
 
 const createReportBtn = document.getElementById('createReport');
