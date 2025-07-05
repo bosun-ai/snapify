@@ -6,11 +6,13 @@
     position: absolute;
     text-align: center;
     width: 120px;
-    height: 45px;
+    height: fit-content;
     padding: 2px;
     font: 12px sans-serif;
-    background: lightsteelblue;
+    /* background: lightsteelblue; */
+    text-color: #fafafa;
     border: 0;
+    opacity: 1!important;
     border-radius: 8px;
     pointer-events: none;
   }
@@ -565,7 +567,7 @@ td input {
       </div>
       <div style="margin: 2rem;">
         <label for="addColumnMapping" style="width: 50%;">Corresponding Mapping:</label>
-        <select id="addColumnMapping">
+        <select id="addColumnMapping" class="selectpicker">
           <option value="">Unmapped</option>
         </select>
       </div>
@@ -935,9 +937,15 @@ async function selectCountries() {
               allColumns.push(entry);
             }
         }
-        const countryCodes = Object.keys(countryDict);
+        const sortedCountryDict = Object.keys(countryDict).sort((a, b) => {
+          if (a === 'BE') return 1;    // BE goes after everything else
+          if (b === 'BE') return -1;
+          return a.localeCompare(b);  // default alphabetical
+        });
+
+        const countryCodes = sortedCountryDict;
         // Create buttons for first x countries
-        var lenDisplayedCountries = 2;
+        var lenDisplayedCountries = 10;
         countryCodes.slice(0, lenDisplayedCountries).forEach((countryCode, index) => {
             const tabButton = document.createElement('button');
             tabButton.textContent = countryCode;
@@ -1379,7 +1387,6 @@ async function getCategorylistDetails() {
                           foundEntry = true;
                         }
                       });
-                
                       if (!foundEntry && cell.data() !== '') {
                         this.title = 'Invalid entry found';
                         this.classList.add('invalid-entry');
@@ -1745,6 +1752,7 @@ async function addNewColumn() {
     labelsV2Options[groupKey].forEach(option => {
       const optionElement = document.createElement('option');
       optionElement.value = option.key;
+      optionElement.setAttribute('data-tooltip', option.description || '');
       optionElement.setAttribute('data-units', option.options);
       var star = '';  
       if (option.required) {
@@ -1756,6 +1764,25 @@ async function addNewColumn() {
     document.getElementById('addColumnMapping').appendChild(optionGroup);
   });
   document.getElementById('addColumnModal').style.display = 'block';
+  $('#addColumnMapping').selectpicker({
+    dropupAuto: false,
+    size: 8
+  });
+  $('#addColumnMapping').selectpicker('refresh');
+  setTimeout(() => {
+    const $options = $('#addColumnMapping option');
+    const $items = $('#addColumnMapping')
+      .parent()
+      .find('.dropdown-menu li:not(.divider):not(.dropdown-header) a');
+    $items.each(function (index) {
+      const tooltip = $options.eq(index).data('tooltip');
+      if (tooltip) {
+        $(this).attr('title', tooltip);
+      }
+    });
+    // Initialize Bootstrap tooltip
+    $items.tooltip({ container: 'body' });
+  }, 200);
   $('#deleteButtonRow').hide();
   $('#deleteButton').hide();
   document.body.style.cursor = 'default';

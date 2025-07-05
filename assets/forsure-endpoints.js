@@ -17,7 +17,7 @@ GETSTATSDETAILS = 'stats/charts/details'
 STATSREPORTS = "stats/charts/filters"
 TOGGLEPIN = 'stats/charts/toggle'
 
-NEXTREPORTS = 'reports/deadlines?all_reports=true'
+NEXTREPORTS = 'reports/deadlines'
 
 // GETREPORTNAMES = 'download/reports/'
 GETREPORTNAMESINPROGRESS = 'download/reports/inprogress'
@@ -113,3 +113,7 @@ ERRORRESOLUTION = 'nav/errors'
 
 DEMODATA = 'demo/data'
 DEMODATASTATUS = 'demo/status'
+
+GETINTEGRATIONS = 'live/config'
+ADDINTEGRATION = 'live/config/add'
+GETINTEGRATIONBYID = 'live/config/id'

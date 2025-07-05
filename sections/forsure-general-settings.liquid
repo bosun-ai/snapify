@@ -568,9 +568,9 @@
       }
     }
 
-    async function getAvailableCountries() {
+    async function getAvailableCountriesSettings() {
       try {
-        let data = await unifiedSendRequest(GETGENERALCONFIGCOUNTRIES, { method: 'GET' });
+        let data = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY, { method: 'GET' });
         return data;
       } catch (error) {
         console.error(error.message);
@@ -578,93 +578,82 @@
       }
     }
 
-    async function getCountryLabels(country) {
-      try {
-        let data = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY + '?country=' + country, { method: 'GET' });
-        return data;
-      } catch (error) {
-        console.error(error.message);
-        showMessage('Failed to get settings definition ' + error.message, false);
-      }
+var generalSettingsDefinition;
+var generalSettings;
+var availableCountriesSettings = {};
+  
+async function initializeSettings() {
+  try {
+    var hasAccess = await unifiedSendRequest(GETGENERALSETTINGSACCESS, { method: 'GET' });
+    if (!hasAccess['generalsettings']) {
+      document.getElementById('generalSettingsContainer').style.display = 'none';
+      return;
     }
-    var generalSettingsDefinition;
-    var generalSettings;
-    var availableCountries = {};
+    document.getElementById('generalSettingsContainer').style.display = 'block';
+    generalSettingsDefinition = await getGeneralSettingsDefinition();
+    generalSettings = await getGeneralSettings();
+    availableCountriesSettings = await getAvailableCountriesSettings();
+    await getDemoDataStatus();
+
+    renderGeneralSettings();
+    await renderCountryTabs(availableCountriesSettings);
+  } catch (error) {
+    console.error('Failed to initialize settings:', error);
+  }
+}
   
-    async function initializeSettings() {
-      try {
-        var hasAccess = await unifiedSendRequest(GETGENERALSETTINGSACCESS, { method: 'GET' });
-        if (!hasAccess['generalsettings']) {
-          document.getElementById('generalSettingsContainer').style.display = 'none';
-          return;
-        }
-        document.getElementById('generalSettingsContainer').style.display = 'block';
-        generalSettingsDefinition = await getGeneralSettingsDefinition();
-        generalSettings = await getGeneralSettings();
-        availableCountries = await getAvailableCountries();
-        await getDemoDataStatus();
-  
-        renderGeneralSettings();
-        await renderCountryTabs();
-      } catch (error) {
-        console.error('Failed to initialize settings:', error);
+function renderGeneralSettings() {
+  const settingsTableBody = document.getElementById('settingsTableBody');
+  settingsTableBody.innerHTML = '';
+
+  generalSettingsDefinition.forEach(setting => {
+    const currentValue = generalSettings[setting.key] || '';
+    let inputElement;
+
+    if (setting.input_type === 'input') {
+      if (typeof setting.default === 'number') {
+        inputElement = `<input class=\"setting form-control\" type=\"number\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
+      } else {
+        inputElement = `<input class=\"setting form-control\" type=\"text\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
       }
+    } else if (setting.input_type === 'checkbox') {
+      inputElement = `<input class=\"setting\" type=\"checkbox\" id=\"${setting.key}\" name=\"${setting.key}\" ${currentValue ? 'checked' : ''} onchange=\"toggleSubentries('${setting.key}', this.checked)\">`;
     }
 
-    
-  
-    function renderGeneralSettings() {
-      const settingsTableBody = document.getElementById('settingsTableBody');
-      settingsTableBody.innerHTML = '';
-  
-      generalSettingsDefinition.forEach(setting => {
-        const currentValue = generalSettings[setting.key] || '';
-        let inputElement;
-  
-        if (setting.input_type === 'input') {
-          if (typeof setting.default === 'number') {
-            inputElement = `<input class=\"setting form-control\" type=\"number\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
-          } else {
-            inputElement = `<input class=\"setting form-control\" type=\"text\" id=\"${setting.key}\" name=\"${setting.key}\" value=\"${currentValue}\" placeholder=\"${setting.default}\">`;
-          }
-        } else if (setting.input_type === 'checkbox') {
-          inputElement = `<input class=\"setting\" type=\"checkbox\" id=\"${setting.key}\" name=\"${setting.key}\" ${currentValue ? 'checked' : ''} onchange=\"toggleSubentries('${setting.key}', this.checked)\">`;
-        }
-  
-        settingsTableBody.innerHTML += `
-          <tr class=\"setting-item\" data-key=\"${setting.key}\">
-            <td><label style="width: fit-content;">${setting.title}<div class=\"tooltip\">${setting.description}</div></label></td>
-            <td>${inputElement}</td>
-          </tr>
-        `;
-      });
-  
-      // Initialize subentry visibility based on current checkbox state
-      generalSettingsDefinition.forEach(setting => {
-        if (setting.input_type === 'checkbox' && setting.subentries) {
-          const control = document.getElementById(setting.key);
-          toggleSubentries(setting.key, control.checked);
-        }
-      });
+    settingsTableBody.innerHTML += `
+      <tr class=\"setting-item\" data-key=\"${setting.key}\">
+        <td><label style="width: fit-content;">${setting.title}<div class=\"tooltip\">${setting.description}</div></label></td>
+        <td>${inputElement}</td>
+      </tr>
+    `;
+  });
+
+  // Initialize subentry visibility based on current checkbox state
+  generalSettingsDefinition.forEach(setting => {
+    if (setting.input_type === 'checkbox' && setting.subentries) {
+      const control = document.getElementById(setting.key);
+      toggleSubentries(setting.key, control.checked);
     }
+  });
+}
   
-    function toggleSubentries(key, isChecked) {
-      const def = generalSettingsDefinition.find(s => s.key === key);
-      const trueSubs = (def.subentries && def.subentries.true) || [];
-      const falseSubs = (def.subentries && def.subentries.false) || [];
-  
-      // Show true subentries when checked, hide when unchecked
-      trueSubs.forEach(subKey => {
-        const row = document.getElementById(`subentry-${subKey}`);
-        if (row) row.style.display = isChecked ? 'table-row' : 'none';
-      });
-  
-      // Show false subentries when unchecked, hide when checked
-      falseSubs.forEach(subKey => {
-        const row = document.getElementById(`subentry-${subKey}`);
-        if (row) row.style.display = !isChecked ? 'table-row' : 'none';
-      });
-    }
+function toggleSubentries(key, isChecked) {
+  const def = generalSettingsDefinition.find(s => s.key === key);
+  const trueSubs = (def.subentries && def.subentries.true) || [];
+  const falseSubs = (def.subentries && def.subentries.false) || [];
+
+  // Show true subentries when checked, hide when unchecked
+  trueSubs.forEach(subKey => {
+    const row = document.getElementById(`subentry-${subKey}`);
+    if (row) row.style.display = isChecked ? 'table-row' : 'none';
+  });
+
+  // Show false subentries when unchecked, hide when checked
+  falseSubs.forEach(subKey => {
+    const row = document.getElementById(`subentry-${subKey}`);
+    if (row) row.style.display = !isChecked ? 'table-row' : 'none';
+  });
+}
 
 
 async function openClientsModal() {
@@ -944,11 +933,11 @@ async function saveClientsEdits() {
 }
 
   
-async function renderCountryTabs() {
+async function renderCountryTabs(availableCountriesSettings) {
     const countryTabs = document.getElementById('countryTabs');
     countryTabs.innerHTML = '';
-    Object.keys(availableCountries).forEach(country => {
-      if (availableCountries[country].recommended) {
+    Object.keys(availableCountriesSettings).forEach(country => {
+      if (availableCountriesSettings[country].recommended) {
         const tab = document.createElement('div');
         tab.className = 'tab';
         tab.classList.add('tab-button');
@@ -1151,15 +1140,6 @@ async function renderCountryTabs() {
       proLabelContainer.appendChild(fieldContainer);
     });
     $('.selectpicker').selectpicker('refresh');
-  }
-
-  async function getProLabels(country, pro, reportType) {
-    try {
-      const response = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY + '?country=' + country, { method: 'GET' });
-      return response;
-    } catch (error) {
-      console.error('Failed to get pro labels:', error);
-    }
   }
 
   async function submitSettings() {
