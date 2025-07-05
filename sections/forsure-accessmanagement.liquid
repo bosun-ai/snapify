@@ -352,7 +352,7 @@ div.display-flex {
   {% render 'forsure-login' %}
   {% render 'forsure-simple-notification' %}
   {% render 'forsure-confirmation' %}
-  <div class="section-{{ section.id }}-padding">
+  <div id="accessManagementWrapper" class="section-{{ section.id }}-padding" style="display: none;">
     <div id="accessManagement" class="configbox page-width border" style="border-radius: 1rem;position:relative;background: #fafafa;">
         <div><h2>Manage Access</h2></div>
         <table>
@@ -367,7 +367,7 @@ div.display-flex {
             <tbody id="userList">          
             </tbody>
         </table>
-        <div id="editModal" class="modal">
+        <div id="editModal" class="modal losensitive">
 
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
@@ -384,7 +384,7 @@ div.display-flex {
             <button id="addApiTokenButton" class="button" style="margin-left: auto;" onclick="addApiToken()">Add API Token</button>
         </div>
     </div>
-    <div id="apiTokenModal" style="padding-bottom: 2rem; display: none">
+    <div id="apiTokenModal" class="losensitive" style="padding-bottom: 2rem; display: none">
         <div class="modal-content">
             <span class="close" onclick="closeApiTokenModal()">&times;</span>
             <h2 style="margin-left: auto;margin-right: auto;width: fit-content;">API Token added</h2>
@@ -674,7 +674,13 @@ window.onclick = function(event) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', getUsers);
+waitForPermission(function() {
+    if (window.userPermissions['forsure-configuration'] && window.userPermissions['accessmanagement']) {
+      document.getElementById('accessManagementWrapper').style.display = 'block';
+      getUsers();
+    }
+  });
+
 
 </script>
 {% endif %}

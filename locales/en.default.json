@@ -189,7 +189,8 @@
     "templates": {
         "404": {
             "title": "Page not found",
-            "subtext": "404"
+            "subtext": "404",
+            "back_to_home": "Back to home"
         },
         "search": {
             "no_results": "No results found for “{{ terms }}”. Check the spelling or use a different word or phrase.",
@@ -864,6 +865,11 @@
                     "title": "Versions",
                     "text": "Here you can see the different versions of the category list to see the changes you made over time. Every time you save, you create a new version.",
                     "group": "Versions"
+                },
+                "dropdown": {
+                    "title": "Dropdown",
+                    "text": "When you edit a cell, you can use the dropdown to select the correct value. Hovering over the options shows the description of the value. If the value is not in the dropdown, you can just type it in.",
+                    "group": "Dropdown"
                 }
             }
         }

@@ -137,6 +137,7 @@
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
   <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  {% render 'forsure-login' %}
   {%- liquid
   assign columns_mobile_int = section.settings.columns_mobile | plus: 0
   assign show_mobile_slider = false
@@ -144,6 +145,7 @@
     assign show_mobile_slider = true
   endif
 -%}
+
   {% render 'forsure-notifications' %}
   {% render 'forsure-guide' %}
   <div id="navbar-side" class="page-width multicolumn color-{{ section.settings.color_scheme }} gradient{% unless section.settings.background_style == 'none' and settings.text_boxes_border_thickness > 0 or settings.text_boxes_shadow_opacity > 0 %} background-{{ section.settings.background_style }}{% endunless %}{% if section.settings.title == blank %} no-heading{% endif %}">
@@ -181,13 +183,13 @@
         {% if isCurrent %}
           <li
             id="list-element-{{ page_name }}"
-            class="list-element-active grid__item slider__slide slider__slide--full-width"
+            class="list-element-active grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
             style="width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
             <div class="greyedout-tooltip">Please upgrade to the full version to access this</div>
             <a
               href="{{ link.url }}"
               id="a-{{ page_name }}"
-              class="header__menu-item list-menu__item link link--text focus-inset content-link"
+              class="header__menu-item list-menu__item link link--text focus-inset content-link greyed_out"
               data-url="{{ link.url }}"
               style="display: flex;flex-wrap: nowrap;
                           background-color:#2255FF;list-style-type: none;width:fit-content;max-width:fit-content;padding-left:1rem;padding-right:1rem">
@@ -207,13 +209,13 @@
             {% else %}
               <li
                 id="list-element-{{ page_name }}"
-                class="list-element grid__item slider__slide slider__slide--full-width"
+                class="list-element grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
                 style="background-color: #fafafa;width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
                 <div class="greyedout-tooltip">Please upgrade to the full version to access this</div>
                 <a
                   href="{{ link.url }}"
                   id="a-{{ page_name }}"
-                  class="header__menu-item list-menu__item link link--text focus-inset content-link"
+                  class="header__menu-item list-menu__item link link--text focus-inset content-link greyed_out"
                   data-url="{{ link.url }}"
                   {% if link.current %}aria-current="page"{% endif %}
                   style="width:fit-content;max-width:fit-content;padding-left:1rem;padding-right:1rem">
@@ -232,25 +234,26 @@
         async function getNavbarElements() {
             try {
                 var data = await unifiedSendRequest(NAVBAR, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+                window.userPermissions = data;
                 var available_url = null;
                 for (const [nav_element, show] of Object.entries(data)) {
-                      if (!show) {
-                          // Add 'greyed_out' class to elements that should be hidden or disabled
-                          const element = document.getElementById(`a-${nav_element}`);
-                          const wrapper = document.getElementById(`list-element-${nav_element}`);
-                          if (element) {
-                              element.classList.add('greyed_out');
-                              wrapper.classList.add('greyed_out_wrapper');
+                    if (show) {
+                      // Add 'greyed_out' class to elements that should be hidden or disabled
+                      const element = document.getElementById(`a-${nav_element}`);
+                      const wrapper = document.getElementById(`list-element-${nav_element}`);
+                      if (element) {
+                          element.classList.remove('greyed_out');
+                          wrapper.classList.remove('greyed_out_wrapper');
+                          if (available_url === null) {
+                            available_url = nav_element;
                           }
-                      } else if (available_url === null) {
-                        available_url = nav_element;
                       }
+                    }
                  }
                 if (data['{{ currentLink }}'] === false) {
                     if (available_url === null) {
                       window.location.href = '/';
                     }
-                    
                     window.location.href = `{{ currentPath }}/${available_url}`;
                 }
                 if (data['{{ currentLink }}?logged_in'] === false) {

@@ -14,9 +14,11 @@ var username = "test";
 var password = "test";
 
 
-function login(id, key) {
+async function login(id, key) {
   username = id;
   password = key;
+  data = await requestToken();
+  TOKEN = data["access_token"];
 }
 
 async function requestToken() {
@@ -163,4 +165,19 @@ async function unifiedSendRequestBlob(endpoint, options = {}) {
     }
     throw new Error(errorDetails);
   }
+}
+
+
+function waitForPermission(callback) {
+  const check = () => {
+    if (
+      window.userPermissions &&
+      Object.keys(window.userPermissions).length > 0
+    ) {
+      callback();
+    } else {
+      setTimeout(check, 50); // Try again in 100ms
+    }
+  };
+  check();
 }

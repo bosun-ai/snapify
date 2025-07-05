@@ -691,6 +691,14 @@ fieldset[disabled] .btn-default:hover {
     <div class="page-width" id="pagewidthWrapper">
       <div style="border-radius: 2.5rem;    overflow: hidden;">
         <div style="background: #fafafa;position:relative">
+          <div
+            onclick="backToInfo()"
+            id="backToInfo"
+            class="svg-arrow svg-arrow-padding collapsed"
+            style="display: none;width: 3rem;transform: rotate(90deg);position: absolute;top: 4rem;left: 2rem;z-index:3;"
+          >
+            {% render 'icon-arrow-rounded' %}
+          </div>
           <div class="borderSpaces"></div>
           <div class="borderSpaces" style="right: 0;"></div>
           <div
@@ -1216,10 +1224,12 @@ function gtag_report_conversion() {
       console.log(`Selected ${date}`);
       const container = document.getElementById('times');
       document.getElementById('leftSide').style.minWidth = document.getElementById('leftSide').innerwidth;
+      console.log('leftSide', document.getElementById('leftSide').style.minWidth);
       document.getElementById('timesContainer').style.display = 'block';
       setTimeout(() => {
         // document.getElementById('container').style.transform = 'translateX(-25rem)';
         document.getElementById('container').classList.add('transitionContainer');
+        console.log('window.innerWidth', window.innerWidth);
         if (window.innerWidth <= 1590 && window.innerWidth >= 1500) {
           const baseWidth = 1590;
           const baseRem = -21;
@@ -1238,6 +1248,7 @@ function gtag_report_conversion() {
             let translateX = baseRem + (baseWidth - window.innerWidth) * remPerPixel;
             document.getElementById('container').style.transform = `translateX(${translateX}rem)`;
         }
+        console.log('container', document.getElementById('container').style.transform);
         document.getElementById('timesContainer').style.transform = 'translateX(1rem)';
       }, 50); // Small delay to allow DOM update
       // document.getElementById('timesContainer').style.transform = 'translateX(-150px)';
@@ -1255,6 +1266,8 @@ function gtag_report_conversion() {
         divWrapper.appendChild(div);
         container.appendChild(divWrapper);
       }
+
+      document.getElementById('backToInfo').style.display = 'flex';
     }
 
     var chosenDate = null;
@@ -1287,10 +1300,11 @@ function gtag_report_conversion() {
     function displayQuestions(date, datestr, time) {
       // document.getElementById('leftSide').style.display = 'block';
       // document.getElementById('borderMiddle').style.display = 'block';
+      document.getElementById('backToInfo').style.display = 'none';
       document.getElementById('calendarContainer').style.display = 'none';
       document.getElementById('calendarContainerWrapper').style.display = 'none';
       document.getElementById('container').classList.remove('transitionContainer');
-      document.getElementById('container').style.transform = 'none';
+      document.getElementById('container').style.transform = '';
       document.getElementById('timesContainer').style.display = 'none';
       const questionContainer = document.getElementById('questionsContainer');
       questionContainer.style.display = 'flex';
@@ -1437,6 +1451,16 @@ function gtag_report_conversion() {
       document.getElementById('timezoneDisplayContainer').style.display = 'none';
       document.getElementById('eventTimeQuestionsContainer').style.display = 'none';
       document.getElementById('backToCalendar').style.display = 'none';
+    }
+
+    function backToInfo() {
+      document.getElementById('backToInfo').style.display = 'none';
+      document.getElementById('calendarContainer').style.display = 'none';
+      document.getElementById('calendarContainerWrapper').style.display = 'none';
+      document.getElementById('container').classList.remove('transitionContainer');
+      document.getElementById('container').style.transform = '';
+      document.getElementById('timesContainer').style.display = 'none';
+      backToCalendar();
     }
 
     function fillQuestions(date, datestr, time) {

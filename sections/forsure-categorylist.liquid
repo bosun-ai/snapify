@@ -380,10 +380,7 @@ td input {
 }
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
-  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
-  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
-  {% render 'forsure-login' %}
   {% render 'forsure-simple-notification' %}
   <link href="https://cdn.datatables.net/v/dt/dt-1.13.7/datatables.min.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -406,7 +403,7 @@ td input {
   <div id="loadingSpinnerContainer" style="display: none;">
     <div id="loadingSpinner" style="display: block!important;"></div>
   </div>
-  <div style="padding: 3rem;margin: 3rem;border-radius: 2rem;border:0.2rem solid #17161c">
+  <div id="categorylistWrapper" style="padding: 3rem;margin: 3rem;border-radius: 2rem;border:0.2rem solid #17161c;display: none;">
     <div id="overlay"></div>
     <div id="popup" style="z-index:50;display: none">
       <div id="popupcontent" style="width: 70%; margin: auto">
@@ -498,7 +495,7 @@ td input {
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
-  <div id="profileModal" class="modal">
+  <div id="profileModal" class="modal losensitive">
     <div class="modal-content">
       <span id="closeMapping" class="close">&times;</span>
       <div class="profile-wrapper">
@@ -528,7 +525,7 @@ td input {
       </div>
     </div>
   </div>
-  <div id="renameColumnModal" class="modal" style="display: none;">
+  <div id="renameColumnModal" class="modal losensitive" style="display: none;">
     <div class="modal-content" style="width: 45vw;">
       <span id="closeRenameColumn" class="close" onclick="closeRenameColumnModal()">&times;</span>
       <h2 style="margin: 2rem;">Rename Column</h2>
@@ -542,7 +539,7 @@ td input {
       </div>
       <div style="margin: 2rem;">
         <label for="renameColumnInput" style="width: 50%;">Corresponding Mapping:</label>
-        <select id="renameColumnMapping">
+        <select id="renameColumnMapping" class="selectpicker">
           <option value="">Unmapped</option>
         </select>
       </div>
@@ -557,7 +554,7 @@ td input {
     </div>
   </div>
 
-  <div id="addColumnModal" class="modal" style="display: none;">
+  <div id="addColumnModal" class="modal losensitive" style="display: none;">
     <div class="modal-content" style="width: 45vw;">
       <span id="closeAddColumn" class="close" onclick="closeAddColumnModal()">&times;</span>
       <h2 style="margin: 2rem;">Add Column</h2>
@@ -581,7 +578,7 @@ td input {
     </div>
     </div>
   </div>
-  <div id="confirmOverwriteModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+  <div id="confirmOverwriteModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
      background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
     <h2>Confirm Overwrite</h2>
     <p>Are you sure you want to overwrite the existing mapping?</p>
@@ -1125,7 +1122,6 @@ async function fillVersionDropdown() {
         {% comment %} showMessage('Failed to get versions ' + error.message, false); {% endcomment %}
     }
 }
-fillVersionDropdown();
 
 // Optional mock data generator (last 5 months example)
 function generateMockVersions() {
@@ -1647,6 +1643,11 @@ async function renameColumn(th, e) {
     });
     document.getElementById('renameColumnMapping').appendChild(optionGroup);
   });
+  $('#renameColumnMapping').selectpicker({
+    dropupAuto: false,
+    size: 8
+  });
+  $('#renameColumnMapping').selectpicker('refresh');
   document.getElementById('renameColumnModal').style.display = 'block';
   $('#deleteButtonRow').hide();
   $('#deleteButton').hide();
@@ -1791,7 +1792,7 @@ async function addNewColumn() {
 }
 
   let currentTh = null;
-  async function deleteColumn() {
+async function deleteColumn() {
       // Delete the column
       // closePopup();
       const columnName = currentTh.textContent;
@@ -1861,10 +1862,9 @@ async function addNewColumn() {
   }
 
   async function activateEditMode() {
-    var data = await unifiedSendRequest(CATEGORYLISTACCESS, {method: 'GET'});
     document.getElementById('editModeActivated').style.display = 'block';
     document.getElementById('activateEditMode').style.display = 'none';
-    if (data['rules'] === false) {
+    if (window.userPermissions['rules'] === false) {
       document.getElementById('addRuleBtn').classList.add('greyed_out_wrapper');
       document.getElementById('addRuleBtn').style.cursor = 'not-allowed';
       document.getElementById('addRuleBtn').style.backgroundColor = '#ddd';
@@ -1884,8 +1884,7 @@ async function addNewColumn() {
   }
 
   async function activateCategorylistMode() {
-    var data = await unifiedSendRequest(CATEGORYLISTACCESS, {method: 'GET'});
-    if (data['livedata'] === false) {
+    if (window.userPermissions['livedata'] === false) {
       document.getElementById('categorylistfromstore').style.cursor = 'not-allowed';
       document.getElementById('categorylistfromstore').style.backgroundColor = '#ddd';
       document.getElementById('categorylistfromstore').onclick = null;
@@ -1937,6 +1936,13 @@ async function addNewColumn() {
       }
   }
 
+  function openDropdownGuide() {
+    // get the 16th td inside the row with id 1
+    var row = document.getElementById('1');
+    var td = row.querySelectorAll('td')[15];
+    td.click();
+  }
+
   function showGuide() {
     startGuide([
         { element: "main", group: "{{ 'software.guide.categorylist.welcome.group' | t }}", title: "{{ 'software.guide.categorylist.welcome.title' | t }}", text: "{{ 'software.guide.categorylist.welcome.text' | t }}", where: 'middle' },
@@ -1948,17 +1954,24 @@ async function addNewColumn() {
         { element: "#deactivateEditModeSave", group: "{{ 'software.guide.categorylist.save.group' | t }}", title: "{{ 'software.guide.categorylist.save.title' | t }}", text: "{{ 'software.guide.categorylist.save.text' | t }}", where: 'below', runBefore: activateEditMode},
         { element: "#tabs-container", group: "{{ 'software.guide.categorylist.tabs.group' | t }}", title: "{{ 'software.guide.categorylist.tabs.title' | t }}", text: "{{ 'software.guide.categorylist.tabs.text' | t }}", where: 'below'},
         { element: "#versionsContainer", group: "{{ 'software.guide.categorylist.versions.group' | t }}", title: "{{ 'software.guide.categorylist.versions.title' | t }}", text: "{{ 'software.guide.categorylist.versions.text' | t }}", where: 'below'},
+        { element: "#editableTable", group: "{{ 'software.guide.categorylist.dropdown.group' | t }}", title: "{{ 'software.guide.categorylist.dropdown.title' | t }}", text: "{{ 'software.guide.categorylist.dropdown.text' | t }}", where: 'inside', runBefore: openDropdownGuide},
     ]);
     setCookie('showedGuideCategory', 'true', 300);
 }
+
 function showGuideFromButton(element) {
   showGuide();
 }
-document.addEventListener('DOMContentLoaded', function() {
-  if(readCookie('showedGuideCategory') === null) {
+
+waitForPermission(function() {
+  if (window.userPermissions['forsure-categorylist-editor']) {
+    document.getElementById('categorylistWrapper').style.display = 'block';
+    fillVersionDropdown();
+    if(readCookie('showedGuideCategory') === null) {
       setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
     }
-  });
+  }
+});
 
   </script>
 {% else %}

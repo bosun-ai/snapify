@@ -4,8 +4,8 @@ Renders container for statistics for pinned charts
 Usage:
 {% render 'forsure-chart-container' %}
 {% endcomment %}
-<div id="customChart">{% render 'forsure-custom-plot', trashcan: trashcan %}</div>
-<ul id="widgetContainer" class="widgetContainer" style="justify-content: center;"></ul>
+<div id="customChart" style="display: none;">{% render 'forsure-custom-plot', trashcan: trashcan %}</div>
+<ul id="widgetContainer" class="widgetContainer" style="justify-content: center;display: none;"></ul>
 {% comment %} <script src="https://code.jquery.com/jquery-3.6.0.js"></script> {% endcomment %}
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
@@ -47,13 +47,6 @@ Usage:
     return containerHeight;
   }
 
-// Add resize event to window
-  window.addEventListener('resize', redraw);
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    await redraw(null, true);
-});
-
   async function redraw(event = null, hard = false) {
     let containerId = 'widgetContainer';
     if (hard) { // Clear the contents of widgetContainer
@@ -74,4 +67,14 @@ Usage:
     }px`;
     document.getElementById(containerId).style.height = widgetContainerHeight;
   }
+
+
+  waitForPermission(async function() {
+    if (window.userPermissions['forsure-statistics'] && window.userPermissions['pinnedchart']) {
+      document.getElementById('widgetContainer').style.display = 'flex';
+      await redraw(null, true);
+      // Add resize event to window
+      window.addEventListener('resize', redraw);
+    }
+  });
 </script>

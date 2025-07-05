@@ -595,13 +595,11 @@ content: "\2713"
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
-  <div id="reportcontainer" style="min-height: 100vh;padding-bottom: 5rem;">
+  <div id="reportcontainer" style="min-height: 100vh;padding-bottom: 5rem;display: none">
   <!-- Load d3.js -->
   <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
   {% comment %} <script src="https://cdn.jsdelivr.net/npm/d3@7"></script> {% endcomment %}
-  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
-  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
   {% render 'forsure-simple-notification' %}
   {% render 'forsure-confirmation' %}
   
@@ -702,7 +700,7 @@ content: "\2713"
             <button class="button" onclick="uploadReports()">Hand in reports</button>
         </div>
 
-        <div id="editClientsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
+        <div id="editClientsModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
             <div style="display: flex;justify-content: space-between;">
               <h3>Edit Clients File</h3>
               <div>
@@ -727,7 +725,7 @@ content: "\2713"
     </div>
 
 
-    <div class="step" id="step1" style="display: none;">
+    <div class="step losensitive" id="step1" style="display: none;">
         <h2 class="heading">Select Orderlist</h2>
         <div class="display-flex" style="margin: auto;width: fit-content;display:flex">
           <h3 id="liveDataText" class="toggle-options">Use live data</h3>
@@ -757,7 +755,7 @@ content: "\2713"
         </div>
     </div>
 
-  <div class="step" id="step2" style="display: none">
+  <div class="step losensitive" id="step2" style="display: none">
       <h2 class="heading">Select Returnlist</h2>
       <div class="dropZone" data-input="return_list" data-url="uploadreturns/" id="returnListDropZone">
         <div>
@@ -776,7 +774,7 @@ content: "\2713"
       </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
-  <div id="profileModal" class="modal">
+  <div id="profileModal" class="losensitive modal">
     <div class="modal-content">
       <span class="close">&times;</span>
       <div class="profile-wrapper">
@@ -813,14 +811,14 @@ content: "\2713"
       </div>
     </div>
   </div>
-  <div id="confirmOverwriteModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+  <div id="confirmOverwriteModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
      background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
     <h2>Confirm Overwrite</h2>
     <p>Are you sure you want to overwrite the existing mapping?</p>
     <button class="button" onclick="confirmOverwrite()">Yes</button>
     <button class="button" onclick="closeConfirmOverwriteModal()">No</button>
   </div>
-  <div class="step" id="step3" style="display: none;">
+  <div class="step losensitive" id="step3" style="display: none;">
       <h2 class="heading">Select country and timeframe</h2>
 
 
@@ -903,7 +901,7 @@ content: "\2713"
 
 
 
-  <div class="step" id="step4" style="display: none;">
+  <div class="step losensitive" id="step4" style="display: none;">
       <h2 class="heading">Confirm</h2>
 
         <div class="container">
@@ -985,7 +983,7 @@ content: "\2713"
           <button class="nextButton button" onclick="createReport()">Create Report</button>
       </div>
   </div>
-  <div class="step" id="stepDone" style="display: none;">
+  <div class="step losensitive" id="stepDone" style="display: none;">
     <h2 class="heading">Report in progress</h2>
     <div id="reportInProgress" style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report is in progress, you can leave this page.</div>
     <div id="reportFailed" style="display:none;margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Failed to create report, please try again or contact the support.</div>
@@ -999,7 +997,7 @@ content: "\2713"
       </div>
   </div>
 </div>
-<div id="errorModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+<div id="errorModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
   <div style="display:flex;gap:1rem;">
     <h2 id="error-modal-title">Errors</h2>
     <div style="display:flex;gap:1rem;margin: auto;margin-right: 1rem;height: fit-content;">
@@ -1018,21 +1016,17 @@ content: "\2713"
 <div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
 </div>
 
-{% render 'forsure-login' %}
-
 <script>
-let allowedToCreateReports = {create_report: false, upload_report: false};
 async function cancreatereports() {
     try {
-        let data = await unifiedSendRequest(CANCREATEREPORTS, {method: 'GET'});
-        if (data['create_reports'] === true) {
+        if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-creation'] === true) {
             document.getElementById('createNewReport').classList.remove('greyed_out');
             document.getElementById('createNewReportWrapper').classList.remove('greyed_out_wrapper');
         } else {
             document.getElementById('createNewReport').classList.add('greyed_out');
             document.getElementById('createNewReportWrapper').classList.add('greyed_out_wrapper');
         }
-        if (data['upload_reports'] === true) {
+        if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-upload'] === true) {
             document.getElementById('uploadExistingReports').classList.remove('greyed_out');
             document.getElementById('uploadExistingReportsWrapper').classList.remove('greyed_out_wrapper');
         } else {
@@ -1047,13 +1041,10 @@ async function cancreatereports() {
     canuselivedata();
 }
 
-cancreatereports();
-
 
 async function canuselivedata() {
   try {
-    var data = await unifiedSendRequest(CATEGORYLISTACCESS, {method: 'GET'});
-    if (data['livedata'] === false) {
+    if (window.userPermissions['forsure-report'] === false || window.userPermissions['livedata'] === false) {
       document.getElementById('liveDataToggleSlider').style.cursor = 'not-allowed';
       document.getElementById('liveDataToggleSlider').style.backgroundColor = '#ddd';
       document.getElementById('liveDataToggle').disabled = true;
@@ -1111,6 +1102,7 @@ async function selectOption(option) {
         guideToShow = 'new';
         await getOrdersReceived();
     } else if (option === 'upload') {
+        getClientsFile();
         document.getElementById('progressIcons').style.display = 'none';
         document.getElementById('step1').style.display = 'none';
         document.getElementById('uploadReport').style.display = 'block';
@@ -1122,7 +1114,6 @@ async function selectOption(option) {
       document.getElementById('uploadReport').style.display = 'none';
       document.getElementById('chooseoption').style.display = 'block';
     }
-    showGuideAfterSelection();
 }
 
 dropZones.forEach(dropZone => {
@@ -1969,6 +1960,7 @@ document.getElementById("editIcon").addEventListener("click", async function() {
     dropdown.style.removeProperty('display');  // Remove the display style
     editIcon.style.display = "inline";
 }
+
 deleteIcon.addEventListener("click", async function() {
     const isConfirmed = confirm("Are you sure you want to delete this profile?");
     if (isConfirmed) {
@@ -2325,7 +2317,6 @@ async function getClientsFile() {
         showMessage('Failed to fetch clients file ' + error.message, false);
     }
 }
-getClientsFile();
 
 async function handleClientsUpload(input, additionalInfo) {
     const file = input.files[0];
@@ -2480,8 +2471,6 @@ async function openClientsModal() {
     }
 }
 
-
-
 // Function to add a new row after the last entry
 function addNewRow() {
     datatable.addRow({});
@@ -2564,8 +2553,6 @@ async function saveClientsEdits() {
     }
 }
 
-
-
 function updateProgressIcons(currentStep) {
     const icons = document.querySelectorAll('.progressIcon');
     icons.forEach(icon => {
@@ -2584,18 +2571,21 @@ function updateProgressIcons(currentStep) {
         }
     });
 }
+
 function nextStep(stepNumber) {
     stepFunctions(stepNumber);
     steps.forEach(step => step.style.display = 'none');
     document.getElementById('step' + stepNumber).style.display = 'block';
     updateProgressIcons(stepNumber);
 }
+
 function prevStep(stepNumber) {
     stepFunctions(stepNumber);
     steps.forEach(step => step.style.display = 'none');
     document.getElementById('step' + stepNumber).style.display = 'block';
     updateProgressIcons(stepNumber);
 }
+
 function stepFunctions(stepNumber){
     if (stepNumber === 3) {
       getTimesAndCountry();
@@ -2661,9 +2651,8 @@ async function getTimesAndCountry() {
     });
     var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, { method: 'GET' });
     fillColumnSelectors(availableColumns);
-    var accessControl = await unifiedSendRequest(GETTEMPLATESACCESS, { method: 'GET' });
     await populateTemplateSelector();
-    if (!accessControl.reporttemplate) {
+    if (!window.userPermissions['reporttemplate']) {
       document.getElementById('confirmAgency').style.display = 'block';
       return;
     }
@@ -2924,8 +2913,7 @@ async function showConfirmationDetails() {
     var selectedFields = $('#customFields').val() || [];
     var selectedGroupBy = $('#groupByFields').val() || [];
     var selectedTemplate = $('#templateSelect').val();
-    var accessControl = await unifiedSendRequest(GETTEMPLATESACCESS, { method: 'GET' });
-    if (!accessControl.reporttemplate) {
+    if (!window.userPermissions['reporttemplate']) {
       var year = moment().year();
       selectedTemplate = `${$('#country').val()}-${year}-${$('#category').val()}-${$('#proSelect').val()}`;
     }
@@ -3013,8 +3001,7 @@ async function createReport() {
         countryData.append("start_date", convertToISO(selectedStartDateValue));
         countryData.append("end_date", convertToISO(selectedEndDateValue));
         var selectedTemplate = $('#templateSelect').val();
-        var accessControl = await unifiedSendRequest(GETTEMPLATESACCESS, { method: 'GET' });
-        if (!accessControl.reporttemplate) {
+        if (!window.userPermissions['reporttemplate']) {
           var year = moment().year();
           selectedTemplate = `${$('#country').val()}-${year}-${$('#category').val()}-${$('#proSelect').val()}`;
         }
@@ -3080,15 +3067,22 @@ function showGuide() {
   }
   setCookie('showedGuideReport', 'true', 300);
 }
+
+waitForPermission(function() {
+  if (window.userPermissions['forsure-report']) {
+    document.getElementById('reportcontainer').style.display = 'block';
+    cancreatereports();
+
+    if(readCookie('showedGuideReport') === null) {
+      setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    }
+  }
+});
+
 function showGuideFromButton(element) {
   showGuide();
 }
 
-function showGuideAfterSelection() {
-  if(readCookie('showedGuideReport') === null) {
-    setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
-  }
-}
 
 </script>
 

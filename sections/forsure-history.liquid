@@ -323,8 +323,6 @@ tr {
   <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
   <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
-  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
-  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
 
 
@@ -342,7 +340,7 @@ tr {
   {% render 'forsure-simple-notification' %}
   <div id="tooltipWarn" class="tooltip" style="display: none;">Tooltip content</div>
   <div id='tooltip' class="tooltipSave"></div>
-  <div class="configbox page-width border" style="padding: 0;border-radius:1rem">
+  <div id="reportcontainer" class="configbox page-width border" style="padding: 0;border-radius:1rem;display: none;">
     <div>
       <div style="display: flex;background-color: #fafafa;position: relative;border-radius: 1rem;" id="filterContainer">
           <h2 class="flex-header" style="margin-left: 2rem">
@@ -397,13 +395,13 @@ tr {
       <div id="reportshistory" class="table-header-title" style="min-height: 65px"></div>
     </div>
   </div>
-  <div id="imageModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:100; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2);">
+  <div id="imageModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:100; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2);">
     <span id="closeModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;">&times;</span>
     <img id="modalImage" src="" alt="Image Preview" style="max-width:100%; max-height:80vh; display:block; margin:0 auto;">
 </div>
 <div id="modalOverlayImage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;"></div>
 
-<div id="excelModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+<div id="excelModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
     <div id="tabs-container" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid #ddd;"></div>
     <div id="report-table-data-excel"></div>
     <span id="closeExcelModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;transform: translateX(-50%);">&times;</span>
@@ -411,7 +409,7 @@ tr {
 </div>
 <div id="modalOverlayExcel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;"></div>
 
-<div id="validateModal" class="modal isolate" style="display: none;">
+<div id="validateModal" class="losensitive modal isolate" style="display: none;">
   <div class="modal-content modalContainer" style="background: #fafafa;">
         <div id="title" style="background: #2255ff; padding: 2rem">
            <h2 style="color:#fafafa;text-align:center;">Are you sure?</h2>
@@ -433,7 +431,7 @@ tr {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf_viewer.min.css" />
-<div id="pdfModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+<div id="pdfModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
     <canvas id="pdfCanvas" style="border: 1px solid #ddd; margin: 0 auto; display: block;"></canvas>
     <div style="text-align: center; margin-top: 10px;">
         <button id="prevPage">Previous Page</button>
@@ -444,8 +442,6 @@ tr {
 </div>
 <div id="modalOverlayPdf" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:999;"></div>
 
-
-  {% render 'forsure-login' %}
   <script>
 async function checkHistoryVersion() {
     try {
@@ -465,7 +461,6 @@ async function checkHistoryVersion() {
         showMessage('Failed to get history ' + error.message, false);
     }
 }
-checkHistoryVersion();
 
 function extractBaseFilename(filename) {
   const parts = filename.split('/');
@@ -513,7 +508,7 @@ function buildHierarchy(paths) {
   return hierarchy;
 }
 
-function createFolderStructure(configDiv, hierarchy, accessControl, currentPath = '') {
+function createFolderStructure(configDiv, hierarchy) {
   configDiv.innerHTML = ''; // Clear existing content
 
   // Recursive function to create the structure
@@ -590,13 +585,13 @@ function createFolderStructure(configDiv, hierarchy, accessControl, currentPath 
               icons.style.display = 'flex';
               icons.appendChild(addOpenIconReport(childFileName, childPath));
               icons.appendChild(addDownloadIcon(childFileName, childPath));
-              if (accessControl.sharereport) {
+              if (window.userPermissions['sharereport'] === true) {
                 icons.appendChild(addShareCol(childFileName, childPath));
               }
-              if (accessControl.deletereport) {
+              if (window.userPermissions['deletereport'] === true) {
                 icons.appendChild(child.can_delete ? addTrashIcon(childFileName) : emptyCol());
               }
-              icons.appendChild(child.can_submit ? sendReportIcon(childFileName, childPath, accessControl.filereport) : emptyCol());
+              icons.appendChild(child.can_submit ? sendReportIcon(childFileName, childPath, window.userPermissions['filereport']) : emptyCol());
       
               childRow.appendChild(fileNameDiv);
               childRow.appendChild(icons);
@@ -655,7 +650,7 @@ function createFolderStructure(configDiv, hierarchy, accessControl, currentPath 
             }
             var submitCol = null;
             if (file["can_submit"]) {
-              submitCol = sendReportIcon(filename, fullPath, accessControl.filereport);
+              submitCol = sendReportIcon(filename, fullPath, window.userPermissions['filereport']);
             } else {
               submitCol = emptyCol();
             }
@@ -1231,7 +1226,7 @@ async function getReports(init=true) {
     }
 }
 
-function createOverview(data, init, accessControl) {
+function createOverview(data, init) {
     const configDiv = document.getElementById("reportshistory");
     const hierarchy = buildHierarchy(data);
 
@@ -1265,7 +1260,7 @@ function createOverview(data, init, accessControl) {
       fillDropdowns('receiptsDropdown', totalPossibleReceipts, 'receipt_only');
     }
     fillDropdowns('periodDropdown', possiblePeriods, 'reporting_periods');  // only reporting period currently really variable
-    createFolderStructure(configDiv, hierarchy, accessControl);
+    createFolderStructure(configDiv, hierarchy);
 }
 
 document.getElementById("companySearch").addEventListener("input", async function () {
@@ -1273,7 +1268,6 @@ document.getElementById("companySearch").addEventListener("input", async functio
 });
 
 async function filterCompanySearch(searchQuery, init) {
-  var accessControl = await unifiedSendRequest(GETACCESSREPORTS, {method: 'GET'});
   searchQuery = searchQuery.toLowerCase().trim().replace(' ', '_').replace('.', '_').replace(',', '_').replace('/', '_'); // Get input and normalize case
 
   let filteredData;
@@ -1286,9 +1280,8 @@ async function filterCompanySearch(searchQuery, init) {
       );
   }
   search_filter = filteredData;
-  createOverview(filteredData, init, accessControl); // Refresh the overview
+  createOverview(filteredData, init); // Refresh the overview
 }
-
 
 
 function fillDropdowns(dropdownId, entries, key) {
@@ -1392,7 +1385,6 @@ document.getElementById('modalOverlayExcel').addEventListener('click', hideExcel
 document.getElementById('closePdfModal').addEventListener('click', hidePdfModal);
 document.getElementById('modalOverlayPdf').addEventListener('click', hidePdfModal);
 
-getReports();
 
 
 
@@ -1410,12 +1402,19 @@ function showGuideFromButton(element) {
   showGuide();
 }
 
+waitForPermission(function() {
+  if (window.userPermissions['forsure-downloads'] === true) {
+    document.getElementById('reportcontainer').style.display = 'block';
+    checkHistoryVersion();
+    getReports();
 
-document.addEventListener('DOMContentLoaded', function() {
-  if(readCookie('showedGuideHistory') === null) {
-      //setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    if(readCookie('showedGuideHistory') === null) {
+        setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
     }
-  });
+
+  }
+});
+
 
   </script>
 </div>

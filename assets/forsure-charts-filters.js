@@ -128,12 +128,7 @@ const widgetChartParams = {}
 // }
 
 async function initDropdowns() {
-    try {
-      let tokenreq = await requestToken();
-      TOKEN = tokenreq["access_token"];
-    } catch (error) {
-      console.error(error.message);
-    }
+    document.getElementById('filters').style.display = 'flex';
     getFilters();
   }
 

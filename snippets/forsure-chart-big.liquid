@@ -25,7 +25,7 @@ Usage:
   }
 </style>
 <div id="overlay"></div>
-<div id="report-table" style="display: none">
+<div id="report-table" class="losensitive" style="display: none">
   <div style="display:flex">
     <div id="widgetPopupWrapper">
       <canvas id="widgetPopup"></canvas>
@@ -136,7 +136,7 @@ function getGroupby(tabulatorData, groupbyCol=false) {
     var columns = createColumns(tabulatorData, groupbyCol);
     var groupby = getGroupby(tabulatorData, groupbyCol);
 
-// return createTable(data);
+    // return createTable(data);
     tableTabulator = new Tabulator("#chartInfo", {
       data: tabulatorData,
       layout: "fitColumns", // Fit columns to width of table (optional)

@@ -214,12 +214,50 @@
     <!-- Rule Script Start --><script>window.checkout = {{cart | json}};window.price_format = {{ shop.money_format | json }};</script><!-- Rule Script End -->
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TN3P2D6506"></script>
+    <script>
+    function waitForShopifyConsent(callback) {
+      const check = () => {
+        if (
+          window.Shopify &&
+          window.Shopify.customerPrivacy &&
+          typeof window.Shopify.customerPrivacy.getTrackingConsent === 'function'
+        ) {
+          callback();
+        } else {
+          setTimeout(check, 100); // Try again in 100ms
+        }
+      };
+      check();
+    }
+      
+      (function(w,d,s,l,i){
+        waitForShopifyConsent(() => {
+          
+          if (window.Shopify.customerPrivacy.getTrackingConsent() == 'no') {
+            console.log('Tracking disabled through cookie banner');
+            return;
+          }
+          w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })}
+    )(window,document,'script','dataLayer','GTM-W8D7MZGG');</script>
+  
   
   <script>
   if (window.location.pathname === "/pages/demo") {
     window.dataLayer = window.dataLayer || [];
   
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){
+        waitForShopifyConsent(() => {
+            if (window.Shopify.customerPrivacy.getTrackingConsent() == 'no') {
+              console.log('Tracking disabled through cookie banner');
+              return;
+            }
+            dataLayer.push(arguments);
+        });
+    }
     gtag('js', new Date());
     gtag('config', 'G-TN3P2D6506');
   
@@ -230,6 +268,70 @@
    </head>
   
     <body class="gradient">
+      <div id="overlayCookieBanner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background-color: rgba(0, 0, 0, 0.5);cursor: default;pointer-events: auto;">
+      </div>
+      <script>
+        // Cookie Banner show overlay to make sure the cookie banner clicked first before continuing
+        document.addEventListener('DOMContentLoaded', function () {
+          const timeoutMs = 30000; // 30 seconds
+          const pollInterval = 300; // How often to check (ms)
+          let timeoutReached = false;
+          let intervalId;
+      
+          const overlay = document.getElementById('overlayCookieBanner');
+      
+          function checkVisibilityAndTrigger() {
+            const el = document.getElementById('csm-wrapper');
+            const isVisible = el && !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+            if (isVisible) {
+              console.log('✅ csm-wrapper is visible');
+              overlay.style.display = 'block';
+              triggerHideOverlay();
+              if (document.getElementsByClassName('isense-cc-settings').length == 1) {
+                document.getElementsByClassName('isense-cc-settings')[0].addEventListener('click', function () {
+                  console.log('🍪 Cookie banner settings clicked');
+                  setTimeout(function() {
+                    triggerHideOverlay();
+                  }, 50);
+                });
+              }
+              clearInterval(intervalId);
+            }
+          }
+      
+          // Polling method
+          intervalId = setInterval(() => {
+            if (timeoutReached) {
+              clearInterval(intervalId);
+              console.log('⏱️ Timeout reached without cookie banner');
+              return;
+            }
+            checkVisibilityAndTrigger();
+          }, pollInterval);
+      
+          // Stop polling after timeout
+          setTimeout(() => {
+            timeoutReached = true;
+          }, timeoutMs);
+        });
+
+        function triggerHideOverlay() {
+          const buttons = document.querySelectorAll('.isense-cc-submit-consent');
+          console.log(buttons);
+          if (buttons.length > 0) {
+            buttons.forEach(btn => {
+              btn.addEventListener('click', function () {
+                document.getElementById('overlayCookieBanner').style.display = 'none';
+              });
+            });
+          }
+        }
+
+      </script>
+
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W8D7MZGG"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+      
       <a class="skip-to-content-link button visually-hidden" href="#MainContent">
         {{ "accessibility.skip_to_text" | t }}
       </a>
@@ -254,7 +356,13 @@
       </script>
       {% section 'announcement-bar' %}
       {% section 'header' %}
-      <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1" style="min-height:calc(100dvh - 11rem);">
+  {% assign path = request.path %}
+  {% if path contains '/pages/forsure' %}
+    {% assign softwarepage = true %}
+  {% else %}
+    {% assign softwarepage = false %}
+  {% endif %}
+      <main id="MainContent" class="content-for-layout focus-none {% if softwarepage %}losensitive{% endif %}" role="main" tabindex="-1" style="min-height:calc(100dvh - 11rem);">
         {{ content_for_layout }}
       </main>
   
