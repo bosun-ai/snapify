@@ -1,0 +1,158 @@
+{% style %}
+    #mapContainer {
+        position: relative;
+        z-index: 2;
+    }
+    #eprMap {
+        height: calc(100% - 40px);
+        width: 100%;
+        z-index: 2;
+    }
+
+  .leaflet-tooltip.custom-tooltip {
+    background-color: #fafafa;
+    color: #17161c;
+    padding: 0;
+    border-radius: 6px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    border: none;
+    max-width: none; /* let inner div control width */
+    width: auto;
+  }
+
+  .leaflet-tooltip.custom-tooltip .tooltip-inner {
+    padding: 8px 10px;
+    font-size: 12px;
+    white-space: pre-line;  /* allow wrapping and \n */
+    word-wrap: break-word;
+    line-height: 1.4;
+  }
+
+
+  .tooltip-inner.tooltip-narrow {
+    max-width: 180px;
+    min-width: 100px;
+  }
+
+  .tooltip-inner.tooltip-wide {
+    min-width: 300px;
+    max-width: 320px;
+  }
+
+  .tooltip-inner.tooltip-multiline {
+    min-width: 200px;
+    max-width: 240px;
+  }
+
+{% endstyle %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div id="mapContainer" class="widget grid-item widget-right">
+  <div id="mapTitle" class="grid-title">
+    <div>EPR Map</div>
+    <div class="icon-container">
+      <div onclick="openMapAdd()">{% render 'icon-add' %}</div>
+      <div onclick="openMapSettings()">{% render 'icon-gear' %}</div>
+    </div>
+  </div>
+    <div id="eprMap"></div>
+</div>
+
+<script>
+
+    const countryStatusMap = {
+        "Germany": { status: "Done", 
+          description: {
+            'Packaging': "Nothing to do.", 
+            'WEEE': "Nothing to do.", 
+            'Batteries': "Nothing to do."
+          }
+       },
+        "Netherlands": {
+          status: "In Progress",
+          description: {
+            'Packaging': "Report coming up.", 
+            'WEEE': "Report coming up.", 
+            'Batteries': "Report coming up."
+          }
+        },
+        "France": { status: "Warning", 
+          description: {
+            'Packaging': "Upcoming audit.", 
+            'WEEE': "Nothing to do.", 
+            'Batteries': "Nothing to do."
+          }
+        },
+        "Italy": { status: "Error", 
+          description: {
+            'Packaging': "Report not submitted.", 
+            'WEEE': "Nothing to do.", 
+            'Batteries': "Nothing to do."
+          }
+        }
+      };
+
+      
+      // Color mapping based on status
+      const statusColors = {
+        "Done": "#28a745",          // Green
+        "In Progress": "#2255ff",   // Blue
+        "Warning": "#ffc107",       // Yellow
+        "Error": "#dc3545"          // Red
+      };
+
+      function createTableFromDescription(descObj) {
+        let table = `<table class="tooltip-table">`;
+        for (const key in descObj) {
+          if (descObj.hasOwnProperty(key)) {
+            const text = descObj[key].replace(`${key}:`, '').trim();
+            table += `<tr><td><strong>${key}</strong></td><td>${text}</td></tr>`;
+          }
+        }
+        table += `</table>`;
+        return table;
+      }
+
+      const map = L.map('eprMap').setView([51.505, 10], 4); // Center Europe
+      // Load country borders GeoJSON
+      {% comment %} fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json') {% endcomment %}
+      fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+        .then(res => res.json())
+        .then(data => {
+          L.geoJSON(data, {
+            style: feature => {
+              const name = feature.properties.name;
+              const status = countryStatusMap[name]?.status;
+              return {
+                color: '#555',
+                weight: 1,
+                fillOpacity: 0.7,
+                fillColor: statusColors[status] || '#ccc' // default gray
+              };
+            },
+            onEachFeature: (feature, layer) => {
+              const name = feature.properties.name;
+              const info = countryStatusMap[name];
+              if (info) {
+                const tableHTML = createTableFromDescription(info.description);
+                const tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>${tableHTML}</div>`;
+                
+                layer.bindTooltip(tooltipHTML, {
+                  direction: 'top',
+                  sticky: true,
+                  className: 'custom-tooltip'
+                });
+              } else {
+                layer.bindTooltip(`<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>No data available</div>`, {
+                  direction: 'top',
+                  sticky: true,
+                  className: 'custom-tooltip'
+                });
+              }
+            }
+          }).addTo(map);
+        });
+</script>
+

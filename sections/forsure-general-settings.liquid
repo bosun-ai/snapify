@@ -582,11 +582,6 @@ var availableCountriesSettings = {};
   
 async function initializeSettings() {
   try {
-    var hasAccess = await unifiedSendRequest(GETGENERALSETTINGSACCESS, { method: 'GET' });
-    if (!hasAccess['generalsettings']) {
-      document.getElementById('generalSettingsContainer').style.display = 'none';
-      return;
-    }
     document.getElementById('generalSettingsContainer').style.display = 'block';
     generalSettingsDefinition = await getGeneralSettingsDefinition();
     generalSettings = await getGeneralSettings();
