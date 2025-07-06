@@ -117,3 +117,5 @@ DEMODATASTATUS = 'demo/status'
 GETINTEGRATIONS = 'live/config'
 ADDINTEGRATION = 'live/config/add'
 GETINTEGRATIONBYID = 'live/config/id'
+
+COUNTRIES = 'dashboard/country-pros'

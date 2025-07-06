@@ -9,6 +9,11 @@
         z-index: 2;
     }
 
+    #eprMapAdd {
+      width: 80%;
+      height: 50vh;
+    }
+
   .leaflet-tooltip.custom-tooltip {
     background-color: #fafafa;
     color: #17161c;
@@ -28,7 +33,6 @@
     line-height: 1.4;
   }
 
-
   .tooltip-inner.tooltip-narrow {
     max-width: 180px;
     min-width: 100px;
@@ -44,10 +48,46 @@
     max-width: 240px;
   }
 
+  .country-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  #countryList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 20%;
+    height: 50vh;
+    overflow-y: auto;
+  }
+
+  .modal-content-wide {
+    width: 80%;
+    height: 80%;
+    top: 10%;
+    left: 10%;
+    position: absolute !important;
+    background-color: #fafafa;
+    padding: 20px;
+  }
+
+  .modal-body {
+    display: flex;
+    gap: 20px;
+  }
+
+  .country-item {
+    display: flex;
+    gap: 1rem;
+  }
+  
 {% endstyle %}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
 
 <div id="mapContainer" class="widget grid-item widget-right">
   <div id="mapTitle" class="grid-title">
@@ -60,17 +100,35 @@
     <div id="eprMap"></div>
 </div>
 
+<div id="mapAddModal" class="modal">
+  <div class="modal-content-wide">
+    <span class="close" onclick="closeModalAdd()">&times;</span>
+    <h2>Add Countries</h2>
+    <div class="modal-body">
+      <div id="countryList">
+        <!-- list of all countries with a checkbox -->
+      </div>
+      <div id="eprMapAdd">
+      </div>
+    </div>
+    <div id="next-button">
+      <button class="button" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 
     const countryStatusMap = {
-        "Germany": { status: "Done", 
+        "DE": { status: "Done", 
           description: {
             'Packaging': "Nothing to do.", 
             'WEEE': "Nothing to do.", 
             'Batteries': "Nothing to do."
           }
        },
-        "Netherlands": {
+        "NL": {
           status: "In Progress",
           description: {
             'Packaging': "Report coming up.", 
@@ -78,14 +136,14 @@
             'Batteries': "Report coming up."
           }
         },
-        "France": { status: "Warning", 
+        "FR": { status: "Warning", 
           description: {
             'Packaging': "Upcoming audit.", 
             'WEEE': "Nothing to do.", 
             'Batteries': "Nothing to do."
           }
         },
-        "Italy": { status: "Error", 
+        "IT": { status: "Error", 
           description: {
             'Packaging': "Report not submitted.", 
             'WEEE': "Nothing to do.", 
@@ -103,11 +161,19 @@
         "Error": "#dc3545"          // Red
       };
 
+      let map = null;
+      let mapAdd = null;
+      const countryLayers = {}; // Store per-country layers
+      let countryLayersAdd = {}; // Store per-country layers
+      let geojsonLayer = null;
+
+      let dbPromise = null;
+
       function createTableFromDescription(descObj) {
         let table = `<table class="tooltip-table">`;
         for (const key in descObj) {
           if (descObj.hasOwnProperty(key)) {
-            const text = descObj[key].replace(`${key}:`, '').trim();
+            const text = descObj[key].trim();
             table += `<tr><td><strong>${key}</strong></td><td>${text}</td></tr>`;
           }
         }
@@ -115,44 +181,206 @@
         return table;
       }
 
-      const map = L.map('eprMap').setView([51.505, 10], 4); // Center Europe
-      // Load country borders GeoJSON
-      {% comment %} fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json') {% endcomment %}
-      fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-        .then(res => res.json())
-        .then(data => {
-          L.geoJSON(data, {
-            style: feature => {
-              const name = feature.properties.name;
-              const status = countryStatusMap[name]?.status;
-              return {
-                color: '#555',
-                weight: 1,
-                fillOpacity: 0.7,
-                fillColor: statusColors[status] || '#ccc' // default gray
-              };
-            },
-            onEachFeature: (feature, layer) => {
-              const name = feature.properties.name;
-              const info = countryStatusMap[name];
-              if (info) {
-                const tableHTML = createTableFromDescription(info.description);
-                const tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>${tableHTML}</div>`;
-                
-                layer.bindTooltip(tooltipHTML, {
-                  direction: 'top',
-                  sticky: true,
-                  className: 'custom-tooltip'
-                });
-              } else {
-                layer.bindTooltip(`<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>No data available</div>`, {
-                  direction: 'top',
-                  sticky: true,
-                  className: 'custom-tooltip'
-                });
-              }
-            }
-          }).addTo(map);
+      function initDB() {
+        dbPromise = idb.openDB('GeoJSON-Cache', 1, {
+          upgrade(db) {
+            db.createObjectStore('geojson');
+          }
         });
+      }
+
+      async function loadGeoJSON() {
+        const db = await dbPromise;
+        const cached = await db.get('geojson', 'countries');
+      
+        if (cached) return cached;
+      
+        const res = await fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
+        const json = await res.json();
+      
+        await db.put('geojson', json, 'countries');
+        return json;
+      }
+
+      function setInitialMap(data, id, countrylayer, tooltips=true){
+        var newMap = L.map(id).setView([51.505, 10], 4); // Center Europe
+        geojsonLayer = L.geoJSON(data, {
+          style: {
+            color: '#555',
+            weight: 1,
+            fillOpacity: 0.7,
+            fillColor: '#ccc'
+          },
+          onEachFeature: (feature, layer) => {
+            const name = feature.properties.name;
+            let id = feature.properties['ISO3166-1-Alpha-2'];
+            if (id == '-99' && name == 'France') {
+              id = 'FR';
+            }
+            countrylayer[id] = layer;
+            if (tooltips) {
+              layer.bindTooltip(`<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>No data available</div>`, {
+                direction: 'top',
+                sticky: true,
+                className: 'custom-tooltip'
+              });
+            }
+          }
+        }).addTo(newMap);
+        return newMap;
+      }
+
+      function updateCountryData(newStatusMap) {
+        for (const alpha2 in newStatusMap) {
+          const info = newStatusMap[alpha2];
+          const layer = countryLayers[alpha2];
+          if (!layer) continue;
+          const name = layer.feature.properties.name;
+          layer.setStyle({
+            fillColor: statusColors[info.status] || '#ccc'
+          });
+      
+          const tableHTML = createTableFromDescription(info.description);
+          const tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>${tableHTML}</div>`;
+          layer.unbindTooltip();
+          layer.bindTooltip(tooltipHTML, {
+            direction: 'top',
+            sticky: true,
+            className: 'custom-tooltip'
+          });
+        }
+      }
+
+async function getCountries() {
+    try {
+        var data = await unifiedSendRequest(COUNTRIES, {method: 'GET'});
+        return data;
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message, false);
+    }
+}
+
+async function openMapAdd() {
+  console.log('openMapAdd');
+  const modal = document.getElementById('mapAddModal');
+  modal.style.display = 'block';
+  const countries = await getCountries();
+  console.log(countries);
+  loadGeoJSON().then(data => {
+    if (mapAdd == null) {
+      countryLayersAdd = {};
+      mapAdd = setInitialMap(data, 'eprMapAdd', countryLayersAdd, false);
+    } else {
+      for (const alpha2 in countryLayersAdd) {
+        removeCountryMap(alpha2);
+      }
+    }
+    var countryList = document.getElementById('countryList');
+    countryList.innerHTML = '';
+
+    for (let alpha_code in countries) {
+      console.log(alpha_code);
+      let container = document.createElement('div');
+      container.className = 'country-item';
+      let country = countries[alpha_code];
+      let checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = alpha_code;
+      checkbox.name = country.info.name;
+      checkbox.onclick = () => selectCountryDashboard(alpha_code);
+      let label = document.createElement('label');
+      label.htmlFor = alpha_code;
+      label.textContent = country.info.name;
+      container.appendChild(checkbox);
+      container.appendChild(label);
+      countryList.appendChild(container);
+      if (country.data) {
+        const selectedList = {};
+        for (const [category, pros] of Object.entries(country.data)) {
+            for (const [proName, status] of Object.entries(pros)) {
+                if (status === 'selected') {
+                    selectedList[category] = proName;
+                }
+            }
+        }
+        if (Object.keys(selectedList).length > 0) {
+          checkbox.checked = true;
+          checkbox.disabled = true;
+          tableHTML = createTableFromDescription(selectedList);
+          addCountryMap(alpha_code, "#28a745", tableHTML);
+        }
+      }
+    }
+  });
+}
+
+function addCountryMap(alpha2, color, data) {
+    const layer = countryLayersAdd[alpha2];
+    if (!layer) return;
+    const name = layer.feature.properties.name;
+    layer.setStyle({
+      fillColor: color
+    });
+    const tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>${data}</div>`;
+    layer.unbindTooltip();
+    layer.bindTooltip(tooltipHTML, {
+      direction: 'top',
+      sticky: true,
+      className: 'custom-tooltip'
+    });
+    const bounds = layer.getBounds();
+    mapAdd.fitBounds(bounds, {
+        padding: [20, 20],   // Optional: padding around the feature
+        maxZoom: 6           // Optional: prevent zooming in too far
+    });
+}
+
+function removeCountryMap(alpha2) {
+  const layer = countryLayersAdd[alpha2];
+  if (!layer) return;
+  layer.setStyle({
+    fillColor: '#ccc'
+  });
+  layer.unbindTooltip();
+}
+
+function selectCountryDashboard(alpha2) {
+  console.log(alpha2);
+  const checkbox = document.getElementById(alpha2);
+  if (checkbox.checked) {
+    addCountryMap(alpha2, "#2255ff", 'Selected');
+  } else {
+    removeCountryMap(alpha2);
+  }
+}
+
+function closeModalAdd() {
+  const modal = document.getElementById('mapAddModal');
+  modal.style.display = 'none';
+}
+
+function openMapSettings() {
+  console.log('openMapSettings');
+  const modal = document.getElementById('mapSettingsModal');
+  modal.style.display = 'block';
+}
+
+
+waitForPermission(function() {
+  if (window.userPermissions['forsure-dashboard']) {
+    initDB();
+
+    loadGeoJSON().then(data => {
+        map = setInitialMap(data, 'eprMap', countryLayers);
+        updateCountryData(countryStatusMap);
+    });
+
+    setInterval(() => {
+      updateCountryData(countryStatusMap);
+    }, 15000);
+  }
+});
+
 </script>
 
