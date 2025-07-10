@@ -12,6 +12,7 @@
     #eprMapAdd {
       width: 80%;
       height: 50vh;
+      border-radius: 1rem;
     }
 
   .leaflet-tooltip.custom-tooltip {
@@ -65,12 +66,13 @@
 
   .modal-content-wide {
     width: 80%;
-    height: 80%;
+    height: 81%;
     top: 10%;
     left: 10%;
     position: absolute !important;
     background-color: #fafafa;
     padding: 20px;
+    border-radius: 1rem;
   }
 
   .modal-body {
@@ -82,7 +84,282 @@
     display: flex;
     gap: 1rem;
   }
+
+  #mapAddOverlay, #mapAddCategoriesOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+
+  #next-button {
+    margin-left: auto;
+    width: fit-content;
+  }
+
+#mapAddSelectCategories {
+  display: none;
+}
+
+#category-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+  height: 45vh;
+  overflow: auto;
+  margin-bottom: 3rem;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.button-unselected {
+  border: 0.2rem solid #17161c;
+  width: 70%;
+  margin: auto;
+}
+
+.button-selected {
+  border: 0.2rem solid #2255ff;
+  width: 70%;
+  margin: auto;
+}
+
+#category-list-container {
+  display: block;
+  width: 80%;
+}
+
+#add-category-button {
+  display: flex;
+  justify-content: space-between;
+}
+
+#add-category-button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.button-remove {
+  position: absolute;
+  right: 0;
+  padding: 0;
+  min-width: 0;
+  width: 3rem;
+  border: 0.2rem solid #17161c;
+}
+
+
+
+#tabs-container {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+.tab-button, .tab-button-credentials {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-button:hover, .tab-button-credentials:hover {
+    background-color: #eaeaea;
+}
+
+.tab-button.active, .tab-button-credentials.active {
+    background-color: #2255ff;
+    color: #fafafa;
+    font-weight: bold;
+}
+
+.tab-button, .tab-button-credentials {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
+
+  .tab {
+      cursor: pointer;
+      padding: 10px;
+      margin-right: 5px;
+      background-color: #f1f1f1;
+      border: solid 1px #ccc;
+      border-bottom: none;
+    }
+    .tab:hover {
+      background-color: #ddd;
+    }
+    .tab-content {
+      border: solid 1px #ccc;
+      padding: 10px;
+      display: none;
+    }
+    .active, .tab:hover {
+      background-color: #2255FF;
+      color: #fafafa;
+    }
+    .button--secondary {
+      border: 0.2rem solid #17161c;
+    }
   
+  .iconhomepage .st4 {
+    stroke-width: 0;
+  }
+  .icon-container-reports {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-title {
+    margin-left: 15px;
+    margin-right: 15px;
+    justify-content: space-between;
+    display: flex;
+  }
+  .tooltip-table-key {
+    width: 50%;
+    margin-left: 1rem;
+    text-align: left;
+  }
+  .tooltip-table-value {
+    width: 50%;
+    text-align: left;
+  }
+  .tooltip-table-row {
+    display: flex;
+    /* justify-content: space-between; */
+    width: 100%;
+  }
+  .tooltip-table {
+    width: 100%;
+  }
+
+  .map-settings-item {
+    display: block;
+  }
+  .map-settings-item-country {
+  }
+  .map-settings-item-report-type {
+  }
+  .map-settings-item-pro {
+  }
+
+  
+.collapsed {
+  transform: rotate(270deg); /* Rotate arrow 90 degrees when collapsed */
+}
+
+
+
+
+.modal-body {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 1.5rem;
+    font-family: sans-serif;
+  }
+
+  #left-side-pro-country-list {
+    width: 250px;
+    border-right: 1px solid #ddd;
+    padding-right: 1rem;
+    overflow: auto;
+    height: 60vh;
+  }
+
+  #main-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #pro-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  #pro-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+  }
+
+  #pro-details > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #pro-details label {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  textarea {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  #questions {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .question-input {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .question-input input {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+
+
 {% endstyle %}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -100,54 +377,148 @@
     <div id="eprMap"></div>
 </div>
 
+<div id="mapAddOverlay"></div>
 <div id="mapAddModal" class="modal">
   <div class="modal-content-wide">
-    <span class="close" onclick="closeModalAdd()">&times;</span>
-    <h2>Add Countries</h2>
-    <div class="modal-body">
-      <div id="countryList">
-        <!-- list of all countries with a checkbox -->
-      </div>
-      <div id="eprMapAdd">
+    <div id="mapAddCountrySelect">
+      <h2 class="modal-title">Add Countries
+        <div>
+          <button class="button button--secondary" onclick="closeModalAdd()">Back</button>
+          <button class="button" onclick="selectReportCategories()">Next</button>
+        </div>
+      </h2>
+      <div class="modal-body">
+        <div id="countryList">
+          <!-- list of all countries with a checkbox -->
+        </div>
+        <div id="eprMapAdd">
+        </div>
       </div>
     </div>
-    <div id="next-button">
-      <button class="button" onclick="nextStep()">Next</button>
+    <div id="mapAddSelectCategories">
+      <h2 class="modal-title"> Select Report Categories
+        <div>
+          <button class="button button--secondary" onclick="openMapAdd()">Back</button>
+          <button class="button" onclick="selectPROs()">Next</button>
+        </div>
+      </h2>
+      <div class="modal-body">
+        <div class="icon-container-reports">
+          <div class="iconhomepage" style="background-color:#fafafa; border-radius: 10%; display: flex;
+                  justify-content: center; align-items: center;z-index: 2;height: 45vh;width: 45vh;
+                  box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);">
+          {% render 'icon-goods-categories' %}
+          </div>
+          
+        </div>
+        <div id="category-list-container">
+          <div id="category-list">
+            <!-- list of all categories with a checkbox -->
+          </div>
+          <div id="add-category-button">
+            <div id="add-category-button-container" title="If you want to add a category that is not in the list, please enter the category name in the input field and click the button. We will put it on our roadmap and add it to the list as soon as possible.">
+              <input type="text" id="input-category-others" placeholder="Add Category">
+              <button class="button" onclick="addCategory()">Add Category</button>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="mapAddSelectPROs">
+      <h2 class="modal-title">Select PROs
+        <div>
+          <button id="back-button-pro" class="button button--secondary" onclick="selectReportCategories()">Back</button>
+          <button id="save-button-pro" class="button" onclick="saveAndClose()">Close</button>
+        </div>
+      </h2>
+        <div class="modal-body">
+          <div id="left-side-pro-country-list">
+            <!-- list of all countries, report_types and PROs -->
+          </div>
+          <div id="main-section">
+            <!-- Details of the selected PRO -->
+            <input type="hidden" id="pro-id" value="">
+            <input type="hidden" id="country" value="">
+            <input type="hidden" id="reportType" value="">
+            <input type="hidden" id="pro-name-input" value="">
+            <h3 id="pro-name">
+              <select id="pro-name-select" class="selectpicker">
+                <option value="">Not set</option>
+              </select>
+              <span id="pro-status">Status</span>
+            </h3>
+        
+            <div id="pro-details">
+              <div id="login-name">
+                <label for="login-name-input">Login Name</label>
+                <input type="text" id="login-name-input" placeholder="Login Name" title="Login Name for the PRO">
+              </div>
+        
+              <div id="password">
+                <label for="password-input">Password</label>
+                <input type="password" id="password-input" placeholder="Password" title="Password for the PRO">
+              </div>
+        
+              <div id="email-responsible">
+                <label for="email-responsible-input">Email Responsible</label>
+                <input type="text" id="email-responsible-input" placeholder="Email Responsible" title="Person in company responsible for the PRO">
+              </div>
+        
+              <div id="extra-info">
+                <label for="extra-info-input">Extra Info</label>
+                <textarea id="extra-info-input" placeholder="Extra Info" title="Extra Info for the login of the PRO"></textarea>
+              </div>
+        
+              <div id="questions">
+                <!-- Dynamic questions go here -->
+                <!-- Example injected question below -->
+                <!-- 
+                <div class="question-input">
+                  <label for="question-1-input">Question 1</label>
+                  <input type="text" id="question-1-input" placeholder="Question 1">
+                </div>
+                -->
+              </div>
+            </div>
+
+          </div>
+          <div id="add-pro-options">
+        </div>
     </div>
   </div>
 </div>
-
 
 <script>
 
     const countryStatusMap = {
         "DE": { status: "Done", 
           description: {
-            'Packaging': "Nothing to do.", 
             'WEEE': "Nothing to do.", 
-            'Batteries': "Nothing to do."
+            'Batteries': "Nothing to do.",
+            'Packaging': "Nothing to do.", 
           }
        },
         "NL": {
           status: "In Progress",
           description: {
-            'Packaging': "Report coming up.", 
             'WEEE': "Report coming up.", 
-            'Batteries': "Report coming up."
+            'Batteries': "Report coming up.",
+            'Packaging': "Report coming up.", 
           }
         },
         "FR": { status: "Warning", 
           description: {
-            'Packaging': "Upcoming audit.", 
             'WEEE': "Nothing to do.", 
-            'Batteries': "Nothing to do."
+            'Batteries': "Nothing to do.",
+            'Packaging': "Upcoming audit.", 
           }
         },
         "IT": { status: "Error", 
           description: {
-            'Packaging': "Report not submitted.", 
             'WEEE': "Nothing to do.", 
-            'Batteries': "Nothing to do."
+            'Batteries': "Nothing to do.",
+            'Packaging': "Report not submitted.", 
           }
         }
       };
@@ -155,10 +526,11 @@
       
       // Color mapping based on status
       const statusColors = {
-        "Done": "#28a745",          // Green
+        "Done": "#21FF3D",          // Green
         "In Progress": "#2255ff",   // Blue
-        "Warning": "#ffc107",       // Yellow
-        "Error": "#dc3545"          // Red
+        "Warning": "#E6B83C",       // Yellow
+        "Error": "#E63C6B",          // Red
+        "Unknown": "#4E5366",
       };
 
       let map = null;
@@ -174,7 +546,7 @@
         for (const key in descObj) {
           if (descObj.hasOwnProperty(key)) {
             const text = descObj[key].trim();
-            table += `<tr><td><strong>${key}</strong></td><td>${text}</td></tr>`;
+            table += `<tr class="tooltip-table-row"><td class="tooltip-table-key"><strong>${key}</strong></td><td class="tooltip-table-value">${text}</td></tr>`;
           }
         }
         table += `</table>`;
@@ -206,10 +578,10 @@
         var newMap = L.map(id).setView([51.505, 10], 4); // Center Europe
         geojsonLayer = L.geoJSON(data, {
           style: {
-            color: '#555',
+            color: '#4E5366',
             weight: 1,
             fillOpacity: 0.7,
-            fillColor: '#ccc'
+            fillColor: '#4E5366'
           },
           onEachFeature: (feature, layer) => {
             const name = feature.properties.name;
@@ -237,7 +609,7 @@
           if (!layer) continue;
           const name = layer.feature.properties.name;
           layer.setStyle({
-            fillColor: statusColors[info.status] || '#ccc'
+            fillColor: statusColors[info.status] || '#4E5366'
           });
       
           const tableHTML = createTableFromDescription(info.description);
@@ -261,12 +633,17 @@ async function getCountries() {
     }
 }
 
+var countries = null;
 async function openMapAdd() {
   console.log('openMapAdd');
   const modal = document.getElementById('mapAddModal');
   modal.style.display = 'block';
-  const countries = await getCountries();
-  console.log(countries);
+  const overlay = document.getElementById('mapAddOverlay');
+  overlay.style.display = 'block';
+  document.getElementById('mapAddSelectCategories').style.display = 'none';
+  document.getElementById('mapAddSelectPROs').style.display = 'none';
+  document.getElementById('mapAddCountrySelect').style.display = 'block';
+  countries = await getCountries();
   loadGeoJSON().then(data => {
     if (mapAdd == null) {
       countryLayersAdd = {};
@@ -280,7 +657,6 @@ async function openMapAdd() {
     countryList.innerHTML = '';
 
     for (let alpha_code in countries) {
-      console.log(alpha_code);
       let container = document.createElement('div');
       container.className = 'country-item';
       let country = countries[alpha_code];
@@ -340,7 +716,7 @@ function removeCountryMap(alpha2) {
   const layer = countryLayersAdd[alpha2];
   if (!layer) return;
   layer.setStyle({
-    fillColor: '#ccc'
+    fillColor: '#4E5366'
   });
   layer.unbindTooltip();
 }
@@ -358,14 +734,480 @@ function selectCountryDashboard(alpha2) {
 function closeModalAdd() {
   const modal = document.getElementById('mapAddModal');
   modal.style.display = 'none';
+  const overlay = document.getElementById('mapAddOverlay');
+  overlay.style.display = 'none';
 }
 
-function openMapSettings() {
-  console.log('openMapSettings');
-  const modal = document.getElementById('mapSettingsModal');
-  modal.style.display = 'block';
+function selectReportCategories() {
+  var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
+  countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled);
+  console.log(countriesSelectedNew);
+  if (countriesSelected.length == 0) {
+    showMessage('Please select at least one new country', false);
+    return;
+  }
+  if (countriesSelectedNew.length == 0) {
+    showMessage('To update existing countries, please use the gear icon', false);
+    return;
+  }
+  var categoryList = document.getElementById('category-list');
+  categoryList.innerHTML = '';
+  var categories = [];
+  for (const country of countriesSelectedNew) {
+    if (countries[country.id].data) {
+      for (const category of Object.keys(countries[country.id].data)) {
+        if (!categories.includes(category)) {
+          categories.push(category);
+        }
+      }
+    }
+  }
+  console.log(categories);
+  selectedCategories.clear();
+  categories.sort(customSort);
+  for (const category of categories) {
+    button = createCategoryButton(category);
+    categoryList.appendChild(button);
+  }
+  document.getElementById('mapAddCountrySelect').style.display = 'none';
+  document.getElementById('mapAddSelectCategories').style.display = 'block';
+  document.getElementById('mapAddSelectPROs').style.display = 'none';
 }
 
+function customSort(a, b) {
+  const order = ['WEEE', 'Batteries', 'Packaging'];
+  const indexA = order.indexOf(a);
+  const indexB = order.indexOf(b);
+  // unknown entries should be at the end
+  if (indexA == -1) {
+    return 1;
+  }
+  if (indexB == -1) {
+    return -1;
+  }
+  return indexA - indexB;
+}
+
+function addCategory() {
+  var input = document.getElementById('input-category-others');
+  var category = input.value;
+  existingCategories = Array.from(document.getElementById('category-list').querySelectorAll('.addcategory'));
+  if (category == '') {
+    showMessage('Please enter a category', false);
+    return;
+  }
+  if (existingCategories.some(item => item.textContent === category)) {
+    showMessage('Category already exists', false);
+    return;
+  }
+  categoryList = document.getElementById('category-list');
+  button = createCategoryButton(category, true);
+  categoryList.appendChild(button);
+  input.value = '';
+}
+
+function createCategoryButton(category, can_remove=false) {
+  let container = document.createElement('div');
+  container.className = 'category-item';
+  container.id = `category-item-${category}`;
+  var button = document.createElement('button');
+  button.className = 'addcategory button button-unselected button--secondary';
+  button.textContent = category;
+  button.id = `button-category-${category}`;
+  button.onclick = () => selectCategory(category);
+  container.appendChild(button);
+  if (can_remove) {
+    var removeButton = document.createElement('button');
+    removeButton.className = 'button-remove button button--secondary';
+    removeButton.textContent = 'X';
+    removeButton.id = `button-category-remove-${category}`;
+    removeButton.onclick = () => removeCategory(category);
+    container.appendChild(removeButton);
+  }
+  return container;
+}
+
+var selectedCategories = new Set();
+function selectCategory(category) {
+  var button = document.getElementById(`button-category-${category}`);
+  if (button.classList.contains('button--secondary')) {
+    // selected button
+    button.classList.remove('button--secondary');
+    button.classList.remove('button-unselected');
+    button.classList.add('button-selected');
+    selectedCategories.add(category);
+  } else {
+    // unselected button
+    button.classList.add('button--secondary');
+    button.classList.add('button-unselected');
+    button.classList.remove('button-selected');
+    selectedCategories.delete(category);
+  }
+}
+
+function removeCategory(category) {
+  var categoryItem = document.getElementById(`category-item-${category}`);
+  categoryItem.remove();
+  selectedCategories.delete(category);
+}
+
+var currentCountry = null;
+async function selectPROs() {
+  await getAvailableCountriesSettings();
+  if (selectedCategories.size == 0) {
+    showMessage('Please select at least one category', false);
+    return;
+  }
+  console.log('selectPROs');
+  var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
+  countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled);
+  var leftSideProCountryList = document.getElementById('left-side-pro-country-list');
+  selected_countries = {};
+  for (const country of countriesSelectedNew) {
+    if (!selected_countries[country.id]) {
+      selected_countries[country.id] = {};
+    }
+    for (const category of selectedCategories) {
+      if (!selected_countries[country.id][category]) {
+        selected_countries[country.id][category] = {};
+      }
+      console.log('country', country.id, 'category', category);
+      console.log('availableCountriesSettings', availableCountriesSettings[country.id]);
+      var countryData = availableCountriesSettings[country.id]?.[category];
+      if (countryData) {
+        for (const pro of Object.keys(countryData)) {
+          selected_countries[country.id][category][pro] = pro;
+        }
+      }
+    }
+  }
+  console.log('selected_countries', selected_countries);
+  createMapSettings(selected_countries);
+
+  document.getElementById('mapAddSelectCategories').style.display = 'none';
+  document.getElementById('mapAddSelectPROs').style.display = 'block';
+}
+
+function addPRO(category) {
+  console.log('addPRO', category);
+  var proSelect = document.getElementById('proSelect');
+  proSelect.innerHTML = '';
+  for (const pro of pros) {
+    var option = document.createElement('option');
+    option.value = pro.id;
+    option.textContent = pro.name;
+    proSelect.appendChild(option);
+  }
+}
+
+async function getPROsSelected() {
+  try {
+    var data = await unifiedSendRequest(COUNTRIES_SELECTED, {method: 'GET'});
+    return data;
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message, false);
+  }
+}
+
+async function openMapSettings() {
+  var selected_countries = await getPROData();
+  selectedCategories.clear();
+  if (selected_countries.length == 0) {
+    showMessage('Please add PROs first', false);
+    return;
+  }
+  createMapSettings(selected_countries);
+}
+
+async function getPROData() {
+  var data = await getPROsSelected();
+  selected_countries = {};
+  for (const item of data) {
+    if (!selected_countries[item.country]) {
+      selected_countries[item.country] = {};
+    }
+    if (!selected_countries[item.country][item.report_type]) {
+      selected_countries[item.country][item.report_type] = {};
+    }
+    selected_countries[item.country][item.report_type][item.pro] = item;
+  }
+  return selected_countries;
+}
+
+async function createMapSettings(selected_countries) {
+  console.log(selected_countries);
+  getAvailableCountriesSettings();
+  renderMapSettingsHierarchy('left-side-pro-country-list', selected_countries);
+  document.getElementById('back-button-pro').style.display = 'none';
+  document.getElementById('mapAddModal').style.display = 'block';
+  document.getElementById('mapAddCountrySelect').style.display = 'none';
+  document.getElementById('mapAddSelectCategories').style.display = 'none';
+  document.getElementById('mapAddSelectPROs').style.display = 'block';
+  document.getElementById('mapAddOverlay').style.display = 'block';
+}
+
+function renderMapSettingsHierarchy(containerId, selected_countries) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+
+  function createCollapsibleItem(name, level = 0) {
+    const wrapper = document.createElement('div');
+    wrapper.style.margin = '2rem 0';
+    wrapper.style.marginLeft = `${level * 1.5}rem`;
+    wrapper.style.cursor = 'pointer';
+
+    const label = document.createElement('div');
+    var labelText = document.createElement('span');
+    const arrowSvg = `<svg class="svg-arrow collapsed" style="margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" version="1.1" fill="2255ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 66.91"><g><path fill="#2255ff" d="M11.68,1.95C8.95-0.7,4.6-0.64,1.95,2.08c-2.65,2.72-2.59,7.08,0.13,9.73l54.79,53.13l4.8-4.93l-4.8,4.95 c2.74,2.65,7.1,2.58,9.75-0.15c0.08-0.08,0.15-0.16,0.22-0.24l53.95-52.76c2.73-2.65,2.79-7.01,0.14-9.73 c-2.65-2.72-7.01-2.79-9.73-0.13L61.65,50.41L11.68,1.95L11.68,1.95z"/></g></svg>`;
+    if (level < 2) {
+      label.innerHTML = `${arrowSvg}`;
+      labelText.style.fontWeight = 'bold';
+    } else {
+      labelText.style.fontWeight = 'normal';
+    }
+    labelText.textContent = name;
+    label.id = `label-${name}`;
+    label.appendChild(labelText);
+    wrapper.appendChild(label);
+
+    const childrenContainer = document.createElement('div');
+    childrenContainer.style.display = 'none';
+    wrapper.appendChild(childrenContainer);
+
+    if (level < 2) {
+      label.addEventListener('click', () => {
+        childrenContainer.style.display = childrenContainer.style.display === 'none' ? 'block' : 'none';
+        label.querySelector('svg').classList.toggle('collapsed');
+      });
+    }
+
+    return { wrapper, label, childrenContainer };
+  }
+  first_country = null;
+  first_report_type = null;
+  first_pro = null;
+  for (const country of Object.keys(selected_countries)) {
+    const { wrapper: countryDiv, label: countryLabel, childrenContainer: reportTypeContainer } = createCollapsibleItem(country, 0);
+    if (!first_country) {
+      first_country = countryLabel;
+    }
+    for (const reportType of Object.keys(selected_countries[country])) {
+      const { wrapper: reportTypeDiv, label: reportTypeLabel, childrenContainer: proContainer } = createCollapsibleItem(reportType, 1);
+      if (!first_report_type) {
+        first_report_type = reportTypeLabel;
+      }
+      for (const pro of Object.keys(selected_countries[country][reportType])) {
+        const proDiv = document.createElement('div');
+        if (!first_pro) {
+          first_pro = proDiv;
+        }
+        proDiv.textContent = pro;
+        proDiv.id = `pro-${country}-${reportType}-${pro}`;
+        proDiv.style.margin = '2rem 0';
+        proDiv.style.marginLeft = '5rem';
+        proDiv.onclick = async () => {
+          await getProDetails(country, reportType, pro);
+        }
+        proContainer.appendChild(proDiv);
+        const proDiv2 = document.createElement('div');
+        proDiv2.textContent = '+';
+        proDiv2.style.margin = '2rem 0';
+        proDiv2.style.marginLeft = '5rem';
+        proDiv2.onclick = async () => {
+          await getProDetails(country, reportType, 'Not Set');
+        }
+        proContainer.appendChild(proDiv2);
+      }
+      reportTypeContainer.appendChild(reportTypeDiv);
+    }
+    container.appendChild(countryDiv);
+  }
+  console.log(first_country, first_report_type, first_pro);
+  first_country.click();
+  first_report_type.click();
+  first_pro.click();
+}
+
+var availableCountriesSettings = [];
+async function getAvailableCountriesSettings() {
+  try {
+    let data = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY, { method: 'GET' });
+    availableCountriesSettings = data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get settings definition ' + error.message, false);
+  }
+}
+
+async function getProDetails(country, reportType, pro) {
+  await savePRO(); // save previous values
+  proValues = await getPROData();
+  proValues = proValues[country][reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': '', 'extra_info': '', 'general_settings': {}, 'id': ''};
+  console.log('proValues', proValues);
+  const proDetails = (
+    availableCountriesSettings?.[country]?.[reportType]?.[pro]
+  ) || {};
+  status = "Done"
+  all_questions_answered = true;
+  console.log('proValues', proValues['general_settings']);
+  console.log('proDetails', proDetails);
+  for (const question of Object.keys(proDetails)) {
+    console.log('question', question, 'proValues', proValues['general_settings'][question]);
+    if (!proValues['general_settings'][question]) {
+      all_questions_answered = false;
+    }
+  }
+  if (!all_questions_answered) {
+    status = "Not All Questions Answered";
+    document.getElementById('pro-status').style.color = 'var(--forsure-main-red)';
+  } else if (!proValues.login || !proValues.password) {
+    status = "Log in info missing";
+    document.getElementById('pro-status').style.color = 'var(--forsure-main-red)';
+  } else if (!proValues.email_responsible) {
+    status = "Email of responsible missing";
+    document.getElementById('pro-status').style.color = 'var(--forsure-main-red)';
+  } else {
+    document.getElementById('pro-status').style.color = '#17161c';
+  }
+  document.getElementById('pro-name-select').innerHTML = '';
+  pros = availableCountriesSettings?.[country]?.[reportType] || {};
+  console.log('pros', pros);
+  var proOptions = [];
+  for (const proOption of Object.keys(pros)) {
+    var option = document.createElement('option');
+    option.value = proOption;
+    option.textContent = proOption;
+    document.getElementById('pro-name-select').appendChild(option);
+    proOptions.push(proOption);
+  }
+  var option = document.createElement('option');
+  option.value = 'Not Set';
+  option.textContent = 'Not Set';
+  proOptions.push('Not Set');
+  document.getElementById('pro-name-select').appendChild(option);
+  if (pro && proOptions.indexOf(pro) == -1) {
+    var option = document.createElement('option');
+    option.value = pro;
+    option.textContent = pro;
+    document.getElementById('pro-name-select').appendChild(option);
+  }
+
+  document.getElementById('pro-name-select').value = pro;
+  document.getElementById('pro-name-input').value = pro;
+  $('.selectpicker').selectpicker('refresh');
+  $('.selectpicker').selectpicker('refresh');
+
+  document.getElementById('country').value = country;
+  document.getElementById('reportType').value = reportType;
+  document.getElementById('pro-id').value = proValues.id;
+  document.getElementById('pro-status').textContent = status;
+  document.getElementById('email-responsible-input').value = proValues.email_responsible;
+  document.getElementById('login-name-input').value = proValues.login;
+  document.getElementById('password-input').value = proValues.password;
+  document.getElementById('extra-info-input').value = proValues.extra_info;
+  document.getElementById('questions').innerHTML = '';
+  for (const [question, value] of Object.entries(proDetails)) {
+    console.log('question', question, 'value', value);
+    var questionDiv = document.createElement('div');
+    questionDiv.id = `question-${question}-input`;
+    var questionLabel = document.createElement('label');
+    questionLabel.textContent = value.title;
+    if (value.input_type == 'dropdown') {
+      var questionInput = document.createElement('select');
+      questionInput.className = 'selectpicker';
+      questionInput.id = `question-${question}-input`;
+      for (const option of value.options) {
+        var optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        questionInput.appendChild(optionElement);
+      }
+      questionDiv.appendChild(questionLabel);
+      questionDiv.appendChild(questionInput);
+      questionInput.value = proValues['general_settings'][question] || '';
+      setTimeout(() => {
+        $('.selectpicker').selectpicker('refresh');
+      }, 50);
+    } else if (value.input_type == 'text') {
+      var questionInput = document.createElement('input');
+      questionInput.id = `question-${question}-input`;
+      questionInput.value = proValues['general_settings'][question] || '';
+      questionDiv.appendChild(questionLabel);
+      questionDiv.appendChild(questionInput);
+    }
+    document.getElementById('questions').appendChild(questionDiv);
+  }
+}
+
+document.getElementById('pro-name-select').onchange = async () => {
+  var pro = document.getElementById('pro-name-select').value;
+  var pro_old = document.getElementById('pro-name-input').value;
+  var country = document.getElementById('country').value;
+  var reportType = document.getElementById('reportType').value;
+  var proDiv = document.getElementById(`pro-${country}-${reportType}-${pro_old}`);
+  proDiv.id = `pro-${country}-${reportType}-${pro}`;
+  proDiv.innerHTML = pro;
+  document.getElementById('pro-name-input').value = pro;
+  await getProDetails(country, reportType, pro);
+}
+
+async function saveAndClose() {
+  if (await savePRO()) {
+    closeModalAdd();
+  }
+}
+
+async function savePRO() {
+  var country = document.getElementById('country').value;
+  var reportType = document.getElementById('reportType').value;
+  var pro = document.getElementById('pro-name-select').value;
+  if (!country || !reportType || !pro) {
+    return false;
+  }
+  var proValues = {
+    email_responsible: document.getElementById('email-responsible-input').value,
+    login: document.getElementById('login-name-input').value,
+    password: document.getElementById('password-input').value,
+    extra_info: document.getElementById('extra-info-input').value,
+  }
+  questions = document.getElementById('questions').querySelectorAll('input, select');
+  general_settings = {};
+  for (const question of questions) {
+    general_settings[question.id.replace('question-', '').replace('-input', '')] = question.value;
+  }
+  console.log(country, reportType, pro, proValues);
+  try {
+    var body = {
+      id: document.getElementById('pro-id').value,
+      country_code: country,
+      report_type: reportType,
+      pro: pro,
+      general_settings: general_settings,
+      login: proValues.login,
+      password: proValues.password,
+      email_responsible: proValues.email_responsible,
+      extra_info: proValues.extra_info,
+    }
+    var data = await unifiedSendRequest(COUNTRIES_SELECTED, {method: 'POST', formData: JSON.stringify(body), headerArgs: {'Content-Type': 'application/json'}});
+    showMessage(country + ' ' + reportType + ' ' + pro + ' saved successfully!', true);
+    return true;
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message, false);
+    return false;
+  }
+}
+
+async function getCountryStatus() {
+  try {
+    var data = await unifiedSendRequest(COUNTRY_STATUS, {method: 'GET'});
+    return data;
+  } catch (error) {
+    console.error(error);
+    showMessage(error.message, false);
+  }
+}
 
 waitForPermission(function() {
   if (window.userPermissions['forsure-dashboard']) {
@@ -373,11 +1215,16 @@ waitForPermission(function() {
 
     loadGeoJSON().then(data => {
         map = setInitialMap(data, 'eprMap', countryLayers);
-        updateCountryData(countryStatusMap);
+        getCountryStatus().then(data => {
+          updateCountryData(data);
+        });
+        
     });
 
     setInterval(() => {
-      updateCountryData(countryStatusMap);
+      getCountryStatus().then(data => {
+        updateCountryData(data);
+      });
     }, 15000);
   }
 });
