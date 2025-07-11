@@ -451,14 +451,14 @@
             "total_duties": "Duties"
         },
         "orders": {
-            "title": "Order history",
+            "title": "Invoices",
             "order_number": "Order",
             "order_number_link": "Order number {{ number }}",
             "date": "Date",
             "payment_status": "Payment status",
             "fulfillment_status": "Fulfillment status",
             "total": "Total",
-            "none": "You haven't placed any orders yet."
+            "none": "You don't have any invoices yet."
         },
         "recover_password": {
             "title": "Reset your password",

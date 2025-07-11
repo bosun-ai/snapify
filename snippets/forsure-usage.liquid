@@ -5,16 +5,18 @@
   
     .progress-label {
       font-weight: bold;
+      margin: auto;
+      width: fit-content;
       margin-bottom: 5px;
     }
   
     .bar-wrapper {
       position: relative;
-      height: 24px;
+      height: 4rem;
       background-color: #f0f0f0;
       border-radius: 6px;
       overflow: hidden;
-      width: 20rem;
+      width: 70vw;
       display: flex;
     }
   
@@ -41,6 +43,21 @@
       font-size: 12px;
       margin-left: 1rem;
     }
+    .bar-text-inside {
+      font-size: 12px;
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      height: fit-content;
+      transform: translate(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fafafa;
+      background-color: #17161c;
+      padding: 0 0.5rem;
+      border-radius: 1rem;
+    }
     .data-container {
         display: flex;
         flex-direction: row;
@@ -48,9 +65,14 @@
         width: fit-content;
         align-items: center;
     }
+
+    #usage-bars {
+      margin-bottom: 2rem;
+    }
+
   </style>
   
-  <div id="usage-bars"></div>
+  <div id="usage-bars">No usage data available</div>
   
   <script>
 
@@ -91,7 +113,9 @@
     
         const label = document.createElement('div');
         label.className = 'progress-label';
-        label.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)}`;
+        var remaining = (total - used).toLocaleString();
+        if (remaining < 0) remaining = 'None';
+        label.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (${remaining} left)`;
     
         const dataContainer = document.createElement('div');
         dataContainer.className = 'data-container';
@@ -120,6 +144,12 @@
           }, 50);
           barWrapper.appendChild(marker);
         }
+
+        var barText = document.createElement('div');
+        barText.className = 'bar-text-inside';
+        barText.textContent = `${used.toLocaleString()} received`;
+        barText.title = `${used.toLocaleString()}/${total.toLocaleString()} ${key} received this year`;
+        barWrapper.appendChild(barText);
     
         wrapper.appendChild(label);
         wrapper.appendChild(barWrapper);
