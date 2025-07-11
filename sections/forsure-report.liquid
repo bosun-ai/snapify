@@ -50,7 +50,7 @@
     scroll-behavior: smooth; 
 }
 .dropZone.error {
-    border-color: red;
+    border-color: var(--forsure-main-red);
 }
 #progressIcons {
     display: flex;
@@ -313,7 +313,7 @@ div.display-flex {
     top: 50%; /* Position above the element */
     left: 50%;
     transform: translateX(-50%);
-    background: red;
+    background: var(--forsure-main-red);
     color: white;
     padding: 0.5rem;
     font-size: 0.9rem;
@@ -592,10 +592,36 @@ content: "\2713"
   pointer-events: none;
 }
 
+
+
+
+.picker      { max-width: 650px; margin: auto; }
+    .year-nav    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .calendar-grid        { display: grid;
+                   grid-template-columns: 80px repeat(3, 1fr) 80px; /* Q | 3×month | S  */
+                   grid-auto-rows: 40px;
+                   gap: var(--gap); }
+    .quarter-btn,
+    .month-btn,
+    .semester-btn,
+    .year-btn    { display: flex; justify-content: center; align-items: center;
+                   border: 1px solid #ccc; border-radius: 4px; user-select: none; 
+                   width: 5rem;
+                   height: 4rem;cursor: pointer;
+                  }
+    .quarter-btn { font-weight: 600; background:#fafafa; }
+    .year-btn    { grid-column: 1 / -1; margin-top: var(--gap); font-weight: 600; width: 90.5%;}
+    /* ======== INTERACTION STATES ======== */
+    .month-btn:hover,
+    .quarter-btn:hover,
+    .semester-btn:hover,
+    .year-btn:hover         { background:#f0f0f0; }
+    .active                 { background:#007bff; color:#fff; border-color:#007bff; }
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
-  <div id="reportcontainer" style="min-height: 100vh;padding-bottom: 5rem;display: none">
+  <div id="reportcontainer" class="section-{{ section.id }}-padding" style="min-height: 100vh;padding-bottom: 5rem;display: none">
   <!-- Load d3.js -->
   <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
   {% comment %} <script src="https://cdn.jsdelivr.net/npm/d3@7"></script> {% endcomment %}
@@ -609,16 +635,16 @@ content: "\2713"
   {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> {% endcomment %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> {% endcomment %}
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>-->
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script
+{% comment %} <script src="https://code.jquery.com/jquery-3.6.0.js"></script> {% endcomment %}
+{%comment %}<script
   src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
   integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-  crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
+  crossorigin="anonymous"></script> {% endcomment %}
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script> {% endcomment %}
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script> {% endcomment %}
+{% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" /> {% endcomment %}
 
   <!-- Create a div where the graph will take place -->
 <div id="uploadSteps" class="border-uploads page-width" style="border-radius:1rem;">
@@ -689,7 +715,7 @@ content: "\2713"
                 <div id="imagecontainer-imageuploadreports/" style="padding:2rem">
                   <img width="220px" id="upload-imageuploadreports/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
                 </div>
-                <div id="upload-textuploadreports/">Drag & Drop your Reports here<br></div>
+                <div id="upload-textuploadreports/">Drag & Drop your Reports here<br>You can upload multiple files at once.</div>
                 <div class="fileList" id="fileList_report_list" style="width:100%; padding:2rem"></div>
               </div>
             </div>
@@ -737,7 +763,7 @@ content: "\2713"
           </label>
 
         </div>
-        <div id="ordersReceived" style="margin: auto;width: fit-content;display: none;">
+        <div id="ordersReceived" style="margin: auto;width: fit-content;display: none;color:red">
         </div>
         <div class="dropZone" data-input="order_list" data-url="uploadorders/" id="orderListDropZone" style="position: relative;background: #fafafa;">
             <div>
@@ -845,12 +871,31 @@ content: "\2713"
               <select id="proSelect" class="selectpicker form-select" data-live-search="true">
               </select>
             </div>
-            <div class="col-md-6">
+
+            
+            <div class="col-md-6" style="position: relative">
               {{ 'daterangepicker.css' | asset_url | stylesheet_tag }}
               <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
               <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
               <label for="monthPicker" class="form-label">Select Timeframe</label>
-              <input type="text" class="form-control small-date-input" style="width: fit-content;" id="monthPicker" placeholder="Choose date range" />
+              <input type="text" onclick="document.getElementById('timePicker').style.display='block';"
+                autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false" class="form-control small-date-input" style="width: fit-content;" id="monthPicker" placeholder="Choose date range" />
+              <div id="timePicker" class="picker" style="display: none;position: absolute;background: white;margin: 2rem;padding: 3rem;border: 0.2rem solid #17161c;border-radius: 2rem;top: 100%;left: 0;transform: translate(-23%, 0);z-index: 2;">                <!-- YEAR NAVIGATION -->
+                <div class="year-nav">
+                  <div onclick="changeYear(-1)" style="width: 30px;transform: rotate(90deg);cursor: pointer">{% render 'icon-arrow-rounded' %}</div>
+                  <div id="yearDisplay"></div>
+                  <div onclick="changeYear(1)" style="width: 30px;transform: rotate(-90deg);cursor: pointer">{% render 'icon-arrow-rounded' %}</div>
+                </div>
+              
+                <!-- CALENDAR GRID -->
+                <div id="calendarGrid" class="calendar-grid"></div>
+              
+                <!-- READOUT -->
+                {% comment %} <p id="monthPicker" style="font-weight:600; margin-top:1rem;"></p> {% endcomment %}
+              </div>
             </div>
           </div>
 
@@ -985,8 +1030,8 @@ content: "\2713"
   </div>
   <div class="step losensitive" id="stepDone" style="display: none;">
     <h2 class="heading">Report in progress</h2>
-    <div id="reportInProgress" style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report is in progress, you can leave this page.</div>
-    <div id="reportFailed" style="display:none;margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Failed to create report, please try again or contact the support.</div>
+    <div id="reportInProgress" style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report is in progress, you can leave this page. If you have any questions, please contact the support at <a href="mailto:info@for-sure.net">info@for-sure.net</a></div>
+    <div id="reportFailed" style="display:none;margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Failed to create report, please try again or contact the support at <a href="mailto:info@for-sure.net">info@for-sure.net</a></div>
     <div id="showReport" style="display:none">
       <div style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report finished</div>
       <a href="/pages/forsure-downloads" class="nextButton button" id="btnShowReports"
@@ -1033,6 +1078,10 @@ async function cancreatereports() {
             document.getElementById('uploadExistingReports').classList.add('greyed_out');
             document.getElementById('uploadExistingReportsWrapper').classList.add('greyed_out_wrapper');
         }
+        if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-creation'] === true && window.userPermissions['report-upload'] === false) {
+          selectOption('new');  // For end customers, we don't need to show the upload option
+        }
+
         allowedToCreateReports = data;
     } catch (error) {
         console.error(error.message);
@@ -1060,9 +1109,10 @@ var ordersReceived = 0;
 async function getOrdersReceived() {
   try {
     let data = await unifiedSendRequest(UPLOADORDERSRECEIVED, {method: 'GET'});
-    ordersReceived = data['total'];
-    if (data['total'] > 0) {
+    ordersReceived = data['Orders']['used'];
+    if (ordersReceived > 0) {
       document.getElementById('nextBtnuploadorders').disabled = false;
+      document.getElementById('nextBtnuploadorders').title = 'Please upload orders first';
     } else {
       document.getElementById('ordersReceived').innerHTML = 'No Orders Received yet';
       document.getElementById('nextBtnuploadorders').disabled = true;
@@ -1083,7 +1133,12 @@ document.getElementById('liveDataToggle').addEventListener('change', function() 
     var liveDataText = document.getElementById('liveDataText');
     if (this.checked) {
       liveDataText.innerText = "Using live data";
-      document.getElementById('nextBtnuploadorders').disabled = false;
+      if (ordersReceived > 0) {
+        document.getElementById('nextBtnuploadorders').disabled = false;
+        document.getElementById('nextBtnuploadorders').title = 'Please upload orders first';
+      } else {
+        document.getElementById('nextBtnuploadorders').disabled = true;
+      }
     } else {
       liveDataText.innerText = "Use live data";
       document.getElementById('nextBtnuploadorders').disabled = true; // todo check if file was added
@@ -1097,7 +1152,8 @@ async function selectOption(option) {
     if (option === 'new') {
       document.getElementById('uploadReport').style.display = 'none';
       document.getElementById('progressIcons').style.display = 'flex';
-        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step1').style.display = 'block';  // TODO change to step 1
+        {% comment %} nextStep(3);  // TODO remove {% endcomment %}
         sessionStorage.setItem('currentFlow', 'new');
         guideToShow = 'new';
         await getOrdersReceived();
@@ -1434,18 +1490,46 @@ async function parseCSV(text, nrows=3) {
   });
 }
 
+async function parseExcel(file, nrows = 3) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+        const headers = jsonData[0];
+        const rows = jsonData.slice(1, nrows + 1);
+
+        const columnDict = {};
+        headers.forEach((header, colIndex) => {
+          columnDict[header] = rows.map(row => row[colIndex] ?? '');
+        });
+
+        resolve(columnDict);
+      } catch (err) {
+        console.error(err);
+        showMessage('Error parsing Excel file: ' + err.message, false);
+        reject(err);
+      }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 
 async function openProfileModal(availableProfiles, fileName, fileInput, rowId, orders, returns) {
-  if (fileInput.type !== 'text/csv' && fileInput.type !== 'application/vnd.ms-excel') {
+  {% comment %} if (fileInput.type !== 'text/csv' && fileInput.type !== 'application/vnd.ms-excel') {
     showMessage('Please upload a CSV file', false);
     return;
-  }
-  const modal = document.getElementById('profileModal');
-  modal.dataset.row = rowId;
-  const profileSelect = document.getElementById('profileSelect');
-  const profileDetails = document.getElementById('profileDetails');
-  const profileFileName = document.getElementById('profileFileName');
-  {% comment %} try { {% endcomment %}
+  } {% endcomment %}
+  let csvData;
+  if (fileInput.name.endsWith('.csv')) {
     var text;
     if (orders) {
       if (rowId in selectedFilesOrders && selectedFilesOrders[rowId].text) {
@@ -1462,12 +1546,33 @@ async function openProfileModal(availableProfiles, fileName, fileInput, rowId, o
         selectedFilesReturns[rowId].text = text;
       }
     }
-    var csvData = await parseCSV(text);
+    csvData = await parseCSV(text);
+  } else if (
+    fileInput.name.endsWith('.xls') || 
+    fileInput.name.endsWith('.xlsx') || 
+    fileInput.type.includes('sheet')
+  ) {
+    csvData = await parseExcel(fileInput);
+  } else {
+    showMessage('Unsupported file type. Please upload a CSV or Excel file.', false);
+    return;
+  }
+  const modal = document.getElementById('profileModal');
+  modal.dataset.row = rowId;
+  {% comment %} try { {% endcomment %}
+
+    addProfileModal(availableProfiles, fileName, csvData, modal);
+}
+
+async function addProfileModal(availableProfiles, fileName, csvData, modal) {
     if (dataUrlCurrent == 'uploadorders/') {
       var labelsV2Options = await getOrderlistLabelsV2Options();
     } else {
       var labelsV2Options = await getReturnlistLabelsV2Options();
     }
+    const profileSelect = document.getElementById('profileSelect');
+    const profileDetails = document.getElementById('profileDetails');
+    const profileFileName = document.getElementById('profileFileName');
     profileFileName.textContent = fileName;
     var profileTable = document.getElementById('profileTableBody');
     profileTable.innerHTML = '';
@@ -1519,37 +1624,36 @@ async function openProfileModal(availableProfiles, fileName, fileInput, rowId, o
       tr.appendChild(tdExclude);
       profileTable.appendChild(tr);
     });
-  {% comment %} } catch (error) {
-    console.error(error.message);
-    showMessage('Failed to parse file ' + fileName, false);
-    return;
-  } {% endcomment %}
+    {% comment %} } catch (error) {
+      console.error(error.message);
+      showMessage('Failed to parse file ' + fileName, false);
+      return;
+    } {% endcomment %}
 
 
-  // Populate the select dropdown
-  profileSelect.innerHTML = '';
-  availableProfiles.forEach(profile => {
-    const option = document.createElement('option');
-    option.value = profile.id;
-    option.textContent = profile.name;
-    profileSelect.appendChild(option);
-  });
-  addNewProfileOption(profileSelect);
-  if (dataUrlCurrent == 'uploadorders/') {
-    getOrderlistLabels(profileSelect.value);
-  } else {
-    getReturnlistLabels(profileSelect.value);
-  }
-  // Display column details (mockup for demonstration)
+    // Populate the select dropdown
+    profileSelect.innerHTML = '';
+    availableProfiles.forEach(profile => {
+      const option = document.createElement('option');
+      option.value = profile.id;
+      option.textContent = profile.name;
+      profileSelect.appendChild(option);
+    });
+    addNewProfileOption(profileSelect);
+    if (dataUrlCurrent == 'uploadorders/') {
+      getOrderlistLabels(profileSelect.value);
+    } else {
+      getReturnlistLabels(profileSelect.value);
+    }
+    // Display column details (mockup for demonstration)
 
-  // Show the modal
-  modal.style.display = 'block';
+    // Show the modal
+    modal.style.display = 'block';
 
-  // Close modal on click of close button
-  document.querySelector('.close').onclick = function() {
-    modal.style.display = 'none';
-  };
-
+    // Close modal on click of close button
+    document.querySelector('.close').onclick = function() {
+      modal.style.display = 'none';
+    };
 }
 
 function toggleExclude(checkbox) {
@@ -2622,7 +2726,9 @@ async function getTimesAndCountry() {
     const quarterEnd = moment(`${lastQuarterYear}-01-01`).quarter(lastQuarter).endOf('quarter');
     const twoYearsAgoYear = moment().subtract(2, 'year').year();
 
-    const ranges = {
+
+  changeYear(0);
+    {% comment %} const ranges = {
         'Last Month': [
             moment().subtract(1, 'month').startOf('month'),
             moment().subtract(1, 'month').endOf('month')
@@ -2648,7 +2754,8 @@ async function getTimesAndCountry() {
       maxDate: moment(maxDate),
       locale: { format: 'DD/MM/YYYY' },
       ranges: ranges
-    });
+    }); {% endcomment %}
+
     var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, { method: 'GET' });
     fillColumnSelectors(availableColumns);
     await populateTemplateSelector();
@@ -2667,6 +2774,115 @@ async function getTimesAndCountry() {
   }
 }
 
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const grid       = document.getElementById('calendarGrid');
+  const yearLbl    = document.getElementById('yearDisplay');
+  const out        = document.getElementById('monthPicker');
+  let   year       = new Date().getFullYear();
+  let   selectedEl = null;
+
+
+function formatRange(year, firstMonthIdx, lastMonthIdx) {
+  // firstMonthIdx & lastMonthIdx are 0-based (Jan = 0 … Dec = 11)
+  const start = new Date(year, firstMonthIdx, 1);            // 1st of first month
+  const end   = new Date(year, lastMonthIdx + 1, 0);         // 0th = last day prev-month
+
+  const toDDMMYYYY = d =>
+    String(d.getDate()).padStart(2,'0') + '/' +
+    String(d.getMonth()+1).padStart(2,'0') + '/' +
+    d.getFullYear();
+
+  return `${toDDMMYYYY(start)} - ${toDDMMYYYY(end)}`;
+}
+  // ==== helpers ====
+  const pad = n => String(n).padStart(2,'0');
+  function setActive(el, label){
+    if (selectedEl) selectedEl.classList.remove('active');
+    selectedEl = el;  el.classList.add('active');
+    out.value = label;
+    document.getElementById('timePicker').style.display = 'none';
+  }
+
+  // ==== building the grid ====
+  function buildGrid(){
+    grid.innerHTML = '';
+    const quarters = [
+      {q:'Q1', m:[0,1,2]},
+      {q:'Q2', m:[3,4,5]},
+      {q:'Q3', m:[6,7,8]},
+      {q:'Q4', m:[9,10,11]},
+    ];
+
+    quarters.forEach((block, idx)=>{
+      /* ----- Quarter button (clickable) ----- */
+      const qBtn = document.createElement('div');
+      qBtn.textContent = block.q;
+      qBtn.className   = 'quarter-btn';
+      qBtn.onclick     = e=>{
+        const rangeStr = formatRange(year, block.m[0], block.m[2]);
+        setActive(qBtn, rangeStr);
+      };
+      grid.appendChild(qBtn);
+
+      /* ----- Three month buttons ----- */
+      block.m.forEach(m=>{
+        const mBtn = document.createElement('div');
+        mBtn.textContent = monthNames[m];
+        mBtn.className   = 'month-btn';
+        mBtn.onclick     = () => setActive(mBtn, formatRange(year, m, m));
+        grid.appendChild(mBtn);
+      });
+
+      /* ----- Add semester button after Q2 & Q4 ----- */
+      if (idx === 1 || idx === 3) {
+        const sIdx = idx === 1 ? 'S1' : 'S2';
+        const start = idx === 1 ? '01' : '07';
+        const end   = idx === 1 ? '06' : '12';
+        const sBtn  = document.createElement('div');
+        sBtn.textContent = sIdx;
+        sBtn.className   = 'semester-btn';
+        sBtn.style.gridRow = `${idx}`;       // Top row of span
+        sBtn.style.gridRowEnd = 'span 2';   // merge ↓
+        sBtn.style.alignSelf  = 'center';   // vertical centring
+        const sStart  = idx === 1 ? 0 : 6;   // Jan or Jul (0-based)
+        const sEnd    = idx === 1 ? 5 : 11;  // Jun or Dec
+        sBtn.onclick = ()=>setActive(sBtn, formatRange(year, sStart, sEnd));
+        grid.appendChild(sBtn);
+      }
+    });
+
+    /* ----- Full-year button ----- */
+    const yBtn = document.createElement('div');
+    yBtn.textContent = 'Full Year';
+    yBtn.className   = 'year-btn';
+    yBtn.onclick     = ()=>setActive(yBtn, formatRange(year, 0, 11));
+    grid.appendChild(yBtn);
+  }
+
+  function changeYear(delta){
+    year += delta;
+    yearLbl.textContent = year;
+    buildGrid();
+    out.value = '';
+    selectedEl = null;
+  }
+
+document.getElementById('monthPicker').addEventListener('click', function() {
+  document.getElementById('timePicker').style.display = 'block';
+});
+document.addEventListener('click', e => {
+  // is the popup currently visible?
+  const isOpen = document.getElementById('timePicker').style.display === 'block';
+  // did we click *outside* both the popup and the button?
+  const clickOutside = !document.getElementById('timePicker').contains(e.target) && !document.getElementById('monthPicker').contains(e.target);
+  
+  if (isOpen && clickOutside) {
+    document.getElementById('timePicker').style.display = 'none';
+  }
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') document.getElementById('timePicker').style.display = 'none';
+});
 function fillColumnSelectors(columns) {
   const fieldsDropdown = document.getElementById('customFields');
   const groupByDropdown = document.getElementById('groupByFields');
@@ -2842,16 +3058,16 @@ async function populateTemplateSelector() {
     
     // Step 2: Rebuild dynamicRanges object in sorted order
     dynamicRanges = Object.fromEntries(sortedRangesArray);
-  
+    $('#monthPicker').val(Object.values(dynamicRanges)[0][0].format('DD/MM/YYYY') + ' - ' + Object.values(dynamicRanges)[0][1].format('DD/MM/YYYY'));
     // Replace existing datepicker with new dynamic ranges
-    $('#monthPicker').daterangepicker({
+    {% comment %} $('#monthPicker').daterangepicker({
       startDate: Object.values(dynamicRanges)[0][0],  // Set first option as default
       endDate: Object.values(dynamicRanges)[0][1],
       minDate: moment().subtract(5, 'year'),
       maxDate: moment().add(1, 'year'),
       locale: { format: 'DD/MM/YYYY' },
       ranges: dynamicRanges
-    });
+    }); {% endcomment %}
   });
 }
 
@@ -2869,6 +3085,7 @@ function updateTemplateOptions(refreshPRO=true) {
 
   templateSelect.innerHTML = '<option value="default">-- Select a template --</option>'; // Clear
   
+  lastTemplate = 'default';
   allTemplates.forEach(template => {
     // Match filtering: if no selection, or matching the selected value
     const matchCountry = !selectedCountry || template.country === selectedCountry;
@@ -2884,10 +3101,16 @@ function updateTemplateOptions(refreshPRO=true) {
     if (matchCountry && matchCategory && matchPro) {
       const option = document.createElement('option');
       option.value = `${template.country}-${template.year}-${template.report_type}-${template.pro}`;
+      lastTemplate = option.value;
       option.textContent = `${template.country} ${template.year} ${template.report_type} ${template.pro}`;
       templateSelect.appendChild(option);
     }
   });
+  if (refreshPRO == false) {
+    $('#templateSelect').val(lastTemplate);
+    $('#templateSelect').trigger('change');
+    $('.selectpicker').selectpicker('refresh'); // needed twice for it to work
+  }
   $('.selectpicker').selectpicker('refresh'); // Re-render
 }
 

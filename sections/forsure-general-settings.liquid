@@ -16,19 +16,15 @@
     }
 
     .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
-      px;
-      padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
-      px;
+      padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
     }
 
 
     @media screen and (min-width: 750px) {
       .section-{{ section.id }}-padding {
-        padding-top: {{ section.settings.padding_top }}
-        px;
-        padding-bottom: {{ section.settings.padding_bottom }}
-        px;
+        padding-top: {{ section.settings.padding_top }}px;
+        padding-bottom: {{ section.settings.padding_bottom }}px;
       }
     }
     .image-with-text p {
@@ -328,6 +324,11 @@
 }
 
 
+#user-icon svg {
+  height: 25px;
+  width: 25px;
+}
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
   <!-- Load d3.js -->
@@ -336,175 +337,183 @@
   <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
   <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
   
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> {% endcomment %}
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>-->
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script
+{% comment %} <script src="https://code.jquery.com/jquery-3.6.0.js"></script> {% endcomment %}
+{% comment %} <script
   src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
   integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-  crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
+  crossorigin="anonymous"></script> {% endcomment %}
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script> {% endcomment %}
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script> {% endcomment %}
+{% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" /> {% endcomment %}
   {% comment %} {% render 'forsure-guide' %} {% endcomment %}
   {% render 'forsure-simple-notification' %}
-  <div style="padding-bottom: 5rem;display: none;" id="generalSettingsContainer">
-    <div class="configbox page-width border" style="padding: 0;border-radius:1rem;padding:3px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem;">
-        <h2>Configure General Settings</h2>
-      </div>
-      <div class="display-flex" style="margin: auto;width: fit-content;display:flex"></div>
-      <div id="generalConfig" class="bordertop" style="background-color: #fafafa;">
-        <div style="display: none" >
-          <h3 style="margin-left: 2rem;width: 50%;display:flex;align-items:center;gap:3rem">Demo Data<div style="background-color: #2255ff;color:#fafafa;padding:0.5rem;border-radius:1rem;" id="demoDataStatus"></div></h3>
-          <div style="margin: auto;margin-right: 2rem;display:flex;gap:2rem">
-            <button class="button" id="createDemoDataButton" onclick="createDemoData()" style="display:none;">Create Demo Data</button>
-            <button class="button" id="deleteDemoDataButton" onclick="deleteDemoData()" style="display:none;background-color:red;">Delete Demo Data</button>
+  <div class="section-{{ section.id }}-padding">
+    <div style="padding-bottom: 5rem;display: none;" id="generalSettingsContainer">
+      <div class="configbox page-width border" style="padding: 0;border-radius:1rem;padding:3px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem;">
+          <h2>Configure General Settings</h2>
+          <div style="display: flex; align-items: center;">
+            <div id="user-icon"  style="cursor: pointer;background: #fafafa;padding-top: 5px;margin-right: 1rem;" onclick="window.location.href='/account?logged_in'">
+              {% render 'icon-user' %}
+            </div>
+            <h5 style="text-decoration: underline;cursor: pointer;margin-right: 2rem;" onclick="window.location.href='/account?logged_in'">{{ customer.email }}</h5>
           </div>
         </div>
-        <hr style="width: 100%; border-top: 0.2rem solid #17161c;display:none;">
-        <h3 class="flex-header" style="margin-left: 2rem">Company Information
-        </h3>
-        <div id="configurationGeneral" style="padding: 20px; border-radius: 10px; background-color: #fafafa;position:relative;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr>
-                <th style="text-align: left; padding: 10px; border-bottom: 1px solid #ddd;">Setting</th>
-                <th style="text-align: left; padding: 10px; border-bottom: 1px solid #ddd;">Value</th>
-              </tr>
-            </thead>
-            <tbody id="settingsTableBody">
-              <!-- General Settings Inputs will be dynamically inserted here -->
-            </tbody>
-            <tbody id="credentialsTableBody">
-              <tr class="setting-item">
-                <td>
-                  <label style="width: fit-content;">Login Details
-                    <div class="tooltip">
-                      <p>Enter or update the login details for the PROs.</p>
-                    </div>
-                  </label>
-                </td>
-                <td><div id="editIconClients" href="#" title="Edit" onclick="openClientsModal()" style="cursor: pointer;">
-                  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
-                </div></td>
-              </tr>
-              <!-- Credentials will be dynamically inserted here -->
-            </tbody>
-          </table>
-          <div class="tab-container">
-            <div id="countryTabs" class="display-flex" style="margin: auto; width: fit-content;position:relative;"></div>
-            <div id="countrySelectionContainer" style="margin: auto; width: fit-content"></div>
-            <div id="reportDataContainer" style="margin: auto; width: 50%;"></div>
+        <div class="display-flex" style="margin: auto;width: fit-content;display:flex"></div>
+        <div id="generalConfig" class="bordertop" style="background-color: #fafafa;">
+          <div style="display: none" >
+            <h3 style="margin-left: 2rem;width: 50%;display:flex;align-items:center;gap:3rem">Demo Data<div style="background-color: #2255ff;color:#fafafa;padding:0.5rem;border-radius:1rem;" id="demoDataStatus"></div></h3>
+            <div style="margin: auto;margin-right: 2rem;display:flex;gap:2rem">
+              <button class="button" id="createDemoDataButton" onclick="createDemoData()" style="display:none;">Create Demo Data</button>
+              <button class="button" id="deleteDemoDataButton" onclick="deleteDemoData()" style="display:none;background-color:red;">Delete Demo Data</button>
+            </div>
+          </div>
+          <hr style="width: 100%; border-top: 0.2rem solid #17161c;display:none;">
+          <h3 class="flex-header" style="margin-left: 2rem">Company Information
+          </h3>
+          <div id="configurationGeneral" style="padding: 20px; border-radius: 10px; background-color: #fafafa;position:relative;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; padding: 10px; border-bottom: 1px solid #ddd;">Setting</th>
+                  <th style="text-align: left; padding: 10px; border-bottom: 1px solid #ddd;">Value</th>
+                </tr>
+              </thead>
+              <tbody id="settingsTableBody">
+                <!-- General Settings Inputs will be dynamically inserted here -->
+              </tbody>
+              <tbody id="credentialsTableBody">
+                <tr class="setting-item">
+                  <td>
+                    <label style="width: fit-content;">Login Details
+                      <div class="tooltip">
+                        <p>Enter or update the login details for the PROs.</p>
+                      </div>
+                    </label>
+                  </td>
+                  <td><div id="editIconClients" href="#" title="Edit" onclick="openClientsModal()" style="cursor: pointer;">
+                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+                  </div></td>
+                </tr>
+                <!-- Credentials will be dynamically inserted here -->
+              </tbody>
+            </table>
+            {% comment %} <div class="tab-container">
+              <div id="countryTabs" class="display-flex" style="margin: auto; width: fit-content;position:relative;"></div>
+              <div id="countrySelectionContainer" style="margin: auto; width: fit-content"></div>
+              <div id="reportDataContainer" style="margin: auto; width: 50%;"></div>
+            </div> {% endcomment %}
           </div>
         </div>
       </div>
-    </div>
-    <div class="page-width" style="text-align: right">
-      <button
-        id="submitChanges"
-        class="button"
-        style="margin-top: 1rem;position:relative;"
-        onclick="submitSettings()"
-      >
-        Submit Changes
-      </button>
-    </div>
-  </div>
-  <div
-    id="proSelectionModal"
-    class="losensitive"
-    style="width: 40%;display:none; position:fixed; z-index:9999; background:#fff; border:1px solid #ccc; padding:20px; border-radius:10px; top:15%; left:50%; transform:translateX(-50%); max-width:600px; box-shadow:0 0 10px rgba(0,0,0,0.3)"
-  >
-    <h3 style="text-align:center">Select PROs</h3>
-    <form id="proSelectionForm"></form>
-    <div style="text-align:center; margin-top:1rem;">
-      <button type="button" onclick="confirmProSelection()">Confirm</button>
-      <button type="button" onclick="closeProModal()">Cancel</button>
-    </div>
-  </div>
-  
-  <div id="editClientsModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
-    <div style="display: flex;justify-content: space-between;">
-      <h3>Edit Credentials</h3>
-      <div>
-          <div id="addRowBtn" onclick="addNewPRO()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add PRO</div>
-          {% comment %} TODO columns and countries should be added automatically based on the PROs selected below {% endcomment %}
+      <div class="page-width" style="text-align: right">
+        <button
+          id="submitChanges"
+          class="button"
+          style="margin-top: 1rem;position:relative;"
+          onclick="submitSettings()"
+        >
+          Submit Changes
+        </button>
       </div>
     </div>
-    <div id="tabs-container"></div>
-    <div id="clientsDatatableContainer">
-        <!-- Datatable for Clients File will be dynamically rendered here -->
+    <div
+      id="proSelectionModal"
+      class="losensitive"
+      style="width: 40%;display:none; position:fixed; z-index:9999; background:#fff; border:1px solid #ccc; padding:20px; border-radius:10px; top:15%; left:50%; transform:translateX(-50%); max-width:600px; box-shadow:0 0 10px rgba(0,0,0,0.3)"
+    >
+      <h3 style="text-align:center">Select PROs</h3>
+      <form id="proSelectionForm"></form>
+      <div style="text-align:center; margin-top:1rem;">
+        <button type="button" onclick="confirmProSelection()">Confirm</button>
+        <button type="button" onclick="closeProModal()">Cancel</button>
+      </div>
     </div>
+    
+    <div id="editClientsModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
+      <div style="display: flex;justify-content: space-between;">
+        <h3>Edit Credentials</h3>
+        <div>
+            <div id="addRowBtn" onclick="addNewPRO()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add PRO</div>
+            {% comment %} TODO columns and countries should be added automatically based on the PROs selected below {% endcomment %}
+        </div>
+      </div>
+      <div id="tabs-container"></div>
+      <div id="clientsDatatableContainer">
+          <!-- Datatable for Clients File will be dynamically rendered here -->
+      </div>
+      <div style="margin-top: 1rem;">
+          <button class="button" onclick="saveClientsEdits()">Save</button>
+          <button class="button" onclick="closeClientsModal()" style="background-color: #17161c;">Cancel</button>
+      </div>
+  </div>
+  <div id="clientsModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeClientsModal()"></div>
+  {% comment %} <div id="addPROModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
+    <h3>Add PRO</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Country</th>
+          <th>Wastestream</th>
+          <th>Scheme</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <select id="countrySelect" class="selectpicker">
+              <option value="">Select Country</option>
+            </select>
+          </td>
+          <td>
+            <select id="wastestreamSelect" class="selectpicker" disabled>
+              <option value="">Select Wastestream</option>
+            </select>
+          </td>
+          <td>
+            <select id="schemeSelect" class="selectpicker" disabled>
+              <option value="">Select Scheme</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Login</th>
+          <th>Password</th>
+          <th>Notes</th>
+          <th>ExtraInfo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <input type="text" id="loginInput">
+          </td>
+          <td>
+            <input type="text" id="passwordInput">
+          </td>
+          <td>
+            <input type="text" id="notesInput">
+          </td>
+          <td>
+            <input type="text" id="extraInfoInput">
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <div style="margin-top: 1rem;">
-        <button class="button" onclick="saveClientsEdits()">Save</button>
-        <button class="button" onclick="closeClientsModal()" style="background-color: #17161c;">Cancel</button>
+      <button class="button" onclick="saveAddPRO()">Save</button>
+      <button class="button" onclick="closeAddPROModal()" style="background-color: #17161c;">Cancel</button>
     </div>
-</div>
-<div id="clientsModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeClientsModal()"></div>
-<div id="addPROModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
-  <h3>Add PRO</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Country</th>
-        <th>Wastestream</th>
-        <th>Scheme</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <select id="countrySelect" class="selectpicker">
-            <option value="">Select Country</option>
-          </select>
-        </td>
-        <td>
-          <select id="wastestreamSelect" class="selectpicker" disabled>
-            <option value="">Select Wastestream</option>
-          </select>
-        </td>
-        <td>
-          <select id="schemeSelect" class="selectpicker" disabled>
-            <option value="">Select Scheme</option>
-          </select>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <table>
-    <thead>
-      <tr>
-        <th>Login</th>
-        <th>Password</th>
-        <th>Notes</th>
-        <th>ExtraInfo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <input type="text" id="loginInput">
-        </td>
-        <td>
-          <input type="text" id="passwordInput">
-        </td>
-        <td>
-          <input type="text" id="notesInput">
-        </td>
-        <td>
-          <input type="text" id="extraInfoInput">
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div style="margin-top: 1rem;">
-    <button class="button" onclick="saveAddPRO()">Save</button>
-    <button class="button" onclick="closeAddPROModal()" style="background-color: #17161c;">Cancel</button>
   </div>
+  <div id="addPROModalOverlay" class="losensitive" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeAddPROModal()">
+  </div> {% endcomment %}
 </div>
-<div id="addPROModalOverlay" class="losensitive" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeAddPROModal()"></div>
-
 <script>
 
     async function createDemoData() {

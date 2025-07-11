@@ -364,11 +364,10 @@ div.display-flex {
                     <th style="width: 10%">Delete</th>
                 </tr>
             </thead>
-            <tbody id="userList">          
+            <tbody id="userList">
             </tbody>
         </table>
         <div id="editModal" class="modal losensitive">
-
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
                 <h2 style="margin-left: auto;margin-right: auto;width: fit-content;">Edit User Roles</h2>
@@ -382,18 +381,6 @@ div.display-flex {
             <input type="email" id="emailInput" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;display: none">
             <button id="addButton" class="button" style="display: none;">Add User</button>
             <button id="addApiTokenButton" class="button" style="margin-left: auto;" onclick="addApiToken()">Add API Token</button>
-        </div>
-    </div>
-    <div id="apiTokenModal" class="losensitive" style="padding-bottom: 2rem; display: none">
-        <div class="modal-content">
-            <span class="close" onclick="closeApiTokenModal()">&times;</span>
-            <h2 style="margin-left: auto;margin-right: auto;width: fit-content;">API Token added</h2>
-            <div>Please save this token in a secure location. You will not be able to access it after closing this window.</div>
-            <div style="display: flex;align-items: center;gap: 1rem;margin: auto;width: fit-content;">
-                <div id="apiToken"></div>
-                <div onclick="copyApiToken()" style="cursor: pointer;" title="Copy to clipboard"><svg width="20px" height="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#17161c" d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -580,49 +567,7 @@ async function addUser(userEmail) {
     }
 }
 
-async function addApiToken() {
-    try {
-        document.body.style.cursor = 'wait';
-        const response = await unifiedSendRequest(ACCESS_ADD_API_TOKEN, {method: 'POST'});
-        if (response.status == 'success') {
-            showMessage('API Token added successfully!', true);
-            getUsers();
-            document.getElementById('apiToken').innerHTML = response.token;
-            openApiTokenModal();
-        } else {
-            console.error('Failed to add API Token:', response);
-            showMessage('Failed to add API Token. Please try again', false);
-        }
-    } catch (error) {
-        console.error('Error adding API Token:', error.message);
-        showMessage('Failed to add API Token' + error.message, false);
-    } finally {
-        document.body.style.cursor = 'default';
-    }
-}
 
-function copyApiToken() {
-    const apiToken = document.getElementById('apiToken').textContent;
-    
-    navigator.clipboard.writeText(apiToken)
-        .then(() => {
-            console.log('API token copied to clipboard!');
-            showMessage('API token copied to clipboard!', true);
-        })
-        .catch(err => {
-            console.error('Failed to copy: ', err);
-        });
-}
-
-function closeApiTokenModal() {
-    var apiTokenModal = document.getElementById('apiTokenModal');
-    apiTokenModal.style.display = 'none';
-}
-
-function openApiTokenModal() {
-    var apiTokenModal = document.getElementById('apiTokenModal');
-    apiTokenModal.style.display = 'block';
-}
 
 
 async function saveChanges(userId) {

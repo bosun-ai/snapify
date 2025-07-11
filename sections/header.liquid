@@ -161,6 +161,10 @@
   border-radius: 1rem;
   background-color:red;
 }
+
+summary span svg {
+  padding: 0!important;
+}
 {%- endstyle -%}
 
 <script src="{{ 'details-disclosure.js' | asset_url }}" defer="defer"></script>
@@ -192,6 +196,29 @@
     <p class="h2 contactText">{{ section.settings.schedule_demo_1 }} <br>{{ section.settings.schedule_demo_2 }}</p>
   </a>
 </div>
+{% assign current_path = request.path %}
+{% assign show_menu = false %}
+{% for link in linklists[section.settings.product-menu-show-on].links %}
+  {% if link.url == current_path %}
+    {% assign show_menu = true %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+{% if '/account?logged_in' == current_path %}
+  {% assign show_menu = true %}
+{% endif %}
+{% if show_menu %}
+  {% if customer.tags contains 'member' %}
+  {% elsif customer.id %}
+    <script>
+      window.location.href = '{{ routes.root_url }}';
+      </script>
+      {% else %}
+      <script>
+      window.location.href = '{{ routes.account_login_url }}';
+      </script>
+  {% endif %}
+{% endif %}
 <{% if section.settings.enable_sticky_header %}sticky-header{% else %}div{% endif %} class="header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %}" style="border-bottom: .25rem solid #25f; margin-bottom: -2rem; height: 13rem; margin-top: -2rem; z-index: 20;position: relative;"     >
   <header class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu != blank %} header--has-menu{% endif %}">
     {%- if section.settings.menu != blank -%}
@@ -206,84 +233,113 @@
           <div id="menu-drawer" class="gradient menu-drawer motion-reduce" tabindex="-1">
             <div class="menu-drawer__inner-container">
               <div class="menu-drawer__navigation-container">
-                <nav class="menu-drawer__navigation">
-                  <ul class="menu-drawer__menu has-submenu list-menu" role="list">
-                    {%- for link in section.settings.menu.links -%}
-                      <li>
-                        {%- if link.links != blank -%}
-                          <details id="Details-menu-drawer-menu-item-{{ forloop.index }}">
-                            <summary class="menu-drawer__menu-item list-menu__item link link--text focus-inset{% if link.child_active %} menu-drawer__menu-item--active{% endif %}">
-                              {{ link.title | escape }}
-                              {% render 'icon-arrow' %}
-                              {% render 'icon-caret' %}
-                            </summary>
-                            <div id="link-{{ link.handle | escape }}" class="menu-drawer__submenu has-submenu gradient motion-reduce" tabindex="-1">
-                              <div class="menu-drawer__inner-submenu">
-                                <button class="menu-drawer__close-button link link--text focus-inset" aria-expanded="true">
+                    <nav class="menu-drawer__navigation">
+                      <ul class="menu-drawer__menu has-submenu list-menu" role="list">
+                        {% assign menuHamburger = section.settings.menu %}
+                        {% if customer.tags contains 'member' and show_menu %}
+                          {% assign menuHamburger = section.settings.product-menu %}
+                        {% endif %}
+                        {%- for link in menuHamburger.links -%}
+                          <li>
+                            {%- if link.links != blank -%}
+                              <details id="Details-menu-drawer-menu-item-{{ forloop.index }}">
+                                <summary class="menu-drawer__menu-item list-menu__item link link--text focus-inset{% if link.child_active %} menu-drawer__menu-item--active{% endif %}">
+                                  {{ link.title | escape }}
                                   {% render 'icon-arrow' %}
-                                  {{ section.settings.back_button | escape }}
-                                </button>
-                                <ul class="menu-drawer__menu list-menu" role="list" tabindex="-1">
-                                  <a href="{{ link.url }}" hreflang="{{ link.title | escape | downcase }}" class="menu-drawer__menu-item link link--text list-menu__item focus-inset{% if link.current %} menu-drawer__menu-item--active{% endif %}"{% if link.current %} aria-current="page"{% endif %}>
-                                          {{ link.title | escape }}
-                                        </a>
-                                  {%- for childlink in link.links -%}
-                                    <li>
-                                      {%- if childlink.links == blank -%}
-                                        <a href="{{ childlink.url }}" hreflang="{{ childlink.title | escape | downcase }}" class="menu-drawer__menu-item link link--text list-menu__item focus-inset{% if childlink.current %} menu-drawer__menu-item--active{% endif %}"{% if childlink.current %} aria-current="page"{% endif %}>
-                                          {{ childlink.title | escape }}
-                                        </a>
-                                      {%- else -%}
-                                        <details id="Details-menu-drawer-submenu-{{ forloop.index }}">
-                                          <summary class="menu-drawer__menu-item link link--text list-menu__item focus-inset">
-                                            {{ childlink.title | escape }}
-                                            {% render 'icon-arrow' %}
-                                            {% render 'icon-caret' %}
-                                          </summary>
-                                          <div id="childlink-{{ childlink.handle | escape }}" class="menu-drawer__submenu has-submenu gradient motion-reduce">
-                                            <button class="menu-drawer__close-button link link--text focus-inset" aria-expanded="true">
-                                              {% render 'icon-arrow' %}
+                                  {% render 'icon-caret' %}
+                                </summary>
+                                <div id="link-{{ link.handle | escape }}" class="menu-drawer__submenu has-submenu gradient motion-reduce" tabindex="-1">
+                                  <div class="menu-drawer__inner-submenu">
+                                    <button class="menu-drawer__close-button link link--text focus-inset" aria-expanded="true">
+                                      {% render 'icon-arrow' %}
+                                      {{ section.settings.back_button | escape }}
+                                    </button>
+                                    <ul class="menu-drawer__menu list-menu" role="list" tabindex="-1">
+                                      <a href="{{ link.url }}" hreflang="{{ link.title | escape | downcase }}" class="menu-drawer__menu-item link link--text list-menu__item focus-inset{% if link.current %} menu-drawer__menu-item--active{% endif %}"{% if link.current %} aria-current="page"{% endif %}>
+                                              {{ link.title | escape }}
+                                            </a>
+                                      {%- for childlink in link.links -%}
+                                        <li>
+                                          {%- if childlink.links == blank -%}
+                                            <a href="{{ childlink.url }}" hreflang="{{ childlink.title | escape | downcase }}" class="menu-drawer__menu-item link link--text list-menu__item focus-inset{% if childlink.current %} menu-drawer__menu-item--active{% endif %}"{% if childlink.current %} aria-current="page"{% endif %}>
                                               {{ childlink.title | escape }}
-                                            </button>
-                                            <ul class="menu-drawer__menu list-menu" role="list" tabindex="-1">
-                                              {%- for grandchildlink in childlink.links -%}
-                                                <li>
-                                                  <a href="{{ grandchildlink.url }}" class="menu-drawer__menu-item link link--text list-menu__item focus-inset{% if grandchildlink.current %} menu-drawer__menu-item--active{% endif %}"{% if grandchildlink.current %} aria-current="page"{% endif %}>
-                                                    {{ grandchildlink.title | escape }}
-                                                  </a>
-                                                </li>
-                                              {%- endfor -%}
-                                            </ul>
-                                          </div>
-                                        </details>
-                                      {%- endif -%}
-                                    </li>
-                                  {%- endfor -%}
-                                </ul>
-                              </div>
-                            </div>
-                          </details>
-                        {%- else -%}
-                          <a href="{{ link.url }}" class="menu-drawer__menu-item list-menu__item link link--text focus-inset{% if link.current %} menu-drawer__menu-item--active{% endif %}"{% if link.current %} aria-current="page"{% endif %}>
-                            {{ link.title | escape }}
-                          </a>
-                        {%- endif -%}
-                      </li>
-                    {%- endfor -%}
-                  </ul>
-                </nav>
-                {% if customer.tags contains 'member' %}
+                                            </a>
+                                          {%- else -%}
+                                            <details id="Details-menu-drawer-submenu-{{ forloop.index }}">
+                                              <summary class="menu-drawer__menu-item link link--text list-menu__item focus-inset">
+                                                {{ childlink.title | escape }}
+                                                {% render 'icon-arrow' %}
+                                                {% render 'icon-caret' %}
+                                              </summary>
+                                              <div id="childlink-{{ childlink.handle | escape }}" class="menu-drawer__submenu has-submenu gradient motion-reduce">
+                                                <button class="menu-drawer__close-button link link--text focus-inset" aria-expanded="true">
+                                                  {% render 'icon-arrow' %}
+                                                  {{ childlink.title | escape }}
+                                                </button>
+                                                <ul class="menu-drawer__menu list-menu" role="list" tabindex="-1">
+                                                  {%- for grandchildlink in childlink.links -%}
+                                                    <li>
+                                                      <a href="{{ grandchildlink.url }}" class="menu-drawer__menu-item link link--text list-menu__item focus-inset{% if grandchildlink.current %} menu-drawer__menu-item--active{% endif %}"{% if grandchildlink.current %} aria-current="page"{% endif %}>
+                                                        {{ grandchildlink.title | escape }}
+                                                      </a>
+                                                    </li>
+                                                  {%- endfor -%}
+                                                </ul>
+                                              </div>
+                                            </details>
+                                          {%- endif -%}
+                                        </li>
+                                      {%- endfor -%}
+                                    </ul>
+                                  </div>
+                                </div>
+                              </details>
+                            {%- else -%}
+                              <a href="{{ link.url }}" class="menu-drawer__menu-item list-menu__item link link--text focus-inset{% if link.current %} menu-drawer__menu-item--active{% endif %}"{% if link.current %} aria-current="page"{% endif %}>
+                                {{ link.title | escape }}
+                              </a>
+                            {%- endif -%}
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </nav>
+                {% if customer.tags contains 'member' and show_menu %}
+                      <style>
+                        .slider-mobile-gutter {
+                          margin: auto;
+                          width: fit-content;
+                        }
+                      </style>
+                    <div style="display: flex">
+                      <div id="guideButton" aria-label="Guide" onclick="showGuideFromButton(this)"
+                          style="color: black;margin: auto 1rem;display: flex;margin-top: 11px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" height="38px" version="1.0" viewBox="0 0 200 200" style="cursor: pointer" onclick="showGuide()">
+                          <path id="path2382" d="m165.33 113.44a103.61 103.61 0 1 1 -207.22 0 103.61 103.61 0 1 1 207.22 0z" stroke-width="0" fill="#fafafa" transform="matrix(.93739 0 0 .93739 42.143 -6.3392)"></path>
+                          <g id="layer1">
+                            <path id="path2413" d="m100 0c-55.2 0-100 44.8-100 100-5.0495e-15 55.2 44.8 100 100 100s100-44.8 100-100-44.8-100-100-100zm0 12.812c48.13 0 87.19 39.058 87.19 87.188s-39.06 87.19-87.19 87.19-87.188-39.06-87.188-87.19 39.058-87.188 87.188-87.188zm1.47 21.25c-5.45 0.03-10.653 0.737-15.282 2.063-4.699 1.346-9.126 3.484-12.876 6.219-3.238 2.362-6.333 5.391-8.687 8.531-4.159 5.549-6.461 11.651-7.063 18.687-0.04 0.468-0.07 0.868-0.062 0.876 0.016 0.016 21.702 2.687 21.812 2.687 0.053 0 0.113-0.234 0.282-0.937 1.941-8.085 5.486-13.521 10.968-16.813 4.32-2.594 9.808-3.612 15.778-2.969 2.74 0.295 5.21 0.96 7.38 2 2.71 1.301 5.18 3.361 6.94 5.813 1.54 2.156 2.46 4.584 2.75 7.312 0.08 0.759 0.05 2.48-0.03 3.219-0.23 1.826-0.7 3.378-1.5 4.969-0.81 1.597-1.48 2.514-2.76 3.812-2.03 2.077-5.18 4.829-10.78 9.407-3.6 2.944-6.04 5.156-8.12 7.343-4.943 5.179-7.191 9.069-8.564 14.719-0.905 3.72-1.256 7.55-1.156 13.19 0.025 1.4 0.062 2.73 0.062 2.97v0.43h21.598l0.03-2.4c0.03-3.27 0.21-5.37 0.56-7.41 0.57-3.27 1.43-5 3.94-7.81 1.6-1.8 3.7-3.76 6.93-6.47 4.77-3.991 8.11-6.99 11.26-10.125 4.91-4.907 7.46-8.26 9.28-12.187 1.43-3.092 2.22-6.166 2.46-9.532 0.06-0.816 0.07-3.03 0-3.968-0.45-7.043-3.1-13.253-8.15-19.032-0.8-0.909-2.78-2.887-3.72-3.718-4.96-4.394-10.69-7.353-17.56-9.094-4.19-1.062-8.23-1.6-13.35-1.75-0.78-0.023-1.59-0.036-2.37-0.032zm-10.908 103.6v22h21.998v-22h-21.998z"></path>
+                          </g>
+                          </svg>
+                      </div>
+                      <a id="gear-icon"  style="margin: auto 1rem;margin-top: 7px;cursor: pointer;background: #fafafa;" href="{{ pages['forsure-configuration'].url }}">
+                        {% render 'icon-gear' %}
+                      </a>
+                      <div style="justify-content: center;align-self: center;margin: auto 1rem;cursor: pointer;margin-top: 1rem;background: #fafafa;position: relative;" id="notificationBell">
+                          <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                            <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"></path>
+                          </svg>
+                          <div id="notification-badge" class="badgeNotification hidden" style="top: -1px">1</div>
+                      </div>
+                    </div>
+                {% elsif customer.tags contains 'member' %}
                   {% if section.settings.show_error_warning %}
                     <div id="errorMessage">{{ section.settings.error_warning }}</div>
                   {% endif %}
-                  <a href="{{ pages['forsure-statistics'].url }}" id="disappearbuttMobile" class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
-                {% elsif customer.tags contains 'vendor' %}
-                  <a href="{{ pages['forsure-categorylist-editor'].url }}" id="disappearbuttMobile" class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
+                  <a href="{{ pages['forsure-dashboard'].url }}" id="disappearbuttMobile" class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
                 {% elsif customer.tags contains 'free-plan' %}
                   <a href="{{ pages['free-plan'].url }}" id="disappearbuttMobile" class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
                 {% else %}
                   <button id="disappearbuttMobile" onclick="showContactOptionsMobile()" class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.schedule_demo }}</button>
-                           <!-- <a href="{{ routes.account_register }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 0.7em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.free_plan }}</a> -->
+                          <!-- <a href="{{ routes.account_register }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 0.7em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.free_plan }}</a> -->
 
                 {% endif %}
               {% comment %} <a href="{{ pages['demo'].url }}"><button class="button" style="width:fit-content;margin:1em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ 'products.product.add_to_cart' | t }}</button></a> {% endcomment %}
@@ -406,57 +462,64 @@
       {%- endif -%}
     {%- endif -%}
     {%- if section.settings.menu != blank -%}
-      {%- if section.settings.menu_type_desktop == 'dropdown' -%}
+      {% comment %} {%- if section.settings.menu_type_desktop == 'dropdown' -%}
         <nav class="header__inline-menu">
           <ul class="list-menu list-menu--inline" role="list">
-            {%- for link in section.settings.menu.links -%}
-              <li>
-                {%- if link.links != blank -%}
-                  <header-menu>
-                    <details id="Details-HeaderMenu-{{ forloop.index }}">
-                      <summary class="header__menu-item list-menu__item link focus-inset">
-                        <span {%- if link.child_active %} class="header__active-menu-item"{% endif %}>{{ link.title | escape }}</span>
-                        {% render 'icon-caret' %}
-                      </summary>
-                      <ul id="HeaderMenu-MenuList-{{ forloop.index }}" class="header__submenu list-menu list-menu--disclosure gradient caption-large motion-reduce global-settings-popup" role="list" tabindex="-1">
-                        {%- for childlink in link.links -%}
-                          <li>
-                            {%- if childlink.links == blank -%}
-                              <a href="{{ childlink.url }}" class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if childlink.current %} list-menu__item--active{% endif %}"{% if childlink.current %} aria-current="page"{% endif %}>
-                                {{ childlink.title | escape }}
-                              </a>
-                            {%- else -%}
-                              <details id="Details-HeaderSubMenu-{{ forloop.index }}">
-                                <summary class="header__menu-item link link--text list-menu__item focus-inset caption-large">
-                                  <span>{{ childlink.title | escape }}</span>
-                                  {% render 'icon-caret' %}
-                                </summary>
-                                <ul id="HeaderMenu-SubMenuList-{{ forloop.index }}" class="header__submenu list-menu motion-reduce">
-                                  {%- for grandchildlink in childlink.links -%}
-                                    <li>
-                                      <a href="{{ grandchildlink.url }}" class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if grandchildlink.current %} list-menu__item--active{% endif %}"{% if grandchildlink.current %} aria-current="page"{% endif %}>
-                                        {{ grandchildlink.title | escape }}
-                                      </a>
-                                    </li>
-                                  {%- endfor -%}
-                                </ul>
-                              </details>
-                            {%- endif -%}
-                          </li>
-                        {%- endfor -%}
-                      </ul>
-                    </details>
-                  </header-menu>
-                {%- else -%}
-                  <a href="{{ link.url }}" class="header__menu-item list-menu__item link link--text focus-inset"{% if link.current %} aria-current="page"{% endif %}>
-                    <span {%- if link.current %} class="header__active-menu-item"{% endif %}>{{ link.title | escape }}</span>
-                  </a>
-                {%- endif -%}
-              </li>
-            {%- endfor -%}
+            {% if customer.tags contains 'member' and show_menu %}
+              {% render 'forsure-product-navigation' %}
+            {% else %}
+              {%- for link in section.settings.menu.links -%}
+                <li>
+                    {%- if link.links != blank -%}
+                    <header-menu>
+                      <details id="Details-HeaderMenu-{{ forloop.index }}">
+                        <summary class="header__menu-item list-menu__item link focus-inset">
+                          <span {%- if link.child_active %} class="header__active-menu-item"{% endif %}>{{ link.title | escape }}</span>
+                          {% render 'icon-caret' %}
+                        </summary>
+                        <ul id="HeaderMenu-MenuList-{{ forloop.index }}" class="header__submenu list-menu list-menu--disclosure gradient caption-large motion-reduce global-settings-popup" role="list" tabindex="-1">
+                          {%- for childlink in link.links -%}
+                            <li>
+                              {%- if childlink.links == blank -%}
+                                <a href="{{ childlink.url }}" class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if childlink.current %} list-menu__item--active{% endif %}"{% if childlink.current %} aria-current="page"{% endif %}>
+                                  {{ childlink.title | escape }}
+                                </a>
+                              {%- else -%}
+                                <details id="Details-HeaderSubMenu-{{ forloop.index }}">
+                                  <summary class="header__menu-item link link--text list-menu__item focus-inset caption-large">
+                                    <span>{{ childlink.title | escape }}</span>
+                                    {% render 'icon-caret' %}
+                                  </summary>
+                                  <ul id="HeaderMenu-SubMenuList-{{ forloop.index }}" class="header__submenu list-menu motion-reduce">
+                                    {%- for grandchildlink in childlink.links -%}
+                                      <li>
+                                        <a href="{{ grandchildlink.url }}" class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if grandchildlink.current %} list-menu__item--active{% endif %}"{% if grandchildlink.current %} aria-current="page"{% endif %}>
+                                          {{ grandchildlink.title | escape }}
+                                        </a>
+                                      </li>
+                                    {%- endfor -%}
+                                  </ul>
+                                </details>
+                              {%- endif -%}
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </details>
+                    </header-menu>
+                    {%- else -%}
+                      <a href="{{ link.url }}" class="header__menu-item list-menu__item link link--text focus-inset"{% if link.current %} aria-current="page"{% endif %}>
+                        <span {%- if link.current %} class="header__active-menu-item"{% endif %}>{{ link.title | escape }}</span>
+                      </a>
+                    {%- endif -%}
+                </li>
+              {%- endfor -%}
+            {% endif %}
           </ul>
         </nav>
-      {%- else -%}
+      {%- else -%} {% endcomment %}
+      {% if customer.tags contains 'member' and show_menu %}
+        {% render 'forsure-product-navigation' %}
+      {% else %}
         <nav class="header__inline-menu">
           <ul class="list-menu list-menu--inline" role="list" style="padding-bottom: 1.5rem;width: max-content;">
             {%- for link in section.settings.menu.links -%}
@@ -533,148 +596,152 @@
         </h1>
       {%- endif -%}
     {%- endif -%}
-    <div class="header__icons" style="padding-bottom: 1.5rem;">
-      <div style="align-items: center;display: flex;text-align:center">
-        {% if customer.tags contains 'subscription-ended' %}
-         <a href="{{ pages['subscription-ended'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
-       {% elsif customer.tags contains 'member' %}
-          {% if section.settings.show_error_warning %}
-            <div id="errorMessage">{{ section.settings.error_warning }}</div>
-          {% endif %}
-         <a href="{{ pages['forsure-statistics'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
-       {% elsif customer.tags contains 'vendor' %}
-         <a href="{{ pages['forsure-categorylist-editor'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
-       {% elsif customer.tags contains 'free-plan' %}
-         <a href="{{ pages['free-plan'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
-       {% else %}
-         <button id="disappearbutt" onclick="showContactOptions()" class="button" style="margin:1em 1em 1em 0.7em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.schedule_demo }}</button>
-         <!-- <a href="{{ routes.account_register }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 0.7em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.free_plan }}</a> -->
+    {% if customer.tags contains 'member' and show_menu %}
 
-       {% endif %}
-       <script>
-            const blockContainer = document.getElementById('block-container');
-            const greyOverlay = document.getElementById('grey-overlay');
-
-            function handleClickOutside(event, toggleButton) {
-              console.log('Listening');
-              if (blockContainer.style.display === 'flex' && !blockContainer.contains(event.target) && event.target !== toggleButton) {
-                hideContactOptions(toggleButton);
-              }
-            }
-
-            function showContactOptions() {
-              console.log('Displaying');
-              blockContainer.style.display = 'flex';
-              greyOverlay.style.display = 'block'; // Show the grey background
-              const toggleButton = document.getElementById('disappearbutt');
-              // Adding named function to the event listener
-              document.addEventListener('click', handleClick);
-            }
-
-            function showContactOptionsMobile() {
-              console.log('Displaying');
-              blockContainer.style.display = 'flex';
-              greyOverlay.style.display = 'block'; // Show the grey background
-              const toggleButton = document.getElementById('disappearbuttMobile');
-              // Adding named function to the event listener
-              document.addEventListener('click', handleClickMobile);
-            }
-
-            // Named function to handle the main toggle button
-            function handleClick(event) {
-              const toggleButton = document.getElementById('disappearbutt');
-              handleClickOutside(event, toggleButton);
-            }
-
-            // Named function to handle the mobile toggle button
-            function handleClickMobile(event) {
-              const toggleButton = document.getElementById('disappearbuttMobile');
-              handleClickOutside(event, toggleButton);
-            }
-
-            // Updated hideContactOptions to remove the correct event listener
-            function hideContactOptions(toggleButton) {
-              blockContainer.style.display = 'none';
-              greyOverlay.style.display = 'none'; // Hide the grey background
-              console.log(`removing event listener for ${toggleButton.id}`);
-
-              // Check which toggleButton was passed and remove the correct event listener
-              if (toggleButton.id === 'disappearbutt') {
-                document.removeEventListener('click', handleClick);
-              } else if (toggleButton.id === 'disappearbuttMobile') {
-                document.removeEventListener('click', handleClickMobile);
-              }
-            }
-      </script>
-      {%- if localization.available_languages.size >= 1 and section.settings.show_languages -%}
-        <noscript>
-          {%- form 'localization', id: 'FooterLanguageFormNoScript', class: 'localization-form' -%}
-            <div class="localization-form__select">
-              <select class="localization-selector link" name="locale_code" aria-labelledby="FooterLanguageLabelNoScript">
-                {%- for language in localization.available_languages -%}
-                  <option value="{{ language.iso_code }}" lang="{{ language.iso_code }}" {%- if language.iso_code == localization.language.iso_code %} selected{% endif %}>
-                    {{ language.iso_code | upcase  }}
-                  </option>
-                {%- endfor -%}
-              </select>
-              {% render 'icon-caret' %}
-            </div>
-            <button class="button button--tertiary">{{ 'localization.update_language' | t }}</button>
-          {%- endform -%}
-        </noscript>
-        <localization-form>
-          {%- form 'localization', id: 'FooterLanguageForm', class: 'localization-form' -%}
-            <div class="no-js-hidden" style="position: relative;">
-              <div class="disclosure" style="position: relative;">
-                <button type="button" style="width:5rem" class="disclosure__button localization-form__select localization-selector link link--text caption-large">
-                  {{ localization.language.iso_code | upcase  }}
-                  {% render 'icon-caret' %}
-                </button>
-                <div class="disclosure__list-wrapper" hidden style="position: absolute;transform: translateY(150%); transition: transform 0s ease 0s;">
-                  <ul id="FooterLanguageList" role="list" class="disclosure__list list-unstyled" style="">
-                    {%- for language in localization.available_languages -%}
-                      <li class="disclosure__item" tabindex="-1">
-                        <a class="link link--text disclosure__link caption-large{% if language.iso_code == localization.language.iso_code %} disclosure__link--active{% endif %} focus-inset" href="#" hreflang="{{ language.iso_code }}" lang="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} aria-current="true"{% endif %} data-value="{{ language.iso_code }}">
-                          {{ language.iso_code | upcase  }}
-                        </a>
-                      </li>
-                    {%- endfor -%}
-                  </ul>
-                </div>
-              </div>
-              <input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}">
-            </div>
-          {%- endform -%}
-        </localization-form>
-      {%- endif -%}
-      </div>
-      {%- if shop.customer_accounts_enabled -%}
-        {% if customer %}
-          <a href="{{ routes.account_logout_url }}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" style="align-self: center;">
-            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="88.363px" height="1.75em" viewBox="0 0 89.149 122.88" enable-background="new 0 0 89.149 122.88" xml:space="preserve"><g><path fill="#17161c" d="M79.128,64.598H40.069c-1.726,0-3.125-1.414-3.125-3.157c0-1.744,1.399-3.158,3.125-3.158h39.057L66.422,43.733 c-1.14-1.301-1.019-3.289,0.269-4.439c1.288-1.151,3.257-1.03,4.396,0.271l17.281,19.792c1.061,1.211,1.029,3.019-0.02,4.19 l-17.262,19.77c-1.14,1.302-3.108,1.423-4.396,0.271c-1.287-1.151-1.408-3.139-0.269-4.44L79.128,64.598L79.128,64.598z M42.396,116.674c1.689,0.409,2.727,2.11,2.318,3.799c-0.409,1.689-2.109,2.728-3.799,2.318c-3.801-0.922-7.582-1.671-11.052-2.358 C10.426,116.583,0,114.519,0,86.871V34.188C0,7.96,11.08,5.889,29.431,2.46c3.572-0.667,7.448-1.391,11.484-2.371 c1.689-0.409,3.39,0.629,3.799,2.319c0.408,1.689-0.629,3.39-2.318,3.799c-4.291,1.041-8.201,1.771-11.805,2.445 C15.454,11.48,6.315,13.188,6.315,34.188v52.683c0,22.467,8.643,24.179,24.756,27.37C34.453,114.911,38.138,115.642,42.396,116.674 L42.396,116.674z"/></g></svg>
-          <span class="visually-hidden">
-            {%- liquid
-              if customer
-                echo 'customer.account_fallback' | t
-              else
-                echo 'customer.log_in' | t
-              endif
-            -%}
-          </span>
-        </a>
+    {% else %}
+        <div class="header__icons" style="padding-bottom: 1.5rem;">
+          <div style="align-items: center;display: flex;text-align:center">
+            {% if customer.tags contains 'subscription-ended' %}
+            <a href="{{ pages['subscription-ended'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
+          {% elsif customer.tags contains 'member' %}
+              {% if section.settings.show_error_warning %}
+                <div id="errorMessage">{{ section.settings.error_warning }}</div>
+              {% endif %}
+            <a href="{{ pages['forsure-dashboard'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
+          {% elsif customer.tags contains 'vendor' %}
+            <a href="{{ pages['forsure-categorylist-editor'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
+          {% elsif customer.tags contains 'free-plan' %}
+            <a href="{{ pages['free-plan'].url }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 1em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.software }}</a>
           {% else %}
-        <a href="{{ routes.account_login_url }}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" style="align-self: center;">
-          <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="88.363px" height="1.75em" viewBox="0 0 88.363 122.879" enable-background="new 0 0 88.363 122.879" xml:space="preserve"><g><path fill="#17161c" d="M42.078,64.589H3.118C1.396,64.589,0,63.179,0,61.439s1.396-3.149,3.118-3.149h38.958L29.405,43.778 c-1.137-1.298-1.017-3.281,0.268-4.429c1.285-1.148,3.248-1.027,4.385,0.271l17.238,19.742c1.059,1.208,1.027,3.009-0.02,4.179 L34.057,83.26c-1.137,1.298-3.1,1.419-4.385,0.271c-1.284-1.148-1.404-3.132-0.268-4.43L42.078,64.589L42.078,64.589z M47.434,122.786c-1.77,0.428-3.55-0.659-3.978-2.428s0.659-3.55,2.427-3.978c4.258-1.032,7.932-1.761,11.303-2.428 c15.99-3.168,24.566-4.866,24.566-27.147V34.258c0-20.817-9.068-22.512-24.086-25.318c-3.596-0.672-7.498-1.401-11.783-2.441 c-1.768-0.428-2.855-2.208-2.427-3.978c0.428-1.769,2.208-2.855,3.978-2.428c4.02,0.976,7.885,1.698,11.447,2.363 c18.383,3.436,29.482,5.51,29.482,31.801v52.548c0,27.705-10.443,29.773-29.912,33.63 C54.986,121.121,51.215,121.869,47.434,122.786L47.434,122.786z"/></g></svg>
-          <span class="visually-hidden">
-            {%- liquid
-              if customer
-                echo 'customer.account_fallback' | t
-              else
-                echo 'customer.log_in' | t
-              endif
-            -%}
-          </span>
-        </a>
+            <button id="disappearbutt" onclick="showContactOptions()" class="button" style="margin:1em 1em 1em 0.7em;font-size:1.2rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.schedule_demo }}</button>
+            <!-- <a href="{{ routes.account_register }}" id="disappearbutt" class="button" style="margin:1em 1em 1em 0.7em;font-size:1.3rem;min-height:4rem;padding:1em 1.5em 1em 1.5em">{{ section.settings.free_plan }}</a> -->
+
+          {% endif %}
+          <script>
+                const blockContainer = document.getElementById('block-container');
+                const greyOverlay = document.getElementById('grey-overlay');
+
+                function handleClickOutside(event, toggleButton) {
+                  console.log('Listening');
+                  if (blockContainer.style.display === 'flex' && !blockContainer.contains(event.target) && event.target !== toggleButton) {
+                    hideContactOptions(toggleButton);
+                  }
+                }
+
+                function showContactOptions() {
+                  console.log('Displaying');
+                  blockContainer.style.display = 'flex';
+                  greyOverlay.style.display = 'block'; // Show the grey background
+                  const toggleButton = document.getElementById('disappearbutt');
+                  // Adding named function to the event listener
+                  document.addEventListener('click', handleClick);
+                }
+
+                function showContactOptionsMobile() {
+                  console.log('Displaying');
+                  blockContainer.style.display = 'flex';
+                  greyOverlay.style.display = 'block'; // Show the grey background
+                  const toggleButton = document.getElementById('disappearbuttMobile');
+                  // Adding named function to the event listener
+                  document.addEventListener('click', handleClickMobile);
+                }
+
+                // Named function to handle the main toggle button
+                function handleClick(event) {
+                  const toggleButton = document.getElementById('disappearbutt');
+                  handleClickOutside(event, toggleButton);
+                }
+
+                // Named function to handle the mobile toggle button
+                function handleClickMobile(event) {
+                  const toggleButton = document.getElementById('disappearbuttMobile');
+                  handleClickOutside(event, toggleButton);
+                }
+
+                // Updated hideContactOptions to remove the correct event listener
+                function hideContactOptions(toggleButton) {
+                  blockContainer.style.display = 'none';
+                  greyOverlay.style.display = 'none'; // Hide the grey background
+                  console.log(`removing event listener for ${toggleButton.id}`);
+
+                  // Check which toggleButton was passed and remove the correct event listener
+                  if (toggleButton.id === 'disappearbutt') {
+                    document.removeEventListener('click', handleClick);
+                  } else if (toggleButton.id === 'disappearbuttMobile') {
+                    document.removeEventListener('click', handleClickMobile);
+                  }
+                }
+          </script>
+          {%- if localization.available_languages.size >= 1 and section.settings.show_languages -%}
+            <noscript>
+              {%- form 'localization', id: 'FooterLanguageFormNoScript', class: 'localization-form' -%}
+                <div class="localization-form__select">
+                  <select class="localization-selector link" name="locale_code" aria-labelledby="FooterLanguageLabelNoScript">
+                    {%- for language in localization.available_languages -%}
+                      <option value="{{ language.iso_code }}" lang="{{ language.iso_code }}" {%- if language.iso_code == localization.language.iso_code %} selected{% endif %}>
+                        {{ language.iso_code | upcase  }}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                  {% render 'icon-caret' %}
+                </div>
+                <button class="button button--tertiary">{{ 'localization.update_language' | t }}</button>
+              {%- endform -%}
+            </noscript>
+            <localization-form>
+              {%- form 'localization', id: 'FooterLanguageForm', class: 'localization-form' -%}
+                <div class="no-js-hidden" style="position: relative;">
+                  <div class="disclosure" style="position: relative;">
+                    <button type="button" style="width:5rem" class="disclosure__button localization-form__select localization-selector link link--text caption-large">
+                      {{ localization.language.iso_code | upcase  }}
+                      {% render 'icon-caret' %}
+                    </button>
+                    <div class="disclosure__list-wrapper" hidden style="position: absolute;transform: translateY(150%); transition: transform 0s ease 0s;">
+                      <ul id="FooterLanguageList" role="list" class="disclosure__list list-unstyled" style="">
+                        {%- for language in localization.available_languages -%}
+                          <li class="disclosure__item" tabindex="-1">
+                            <a class="link link--text disclosure__link caption-large{% if language.iso_code == localization.language.iso_code %} disclosure__link--active{% endif %} focus-inset" href="#" hreflang="{{ language.iso_code }}" lang="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} aria-current="true"{% endif %} data-value="{{ language.iso_code }}">
+                              {{ language.iso_code | upcase  }}
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                  </div>
+                  <input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}">
+                </div>
+              {%- endform -%}
+            </localization-form>
+          {%- endif -%}
+          </div>
+          {%- if shop.customer_accounts_enabled -%}
+            {% if customer %}
+              <a href="{{ routes.account_logout_url }}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" style="align-self: center;">
+                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="88.363px" height="1.75em" viewBox="0 0 89.149 122.88" enable-background="new 0 0 89.149 122.88" xml:space="preserve"><g><path fill="#17161c" d="M79.128,64.598H40.069c-1.726,0-3.125-1.414-3.125-3.157c0-1.744,1.399-3.158,3.125-3.158h39.057L66.422,43.733 c-1.14-1.301-1.019-3.289,0.269-4.439c1.288-1.151,3.257-1.03,4.396,0.271l17.281,19.792c1.061,1.211,1.029,3.019-0.02,4.19 l-17.262,19.77c-1.14,1.302-3.108,1.423-4.396,0.271c-1.287-1.151-1.408-3.139-0.269-4.44L79.128,64.598L79.128,64.598z M42.396,116.674c1.689,0.409,2.727,2.11,2.318,3.799c-0.409,1.689-2.109,2.728-3.799,2.318c-3.801-0.922-7.582-1.671-11.052-2.358 C10.426,116.583,0,114.519,0,86.871V34.188C0,7.96,11.08,5.889,29.431,2.46c3.572-0.667,7.448-1.391,11.484-2.371 c1.689-0.409,3.39,0.629,3.799,2.319c0.408,1.689-0.629,3.39-2.318,3.799c-4.291,1.041-8.201,1.771-11.805,2.445 C15.454,11.48,6.315,13.188,6.315,34.188v52.683c0,22.467,8.643,24.179,24.756,27.37C34.453,114.911,38.138,115.642,42.396,116.674 L42.396,116.674z"/></g></svg>
+              <span class="visually-hidden">
+                {%- liquid
+                  if customer
+                    echo 'customer.account_fallback' | t
+                  else
+                    echo 'customer.log_in' | t
+                  endif
+                -%}
+              </span>
+            </a>
+              {% else %}
+            <a href="{{ routes.account_login_url }}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" style="align-self: center;">
+              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="88.363px" height="1.75em" viewBox="0 0 88.363 122.879" enable-background="new 0 0 88.363 122.879" xml:space="preserve"><g><path fill="#17161c" d="M42.078,64.589H3.118C1.396,64.589,0,63.179,0,61.439s1.396-3.149,3.118-3.149h38.958L29.405,43.778 c-1.137-1.298-1.017-3.281,0.268-4.429c1.285-1.148,3.248-1.027,4.385,0.271l17.238,19.742c1.059,1.208,1.027,3.009-0.02,4.179 L34.057,83.26c-1.137,1.298-3.1,1.419-4.385,0.271c-1.284-1.148-1.404-3.132-0.268-4.43L42.078,64.589L42.078,64.589z M47.434,122.786c-1.77,0.428-3.55-0.659-3.978-2.428s0.659-3.55,2.427-3.978c4.258-1.032,7.932-1.761,11.303-2.428 c15.99-3.168,24.566-4.866,24.566-27.147V34.258c0-20.817-9.068-22.512-24.086-25.318c-3.596-0.672-7.498-1.401-11.783-2.441 c-1.768-0.428-2.855-2.208-2.427-3.978c0.428-1.769,2.208-2.855,3.978-2.428c4.02,0.976,7.885,1.698,11.447,2.363 c18.383,3.436,29.482,5.51,29.482,31.801v52.548c0,27.705-10.443,29.773-29.912,33.63 C54.986,121.121,51.215,121.869,47.434,122.786L47.434,122.786z"/></g></svg>
+              <span class="visually-hidden">
+                {%- liquid
+                  if customer
+                    echo 'customer.account_fallback' | t
+                  else
+                    echo 'customer.log_in' | t
+                  endif
+                -%}
+              </span>
+            </a>
+              {% endif %}
           {% endif %}
       {% endif %}
 
@@ -717,7 +784,6 @@
     addPageVisit();
   });
 </script>
-
 
 <script type="application/ld+json">
   {
@@ -836,6 +902,18 @@
       "id": "menu",
       "default": "main-menu",
       "label": "t:sections.header.settings.menu.label"
+    },
+    {
+      "type": "link_list",
+      "id": "product-menu",
+      "default": "main-menu",
+      "label": "Product Menu"
+    },
+    {
+      "type": "link_list",
+      "id": "product-menu-show-on",
+      "default": "main-menu",
+      "label": "Pages on which to show product menu"
     },
     {
       "type": "select",

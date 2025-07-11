@@ -266,14 +266,18 @@ Usage:
     
     
     function updateNotificationBadge(messageList) {
-        const badge = document.getElementById('notification-badge');
-    
+        const badges = document.querySelectorAll('.badgeNotification');
         const count = messageList.length;
+        console.log(count);
         if (count > 0) {
-          badge.textContent = count > 9 ? '9+' : count;
-          badge.classList.remove('hidden');
+            badges.forEach(badge => {
+                badge.textContent = count > 9 ? '9+' : count;
+                badge.classList.remove('hidden');
+            });
         } else {
-          badge.classList.add('hidden');
+            badges.forEach(badge => {
+                badge.classList.add('hidden');
+            });
         }
       }
     

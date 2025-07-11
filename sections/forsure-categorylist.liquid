@@ -18,19 +18,15 @@
   }
 
   .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
-    px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
-    px;
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
 
 
   @media screen and (min-width: 750px) {
     .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}
-      px;
-      padding-bottom: {{ section.settings.padding_bottom }}
-      px;
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
   .image-with-text p {
@@ -383,19 +379,19 @@ td input {
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
   {% render 'forsure-simple-notification' %}
   <link href="https://cdn.datatables.net/v/dt/dt-1.13.7/datatables.min.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  {% comment %} <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> {% endcomment %}
   <script src="https://cdn.datatables.net/v/dt/dt-1.13.7/datatables.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script> {% endcomment %}
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script> {% endcomment %}
+  {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" /> {% endcomment %}
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+<div class="section-{{ section.id }}-padding">
   <input
     type="file"
     id="category_list"
-    accept=".csv"
+    accept=".csv,.xls,.xlsx"
     style="display: none">
   <button id="deleteButton" style="position: absolute;display:none;z-index:2" onclick="deleteColumn()">X</button>
   <button id="deleteButtonRow" style="position: absolute;display:none;z-index:2" onclick="deleteRow()">X</button>
@@ -403,7 +399,7 @@ td input {
   <div id="loadingSpinnerContainer" style="display: none;">
     <div id="loadingSpinner" style="display: block!important;"></div>
   </div>
-  <div id="categorylistWrapper" style="padding: 3rem;margin: 3rem;border-radius: 2rem;border:0.2rem solid #17161c;display: none;">
+  <div id="categorylistWrapper" style="padding: 3rem;margin: 3rem;margin-top: 0;border-radius: 2rem;border:0.2rem solid #17161c;display: none;">
     <div id="overlay"></div>
     <div id="popup" style="z-index:50;display: none">
       <div id="popupcontent" style="width: 70%; margin: auto">
@@ -488,7 +484,7 @@ td input {
             </select>
         </div>
       </div>
-      <div id="errorsDiv" style="color: red; display: none;text-align: center"></div>
+      <div id="errorsDiv" style="color: var(--forsure-main-red); display: none;text-align: center"></div>
       <table id="editableTable" style="width:100%; overflow-x: auto">
         <thead></thead>
       </table>
@@ -587,6 +583,7 @@ td input {
       <button class="button" style="background-color: #17161c;"onclick="closeConfirmOverwriteModal()">No</button>
     </div>
   </div>
+</div>
   <script>
     document.getElementById('category_list').addEventListener('change', openProfileModal);
 
@@ -617,25 +614,65 @@ async function parseCSV(fileInput, nrows=3) {
   });
 }
 
+async function parseExcel(file, nrows = 3) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+        const headers = jsonData[0];
+        const rows = jsonData.slice(1, nrows + 1);
+
+        const columnDict = {};
+        headers.forEach((header, colIndex) => {
+          columnDict[header] = rows.map(row => row[colIndex] ?? '');
+        });
+
+        resolve(columnDict);
+      } catch (err) {
+        console.error(err);
+        showMessage('Error parsing Excel file: ' + err.message, false);
+        reject(err);
+      }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+}
     
 async function openProfileModal(event) {
-  const fileInput = event.target.files[0];
-  if (!fileInput) {
-    return;
-  }
-  if (fileInput.type !== 'text/csv' && fileInput.type !== 'application/vnd.ms-excel') {
-    showMessage('Please upload a CSV file', false);
-    return;
-  }
-  var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
-  loadingSpinnerContainer.style.display = 'block';
-  const fileName = fileInput.name;
-  const modal = document.getElementById('profileModal');
-  const profileSelect = document.getElementById('profileSelect');
-  const profileDetails = document.getElementById('profileDetails');
-  const profileFileName = document.getElementById('profileFileName');
-  {% comment %} try { {% endcomment %}
-    const csvData = await parseCSV(fileInput);
+    const fileInput = event.target.files[0];
+    if (!fileInput) {
+      return;
+    }
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+    loadingSpinnerContainer.style.display = 'block';
+    const fileName = fileInput.name;
+    const modal = document.getElementById('profileModal');
+    const profileSelect = document.getElementById('profileSelect');
+    const profileDetails = document.getElementById('profileDetails');
+    const profileFileName = document.getElementById('profileFileName');
+    {% comment %} try { {% endcomment %}
+    let csvData;
+    if (fileInput.name.endsWith('.csv')) {
+      csvData = await parseCSV(fileInput);
+    } else if (
+      fileInput.name.endsWith('.xls') || 
+      fileInput.name.endsWith('.xlsx') || 
+      fileInput.type.includes('sheet')
+    ) {
+      csvData = await parseExcel(fileInput);
+    } else {
+      showMessage('Unsupported file type. Please upload a CSV or Excel file.', false);
+      loadingSpinnerContainer.style.display = 'none';
+      return;
+    }
     var labelsV2Options = await getCategorylistLabelsV2Options();
     profileFileName.textContent = fileName;
     var profileTable = document.getElementById('profileTableBody');
@@ -656,6 +693,7 @@ async function openProfileModal(event) {
       const tdMapping = document.createElement('td');
       const selectMapping = document.createElement('select');
       selectMapping.classList.add('btn', 'bs-placeholder', 'btn-default');
+      selectMapping.style.width = '100%';
       var defaultOption = document.createElement('option');
       defaultOption.value = '';
       defaultOption.textContent = 'Unmapped';
@@ -1455,6 +1493,7 @@ async function getCategorylistDetails() {
             subentries.forEach(subentry => {
               const option = $('<div>', {
                 text: subentry.key,
+                class: 'dropdown-option',  
                 title: subentry.title,
                 css: {
                   padding: '4px 8px',
@@ -1472,6 +1511,15 @@ async function getCategorylistDetails() {
                 }
               });
               dropdown.append(option);
+            });
+            input.on('keyup', function () {
+              const q = $(this).val().toLowerCase();
+
+              dropdown.find('.dropdown-option').each(function () {
+                const txt = $(this).text().toLowerCase();
+                const title = $(this).attr('title');
+                $(this).toggle(txt.includes(q) || title.toLowerCase().includes(q));
+              });
             });
 
             const saveValue = () => {
@@ -1938,8 +1986,8 @@ async function deleteColumn() {
 
   function openDropdownGuide() {
     // get the 16th td inside the row with id 1
-    var row = document.getElementById('1');
-    var td = row.querySelectorAll('td')[15];
+    var row = document.getElementById('editableTable').querySelector('tbody tr');
+    var td = row.querySelectorAll('td')[6];
     td.click();
   }
 
@@ -1954,7 +2002,7 @@ async function deleteColumn() {
         { element: "#deactivateEditModeSave", group: "{{ 'software.guide.categorylist.save.group' | t }}", title: "{{ 'software.guide.categorylist.save.title' | t }}", text: "{{ 'software.guide.categorylist.save.text' | t }}", where: 'below', runBefore: activateEditMode},
         { element: "#tabs-container", group: "{{ 'software.guide.categorylist.tabs.group' | t }}", title: "{{ 'software.guide.categorylist.tabs.title' | t }}", text: "{{ 'software.guide.categorylist.tabs.text' | t }}", where: 'below'},
         { element: "#versionsContainer", group: "{{ 'software.guide.categorylist.versions.group' | t }}", title: "{{ 'software.guide.categorylist.versions.title' | t }}", text: "{{ 'software.guide.categorylist.versions.text' | t }}", where: 'below'},
-        { element: "#editableTable", group: "{{ 'software.guide.categorylist.dropdown.group' | t }}", title: "{{ 'software.guide.categorylist.dropdown.title' | t }}", text: "{{ 'software.guide.categorylist.dropdown.text' | t }}", where: 'inside', runBefore: openDropdownGuide},
+        { element: "#editableTable tbody tr", group: "{{ 'software.guide.categorylist.dropdown.group' | t }}", title: "{{ 'software.guide.categorylist.dropdown.title' | t }}", text: "{{ 'software.guide.categorylist.dropdown.text' | t }}", where: 'middle', runBefore: openDropdownGuide},
     ]);
     setCookie('showedGuideCategory', 'true', 300);
 }

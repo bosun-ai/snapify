@@ -274,7 +274,13 @@
 }
 
 
-
+.pro-active {
+  background: #2255ff;
+  width: fit-content;
+  padding: 1rem;
+  border-radius: 1rem;
+  color: #fafafa;
+}
 
 .modal-body {
     display: flex;
@@ -526,11 +532,11 @@
       
       // Color mapping based on status
       const statusColors = {
-        "Done": "#21FF3D",          // Green
-        "In Progress": "#2255ff",   // Blue
-        "Warning": "#E6B83C",       // Yellow
-        "Error": "#E63C6B",          // Red
-        "Unknown": "#4E5366",
+        "DONE": "#21FF3D",          // Green
+        "IN_PROGRESS": "#2255ff",   // Blue
+        "WARNING": "#E6B83C",       // Yellow
+        "ERROR": "#E63C6B",          // Red
+        "UNKNOWN": "#4E5366",
       };
 
       let map = null;
@@ -740,20 +746,20 @@ function closeModalAdd() {
 
 function selectReportCategories() {
   var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
-  countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled);
-  console.log(countriesSelectedNew);
+  {% comment %} countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled); {% endcomment %}
+  console.log(countriesSelected);
   if (countriesSelected.length == 0) {
     showMessage('Please select at least one new country', false);
     return;
   }
-  if (countriesSelectedNew.length == 0) {
+  {% comment %} if (countriesSelectedNew.length == 0) {
     showMessage('To update existing countries, please use the gear icon', false);
     return;
-  }
+  } {% endcomment %}
   var categoryList = document.getElementById('category-list');
   categoryList.innerHTML = '';
   var categories = [];
-  for (const country of countriesSelectedNew) {
+  for (const country of countriesSelected) {
     if (countries[country.id].data) {
       for (const category of Object.keys(countries[country.id].data)) {
         if (!categories.includes(category)) {
@@ -860,24 +866,19 @@ async function selectPROs() {
   }
   console.log('selectPROs');
   var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
-  countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled);
+  {% comment %} countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled); {% endcomment %}
   var leftSideProCountryList = document.getElementById('left-side-pro-country-list');
   selected_countries = {};
-  for (const country of countriesSelectedNew) {
+  for (const country of countriesSelected) {
     if (!selected_countries[country.id]) {
       selected_countries[country.id] = {};
     }
     for (const category of selectedCategories) {
-      if (!selected_countries[country.id][category]) {
-        selected_countries[country.id][category] = {};
-      }
-      console.log('country', country.id, 'category', category);
-      console.log('availableCountriesSettings', availableCountriesSettings[country.id]);
-      var countryData = availableCountriesSettings[country.id]?.[category];
-      if (countryData) {
-        for (const pro of Object.keys(countryData)) {
-          selected_countries[country.id][category][pro] = pro;
-        }
+      const countryCfg = availableCountriesSettings?.[country.id]?.[category];
+      if (!countryCfg) continue;
+      selected_countries[country.id][category] = {};
+      for (const proName of Object.keys(countryCfg)) {
+        selected_countries[country.id][category][proName] = proName;
       }
     }
   }
@@ -967,21 +968,13 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
       labelText.style.fontWeight = 'normal';
     }
     labelText.textContent = name;
-    label.id = `label-${name}`;
     label.appendChild(labelText);
     wrapper.appendChild(label);
 
     const childrenContainer = document.createElement('div');
     childrenContainer.style.display = 'none';
+    childrenContainer.classList.add('children-container');
     wrapper.appendChild(childrenContainer);
-
-    if (level < 2) {
-      label.addEventListener('click', () => {
-        childrenContainer.style.display = childrenContainer.style.display === 'none' ? 'block' : 'none';
-        label.querySelector('svg').classList.toggle('collapsed');
-      });
-    }
-
     return { wrapper, label, childrenContainer };
   }
   first_country = null;
@@ -989,11 +982,37 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
   first_pro = null;
   for (const country of Object.keys(selected_countries)) {
     const { wrapper: countryDiv, label: countryLabel, childrenContainer: reportTypeContainer } = createCollapsibleItem(country, 0);
+    countryLabel.id = `label-${country}`;
+    countryLabel.classList.add('country-label');
+    countryLabel.addEventListener('click', () => {
+      console.log('countryLabel clicked', countryLabel.id);
+      document.querySelectorAll('.country-label').forEach(label => {
+        if (label.id != countryLabel.id) {
+          console.log('countryLabel clicked', label.id, countryLabel.id);
+          label.querySelector('svg').classList.add('collapsed');
+          label.nextElementSibling.style.display = 'none';
+        }
+      });
+      reportTypeContainer.style.display = reportTypeContainer.style.display === 'none' ? 'block' : 'none';
+      countryLabel.querySelector('svg').classList.toggle('collapsed');
+    });
     if (!first_country) {
       first_country = countryLabel;
     }
     for (const reportType of Object.keys(selected_countries[country])) {
       const { wrapper: reportTypeDiv, label: reportTypeLabel, childrenContainer: proContainer } = createCollapsibleItem(reportType, 1);
+      reportTypeLabel.id = `label-${country}-${reportType}`;
+      reportTypeLabel.classList.add('report-type-label');
+      reportTypeLabel.addEventListener('click', () => {
+        document.querySelectorAll('.report-type-label').forEach(label => {
+          if (label.id != reportTypeLabel.id) {
+            label.querySelector('svg').classList.add('collapsed');
+            label.nextElementSibling.style.display = 'none';
+          }
+        });
+        proContainer.style.display = proContainer.style.display === 'none' ? 'block' : 'none';
+        reportTypeLabel.querySelector('svg').classList.toggle('collapsed');
+      });
       if (!first_report_type) {
         first_report_type = reportTypeLabel;
       }
@@ -1007,18 +1026,35 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
         proDiv.style.margin = '2rem 0';
         proDiv.style.marginLeft = '5rem';
         proDiv.onclick = async () => {
+          document.querySelectorAll('.pro-active').forEach(pro => {
+            pro.classList.remove('pro-active');
+          });
+          proDiv.classList.add('pro-active');
           await getProDetails(country, reportType, pro);
         }
         proContainer.appendChild(proDiv);
-        const proDiv2 = document.createElement('div');
-        proDiv2.textContent = '+';
-        proDiv2.style.margin = '2rem 0';
-        proDiv2.style.marginLeft = '5rem';
-        proDiv2.onclick = async () => {
-          await getProDetails(country, reportType, 'Not Set');
-        }
-        proContainer.appendChild(proDiv2);
       }
+      const proDiv2 = document.createElement('div');
+      proDiv2.innerHTML = `{% render 'icon-add' %}`;
+      proDiv2.querySelector('svg').style.width = '2rem';
+      proDiv2.querySelector('svg').style.height = '2rem';
+      proDiv2.querySelector('svg').style.fill = '#17161c';
+      proDiv2.style.margin = '2rem 0';
+      proDiv2.id = `pro-${country}-${reportType}-Not Set`;
+      proDiv2.style.marginLeft = '5rem';
+      proDiv2.onclick = async () => {
+        document.querySelectorAll('.pro-active').forEach(pro => {
+          pro.classList.remove('pro-active');
+        });
+        proDiv2.classList.add('pro-active');
+        document.getElementById('pro-name-select').value = 'Not Set';
+        document.getElementById('pro-name-input').value = 'Not Set';
+        document.getElementById('pro-id').value = '';
+        document.getElementById('pro-status').textContent = 'Not Set';
+        proDiv2.textContent = 'Not Set';
+        await getProDetails(country, reportType, 'Not Set');
+      }
+      proContainer.appendChild(proDiv2);
       reportTypeContainer.appendChild(reportTypeDiv);
     }
     container.appendChild(countryDiv);
@@ -1040,10 +1076,18 @@ async function getAvailableCountriesSettings() {
   }
 }
 
+function showOnlyCurrentPRO() {
+  var country = document.getElementById('country').value;
+  var reportType = document.getElementById('reportType').value;
+  var pro = document.getElementById('pro-name-select').value;
+  
+}
+
 async function getProDetails(country, reportType, pro) {
   await savePRO(); // save previous values
   proValues = await getPROData();
-  proValues = proValues[country][reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': '', 'extra_info': '', 'general_settings': {}, 'id': ''};
+  console.log('proValues', proValues);
+  proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': '', 'extra_info': '', 'general_settings': {}, 'id': ''};
   console.log('proValues', proValues);
   const proDetails = (
     availableCountriesSettings?.[country]?.[reportType]?.[pro]
@@ -1155,6 +1199,9 @@ document.getElementById('pro-name-select').onchange = async () => {
 async function saveAndClose() {
   if (await savePRO()) {
     closeModalAdd();
+    getCountryStatus().then(data => {
+      updateCountryData(data);
+    });
   }
 }
 
@@ -1230,4 +1277,3 @@ waitForPermission(function() {
 });
 
 </script>
-

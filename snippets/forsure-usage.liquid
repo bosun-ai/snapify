@@ -1,0 +1,142 @@
+<style>
+    .progress-container {
+      margin-bottom: 20px;
+    }
+  
+    .progress-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  
+    .bar-wrapper {
+      position: relative;
+      height: 24px;
+      background-color: #f0f0f0;
+      border-radius: 6px;
+      overflow: hidden;
+      width: 20rem;
+      display: flex;
+    }
+  
+    .bar-fill {
+      height: 100%;
+      background-color: #4caf50;
+      transition: width 1s;
+      display: block!important;
+    }
+  
+    .bar-fill.red {
+      background-color: #e53935;
+    }
+  
+    .bar-marker {
+      height: 100%;
+      background-color: #2255ff;
+      transition: width 1s;
+      display: block!important;
+    }
+  
+    .bar-text {
+      margin-top: 4px;
+      font-size: 12px;
+      margin-left: 1rem;
+    }
+    .data-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: fit-content;
+        align-items: center;
+    }
+  </style>
+  
+  <div id="usage-bars"></div>
+  
+  <script>
+
+    async function getUsageData() {
+        try {
+            var data = await unifiedSendRequest(ORDERVOLUMES, {method: 'GET'});
+            return data;
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message, false);
+        }
+    }
+
+    async function refreshUsageData() {
+        try {
+            var data = await unifiedSendRequest(ORDERVOLUMESREFRESH, {method: 'GET'});
+            return data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function updateUsageBars() {
+      const usageData = await getUsageData();
+      const container = document.getElementById('usage-bars');
+      container.innerHTML = '';
+    
+      Object.entries(usageData).forEach(([key, { used, total, last_month }]) => {
+        const percentUsed = (used / total) * 100;
+        const percentLastMonth = last_month !== undefined ? (last_month / total) * 100 : null;
+        var percentUsedLastMonth = percentUsed;
+        if (percentLastMonth !== null) {
+          var percentUsedLastMonth = percentUsed-percentLastMonth;
+        }
+    
+        const wrapper = document.createElement('div');
+        wrapper.className = 'progress-container';
+    
+        const label = document.createElement('div');
+        label.className = 'progress-label';
+        label.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)}`;
+    
+        const dataContainer = document.createElement('div');
+        dataContainer.className = 'data-container';
+        const barWrapper = document.createElement('div');
+        barWrapper.className = 'bar-wrapper';
+        barWrapper.title = `${(total-used).toLocaleString()} ${key} left over this year`;
+    
+        const barFill = document.createElement('div');
+        barFill.className = 'bar-fill';
+        barFill.style.width = `0%`;
+        setTimeout(() => {
+          barFill.style.width = `${percentUsedLastMonth}%`;
+        }, 50);
+        barFill.title = `${used.toLocaleString()} ${key} received this year`;
+        if (percentUsed > 90) barFill.classList.add('red');
+        
+        barWrapper.appendChild(barFill);
+        
+        if (percentLastMonth !== null) {
+          const marker = document.createElement('div');
+          marker.className = 'bar-marker';
+          marker.title = `${(last_month).toLocaleString()} ${key} received last month`;
+          marker.style.width = `0%`;
+          setTimeout(() => {
+            marker.style.width = `${percentLastMonth}%`;
+          }, 50);
+          barWrapper.appendChild(marker);
+        }
+    
+        wrapper.appendChild(label);
+        wrapper.appendChild(barWrapper);
+        const text = document.createElement('div');
+        text.className = 'bar-text';
+        text.textContent = `${percentUsed.toFixed(1)}% used`;
+        text.title = `${used.toLocaleString()}/${total.toLocaleString()} ${key} received this year`;
+        dataContainer.appendChild(wrapper);
+        dataContainer.appendChild(text);
+        container.appendChild(dataContainer);
+      });
+      refreshUsageData();
+    }
+
+    waitForPermission(function() {
+      updateUsageBars();
+    });
+
+  </script>
+  

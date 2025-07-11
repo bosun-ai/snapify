@@ -209,7 +209,7 @@
         {{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}.
       </span>
     {%- endif -%}
-    <div id="emailError" style="color: red;width: 85%; margin-left: auto; margin-right: auto;"></div>
+    <div id="emailError" style="color: var(--forsure-main-red);width: 85%; margin-left: auto; margin-right: auto;"></div>
 
     <div class="" style="margin-top: 1.5rem;">
       <input
@@ -224,7 +224,7 @@
         checked />
       <label for="marketingConsent" style="font-size:11px;margin-top:2rem;margin-left:auto">{{ registerCheckbox }}</label>
     </div>
-    <div id="generalError" style="color: red;width: 85%; margin-left: auto; margin-right: auto;"></div>
+    <div id="generalError" style="color: var(--forsure-main-red);width: 85%; margin-left: auto; margin-right: auto;"></div>
     <button id="submitBtn" style="width:70%;margin: 1.5rem 0 1.5rem!important;font-size:21px" onclick="registerAccount()">
       {{ registerButton }}
     </button>

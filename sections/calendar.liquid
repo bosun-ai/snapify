@@ -1005,7 +1005,9 @@ fieldset[disabled] .btn-default:hover {
                 </div>
                 {%- if form.posted_successfully? -%}
                   <script>
-                window.location.replace('/');
+                setTimeout(function() {
+                    window.location.replace('/');
+                }, 50);
                 // function fillSuccessContainer() {
                 //       document.getElementById('successContainerDetails').style.display = 'block';
                 //       document.getElementById('borderMiddle').style.display = 'none';
@@ -1645,15 +1647,21 @@ function gtag_report_conversion() {
       dataToSend['timezone'] = timezone;
       console.log(formDataDict);
       try {
+        console.log(JSON.stringify(dataToSend));
         await request(`create`, {
           method: 'POST',
           formData: JSON.stringify(dataToSend),
           headerArgs: { 'Content-Type': 'application/json' },
         });
+        console.log('Event Scheduled');
         gtag('js', new Date());
+        console.log('JS Date');
         gtag('config', 'G-TN3P2D6506');
+        console.log('Config log');
         gtag_report_conversion();
+        console.log('Report Conversion log');
         window.lintrk('track', { conversion_id: 19886530 });
+        console.log('LinkedIn Log');
         showMessage("You are scheduled. A calendar invitation has been sent to your email address.", true);
       } catch (error) {
         console.error('Error submitting questions:', error);

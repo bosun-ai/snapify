@@ -1,0 +1,394 @@
+{{ 'section-multicolumn.css' | asset_url | stylesheet_tag }}
+<link
+  rel="stylesheet"
+  href="{{ 'component-slider.css' | asset_url }}"
+  media="print"
+  onload="this.media='all'">
+<noscript>{{ 'component-slider.css' | asset_url | stylesheet_tag }}</noscript>
+
+{%- style -%}
+  .multicolumn-card {
+    background: none;
+  }
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+    px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+    px;
+  }
+  .page-width-wide {
+    padding: 0 2rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}
+      px;
+      padding-bottom: {{ section.settings.padding_bottom }}
+      px;
+    }
+  }
+  .multicolumn-card__info p {
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+
+  @media screen and (min-width: 990px) {
+    .grid--3-col-desktop .grid__item {
+      max-width: 100%;
+    }
+  }
+  #navbar-side {
+    margin-top: -2.5rem;
+    margin-left: -3rem;
+    padding: 0
+  }
+  /* #navbar-side {
+    display: none;
+  } */
+  /* @media screen and (min-width: 1440px) {
+    #navbar-side {
+      display: block;
+    }
+    ul{
+      float: left; width: fit-content;position: fixed;z-index:9999;
+  
+    }
+  } 
+  */
+  #ul-submenu {
+    display: flex;
+    /* justify-content: space-between; */
+
+    align-items: flex-start;
+  }
+  #ul-submenu li {
+    white-space: nowrap;
+  }
+  @media screen and (min-width: 1100px) {
+    #ul-submenu {
+      /* justify-content: space-evenly; */
+      justify-content: center;
+    }
+  }
+  #list-element-1-active, #list-element-1 {
+    margin-left: 0;
+  }
+  .slider--tablet:after {
+    padding-left: 0!important;
+    margin-left: 0!important;
+  }
+
+  
+#reopenButton {
+    position: fixed;      /* Fixed positioning to keep it on the viewport */
+    top: 90%;             /* Center it vertically */
+    left: 2%;              /* Position it on the left side */
+    transform: translateY(-50%); /* Centering adjustment */
+    z-index: 1000;        /* Ensure it's above other elements */
+    cursor: pointer;      /* Pointer cursor for better UX */
+    background-color: #17161C; /* Background color as provided */
+    color: {{ section.settings.text_color_button }}; /* Color from the provided style */
+    border: none;         /* Remove any default borders */
+    display: none;        /* Initially hidden */
+    width: fit-content;   /* Make width fit the content */
+    height: fit-content;  /* Make height fit the content */
+}
+
+.greyed_out {
+    cursor: not-allowed;
+    background-color: grey;
+    opacity: 0.5;
+    position: relative; /* Needed for positioning the tooltip */
+    pointer-events: none; /* Disable clicks on links */
+    color: inherit; /* Ensure the link text doesn't look like a link */
+    text-decoration: none; /* Remove underline or other link styles */
+}
+
+.greyed_out_wrapper:hover .greyedout-tooltip {
+    display: block; /* Show the tooltip on hover */
+}
+
+.greyedout-tooltip {
+    display: none; /* Hide the tooltip by default */
+    position: absolute;
+    top: 100%; /* Position above the element */
+    color: white;
+    background: var(--forsure-main-red);
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 100;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.active {
+  background-color: #2255ff;
+}
+
+#gear-icon svg{
+  fill: #17161c;
+  height: 45px;
+  width: 45px;
+}
+
+#headerIcons .dropdown {
+  width: 15rem!important;
+  margin-left: 1rem!important;
+}
+{%- endstyle -%}
+
+{% if customer.tags contains 'member' %}
+    <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
+    <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+
+    {{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <!-- removed in snippets/forsure-charts-filters-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    {% render 'forsure-login' %}
+    {%- liquid
+        assign columns_mobile_int = section.settings.columns_mobile | plus: 0
+        assign show_mobile_slider = false
+        if section.settings.swipe_on_mobile and section.blocks.size > columns_mobile_int
+            assign show_mobile_slider = true
+        endif
+    -%}
+
+  {% render 'forsure-notifications' %}
+  {% render 'forsure-guide' %}
+  <div id="navbar-side" class="header__inline-menu page-width multicolumn color-{{ section.settings.color_scheme }} gradient{% unless section.settings.background_style == 'none' and settings.text_boxes_border_thickness > 0 or settings.text_boxes_shadow_opacity > 0 %} background-{{ section.settings.background_style }}{% endunless %}{% if section.settings.title == blank %} no-heading{% endif %}">
+  <!-- <nav> -->
+  <slider-component class="slider-mobile-gutter" style="display: flex;">
+    <ul
+      class="color-{{ section.settings.color_scheme }} grid--peek grid--3-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop slider slider--tablet collection-list--{{ section.blocks.size }}-items"
+      style="border-radius:1rem;padding:0;overflow-x: auto;list-style-type: none;width:fit-content;margin:auto;border:0.2rem solid #17161c;margin-right: 1rem;margin-top: 1.5rem;"
+      id="ul-submenu"
+      role="list">
+      {%- for link in section.settings.product-menu.links -%}
+        {% assign foundCurrent = false %}
+        {% if link.current %}
+          {% assign foundCurrent = true %}
+        {% elsif foundCurrent == false and link.url contains '?logged_in' %}
+          {% assign foundCurrent = true %}
+        {% endif %}
+        {%  assign page_name = link.url | split: '/' | last %}
+        {% if foundCurrent %}
+          <li
+            id="list-element-{{ page_name }}"
+            class="list-element-active grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
+            style="width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
+            <div class="greyedout-tooltip">Please upgrade to the full version to access this</div>
+            <a
+              href="{{ link.url }}"
+              id="a-{{ page_name }}"
+              class="header__menu-item list-menu__item link link--text focus-inset content-link greyed_out"
+              data-url="{{ link.url }}"
+              style="display: flex;flex-wrap: nowrap;
+                          background-color:#2255FF;list-style-type: none;width:fit-content;max-width:fit-content;padding-left:1rem;padding-right:1rem">
+              <span class="h3" style="color:#FAFAFA;">{{ link.title | escape }}</span>
+              <!-- <svg class="arrow" style="width: 12px; height: 12px" viewBox="160.229 181.99 122.879 66.904" xmlns="http://www.w3.org/2000/svg">
+              <g transform="matrix(1, 0, 0, 1, 160.228716, 181.983432)">
+              <g transform="translate(61.5, 33.5) rotate(90) translate(-61.5, -33.5)">
+              <path d="M11.68,64.96c-2.72,2.65-7.08,2.59-9.73-0.14c-2.65-2.72-2.59-7.08,0.13-9.73L56.87,1.97l4.8,4.93l-4.81-4.95 c2.74-2.65,7.1-2.58,9.76,0.15c0.08,0.08,0.15,0.16,0.23,0.24L120.8,55.1c2.72,2.65,2.78,7.01,0.13,9.73 c-2.65,2.72-7,2.78-9.73,0.14L61.65,16.5L11.68,64.96L11.68,64.96z" style="fill: rgb(250, 250, 250);"></path>
+              </g>
+              </g>
+              </svg> -->
+            </a>
+          </li>
+        {% else %}
+            <li
+            id="list-element-{{ page_name }}"
+            class="list-element grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
+            style="background-color: #fafafa;width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
+            <div id="greyedout-tooltip-{{ page_name }}" class="greyedout-tooltip">Please upgrade to the full version to access this</div>
+            <a
+                href="{{ link.url }}"
+                id="a-{{ page_name }}"
+                class="header__menu-item list-menu__item link link--text focus-inset content-link greyed_out"
+                data-url="{{ link.url }}"
+                {% if link.current %}aria-current="page"{% endif %}
+                style="width:fit-content;max-width:fit-content;padding-left:1rem;padding-right:1rem">
+                <span class="h3" style="">{{ link.title | escape }}</span>
+            </a>
+            </li>
+        {% endif %}
+      {% endfor %}
+      </ul>
+      {% assign pathParts = request.path | split: '/' %}
+      {% assign currentLink = pathParts | last %}
+      {% assign partsPathsLen = pathParts.size | minus: 1 %}
+      {% assign currentPath = pathParts | slice: 0, partsPathsLen | join: '/' %}
+      <script>
+        async function getNavbarElements() {
+            try {
+                var data = await unifiedSendRequest(NAVBAR, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+                window.userPermissions = data;
+                var available_url = null;
+                for (const [nav_element, show] of Object.entries(data)) {
+                    if (show === true) {
+                      // Add 'greyed_out' class to elements that should be hidden or disabled
+                      const element = document.getElementById(`a-${nav_element}`);
+                      const wrapper = document.getElementById(`list-element-${nav_element}`);
+                      if (element) {
+                          element.classList.remove('greyed_out');
+                          wrapper.classList.remove('greyed_out_wrapper');
+                          if (available_url === null) {
+                            available_url = nav_element;
+                          }
+                      }
+                    } else if (show === false) {
+                    } else {
+                      // Special case for 'forsure-statistics' if no orders received
+                      const tooltip = document.getElementById(`greyedout-tooltip-${nav_element}`);
+                      tooltip.innerText = show;
+                    }
+                }
+                if (data['{{ currentLink }}'] != true) {
+                    if (available_url === null) {
+                      window.location.href = '/';
+                    }
+                    {% comment %} window.location.href = `{{ currentPath }}/${available_url}`; {% endcomment %}
+                }
+                console.log(data['{{ currentLink }}?logged_in']);
+                if (data['{{ currentLink }}?logged_in'] != undefined && data['{{ currentLink }}?logged_in'] != true) {
+                  if (available_url === null) {
+                      window.location.href = '/';
+                    }
+                    {% comment %} window.location.href = `{{ currentPath }}/${available_url}`; {% endcomment %}
+                }
+            } catch (error) {
+                console.error('Failed to get navigation:', error);
+                showMessage('Failed to get navigation: ' + error.message, false);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', getNavbarElements);
+      </script>
+    {% if customer.tags contains 'dashboard' %}
+        <style>
+            #gear-icon svg{
+                width: 28.5px;
+                height: 28.5px;
+            }
+            .badgeNotification {
+                top: 3px;
+                position: absolute;
+                right: -4px;
+                background-color: #a80000;
+                color: white;
+                border-radius: 50%;
+                font-size: 10px;
+                min-width: 14px;
+                height: 14px;
+                text-align: center;
+                align-items: center;
+                font-weight: bold;
+            }
+        </style>
+        <div style="display: flex;flex-direction: column;margin-bottom: 1.5rem;">
+            <div style="display: flex;justify-content: space-evenly;">
+                <div style="width: 26px;cursor: pointer;align-items: center;display: flex;margin: auto 0;" onclick='window.location.href="https://for-sure.net/pages/forsure-agency-dashboard";'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="2255ff" d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/></svg></div>
+                <div id="guideButton" aria-label="Guide" onclick="showGuideFromButton(this)"
+                    style="color: black;margin: auto 0;display: flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="26px" version="1.0" viewBox="0 0 200 200" style="cursor: pointer" onclick="showGuide()">
+                    <path id="path2382" d="m165.33 113.44a103.61 103.61 0 1 1 -207.22 0 103.61 103.61 0 1 1 207.22 0z" stroke-width="0" fill="#fafafa" transform="matrix(.93739 0 0 .93739 42.143 -6.3392)"></path>
+                    <g id="layer1">
+                        <path id="path2413" d="m100 0c-55.2 0-100 44.8-100 100-5.0495e-15 55.2 44.8 100 100 100s100-44.8 100-100-44.8-100-100-100zm0 12.812c48.13 0 87.19 39.058 87.19 87.188s-39.06 87.19-87.19 87.19-87.188-39.06-87.188-87.19 39.058-87.188 87.188-87.188zm1.47 21.25c-5.45 0.03-10.653 0.737-15.282 2.063-4.699 1.346-9.126 3.484-12.876 6.219-3.238 2.362-6.333 5.391-8.687 8.531-4.159 5.549-6.461 11.651-7.063 18.687-0.04 0.468-0.07 0.868-0.062 0.876 0.016 0.016 21.702 2.687 21.812 2.687 0.053 0 0.113-0.234 0.282-0.937 1.941-8.085 5.486-13.521 10.968-16.813 4.32-2.594 9.808-3.612 15.778-2.969 2.74 0.295 5.21 0.96 7.38 2 2.71 1.301 5.18 3.361 6.94 5.813 1.54 2.156 2.46 4.584 2.75 7.312 0.08 0.759 0.05 2.48-0.03 3.219-0.23 1.826-0.7 3.378-1.5 4.969-0.81 1.597-1.48 2.514-2.76 3.812-2.03 2.077-5.18 4.829-10.78 9.407-3.6 2.944-6.04 5.156-8.12 7.343-4.943 5.179-7.191 9.069-8.564 14.719-0.905 3.72-1.256 7.55-1.156 13.19 0.025 1.4 0.062 2.73 0.062 2.97v0.43h21.598l0.03-2.4c0.03-3.27 0.21-5.37 0.56-7.41 0.57-3.27 1.43-5 3.94-7.81 1.6-1.8 3.7-3.76 6.93-6.47 4.77-3.991 8.11-6.99 11.26-10.125 4.91-4.907 7.46-8.26 9.28-12.187 1.43-3.092 2.22-6.166 2.46-9.532 0.06-0.816 0.07-3.03 0-3.968-0.45-7.043-3.1-13.253-8.15-19.032-0.8-0.909-2.78-2.887-3.72-3.718-4.96-4.394-10.69-7.353-17.56-9.094-4.19-1.062-8.23-1.6-13.35-1.75-0.78-0.023-1.59-0.036-2.37-0.032zm-10.908 103.6v22h21.998v-22h-21.998z"></path>
+                    </g>
+                    </svg>
+                </div>
+                <a id="gear-icon"  style="margin: auto 0;margin-top: 5px;cursor: pointer;background: #fafafa;" href="{{ pages['forsure-configuration'].url }}">
+                    {% render 'icon-gear' %}
+                </a>
+                <div style="justify-content: center;align-self: center;cursor: pointer;margin: auto 0;background: #fafafa;position: relative;" id="notificationBell">
+                    <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;" height="23" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                            <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"/>
+                        </svg>
+                        <div id="notification-badge" class="badgeNotification hidden">1</div>
+                </div>
+            </div>
+            <div id="headerIcons">
+                <div style="display: flex;">
+                    <div class="filter-group" style='justify-content: center;    align-self: center;'>
+                    <!-- <div class="filter-group-heading">Companies</div> -->
+                    <select
+                    id="companies"
+                    class="selectpicker"
+                    data-live-search="true">
+                    <option value="DE">ForSURE Europe B.V.</option>
+                    <option value="DE">Aurora Innovations B.V.</option>
+                    <option value="DE">Blue Horizon Ventures B.V.</option>
+                    <option value="DE">Redstone Technologies B.V.</option>
+                    <option value="DE">OpalWave B.V.</option>
+                    <option value="DE">Quantum Leap B.V.</option>
+                    <option value="DE">Bright Future B.V.</option>
+                    <option value="DE">Silver Lake Ventures B.V.</option>
+                    </select>
+                </div>
+                
+                <script>
+                if (typeof $('.selectpicker').selectpicker === 'function') {
+                    $('.selectpicker').selectpicker('refresh');
+                }</script>
+            </div>
+        </div>
+
+    {% else %}
+      <style>
+        .slider-mobile-gutter {
+          margin: auto;
+          width: fit-content;
+        }
+        #navbar-side {
+          margin-top: -2rem;
+        }
+        slider-component ul {
+          margin-top: 0rem!important;
+        }
+      </style>
+      <div id="guideButton" aria-label="Guide" onclick="showGuideFromButton(this)"
+          style="color: black;margin: auto 1rem;display: flex;margin-top: 11px;">
+          <svg xmlns="http://www.w3.org/2000/svg" height="38px" version="1.0" viewBox="0 0 200 200" style="cursor: pointer" onclick="showGuide()">
+          <path id="path2382" d="m165.33 113.44a103.61 103.61 0 1 1 -207.22 0 103.61 103.61 0 1 1 207.22 0z" stroke-width="0" fill="#fafafa" transform="matrix(.93739 0 0 .93739 42.143 -6.3392)"></path>
+          <g id="layer1">
+            <path id="path2413" d="m100 0c-55.2 0-100 44.8-100 100-5.0495e-15 55.2 44.8 100 100 100s100-44.8 100-100-44.8-100-100-100zm0 12.812c48.13 0 87.19 39.058 87.19 87.188s-39.06 87.19-87.19 87.19-87.188-39.06-87.188-87.19 39.058-87.188 87.188-87.188zm1.47 21.25c-5.45 0.03-10.653 0.737-15.282 2.063-4.699 1.346-9.126 3.484-12.876 6.219-3.238 2.362-6.333 5.391-8.687 8.531-4.159 5.549-6.461 11.651-7.063 18.687-0.04 0.468-0.07 0.868-0.062 0.876 0.016 0.016 21.702 2.687 21.812 2.687 0.053 0 0.113-0.234 0.282-0.937 1.941-8.085 5.486-13.521 10.968-16.813 4.32-2.594 9.808-3.612 15.778-2.969 2.74 0.295 5.21 0.96 7.38 2 2.71 1.301 5.18 3.361 6.94 5.813 1.54 2.156 2.46 4.584 2.75 7.312 0.08 0.759 0.05 2.48-0.03 3.219-0.23 1.826-0.7 3.378-1.5 4.969-0.81 1.597-1.48 2.514-2.76 3.812-2.03 2.077-5.18 4.829-10.78 9.407-3.6 2.944-6.04 5.156-8.12 7.343-4.943 5.179-7.191 9.069-8.564 14.719-0.905 3.72-1.256 7.55-1.156 13.19 0.025 1.4 0.062 2.73 0.062 2.97v0.43h21.598l0.03-2.4c0.03-3.27 0.21-5.37 0.56-7.41 0.57-3.27 1.43-5 3.94-7.81 1.6-1.8 3.7-3.76 6.93-6.47 4.77-3.991 8.11-6.99 11.26-10.125 4.91-4.907 7.46-8.26 9.28-12.187 1.43-3.092 2.22-6.166 2.46-9.532 0.06-0.816 0.07-3.03 0-3.968-0.45-7.043-3.1-13.253-8.15-19.032-0.8-0.909-2.78-2.887-3.72-3.718-4.96-4.394-10.69-7.353-17.56-9.094-4.19-1.062-8.23-1.6-13.35-1.75-0.78-0.023-1.59-0.036-2.37-0.032zm-10.908 103.6v22h21.998v-22h-21.998z"></path>
+          </g>
+          </svg>
+      </div>
+      <a id="gear-icon"  style="margin: auto 1rem;margin-top: 7px;cursor: pointer;background: #fafafa;" href="{{ pages['forsure-configuration'].url }}">
+        {% render 'icon-gear' %}
+      </a>
+      <div style="justify-content: center;align-self: center;margin: auto 1rem;cursor: pointer;margin-top: 1rem;background: #fafafa;position: relative;" id="notificationBell">
+          <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.6rem;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"></path>
+          </svg>
+          <div id="notification-badge" class="badgeNotification hidden" style="top: 0px">1</div>
+      </div>
+      {% else %}
+            
+      {% endif %}
+    </slider-component>
+    <!-- </nav> -->
+  </div>
+{% elsif customer.id %}
+    <script>
+  window.location.href = '{{ routes.root_url }}';
+  </script>
+{% else %}
+  <script>
+  window.location.href = '{{ routes.account_login_url }}';
+  </script>
+{% endif %}

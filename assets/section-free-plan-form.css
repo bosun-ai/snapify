@@ -56,7 +56,7 @@
   cursor: default!important;
 }
 .errorMessage {
-  color: red;
+  color: var(--forsure-main-red);
   width: 85%;
   margin-left: auto;
   margin-right: auto;

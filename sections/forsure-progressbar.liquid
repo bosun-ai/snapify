@@ -81,7 +81,7 @@
                 document.getElementById('report-status').style.display = 'none';
                 try {
                   clearTimeout(repeatActionTimeout);
-                  document.getElementById('reportFailed').textContent = data['description'];
+                  document.getElementById('reportFailed').innerHTML = data['description'] + '<br> Please try again or contact the support at <a href="mailto:info@for-sure.net">info@for-sure.net</a>';
                   document.getElementById('reportFailed').style.display = 'block';
                   document.getElementById('reportInProgress').style.display = 'none';
                   // remove the timeout
