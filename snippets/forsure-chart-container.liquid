@@ -17,7 +17,7 @@ Usage:
       items: "> :not(:first-child)", 
       update: function(event, ui) {
         const order = [];
-        $("#widgetContainer").children(":not(:first-child)").each(function(index) {
+        $("#widgetContainer").children().each(function(index) {
           if ($(this).attr('id') in widgetChartParams) {
             order.push($(this).attr('id').replace('widget', ''));
           }
@@ -51,12 +51,6 @@ Usage:
     let containerId = 'widgetContainer';
     if (hard) { // Clear the contents of widgetContainer
       document.getElementById(containerId).innerHTML = '';
-      var reportsDue = createCanvasElement('widgetReportsDue');
-      reportsDue.classList.add('reportsDueWidget');
-      document.getElementById('widgetContainer').appendChild(reportsDue);
-      getReportsDue('widgetReportsDue').then(async (result) => {
-          createReportsDueWidget(result);
-      });
     }
     let availableCharts = await getPinnedCharts();
     await drawCharts(availableCharts, containerId, hard);

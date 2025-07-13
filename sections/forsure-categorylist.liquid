@@ -378,8 +378,13 @@ td input {
   width: 100%;
 }
 
-#editableTable tbody tr td:first-child {
-  width: 100%;
+#editableTable th:first-child,
+#editableTable td:first-child{
+    white-space:nowrap;
+}
+#editableTable th:not(:first-child){
+    white-space:normal;      /* allow wrapping                 */
+    min-width: 8ch;
 }
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
@@ -1102,8 +1107,11 @@ function showCountryData(countryData, countryCode, generalDict) {
     // Loop through datatable columns and show/hide based on country data
     table.columns().every(function () {
         const column = this;
-        const headerText = $(column.header()).text().trim();
-
+        const headerText = $(column.header())
+        .text()
+        .trim()
+        .replace(/\u00A0/g, ' ')   // NO-BREAK SPACE → normal space
+        .replace(/\u2011/g, '-');  // NO-BREAK HYPHEN → hyphen
         if (countryLabels.includes(headerText) || generalColumns.includes(headerText)) {
             column.visible(true);
         } else {
@@ -1350,10 +1358,11 @@ async function getCategorylistDetails() {
       });
       var headers = Object.keys(data[Object.keys(data)[0]]);
       var cols = headers.map(key => {
-          return { data: key,
+          return { data: key
                    {% comment %} visible: !key.startsWith('HiddenColumn') {% endcomment %}
           };
       });
+      console.log('cols', cols);
       cols.forEach((col, index) => {
           columnNames[index] = col.data;
       });
@@ -1437,7 +1446,15 @@ async function getCategorylistDetails() {
                     }
                   });
               }
-          }
+          },
+          headerCallback: function (thead/*, data, start, end, display*/) {
+            $(thead).find('th').each(function (idx) {
+                const original = headers[idx];          // unmodified text
+                console.log('original', original);
+                console.log('splitHeaderInTwo(original)', splitHeaderInTwo(original));
+                this.innerHTML = splitHeaderInTwo(original);
+            });
+        }
         });
       $('#deleteButtonRow').mouseenter(function(){
         clearTimeout(deleteRowButtonTimer);
@@ -1668,7 +1685,10 @@ async function renameColumn(th, e) {
   e.stopImmediatePropagation();
   var currentHeader = $(th);
   var columnIndex = currentHeader.index();
-  var currentText = currentHeader.text();
+  var currentText = currentHeader.text()
+      .trim()
+      .replace(/\u00A0/g, ' ')   // NO-BREAK SPACE → normal space
+      .replace(/\u2011/g, '-');  // NO-BREAK HYPHEN → hyphen
   var currentLabel = categorylistLabels[currentText];
   if (currentLabel) {
     currentLabel = currentLabel.key;
@@ -1708,6 +1728,7 @@ async function renameColumn(th, e) {
   $('#deleteButton').hide();
   document.body.style.cursor = 'default';
   document.getElementById('editableTable').style.cursor = 'default';
+  $('.selectpicker').selectpicker('refresh');
 }
 
 async function saveRenameColumn() {
@@ -1801,6 +1822,10 @@ async function addNewColumn() {
   document.body.style.cursor = 'wait';
   var labelsV2Options = await getCategorylistLabelsV2Options();
   document.getElementById('addColumnMapping').innerHTML = '';
+  var unmappedOption = document.createElement('option');
+  unmappedOption.value = '';
+  unmappedOption.textContent = 'Unmapped';
+  document.getElementById('addColumnMapping').appendChild(unmappedOption);
   Object.keys(labelsV2Options).forEach(groupKey => {
     var optionGroup = document.createElement('optgroup');
     optionGroup.label = groupKey;
@@ -1989,6 +2014,51 @@ async function deleteColumn() {
         console.error(error);
         showMessage('Failed to save changes ' + error.message, false);
       }
+  }
+
+    /**
+  * returns an HTML **string** where…
+  *   • the header is split in TWO halves (closest possible to 50 / 50)
+  *     **only** at " ", "/", "-", "_"                                  *
+  *   • every other occurrence of those characters becomes unbreakable  *
+  */
+  function splitHeaderInTwo(header) {
+    // characters at which we may split
+    const BREAK_CHARS = [' ', '/', '-', '_'];
+  
+    /* 1️⃣  collect the positions of every break-character */
+    const breakPoints = [...header]
+      .map((ch, idx) => BREAK_CHARS.includes(ch) ? idx : -1)
+      .filter(idx => idx !== -1);
+  
+    // nothing to split on → return as-is
+    if (breakPoints.length === 0) return header;
+  
+    /* 2️⃣  choose the position closest to the middle */
+    const mid      = header.length / 2;
+    const splitIdx = breakPoints.reduce(
+        (best, cur) => Math.abs(cur - mid) < Math.abs(best - mid) ? cur : best,
+        breakPoints[0]
+    );
+  
+    /* 3️⃣  rebuild the string with exactly one <wbr>
+           and NB-spaces / NB-hyphens everywhere else          */
+    let out = '';
+    for (let i = 0; i < header.length; i++) {
+      const ch = header[i];
+  
+      if (i === splitIdx) {               // ← chosen break-point
+        out += ch + '<wbr>';
+        continue;
+      }
+  
+      switch (ch) {                       // make all other breaks non-breaking
+        case ' ' : out += '&nbsp;';   break;   // non-breaking space
+        case '-' : out += '&#8209;';   break;  // non-breaking hyphen
+        default  : out += ch;                  // ‘/’ and ‘_’ never break anyway
+      }
+    }
+    return out;
   }
 
   function openDropdownGuide() {
