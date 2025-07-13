@@ -22,8 +22,8 @@
 }
 #informationList {
     transition: max-height .3s ease-in-out, transform .3s ease-in-out;
-    overflow: hidden; 
-    height: auto;
+    /* overflow: hidden;  */
+    /* height: auto; */
 }
 #informationList.open {
     max-height: 999px;            /* any value larger than the tallest content */
@@ -42,10 +42,12 @@
 }
 
 .modal-content {
-    width: 60%;
-    height: 70%;
-    top: 15%;
-    left: 20%;
+    width: fit-content;
+    height: fit-content;
+    top: 50%;
+    left: 50%;
+    min-width: 70rem;
+    transform: translate(-50%, -50%);
     position: absolute !important;
     background-color: #fafafa;
     padding: 20px;
@@ -69,7 +71,8 @@
 #buttons {
     display: flex;
     gap: 10px;
-    margin: 20px 0;
+    margin: auto;
+    width: fit-content;
 }
 
 #buttons > div {
@@ -94,7 +97,8 @@
 #buttons-options {
     display: flex;
     gap: 10px;
-    margin: 20px 0;
+    margin: auto;
+    width: fit-content;
 }
 
 #buttons-options button {
@@ -117,6 +121,8 @@
 }
 #informationContainer {
     height: 39%;
+    flex-direction: column;
+    display: flex;
 }
 
 #expandInformation svg path, #collapseInformation svg path {
@@ -128,10 +134,87 @@
     margin: auto;
 }
 
+#informationTitle {
+    flex: 0 0 auto;
+}
 
-.information-item-active {
+.information-row {
+    cursor: pointer;
+}
+
+.information-row-active {
     background-color: #2255ff;
     color: #fafafa;
+}
+.information-table th, .information-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+
+.information-scroll-wrapper {
+  overflow-y: auto;
+  border-top: 1px solid #ccc;
+  flex: 1 1 auto;
+}
+
+/* Ensures sticky header */
+.information-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.information-header-cell {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  font-weight: bold;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+
+.information-cell {
+  padding: 10px;
+  border: 1px solid #ddd;
+  word-wrap: break-word;
+}
+
+.information-row-active {
+  background-color: #2255ff;
+  color: #fafafa;
+}
+
+.information-table th, .information-table td {
+    border: none!important;
+}
+
+.information-row-active .information-cell div svg .st2-weee {
+        stroke: #fafafa;
+    }
+.information-row-active .information-cell div svg .st5-weee {
+    stroke: #fafafa;
+    fill: #fafafa;
+}
+.information-row-active .information-cell div svg .st2-batteries {
+    stroke: #fafafa;    
+}
+.information-row-active .information-cell div svg .st5-batteries {
+    stroke: #fafafa;
+    fill: #fafafa;
+}
+
+.information-row-active .information-cell div svg .st2-packaging {
+    stroke: #fafafa;
+}
+.information-row-active .information-cell div svg .st5-packaging {
+    stroke: #fafafa;
+    /* fill: #fafafa; */
+}
+
+.information-cell svg {
+    width: 30px;
+    height: 30px;
 }
 {% endstyle %}
 
@@ -150,7 +233,7 @@
         <div onclick="openInformationSettings()">{% render 'icon-gear' %}</div>
       </div>
     </div>
-      <div id="informationList">
+      <div id="informationList" class="information-scroll-wrapper">
         {% comment %} <div class="warning-item">
             <div class="warning-item-title">
                 <div>Warning 1</div>
@@ -311,36 +394,103 @@
         }
     }
 
+    var activeInformation = null;
     function updateInformation(data) {
-        var informationList = document.getElementById('informationList');
-        informationList.innerHTML = '';
-        for (const [index, item] of data.entries()) {
-            var informationItem = document.createElement('div');
-            informationItem.className = 'information-item';
-            informationItem.id = `information-item-${index}`;
-            informationItem.innerHTML = `${item.status}: ${item.country} - ${item.report_type} - ${item.pro}`;
-            informationItem.onclick = (function(currentItem, currentData) {
+        const scrollWrapper = document.getElementById('informationList');
+        scrollWrapper.innerHTML = '';
+
+        const table = document.createElement('table');
+        table.className = 'information-table';
+
+        // Create header
+        const tableHeader = document.createElement('thead');
+        const tableHeaderRow = document.createElement('tr');
+        tableHeaderRow.className = 'information-header-row';
+
+        const headers = ['Status', 'Country', 'Report Type', 'PRO'];
+        headers.forEach(headerText => {
+            const th = document.createElement('th');
+            th.className = 'information-header-cell';
+            var content = document.createElement('div');
+            content.style.width = 'fit-content';
+            content.style.margin = 'auto';
+            content.style.display = 'flex';
+            content.innerText = headerText;
+            th.appendChild(content);
+            tableHeaderRow.appendChild(th);
+        });
+        tableHeader.appendChild(tableHeaderRow);
+        table.appendChild(tableHeader);
+
+        // Create body
+        const tableBody = document.createElement('tbody');
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'information-row';
+
+            if (activeInformation &&
+                activeInformation.country === item.country &&
+                activeInformation.report_type === item.report_type &&
+                activeInformation.pro === item.pro) {
+                row.classList.add('information-row-active');
+            }
+
+            const values = [item.status, item.country, item.report_type, item.pro];
+            values.forEach(val => {
+                const td = document.createElement('td');
+                td.className = 'information-cell';
+                var content = document.createElement('div');
+                content.style.width = 'fit-content';
+                content.style.margin = 'auto';
+                content.style.display = 'flex';
+
+                if (val === 'ERROR') {
+                    content.innerHTML = `{% render 'forsure-icon-error' %}`;
+                }
+                else if (val === 'WARNING') {
+                    content.innerHTML = `{% render 'forsure-icon-warning' %}`;
+                }else if (val === 'Batteries') {
+                    content.innerHTML = getBatteriesSVG();
+                }
+                else if (val === 'WEEE') {
+                    content.innerHTML = getWEEESVG();
+                }
+                else if (val === 'Packaging') {
+                    content.innerHTML = getPackagingSVG();
+                }
+                else {
+                    content.innerText = val;
+                }
+                td.appendChild(content);
+                row.appendChild(td);
+            });
+
+            row.onclick = (function(currentItem, currentData) {
                 return function() {
-                    console.log(currentData);
-                    
-                    if (currentItem.classList.contains('information-item-active')) {
+                    activeInformation = currentData;
+                    const rows = document.getElementsByClassName('information-row');
+                    if (currentItem.classList.contains('information-row-active')) {
                         closeInformationDetails();
-                        currentItem.classList.remove('information-item-active');
-                        return;
+                        currentItem.classList.remove('information-row-active');
+                    } else {
+                        for (const row of rows) {
+                            row.classList.remove('information-row-active');
+                        }
+                        currentItem.classList.add('information-row-active');
+                        openInformationDetails(currentData);
                     }
-                    var informationItems = document.getElementsByClassName('information-item');
-                    for (const informationItem of informationItems) {
-                        informationItem.classList.remove('information-item-active');
-                    }
-                    currentItem.classList.add('information-item-active');
-                    openInformationDetails(currentData);
                 };
-            })(informationItem, item);
-            informationList.appendChild(informationItem);
-        }
+            })(row, item);
+
+            tableBody.appendChild(row);
+        });
+
+        table.appendChild(tableBody);
+        scrollWrapper.appendChild(table);
     }
 
     function openInformationDetails(item) {
+
         document.getElementById('informationDetails').innerHTML = `
         <h3 style="text-align: center;">Received the following ${item.status[0].toUpperCase() + item.status.slice(1).toLowerCase()}:</h3>    
             <table style="margin: auto;margin-top: 1rem">
@@ -379,7 +529,7 @@
       
           setInterval(() => {
             getInformation().then(data => {
-                updateInformation(data);
+                {% comment %} updateInformation(data); {% endcomment %}
             });
           }, 10000);
         }

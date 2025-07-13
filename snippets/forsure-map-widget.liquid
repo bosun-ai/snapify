@@ -11,7 +11,7 @@
 
     #eprMapAdd {
       width: 80%;
-      height: 50vh;
+      /* height: 50vh; */
       border-radius: 1rem;
     }
 
@@ -59,15 +59,16 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    height: 50vh;
+    height: 39.5vh;
     overflow-y: auto;
   }
 
   .modal-content-wide {
     width: 80%;
-    height: 81%;
-    top: 10%;
-    left: 10%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 120rem;
     position: absolute !important;
     background-color: #fafafa;
     padding: 20px;
@@ -105,13 +106,13 @@
 }
 
 #category-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  width: 100%;
-  height: 45vh;
-  overflow: auto;
-  margin-bottom: 3rem;
+  flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem;
+    align-content: start;
 }
 
 .category-item {
@@ -134,13 +135,19 @@
 }
 
 #category-list-container {
-  display: block;
+  display: flex;
   width: 80%;
+  height: 45vh;
+  flex-direction: column;
 }
 
 #add-category-button {
   display: flex;
   justify-content: space-between;
+  width: fit-content;
+  flex-direction: column;
+  margin-left: calc(6% + 0.75rem * 0.7)
+    /* aligned with button start, (80% width - 3 rem gap)  / 2 * 70% (button width) / 2 (padding on both sides)*/
 }
 
 #add-category-button-container {
@@ -285,7 +292,7 @@
     display: flex;
     flex-direction: row;
     gap: 2rem;
-    padding: 1.5rem;
+    padding: 3rem 1.5rem;
     font-family: sans-serif;
   }
 
@@ -294,29 +301,33 @@
     border-right: 1px solid #ddd;
     padding-right: 1rem;
     overflow: auto;
-    height: 60vh;
+    height: 45vh;
   }
 
   #main-section {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    height: 45vh;
+    overflow: auto;
   }
 
   #pro-name {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     margin-bottom: 1rem;
     border-bottom: 1px solid #ccc;
     padding-bottom: 0.5rem;
     font-size: 1.2rem;
+    flex: 0 0 auto;
   }
 
   #pro-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem 2rem;
+    flex: 1 1 auto;
   }
 
   #pro-details > div {
@@ -364,7 +375,21 @@
     font-size: 1rem;
   }
 
+  #pro-status {
+    font-size: large;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  #pro-status svg {
+    height: 30px;
+    width: 30px;
+  }
 
+.questions-label {
+  width: 50%;
+  margin-right: 1rem;
+}
 {% endstyle %}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -407,14 +432,14 @@
       <h2 class="modal-title"> Select Report Categories
         <div>
           <button class="button button--secondary" onclick="openMapAdd()">Back</button>
-          <button class="button" onclick="selectPROs()">Next</button>
+          <button class="button" onclick="selectPROs(true)">Next</button>
         </div>
       </h2>
       <div class="modal-body">
         <div class="icon-container-reports">
           <div class="iconhomepage" style="background-color:#fafafa; border-radius: 10%; display: flex;
                   justify-content: center; align-items: center;z-index: 2;height: 45vh;width: 45vh;
-                  box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);">
+                  box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 1);margin: auto;">
           {% render 'icon-goods-categories' %}
           </div>
           
@@ -424,8 +449,9 @@
             <!-- list of all categories with a checkbox -->
           </div>
           <div id="add-category-button">
+            <h6>Every category you add will be a recommendation for our roadmap.</h6>
             <div id="add-category-button-container" title="If you want to add a category that is not in the list, please enter the category name in the input field and click the button. We will put it on our roadmap and add it to the list as soon as possible.">
-              <input type="text" id="input-category-others" placeholder="Add Category">
+              <input type="text" id="input-category-others" placeholder="Add Category" style="width: 50%;">
               <button class="button" onclick="addCategory()">Add Category</button>
             </div>
             
@@ -441,8 +467,11 @@
         </div>
       </h2>
         <div class="modal-body">
-          <div id="left-side-pro-country-list">
-            <!-- list of all countries, report_types and PROs -->
+          <div>
+            <input type="text" id="search-pro" placeholder="Search PRO" style="width: fit-content;" onkeyup="filterPROs()">
+            <div id="left-side-pro-country-list">
+              <!-- list of all countries, report_types and PROs -->
+            </div>
           </div>
           <div id="main-section">
             <!-- Details of the selected PRO -->
@@ -955,8 +984,8 @@ function removeCategory(category) {
   selectedCategories.delete(category);
 }
 
-var currentCountry = null;
-async function selectPROs() {
+async function selectPROs(add_pro=false) {
+  console.log('selectPROs', add_pro);
   await getAvailableCountriesSettings();
   if (selectedCategories.size == 0) {
     showMessage('Please select at least one category', false);
@@ -965,7 +994,6 @@ async function selectPROs() {
   console.log('selectPROs');
   var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
   {% comment %} countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled); {% endcomment %}
-  var leftSideProCountryList = document.getElementById('left-side-pro-country-list');
   selected_countries = {};
   for (const country of countriesSelected) {
     if (!selected_countries[country.id]) {
@@ -981,7 +1009,7 @@ async function selectPROs() {
     }
   }
   console.log('selected_countries', selected_countries);
-  createMapSettings(selected_countries);
+  createMapSettings(selected_countries, add_pro);
 
   document.getElementById('mapAddSelectCategories').style.display = 'none';
   document.getElementById('mapAddSelectPROs').style.display = 'block';
@@ -1016,7 +1044,7 @@ async function openMapSettings() {
     showMessage('Please add PROs first', false);
     return;
   }
-  createMapSettings(selected_countries);
+  createMapSettings(selected_countries, false);
 }
 
 async function getPROData() {
@@ -1034,11 +1062,13 @@ async function getPROData() {
   return selected_countries;
 }
 
-async function createMapSettings(selected_countries) {
+async function createMapSettings(selected_countries, add_pro=false) {
   console.log(selected_countries);
   getAvailableCountriesSettings();
   renderMapSettingsHierarchy('left-side-pro-country-list', selected_countries);
-  document.getElementById('back-button-pro').style.display = 'none';
+  if (!add_pro) {
+    document.getElementById('back-button-pro').style.display = 'none';
+  }
   document.getElementById('mapAddModal').style.display = 'block';
   document.getElementById('mapAddCountrySelect').style.display = 'none';
   document.getElementById('mapAddSelectCategories').style.display = 'none';
@@ -1046,7 +1076,42 @@ async function createMapSettings(selected_countries) {
   document.getElementById('mapAddOverlay').style.display = 'block';
 }
 
-function renderMapSettingsHierarchy(containerId, selected_countries) {
+function filterPROs() {
+  var filtered_countries = {};
+  var search = document.getElementById('search-pro').value.toLowerCase();
+  if (search == '') {
+    filtered_countries = selected_countries;
+  } else {
+    for (const country of Object.keys(selected_countries)) {
+      for (const reportType of Object.keys(selected_countries[country])) {
+        for (const pro of Object.keys(selected_countries[country][reportType])) {
+          pro_details = selected_countries[country][reportType][pro];
+          console.log('pro_details', pro_details);
+          console.log('pro', pro);
+          console.log('search', search);
+          console.log('pro.toLowerCase().includes(search)', pro.toLowerCase().includes(search));
+          console.log('pro_details.report_type.toLowerCase().includes(search)', pro_details.report_type.toLowerCase().includes(search));
+          console.log('pro_details.country.toLowerCase().includes(search)', pro_details.country.toLowerCase().includes(search));
+          if (pro.toLowerCase().includes(search) || pro_details.report_type.toLowerCase().includes(search) || 
+          pro_details.country.toLowerCase().includes(search)) {
+            if (!filtered_countries[country]) {
+              filtered_countries[country] = {};
+            }
+            if (!filtered_countries[country][reportType]) {
+              filtered_countries[country][reportType] = {};
+            }
+            filtered_countries[country][reportType][pro] = pro_details;
+          }
+        }
+      }
+    }
+  }
+  activePro = document.querySelector('.pro-active')?.id;
+  console.log('filtered_countries', filtered_countries);
+  renderMapSettingsHierarchy('left-side-pro-country-list', filtered_countries, activePro);
+}
+
+function renderMapSettingsHierarchy(containerId, selected_countries, activePro=null) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
 
@@ -1054,7 +1119,6 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
     const wrapper = document.createElement('div');
     wrapper.style.margin = '2rem 0';
     wrapper.style.marginLeft = `${level * 1.5}rem`;
-    wrapper.style.cursor = 'pointer';
 
     const label = document.createElement('div');
     var labelText = document.createElement('span');
@@ -1082,17 +1146,21 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
     const { wrapper: countryDiv, label: countryLabel, childrenContainer: reportTypeContainer } = createCollapsibleItem(country, 0);
     countryLabel.id = `label-${country}`;
     countryLabel.classList.add('country-label');
+    countryLabel.style.width = 'fit-content';
+    countryLabel.style.cursor = 'pointer';
     countryLabel.addEventListener('click', () => {
       console.log('countryLabel clicked', countryLabel.id);
       document.querySelectorAll('.country-label').forEach(label => {
         if (label.id != countryLabel.id) {
-          console.log('countryLabel clicked', label.id, countryLabel.id);
           label.querySelector('svg').classList.add('collapsed');
           label.nextElementSibling.style.display = 'none';
         }
       });
       reportTypeContainer.style.display = reportTypeContainer.style.display === 'none' ? 'block' : 'none';
       countryLabel.querySelector('svg').classList.toggle('collapsed');
+      // click first element inside reportTypeContainer
+      console.log('reportTypeContainer', reportTypeContainer.querySelector('div:first-child').querySelector('div:first-child'));
+      reportTypeContainer.querySelector('div:first-child').querySelector('div:first-child').click();
     });
     if (!first_country) {
       first_country = countryLabel;
@@ -1101,6 +1169,8 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
       const { wrapper: reportTypeDiv, label: reportTypeLabel, childrenContainer: proContainer } = createCollapsibleItem(reportType, 1);
       reportTypeLabel.id = `label-${country}-${reportType}`;
       reportTypeLabel.classList.add('report-type-label');
+      reportTypeLabel.style.width = 'fit-content';
+      reportTypeLabel.style.cursor = 'pointer';
       reportTypeLabel.addEventListener('click', () => {
         document.querySelectorAll('.report-type-label').forEach(label => {
           if (label.id != reportTypeLabel.id) {
@@ -1110,6 +1180,8 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
         });
         proContainer.style.display = proContainer.style.display === 'none' ? 'block' : 'none';
         reportTypeLabel.querySelector('svg').classList.toggle('collapsed');
+        // click first element inside proContainer
+        proContainer.querySelector('div:first-child').click();
       });
       if (!first_report_type) {
         first_report_type = reportTypeLabel;
@@ -1123,11 +1195,14 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
         proDiv.id = `pro-${country}-${reportType}-${pro}`;
         proDiv.style.margin = '2rem 0';
         proDiv.style.marginLeft = '5rem';
+        proDiv.style.cursor = 'pointer';
+        proDiv.style.width = 'fit-content';
         proDiv.onclick = async () => {
           document.querySelectorAll('.pro-active').forEach(pro => {
             pro.classList.remove('pro-active');
           });
           proDiv.classList.add('pro-active');
+          proDiv.scrollIntoView({behavior: 'smooth', block: 'center'});
           await getProDetails(country, reportType, pro);
         }
         proContainer.appendChild(proDiv);
@@ -1140,6 +1215,8 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
       proDiv2.style.margin = '2rem 0';
       proDiv2.id = `pro-${country}-${reportType}-Not Set`;
       proDiv2.style.marginLeft = '5rem';
+      proDiv2.style.cursor = 'pointer';
+      proDiv2.style.width = 'fit-content';
       proDiv2.onclick = async () => {
         document.querySelectorAll('.pro-active').forEach(pro => {
           pro.classList.remove('pro-active');
@@ -1150,6 +1227,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
         document.getElementById('pro-id').value = '';
         document.getElementById('pro-status').textContent = 'Not Set';
         proDiv2.textContent = 'Not Set';
+        proDiv2.scrollIntoView({behavior: 'smooth', block: 'center'});
         await getProDetails(country, reportType, 'Not Set');
       }
       proContainer.appendChild(proDiv2);
@@ -1158,9 +1236,21 @@ function renderMapSettingsHierarchy(containerId, selected_countries) {
     container.appendChild(countryDiv);
   }
   console.log(first_country, first_report_type, first_pro);
-  first_country.click();
-  first_report_type.click();
-  first_pro.click();
+  if (activePro) {
+    country = activePro.split('-')[1];
+    reportType = activePro.split('-')[2];
+    pro = activePro.split('-')[3];
+    document.getElementById(`label-${country}`).click();
+    content = document.getElementById(`label-${country}`).nextElementSibling.querySelector('.report-type-label').textContent;
+    console.log('content', content);
+    console.log('reportType', reportType);
+    if (reportType != content) {
+      document.getElementById(`label-${country}-${reportType}`).click();
+    }
+    document.getElementById(activePro).click();
+  } else {
+    first_country.click();
+  }
 }
 
 var availableCountriesSettings = [];
@@ -1181,7 +1271,16 @@ function showOnlyCurrentPRO() {
   
 }
 
+let currentCountry = null;
+let currentReportType = null;
+let currentPro = null;
 async function getProDetails(country, reportType, pro) {
+  if (currentCountry == country && currentReportType == reportType && currentPro == pro) {
+    return;
+  }
+  currentCountry = country;
+  currentReportType = reportType;
+  currentPro = pro;
   await savePRO(); // save previous values
   proValues = await getPROData();
   console.log('proValues', proValues);
@@ -1190,28 +1289,7 @@ async function getProDetails(country, reportType, pro) {
   const proDetails = (
     availableCountriesSettings?.[country]?.[reportType]?.[pro]
   ) || {};
-  status = "Done"
-  all_questions_answered = true;
-  console.log('proValues', proValues['general_settings']);
-  console.log('proDetails', proDetails);
-  for (const question of Object.keys(proDetails)) {
-    console.log('question', question, 'proValues', proValues['general_settings'][question]);
-    if (!proValues['general_settings'][question]) {
-      all_questions_answered = false;
-    }
-  }
-  if (!all_questions_answered) {
-    status = "Not All Questions Answered";
-    document.getElementById('pro-status').style.color = 'var(--forsure-main-red)';
-  } else if (!proValues.login || !proValues.password) {
-    status = "Log in info missing";
-    document.getElementById('pro-status').style.color = 'var(--forsure-main-red)';
-  } else if (!proValues.email_responsible) {
-    status = "Email of responsible missing";
-    document.getElementById('pro-status').style.color = 'var(--forsure-main-red)';
-  } else {
-    document.getElementById('pro-status').style.color = '#17161c';
-  }
+
   document.getElementById('pro-name-select').innerHTML = '';
   pros = availableCountriesSettings?.[country]?.[reportType] || {};
   console.log('pros', pros);
@@ -1243,7 +1321,7 @@ async function getProDetails(country, reportType, pro) {
   document.getElementById('country').value = country;
   document.getElementById('reportType').value = reportType;
   document.getElementById('pro-id').value = proValues.id;
-  document.getElementById('pro-status').textContent = status;
+
   document.getElementById('email-responsible-input').value = proValues.email_responsible;
   document.getElementById('login-name-input').value = proValues.login;
   document.getElementById('password-input').value = proValues.password;
@@ -1254,10 +1332,11 @@ async function getProDetails(country, reportType, pro) {
     var questionDiv = document.createElement('div');
     questionDiv.id = `question-${question}-input`;
     var questionLabel = document.createElement('label');
+    questionLabel.classList.add('questions-label');
     questionLabel.textContent = value.title;
     if (value.input_type == 'dropdown') {
       var questionInput = document.createElement('select');
-      questionInput.className = 'selectpicker';
+      questionInput.className = 'selectpicker questions-answer';
       questionInput.id = `question-${question}-input`;
       for (const option of value.options) {
         var optionElement = document.createElement('option');
@@ -1273,13 +1352,24 @@ async function getProDetails(country, reportType, pro) {
       }, 50);
     } else if (value.input_type == 'text') {
       var questionInput = document.createElement('input');
+      questionInput.classList.add('questions-answer');
       questionInput.id = `question-${question}-input`;
       questionInput.value = proValues['general_settings'][question] || '';
+      questionDiv.appendChild(questionLabel);
+      questionDiv.appendChild(questionInput);
+    } else if (value.input_type == 'checkbox') {
+      var questionInput = document.createElement('input');
+      questionInput.type = 'checkbox';
+      questionInput.classList.add('questions-answer');
+      questionInput.id = `question-${question}-input`;
+      console.log('question', question, 'proValues', proValues['general_settings'][question]);
+      questionInput.checked = proValues['general_settings'][question] || false;
       questionDiv.appendChild(questionLabel);
       questionDiv.appendChild(questionInput);
     }
     document.getElementById('questions').appendChild(questionDiv);
   }
+  updatePROStatus();
 }
 
 document.getElementById('pro-name-select').onchange = async () => {
@@ -1303,6 +1393,62 @@ async function saveAndClose() {
   }
 }
 
+function updatePROStatus() {
+  var error = false;
+  status = "Done";
+  const allAnswered = Array.from(
+    document.querySelectorAll('#questions input, #questions select')
+  ).every(el =>
+    // for checkboxes / radios we care about “checked”,
+    // otherwise we care about non-empty value
+    (el.type === 'checkbox' || el.type === 'radio')
+      ? true // for checkboxes / radios don't care about the value,
+      : el.value.trim()
+  );
+
+  if (!document.getElementById('login-name-input').value || !document.getElementById('password-input').value) {
+    status = "Log in info missing";
+    error = true;
+  } else if (!document.getElementById('email-responsible-input').value) {
+    status = "Email of responsible missing";
+    error = true;
+  } else if (!document.getElementById('email-responsible-input').value.includes('@')) {
+    status = "Email of responsible is not valid";
+    error = true;
+  } else if (!allAnswered) {
+    status = "Not All Questions Answered";
+    error = true;
+  } else {
+    error = false;
+  }
+  if (document.getElementById('pro-name-select').value == 'Not Set') { // if not set, it means that nothing has to be entered
+    status = "Not Set";
+    error = false;
+  }
+  if (error) {
+    document.getElementById('pro-status').style.color = 'var(--forsure-main-red)';
+    document.getElementById('pro-status').innerHTML = `{% render 'forsure-icon-error' %} ${status}`;
+  } else {
+    document.getElementById('pro-status').style.color = '#17161c';
+    document.getElementById('pro-status').textContent = status;
+  }
+}
+
+['login-name-input',
+  'password-input',
+  'email-responsible-input'
+ ].forEach(id =>
+   document.getElementById(id).addEventListener('keyup', updatePROStatus)
+ );
+ 
+ // keyup bubbles from inputs inside #questions, so one listener is enough
+ document.getElementById('questions').addEventListener('keyup', updatePROStatus);
+ 
+ // select boxes change with ‘change’, not ‘keyup’
+ document.getElementById('questions').addEventListener('change', updatePROStatus);
+ document.getElementById('pro-name-select').addEventListener('change', updatePROStatus);
+ 
+
 async function savePRO() {
   var country = document.getElementById('country').value;
   var reportType = document.getElementById('reportType').value;
@@ -1319,7 +1465,11 @@ async function savePRO() {
   questions = document.getElementById('questions').querySelectorAll('input, select');
   general_settings = {};
   for (const question of questions) {
-    general_settings[question.id.replace('question-', '').replace('-input', '')] = question.value;
+    if (question.type == 'checkbox') {
+      general_settings[question.id.replace('question-', '').replace('-input', '')] = question.checked;
+    } else {
+      general_settings[question.id.replace('question-', '').replace('-input', '')] = question.value;
+    }
   }
   console.log(country, reportType, pro, proValues);
   try {
