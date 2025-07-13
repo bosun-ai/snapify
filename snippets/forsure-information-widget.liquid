@@ -118,6 +118,21 @@
 #informationContainer {
     height: 39%;
 }
+
+#expandInformation svg path, #collapseInformation svg path {
+    fill: #fafafa;
+}
+
+#expandInformation svg, #collapseInformation svg {
+    height: 32px;
+    margin: auto;
+}
+
+
+.information-item-active {
+    background-color: #2255ff;
+    color: #fafafa;
+}
 {% endstyle %}
 
 <div id="informationContainer" class="widget grid-item widget-left">
@@ -299,12 +314,61 @@
     function updateInformation(data) {
         var informationList = document.getElementById('informationList');
         informationList.innerHTML = '';
-        for (const item of data) {
+        for (const [index, item] of data.entries()) {
             var informationItem = document.createElement('div');
             informationItem.className = 'information-item';
+            informationItem.id = `information-item-${index}`;
             informationItem.innerHTML = `${item.status}: ${item.country} - ${item.report_type} - ${item.pro}`;
+            informationItem.onclick = (function(currentItem, currentData) {
+                return function() {
+                    console.log(currentData);
+                    
+                    if (currentItem.classList.contains('information-item-active')) {
+                        closeInformationDetails();
+                        currentItem.classList.remove('information-item-active');
+                        return;
+                    }
+                    var informationItems = document.getElementsByClassName('information-item');
+                    for (const informationItem of informationItems) {
+                        informationItem.classList.remove('information-item-active');
+                    }
+                    currentItem.classList.add('information-item-active');
+                    openInformationDetails(currentData);
+                };
+            })(informationItem, item);
             informationList.appendChild(informationItem);
         }
+    }
+
+    function openInformationDetails(item) {
+        document.getElementById('informationDetails').innerHTML = `
+        <h3 style="text-align: center;">Received the following ${item.status[0].toUpperCase() + item.status.slice(1).toLowerCase()}:</h3>    
+            <table style="margin: auto;margin-top: 1rem">
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">Country</td>
+                    <td>${item.country}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">Report Type</td>
+                    <td>${item.report_type}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">PRO</td>
+                    <td>${item.pro}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">Description</td>
+                    <td>${item.description}</td>
+                </tr>
+            </table>
+        `;
+        document.getElementById('informationDetailsContainer').style.display = 'block';
+        document.getElementById('mapContainer').style.display = 'none';
+    }
+
+    function closeInformationDetails() {
+        document.getElementById('informationDetailsContainer').style.display = 'none';
+        document.getElementById('mapContainer').style.display = 'block';
     }
 
     waitForPermission(function() {

@@ -376,10 +376,9 @@ div.display-flex {
                 <div style="margin: 2rem auto;width: fit-content;"><button class="button" onclick="saveChanges(currentEditingUserId)">Save Changes</button></div>
             </div>
         </div>
-        <div id="container" style="padding-bottom: 2rem; display: flex">
-            <button id="addUserButton" class="button" onclick="addInputField()" style="position:relative;">Add User</button>
-            <input type="email" id="emailInput" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;display: none">
-            <button id="addButton" class="button" style="display: none;">Add User</button>
+        <div id="container" style="padding-bottom: 2rem; display: flex;margin-left: auto;width: fit-content;">
+            <input type="email" id="emailInput" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;">
+            <button id="addButton" class="button" onclick="addUser()">Add User</button>
         </div>
     </div>
 </div>
@@ -528,19 +527,8 @@ async function deleteUser(userId) {
     }
 }
 
-function addInputField() {
-    const container = document.getElementById('container');
-    const addUserButton = document.getElementById('addUserButton');
-    addUserButton.style.display = 'none';
-    document.getElementById('emailInput').style.display = 'block';
-    var addButton = document.getElementById('addButton');
-    addButton.style.display = 'block';
-    addButton.onclick = function() {
-            addUser(document.getElementById('emailInput').value);
-    };
-}
-
-async function addUser(userEmail) {
+async function addUser() {
+  userEmail = document.getElementById('emailInput').value;
     try {
         var formData = new FormData();
         if (!document.getElementById('emailInput').value.includes('@')) {

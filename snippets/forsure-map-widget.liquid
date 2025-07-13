@@ -59,7 +59,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 20%;
     height: 50vh;
     overflow-y: auto;
   }
@@ -394,8 +393,11 @@
         </div>
       </h2>
       <div class="modal-body">
-        <div id="countryList">
-          <!-- list of all countries with a checkbox -->
+        <div id="search-country-container" style="display: flex; flex-direction: column; gap: 1rem; width: 250px;">
+          <input type="text" id="search-country" placeholder="Search country" style="width: 100%;" onkeyup="searchCountry()">
+          <div id="countryList">
+            <!-- list of all countries with a checkbox -->
+          </div>
         </div>
         <div id="eprMapAdd">
         </div>
@@ -486,10 +488,9 @@
                 </div>
                 -->
               </div>
-            </div>
-
           </div>
           <div id="add-pro-options">
+          </div>
         </div>
     </div>
   </div>
@@ -580,7 +581,23 @@
         return json;
       }
 
-      function setInitialMap(data, id, countrylayer, tooltips=true){
+      var countryCenters = null;
+      async function loadCenters() {
+        const res = await fetch('https://raw.githubusercontent.com/gavinr/world-countries-centroids/refs/heads/master/dist/countries.geojson');
+        const json = await res.json();
+
+        const rows = json.features;
+        const centers = {};
+        for (const row of rows) {
+          const country = row.properties.ISO;
+          const lat = row.geometry.coordinates[1];
+          const lon = row.geometry.coordinates[0];
+          centers[country] = {lat, lon};
+        }
+        countryCenters = centers;
+      }
+
+      function setInitialMap(data, id, countrylayer, tooltips=true, availableCountries=[]){
         var newMap = L.map(id).setView([51.505, 10], 4); // Center Europe
         geojsonLayer = L.geoJSON(data, {
           style: {
@@ -603,8 +620,45 @@
                 className: 'custom-tooltip'
               });
             }
+            // Add lock icon for countries not in availableCountries
+            if (availableCountries.length > 0 && !availableCountries.includes(id)) {
+              let center = null;
+              if (countryCenters[id]) {
+                center = { lat: countryCenters[id].lat, lng: countryCenters[id].lon }; // note: Leaflet uses `lng` not `lon`
+              } else {
+                center = layer.getBounds().getCenter();
+              }
+
+              const lockIcon = L.divIcon({
+                html: `<div class="lock-icon">{% render 'icon-lock' %}</div>`,
+                className: 'country-lock-icon',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+              });
+
+              const marker = L.marker(center, { icon: lockIcon }).addTo(newMap);
+
+              // Add tooltip
+              marker.bindTooltip(
+                `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>Country not yet available.</div>`,
+                {
+                  direction: 'top',
+                  className: 'custom-tooltip',
+                  sticky: true
+                }
+              );
+              layer.bindTooltip(
+                `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>Country not yet available.</div>`,
+                {
+                  direction: 'top',
+                  className: 'custom-tooltip',
+                  sticky: true
+                }
+              );
+            }
           }
         }).addTo(newMap);
+
         return newMap;
       }
 
@@ -639,7 +693,11 @@ async function getCountries() {
     }
 }
 
+
+
+
 var countries = null;
+var availableCountries = [];
 async function openMapAdd() {
   console.log('openMapAdd');
   const modal = document.getElementById('mapAddModal');
@@ -650,51 +708,91 @@ async function openMapAdd() {
   document.getElementById('mapAddSelectPROs').style.display = 'none';
   document.getElementById('mapAddCountrySelect').style.display = 'block';
   countries = await getCountries();
+  availableCountries = [];
+  for (const country of Object.keys(countries)) {
+    if (countries[country].data != null) {
+      availableCountries.push(country);
+    }
+  }
+  console.log('availableCountries', availableCountries);
   loadGeoJSON().then(data => {
     if (mapAdd == null) {
       countryLayersAdd = {};
-      mapAdd = setInitialMap(data, 'eprMapAdd', countryLayersAdd, false);
+      mapAdd = setInitialMap(data, 'eprMapAdd', countryLayersAdd, false, availableCountries);
     } else {
       for (const alpha2 in countryLayersAdd) {
         removeCountryMap(alpha2);
       }
     }
-    var countryList = document.getElementById('countryList');
-    countryList.innerHTML = '';
+    updateCountryList(countries, true);
+  });
+}
 
-    for (let alpha_code in countries) {
-      let container = document.createElement('div');
-      container.className = 'country-item';
-      let country = countries[alpha_code];
-      let checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = alpha_code;
-      checkbox.name = country.info.name;
-      checkbox.onclick = () => selectCountryDashboard(alpha_code);
-      let label = document.createElement('label');
-      label.htmlFor = alpha_code;
-      label.textContent = country.info.name;
-      container.appendChild(checkbox);
-      container.appendChild(label);
-      countryList.appendChild(container);
-      if (country.data) {
-        const selectedList = {};
-        for (const [category, pros] of Object.entries(country.data)) {
-            for (const [proName, status] of Object.entries(pros)) {
-                if (status === 'selected') {
-                    selectedList[category] = proName;
-                }
-            }
-        }
-        if (Object.keys(selectedList).length > 0) {
-          checkbox.checked = true;
-          checkbox.disabled = true;
-          tableHTML = createTableFromDescription(selectedList);
-          addCountryMap(alpha_code, "#28a745", tableHTML);
-        }
+function searchCountry() {
+  var search = document.getElementById('search-country').value;
+  console.log(`search: ${search}`);
+  if (search == '') {
+    updateCountryList(countries);
+    return;
+  }
+  const countriesFiltered = Object.entries(countries)
+  .filter(([key, country]) => {
+    const name = country?.info?.name?.toLowerCase() || '';
+    const alpha2 = key?.toLowerCase() || '';
+    return name.includes(search.toLowerCase()) || alpha2.includes(search.toLowerCase());
+  })
+  .reduce((obj, [key, value]) => {
+    obj[key] = value;
+    return obj;
+  }, {});
+  updateCountryList(countriesFiltered);
+}
+
+function updateCountryList(countriesFiltered, updateMap=false) {
+  var countryList = document.getElementById('countryList');
+  countryList.innerHTML = '';
+
+  for (let alpha_code in countriesFiltered) {
+    let container = document.createElement('div');
+    container.className = 'country-item';
+    let country = countriesFiltered[alpha_code];
+    let checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = alpha_code;
+    checkbox.name = country.info.name;
+    checkbox.onclick = () => selectCountryDashboard(alpha_code);
+    let label = document.createElement('label');
+    label.htmlFor = alpha_code;
+    label.textContent = country.info.name;
+    if (!availableCountries.includes(alpha_code)) {
+      var lockElement = document.createElement('div');
+      lockElement.className = 'lock-icon';
+      lockElement.innerHTML = `<div class="lock-icon">{% render 'icon-lock' %}</div>`;
+    }
+
+    container.appendChild(checkbox);
+    container.appendChild(label);
+    if (!availableCountries.includes(alpha_code)) {
+      container.appendChild(lockElement);
+    }
+    countryList.appendChild(container);
+    if (country.data && updateMap) {
+      const selectedList = {};
+      for (const [category, pros] of Object.entries(country.data)) {
+          for (const [proName, status] of Object.entries(pros)) {
+              if (status === 'selected') {
+                  selectedList[category] = proName;
+              }
+          }
+      }
+      if (Object.keys(selectedList).length > 0) {
+        checkbox.checked = true;
+        checkbox.disabled = true;
+        tableHTML = createTableFromDescription(selectedList);
+        addCountryMap(alpha_code, "#28a745", tableHTML);
       }
     }
-  });
+  }
 }
 
 function addCountryMap(alpha2, color, data) {
@@ -1259,13 +1357,14 @@ async function getCountryStatus() {
 waitForPermission(function() {
   if (window.userPermissions['forsure-dashboard']) {
     initDB();
-
     loadGeoJSON().then(data => {
         map = setInitialMap(data, 'eprMap', countryLayers);
         getCountryStatus().then(data => {
           updateCountryData(data);
         });
-        
+    });
+    loadCenters().then(centers => {
+      console.log('centers', centers);
     });
 
     setInterval(() => {
