@@ -216,6 +216,12 @@
     width: 30px;
     height: 30px;
 }
+
+.information-cell-content {
+    display: flex;
+    width: fit-content;
+    /* margin: auto; */
+}
 {% endstyle %}
 
 <div id="informationContainer" class="widget grid-item widget-left">
@@ -412,9 +418,7 @@
             const th = document.createElement('th');
             th.className = 'information-header-cell';
             var content = document.createElement('div');
-            content.style.width = 'fit-content';
-            content.style.margin = 'auto';
-            content.style.display = 'flex';
+            content.className = 'information-cell-content';
             content.innerText = headerText;
             th.appendChild(content);
             tableHeaderRow.appendChild(th);
@@ -440,9 +444,7 @@
                 const td = document.createElement('td');
                 td.className = 'information-cell';
                 var content = document.createElement('div');
-                content.style.width = 'fit-content';
-                content.style.margin = 'auto';
-                content.style.display = 'flex';
+                content.className = 'information-cell-content';
 
                 if (val === 'ERROR') {
                     content.innerHTML = `{% render 'forsure-icon-error' %}`;
@@ -530,7 +532,7 @@
       
           setInterval(() => {
             getInformation().then(data => {
-                updateInformation(data);
+                {% comment %} updateInformation(data); {% endcomment %}
             });
           }, 10000);
         }

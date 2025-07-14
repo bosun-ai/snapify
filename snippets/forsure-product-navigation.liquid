@@ -260,8 +260,9 @@
                 if (data['{{ currentLink }}'] != true) {
                     if (available_url === null) {
                       window.location.href = '/';
+                    } else {
+                      window.location.href = `{{ currentPath }}/${available_url}`;
                     }
-                    {% comment %} window.location.href = `{{ currentPath }}/${available_url}`; {% endcomment %}
                 }
                 console.log(data['{{ currentLink }}?logged_in']);
                 if (data['{{ currentLink }}?logged_in'] != undefined && data['{{ currentLink }}?logged_in'] != true) {

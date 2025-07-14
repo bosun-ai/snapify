@@ -628,6 +628,7 @@
 
       function setInitialMap(data, id, countrylayer, tooltips=true, availableCountries=[]){
         var newMap = L.map(id).setView([51.505, 10], 4); // Center Europe
+        newMap.attributionControl.setPrefix(false);
         geojsonLayer = L.geoJSON(data, {
           style: {
             color: '#4E5366',

@@ -377,7 +377,7 @@ div.display-flex {
             </div>
         </div>
         <div id="container" style="padding-bottom: 2rem; display: flex;margin-left: auto;width: fit-content;">
-            <input type="email" id="emailInput" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;">
+            <input type="email" id="addUserInput" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;">
             <button id="addButton" class="button" onclick="addUser()">Add User</button>
         </div>
     </div>
@@ -528,10 +528,10 @@ async function deleteUser(userId) {
 }
 
 async function addUser() {
-  userEmail = document.getElementById('emailInput').value;
+  userEmail = document.getElementById('addUserInput').value;
     try {
         var formData = new FormData();
-        if (!document.getElementById('emailInput').value.includes('@')) {
+        if (!document.getElementById('addUserInput').value.includes('@')) {
             showMessage('Please enter a valid email address.', false);
             return;
         }
@@ -540,7 +540,7 @@ async function addUser() {
         if (response.status == 'success') {
             showMessage('User added successfully!', true);
             const addUserButton = document.getElementById('addUserButton');
-            document.getElementById('emailInput').style.display = 'none';
+            document.getElementById('addUserInput').style.display = 'none';
             document.getElementById('addButton').style.display = 'none';
             addUserButton.style.display = 'block';
             getUsers();

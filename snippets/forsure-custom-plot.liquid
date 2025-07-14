@@ -107,7 +107,6 @@ Usage:
 .columnsLeftContent {
   padding-left: 0rem;
   margin: 1rem 0;
-  margin-left: 1rem;
 }
 .columnsLeftContent li {
   overflow-x: auto; /* Need this to hide the corners of the blue element around the dots */
@@ -118,11 +117,11 @@ Usage:
 }
 
 .collapsed {
-  transform: rotate(180deg); /* Rotate arrow 90 degrees when collapsed */
+  /* transform: rotate(180deg); Rotate arrow 90 degrees when collapsed */
+  transform: rotate(90deg);
 }
 .colItems {
   /* padding: 0.5rem; */
-  cursor: pointer;
   list-style: none;
   /* border: 0.2rem solid #17161c;
   border-radius: 2rem; */
@@ -174,14 +173,12 @@ Usage:
   cursor: text;
 }
 .columnsLeftContentList {
-  width: 80%;
   overflow: hidden;
-  margin-left: 2rem;
   transition: max-height 0.5s ease-out;
 }
 .columnsLeftContentListHidden {
-  max-height: 0;
-  overflow: hidden;
+  /* max-height: 0;
+  overflow: hidden; */
 }
 .icon {
   padding: 0 2rem;
@@ -267,6 +264,37 @@ Usage:
 
 .columnsTitle {
   cursor: pointer;
+}
+
+.columnsTitle svg {
+  width: 30px!important;
+  margin: auto 1rem!important;
+}
+
+.disabled .textBorder {
+  background: #ccc;
+}
+
+.columnsRow__arrow {
+  width: 30px;
+  cursor: pointer;
+}
+.columnsRow {
+  display: flex;
+  width: 100%;
+}
+.columnsRow__head {
+  width: 100%;
+}
+
+.disabled .colItemContainer {
+  cursor: not-allowed;
+}
+
+.columnsRow__headerWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 {% endstyle %}
@@ -360,48 +388,111 @@ Usage:
     var data = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, {method: 'GET'});
     var columnsDiv = document.getElementById('columnsContentLeft');
     columnsDiv.innerHTML = ``;
-    var table = document.createElement('table');
-    for(var key in data) {
-        // Check if the key is actually a property of the data object
-        if (data.hasOwnProperty(key)) {
-          var tableRow = document.createElement('tr');
-          var headerListCell = document.createElement('td');
-          var columnHeader = document.createElement('h2');
-          columnHeader.textContent = key;
-          columnHeader.classList.add('columnsLeftContent', 'columnsLeftContentHeader', 'columnsTitle');
-          headerListCell.append(columnHeader);
+    Object.entries(data).forEach(([key, value]) => {
+      renderGroup(key, value, columnsDiv);   // <– recursion starts here
+    });
+    document.querySelectorAll('.columnsLeftContentList').forEach(list => {
+      // 1. remember the natural height before shrinking
+      list.dataset.fullHeight = list.scrollHeight;
+      list.style.transition = 'none';
+      // 2. collapse
+      list.style.maxHeight = '0';
+      list.classList.add('columnsLeftContentListHidden');
 
-          var columnList = document.createElement('ul');
-          columnList.classList.add('columnsLeftContent', 'columnsLeftContentList');
-          columnList.id = `draggableList${key}`;
-          data[key].forEach(function(col) {
-            var listItem = createLiElement(col);
-            columnList.appendChild(listItem); // Append the list item to the unordered list
-          });
-          headerListCell.appendChild(columnList);
-
-          var arrowCell = document.createElement('td');
-          var svgArrow = createSvgArrow();
-          arrowCell.classList.add('columnsTitle');
-          arrowCell.appendChild(svgArrow);
-
-          tableRow.appendChild(headerListCell);
-          tableRow.appendChild(arrowCell);
-
-          columnsDiv.appendChild(tableRow);
-          columnList.style.maxHeight = columnList.scrollHeight + "px";
-          // Create a closure to capture the current columnList and svgArrow
-          (function (list, arrow) {
-                columnHeader.addEventListener('click', function () {
-                    toggleCollapse(list, arrow);
-                });
-                svgArrow.addEventListener('click', function () {
-                    toggleCollapse(list, arrow);
-                });
-            })(columnList, svgArrow); // Immediately invoke the function with current columnList and svgArrow
-        }
-    }
+      requestAnimationFrame(() => {
+        list.style.transition = '';          // clears the inline 'none'
+      });
+  
+      // 3. make sure the arrow next to this list points down
+      const arrow = list
+        .closest('.columnsRow__head')            // up to the head div
+        .querySelector('.columnsRow__arrow svg');
+      arrow?.classList.add('collapsed');
+    });
     updateYAxisPosition();
+  }
+  function renderGroup(title, value, parent, level = 0) {
+    /*───────────────────────────────
+      1. LEAF GUARD
+    ───────────────────────────────*/
+    if (typeof value !== 'object' || value === null) {
+      // value is primitive → no dropdown, just an <li>
+      parent.appendChild(createLiElement(title, value));
+      return;
+    }
+  
+    /*───────────────────────────────
+      2. FLEX ROW WRAPPER
+    ───────────────────────────────*/
+    const row = document.createElement('div');
+    row.classList.add('columnsRow');            // flex container
+    parent.appendChild(row);
+  
+    /*── a) header / list wrapper (takes full width) ────────────*/
+    const head = document.createElement('div');
+    head.classList.add('columnsRow__head');     // flex-grow: 1
+    row.appendChild(head);
+
+    const headerWrapper = document.createElement('div');
+    headerWrapper.classList.add('columnsRow__headerWrapper');
+  
+    const HeadingTag = level === 0 ? 'h2' : 'h3';
+    const header = document.createElement(HeadingTag);
+    header.textContent = title;
+    header.classList.add(
+      'columnsLeftContent',
+      'columnsLeftContentHeader',
+      'columnsTitle'
+    );
+    headerWrapper.appendChild(header);
+    const arrowWrap = document.createElement('div');
+    arrowWrap.classList.add('columnsRow__arrow');
+    arrowWrap.innerHTML = `{% render 'icon-arrow-rounded' %}`;
+    headerWrapper.appendChild(arrowWrap);
+    head.appendChild(headerWrapper);
+  
+    /*── b) arrow wrapper (fixed width) ─────────────────────────*/
+
+  
+    /*── c) list container inside head ─────────────────────────*/
+    const list = document.createElement('ul');
+    list.classList.add('columnsLeftContentList');
+    {% comment %} list.style.maxHeight = 0; {% endcomment %}
+    list.style.paddingLeft = `${level}rem`;
+    head.appendChild(list);
+  
+    /*───────────────────────────────
+      3. CHILDREN
+    ───────────────────────────────*/
+    if (Array.isArray(value)) {
+      // array of strings → simple <li> for each
+      value.forEach(col => list.appendChild(createLiElement(col, true)));
+    } else {
+      // nested dict → recurse
+      Object.entries(value).forEach(([k, v]) =>
+        renderGroup(k, v, list, level + 1)
+      );
+    }
+  
+    /*───────────────────────────────
+      4. COLLAPSE TOGGLE
+    ───────────────────────────────*/
+    
+    const toggle = () => {
+      list.classList.toggle('columnsLeftContentListHidden');
+      list.style.maxHeight = list.classList.contains('columnsLeftContentListHidden')
+        ? 0
+        : list.dataset.fullHeight + 'px';
+      arrowWrap.querySelector('svg').classList.toggle('collapsed');
+    };
+  
+    header.addEventListener('click', toggle);
+    arrowWrap.addEventListener('click', toggle);
+  
+    // initial height so CSS transition works
+    list.style.maxHeight = list.scrollHeight + 'px';
+    list.dataset.fullHeight = list.scrollHeight;   // remember it
+    {% comment %} list.style.maxHeight    = '0';                 // keep collapsed {% endcomment %}
   }
 
   function createSvgArrow() {
@@ -421,13 +512,19 @@ Usage:
     return svg;
   }
 
-  function createLiElement(col) {
+  function createLiElement(col, available=true) {
       var listItem = document.createElement('li');
       listItem.id = `col${hashCode(col)}`;
-      listItem.draggable = "true";
       listItem.name = col;
       listItem.setAttribute('data-name', col);
       listItem.classList.add('colItems');
+      if (!available) {
+        listItem.classList.add('disabled');
+        listItem.draggable = false;
+        listItem.title = 'This column does not have any data';
+      } else {
+        listItem.draggable = true;
+      }
       listItem.addEventListener('dragstart', handleDragStart);
       var itemContainer = document.createElement('div');
       itemContainer.classList.add('colItemContainer');
@@ -456,7 +553,7 @@ Usage:
       listElement.style.maxHeight = listElement.scrollHeight + "px";
     }
 
-    arrowElement.classList.toggle('collapsed');
+    arrowElement.querySelector('svg').classList.toggle('collapsed');
   }
 
   function changeChart() {
