@@ -472,6 +472,7 @@
                     if (currentItem.classList.contains('information-row-active')) {
                         closeInformationDetails();
                         currentItem.classList.remove('information-row-active');
+                        activeInformation = null;
                     } else {
                         for (const row of rows) {
                             row.classList.remove('information-row-active');
@@ -529,7 +530,7 @@
       
           setInterval(() => {
             getInformation().then(data => {
-                {% comment %} updateInformation(data); {% endcomment %}
+                updateInformation(data);
             });
           }, 10000);
         }

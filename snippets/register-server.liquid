@@ -391,7 +391,7 @@ var serverUrl = 'https://server.for-sure.net/register/';
       });
     if (response.status === 200){
       setCookieShort('recentlyRegistered', "true", 300);
-      window.location.href = '{{ pages['account-activation'].url }}';
+      window.location.href = '{{ pages['free-plan'].url }}';
     } else {
       var responseJson = await response.json();
       document.getElementById('generalError').textContent = responseJson['detail'];

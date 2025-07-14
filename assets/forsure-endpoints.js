@@ -92,6 +92,7 @@ CATEGORYLISTDELETECOLUMN = 'categorylist/delete-column'
 USESAMPLECATEGORYLIST = 'categorylist/use-sample'
 
 GETREPORTTIMES = 'reports/create/country_times'
+GETDATEOPTIONS = 'reports/create/date-options'
 GETREPORTPROGRESS = 'reports/template/progress'
 CREATEREPORT = 'reports/template/create_report_user'
 GETTEMPLATES = 'reports/template/templates'
