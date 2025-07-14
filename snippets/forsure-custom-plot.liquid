@@ -297,6 +297,29 @@ Usage:
   justify-content: space-between;
 }
 
+#loadingSpinner, #loadingSpinnerCalendar {
+    border: 4px solid rgba(34, 85, 255, 0.1);
+    border-top: 4px solid #2255ff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+    display: flex;
+}
+#loadingSpinnerContainer, #loadingSpinnerCalendarContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 {% endstyle %}
 
 {% comment %} <div id="overlayCustom"></div>
@@ -316,6 +339,9 @@ Usage:
     <div style="width: 75%;position:relative">
       <div id='tooltip' class="tooltipSave"></div>
       <div id="widgetContainerCustom" style="">
+        <div id="loadingSpinnerContainer" style="display: none;">
+          <div id="loadingSpinner"></div>
+        </div>
         <h4 id="chartTitle">Chart Title</h4>
         <canvas id="widgetCustom" style="width:100%;height:45vh"></canvas>
       </div>
@@ -791,8 +817,11 @@ async function createPlot(){
     filters: filterData
   };
   try {
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+    loadingSpinnerContainer.style.display = 'block';
       var data = await unifiedSendRequest(CUSTOMCHARTCREATE, {formData: JSON.stringify(chartDataNew), headerArgs: {'Content-Type': 'application/json'}});
       // chartData = data;
+      
       lastX = xValues;
       lastY = yValues;
       updateChartNew(data, chart, 'chartTitle');
@@ -814,6 +843,7 @@ async function createPlot(){
   } catch (error) {
     showTooltip("Failed to create chart", false); 
   }
+  loadingSpinnerContainer.style.display = 'none';
 }
 
 function makeEditable(e) {
