@@ -319,18 +319,20 @@ Usage:
     100% { transform: rotate(360deg); }
 }
 
-
 {% endstyle %}
 
 {% comment %} <div id="overlayCustom"></div>
 <div id="customChart" style="display: none"> {% endcomment %}
   <div id="chartSelectionContainer" class="losensitive" style="margin: auto;width:fit-content"></div>
   <div style="display:flex;position:relative">
-    <div id="columnsLeft" style="width: fit-content;overflow: auto;height: 60vh;position: relative;
-            margin-right: 11rem;overflow-y: auto;overflow-x: clip;min-width:300px">
-        <!-- <img width="20px" src="{{ trashcan | image_url }}" alt="{{ trashcan.alt | escape }}" loading="lazy"> TODO replace svg with image above once possible -->
-        <div id="trashIconContainer"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="4rem" height="4rem" viewBox="0 0 108.294 122.88" enable-background="new 0 0 108.294 122.88" xml:space="preserve"><g><path fill="#17161c" d="M4.873,9.058h33.35V6.2V6.187c0-0.095,0.002-0.186,0.014-0.279c0.075-1.592,0.762-3.037,1.816-4.086l-0.007-0.007 c1.104-1.104,2.637-1.79,4.325-1.806l0.023,0.002V0h0.031h19.884h0.016c0.106,0,0.207,0.009,0.309,0.022 c1.583,0.084,3.019,0.76,4.064,1.81c1.102,1.104,1.786,2.635,1.803,4.315l-0.003,0.021h0.014V6.2v2.857h32.909h0.017 c0.138,0,0.268,0.014,0.401,0.034c1.182,0.106,2.254,0.625,3.034,1.41l0.004,0.007l0.005-0.007 c0.851,0.857,1.386,2.048,1.401,3.368l-0.002,0.032h0.014v0.032v10.829c0,1.472-1.195,2.665-2.667,2.665h-0.07H2.667 C1.195,27.426,0,26.233,0,24.762v-0.063V13.933v-0.014c0-0.106,0.004-0.211,0.018-0.315v-0.021 c0.089-1.207,0.624-2.304,1.422-3.098l-0.007-0.002C2.295,9.622,3.49,9.087,4.81,9.069l0.032,0.002V9.058H4.873L4.873,9.058z M77.79,49.097h-5.945v56.093h5.945V49.097L77.79,49.097z M58.46,49.097h-5.948v56.093h5.948V49.097L58.46,49.097z M39.13,49.097 h-5.946v56.093h5.946V49.097L39.13,49.097z M10.837,31.569h87.385l0.279,0.018l0.127,0.007l0.134,0.011h0.009l0.163,0.023 c1.363,0.163,2.638,0.789,3.572,1.708c1.04,1.025,1.705,2.415,1.705,3.964c0,0.098-0.009,0.193-0.019,0.286l-0.002,0.068 l-0.014,0.154l-7.393,79.335l-0.007,0.043h0.007l-0.016,0.139l-0.051,0.283l-0.002,0.005l-0.002,0.018 c-0.055,0.331-0.12,0.646-0.209,0.928l-0.007,0.022l-0.002,0.005l-0.009,0.018l-0.023,0.062l-0.004,0.021 c-0.118,0.354-0.264,0.698-0.432,1.009c-1.009,1.88-2.879,3.187-5.204,3.187H18.13l-0.247-0.014v0.003l-0.011-0.003l-0.032-0.004 c-0.46-0.023-0.889-0.091-1.288-0.202c-0.415-0.116-0.818-0.286-1.197-0.495l-0.009-0.002l-0.002,0.002 c-1.785-0.977-2.975-2.882-3.17-5.022L4.88,37.79l-0.011-0.125l-0.011-0.247l-0.004-0.116H4.849c0-1.553,0.664-2.946,1.707-3.971 c0.976-0.955,2.32-1.599,3.756-1.726l0.122-0.004v-0.007l0.3-0.013l0.104,0.002V31.569L10.837,31.569z M98.223,36.903H10.837 v-0.007l-0.116,0.004c-0.163,0.022-0.322,0.106-0.438,0.222c-0.063,0.063-0.104,0.132-0.104,0.179h-0.007l0.007,0.118l7.282,79.244 h-0.002l0.002,0.012c0.032,0.376,0.202,0.691,0.447,0.825l-0.002,0.004l0.084,0.032l0.063,0.012h0.077h72.695 c0.207,0,0.399-0.157,0.518-0.377l0.084-0.197l0.054-0.216l0.014-0.138h0.005l7.384-79.21L98.881,37.3 c0-0.045-0.041-0.111-0.103-0.172c-0.12-0.118-0.286-0.202-0.451-0.227L98.223,36.903L98.223,36.903z M98.334,36.901h-0.016H98.334 L98.334,36.901z M98.883,37.413v-0.004V37.413L98.883,37.413z M104.18,37.79l-0.002,0.018L104.18,37.79L104.18,37.79z M40.887,14.389H5.332v7.706h97.63v-7.706H67.907h-0.063c-1.472,0-2.664-1.192-2.664-2.664V6.2V6.168h0.007 c-0.007-0.22-0.106-0.433-0.259-0.585c-0.137-0.141-0.324-0.229-0.521-0.252h-0.082h-0.016H44.425h-0.031V5.325 c-0.213,0.007-0.422,0.104-0.576,0.259l-0.004-0.004l-0.007,0.004c-0.131,0.134-0.231,0.313-0.259,0.501l0.007,0.102V6.2v5.524 C43.554,13.196,42.359,14.389,40.887,14.389L40.887,14.389z"/></g></svg></div>
-        <div id="columnsContentLeft"></div>
+    <div>
+      <input type="text" id="search-columns" placeholder="Search columns" class="btn dropdown-toggle bs-placeholder btn-default" style="cursor: text;" onkeyup="searchColumn()">
+      <div id="columnsLeft" style="width: fit-content;overflow: auto;height: 60vh;position: relative;
+              margin-right: 11rem;overflow-y: auto;overflow-x: clip;min-width:300px">
+          <!-- <img width="20px" src="{{ trashcan | image_url }}" alt="{{ trashcan.alt | escape }}" loading="lazy"> TODO replace svg with image above once possible -->
+          <div id="trashIconContainer"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="4rem" height="4rem" viewBox="0 0 108.294 122.88" enable-background="new 0 0 108.294 122.88" xml:space="preserve"><g><path fill="#17161c" d="M4.873,9.058h33.35V6.2V6.187c0-0.095,0.002-0.186,0.014-0.279c0.075-1.592,0.762-3.037,1.816-4.086l-0.007-0.007 c1.104-1.104,2.637-1.79,4.325-1.806l0.023,0.002V0h0.031h19.884h0.016c0.106,0,0.207,0.009,0.309,0.022 c1.583,0.084,3.019,0.76,4.064,1.81c1.102,1.104,1.786,2.635,1.803,4.315l-0.003,0.021h0.014V6.2v2.857h32.909h0.017 c0.138,0,0.268,0.014,0.401,0.034c1.182,0.106,2.254,0.625,3.034,1.41l0.004,0.007l0.005-0.007 c0.851,0.857,1.386,2.048,1.401,3.368l-0.002,0.032h0.014v0.032v10.829c0,1.472-1.195,2.665-2.667,2.665h-0.07H2.667 C1.195,27.426,0,26.233,0,24.762v-0.063V13.933v-0.014c0-0.106,0.004-0.211,0.018-0.315v-0.021 c0.089-1.207,0.624-2.304,1.422-3.098l-0.007-0.002C2.295,9.622,3.49,9.087,4.81,9.069l0.032,0.002V9.058H4.873L4.873,9.058z M77.79,49.097h-5.945v56.093h5.945V49.097L77.79,49.097z M58.46,49.097h-5.948v56.093h5.948V49.097L58.46,49.097z M39.13,49.097 h-5.946v56.093h5.946V49.097L39.13,49.097z M10.837,31.569h87.385l0.279,0.018l0.127,0.007l0.134,0.011h0.009l0.163,0.023 c1.363,0.163,2.638,0.789,3.572,1.708c1.04,1.025,1.705,2.415,1.705,3.964c0,0.098-0.009,0.193-0.019,0.286l-0.002,0.068 l-0.014,0.154l-7.393,79.335l-0.007,0.043h0.007l-0.016,0.139l-0.051,0.283l-0.002,0.005l-0.002,0.018 c-0.055,0.331-0.12,0.646-0.209,0.928l-0.007,0.022l-0.002,0.005l-0.009,0.018l-0.023,0.062l-0.004,0.021 c-0.118,0.354-0.264,0.698-0.432,1.009c-1.009,1.88-2.879,3.187-5.204,3.187H18.13l-0.247-0.014v0.003l-0.011-0.003l-0.032-0.004 c-0.46-0.023-0.889-0.091-1.288-0.202c-0.415-0.116-0.818-0.286-1.197-0.495l-0.009-0.002l-0.002,0.002 c-1.785-0.977-2.975-2.882-3.17-5.022L4.88,37.79l-0.011-0.125l-0.011-0.247l-0.004-0.116H4.849c0-1.553,0.664-2.946,1.707-3.971 c0.976-0.955,2.32-1.599,3.756-1.726l0.122-0.004v-0.007l0.3-0.013l0.104,0.002V31.569L10.837,31.569z M98.223,36.903H10.837 v-0.007l-0.116,0.004c-0.163,0.022-0.322,0.106-0.438,0.222c-0.063,0.063-0.104,0.132-0.104,0.179h-0.007l0.007,0.118l7.282,79.244 h-0.002l0.002,0.012c0.032,0.376,0.202,0.691,0.447,0.825l-0.002,0.004l0.084,0.032l0.063,0.012h0.077h72.695 c0.207,0,0.399-0.157,0.518-0.377l0.084-0.197l0.054-0.216l0.014-0.138h0.005l7.384-79.21L98.881,37.3 c0-0.045-0.041-0.111-0.103-0.172c-0.12-0.118-0.286-0.202-0.451-0.227L98.223,36.903L98.223,36.903z M98.334,36.901h-0.016H98.334 L98.334,36.901z M98.883,37.413v-0.004V37.413L98.883,37.413z M104.18,37.79l-0.002,0.018L104.18,37.79L104.18,37.79z M40.887,14.389H5.332v7.706h97.63v-7.706H67.907h-0.063c-1.472,0-2.664-1.192-2.664-2.664V6.2V6.168h0.007 c-0.007-0.22-0.106-0.433-0.259-0.585c-0.137-0.141-0.324-0.229-0.521-0.252h-0.082h-0.016H44.425h-0.031V5.325 c-0.213,0.007-0.422,0.104-0.576,0.259l-0.004-0.004l-0.007,0.004c-0.131,0.134-0.231,0.313-0.259,0.501l0.007,0.102V6.2v5.524 C43.554,13.196,42.359,14.389,40.887,14.389L40.887,14.389z"/></g></svg></div>
+          <div id="columnsContentLeft"></div>
+      </div>
     </div>
     <div id="chosenYContainer" class="dragYContainer">
       <ul id="chosenY" class="dragContainer chosenYContainerPlaceholder dragYList"><p id="chosenYPlaceholder">Drop items here</p></ul>
@@ -410,13 +412,20 @@ Usage:
     return s.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   }
 
+  var columnsData = null;
   async function getColumnsCustom() {
     var data = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, {method: 'GET'});
+    columnsData = data;
     var columnsDiv = document.getElementById('columnsContentLeft');
     columnsDiv.innerHTML = ``;
     Object.entries(data).forEach(([key, value]) => {
       renderGroup(key, value, columnsDiv);   // <– recursion starts here
     });
+    collapseAll();
+    updateYAxisPosition();
+  }
+
+  function collapseAll() {
     document.querySelectorAll('.columnsLeftContentList').forEach(list => {
       // 1. remember the natural height before shrinking
       list.dataset.fullHeight = list.scrollHeight;
@@ -435,8 +444,8 @@ Usage:
         .querySelector('.columnsRow__arrow svg');
       arrow?.classList.add('collapsed');
     });
-    updateYAxisPosition();
   }
+
   function renderGroup(title, value, parent, level = 0) {
     /*───────────────────────────────
       1. LEAF GUARD
@@ -521,23 +530,6 @@ Usage:
     {% comment %} list.style.maxHeight    = '0';                 // keep collapsed {% endcomment %}
   }
 
-  function createSvgArrow() {
-    var svgNS = "http://www.w3.org/2000/svg";
-    var svg = document.createElementNS(svgNS, "svg");
-    svg.setAttributeNS(null, "style", "margin:auto;");
-    svg.setAttributeNS(null, "class", "svg-arrow");
-    svg.setAttributeNS(null, "width", "20.593");
-    svg.setAttributeNS(null, "height", "22.88");
-    svg.setAttributeNS(null, "viewBox", "0 0 80.593 122.88");
-    
-    var polygon = document.createElementNS(svgNS, "polygon");
-    polygon.setAttributeNS(null, "style", "fill:#17161c;");
-    polygon.setAttributeNS(null, "points", "0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0");
-    svg.appendChild(polygon);
-    
-    return svg;
-  }
-
   function createLiElement(col, available=true) {
       var listItem = document.createElement('li');
       listItem.id = `col${hashCode(col)}`;
@@ -580,6 +572,65 @@ Usage:
     }
 
     arrowElement.querySelector('svg').classList.toggle('collapsed');
+  }
+
+  function filterRecursive(node, term) {
+    const t = term.toLowerCase();
+  
+    // 1. strings  ---------------------------------------------------------
+    if (typeof node === 'string') {
+      return node.toLowerCase().includes(t) ? node : null;
+    }
+  
+    // 2. arrays  ----------------------------------------------------------
+    if (Array.isArray(node)) {
+      const kept = node
+        .map(item => filterRecursive(item, term))
+        .filter(Boolean);          // remove nulls
+      return kept.length ? kept : null;
+    }
+  
+    // 3. objects  ---------------------------------------------------------
+    if (node && typeof node === 'object') {
+      const keptEntries = Object.entries(node)
+        .map(([k, v]) => {
+          const child = filterRecursive(v, term);
+          const keyMatches = k.toLowerCase().includes(t);
+          return keyMatches || child ? [k, child ?? v] : null;
+        })
+        .filter(Boolean);          // remove nulls
+  
+      return keptEntries.length ? Object.fromEntries(keptEntries) : null;
+    }
+  
+    // anything else (numbers, booleans, etc.)
+    return null;
+  }
+  
+  // your search handler ---------------------------------------------------
+  function searchColumn() {
+    const search = document.getElementById('search-columns').value.trim();
+    const columnsDiv = document.getElementById('columnsContentLeft');
+    columnsDiv.innerHTML = '';
+  
+    // show everything if the box is empty
+    if (!search) {
+      Object.entries(columnsData).forEach(([key, value]) =>
+        renderGroup(key, value, columnsDiv)
+      );
+      collapseAll();
+      return;
+    }
+  
+    const filtered = filterRecursive(columnsData, search);
+    if (!filtered) {
+      columnsDiv.innerHTML = '<em>No matches</em>';
+      return;
+    }
+    console.log(filtered);
+    Object.entries(filtered).forEach(([key, value]) =>
+      renderGroup(key, value, columnsDiv)
+    );
   }
 
   function changeChart() {
@@ -792,6 +843,23 @@ function getValues(listId) {
   return ids;
 }
 
+function arraysEqual(a, b) {
+  // same reference → equal
+  if (a === b) return true;
+
+  // one is null/undefined or not an array → not equal
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+
+  // different sizes → not equal
+  if (a.length !== b.length) return false;
+
+  // compare contents in order
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 var lastX = null;
 var lastY = null;
 var pieChartOnly = false;
@@ -804,7 +872,7 @@ async function createPlot(){
   } else if (pieChartOnly) {
     pieChartOnly = false;
   }
-  if (xValues === lastX && yValues === lastY) {
+  if (arraysEqual(xValues, lastX) && arraysEqual(yValues, lastY)) {
     // data hasn't changed
     return;
   }
@@ -817,13 +885,13 @@ async function createPlot(){
     filters: filterData
   };
   try {
+    lastX = xValues;
+    lastY = yValues;
     var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
     loadingSpinnerContainer.style.display = 'block';
       var data = await unifiedSendRequest(CUSTOMCHARTCREATE, {formData: JSON.stringify(chartDataNew), headerArgs: {'Content-Type': 'application/json'}});
       // chartData = data;
       
-      lastX = xValues;
-      lastY = yValues;
       updateChartNew(data, chart, 'chartTitle');
       chartDataNew = {
         chart_type: selectChartType,
