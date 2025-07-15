@@ -1,0 +1,335 @@
+{{ 'daterangepicker.css' | asset_url | stylesheet_tag }}
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+{% style %}
+
+.picker      { max-width: 650px; margin: auto; }
+    .year-nav    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .calendar-grid        { display: grid;
+                   grid-template-columns: 80px repeat(4, 1fr); /* Q | 3×month | S  */
+                   grid-auto-rows: 40px;
+                   gap: var(--gap); }
+    .quarter-btn,
+    .month-btn,
+    .semester-btn,
+    .year-btn    { display: flex; justify-content: center; align-items: center;
+                   border: 1px solid #ccc; border-radius: 4px; user-select: none; 
+                   width: 5rem;
+                   height: 4rem;cursor: pointer;
+                  }
+    .quarter-btn { font-weight: 600; background:#fafafa; }
+    .year-btn    { grid-column: 1 / -1; margin-top: var(--gap); font-weight: 600; width: 100%;}
+    /* ======== INTERACTION STATES ======== */
+    .month-btn:hover,
+    .quarter-btn:hover,
+    .semester-btn:hover,
+    .year-btn:hover         { background:#f0f0f0; }
+    .active                 { background:#007bff; color:#fff; border-color:#007bff; }
+
+
+.disabled {
+  background-color: #ccc;
+}
+.disabled-date {
+  background-color: #ccc;
+}
+
+{% endstyle %}
+<label for="monthPicker" class="form-label">Select Timeframe</label>
+<input type="text"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false" class="form-control small-date-input" style="width: fit-content;" id="monthPicker" placeholder="Choose date range" />
+<input type="hidden" id="customDateRangePicker" />
+<div id="timePicker" class="picker" style="display: none;position: absolute;background: white;margin: 2rem;padding: 3rem;border: 0.2rem solid #17161c;border-radius: 2rem;top: 100%;left: 0;transform: translate(-23%, 0);z-index: 2;">                <!-- YEAR NAVIGATION -->
+    <div class="year-nav">
+        <div onclick="changeYear(-1)" style="width: 30px;transform: rotate(90deg);cursor: pointer">{% render 'icon-arrow-rounded' %}</div>
+        <div id="yearDisplay"></div>
+        <div onclick="changeYear(1)" style="width: 30px;transform: rotate(-90deg);cursor: pointer">{% render 'icon-arrow-rounded' %}</div>
+    </div>
+    <!-- CALENDAR GRID -->
+    <div id="calendarGrid" class="calendar-grid">
+    </div>
+
+{% comment %} <p id="monthPicker" style="font-weight:600; margin-top:1rem;"></p> {% endcomment %}
+</div>
+<script>
+function selectCustomDateRange () {
+    // 1. hide the preset grid
+    document.getElementById('timePicker').style.display = 'none';
+
+    // 2. prepare the daterangepicker on the *same* input, but only once
+    const $input = $('#monthPicker');
+    if (!$input.data('daterangepicker')) {
+        $input.daterangepicker({
+        locale: { format: 'DD/MM/YYYY' },
+        autoUpdateInput: false,                    // keep empty until user hits Apply
+            /* add a custom class so we can colour the available ones ------------ */
+        isCustomDate(date) {
+            return availSet.has(fmt(date)) ? '' : 'disabled-date';           // class name or ''
+        }
+        });
+
+        // 3. when a range is chosen
+        $input.on('apply.daterangepicker', (ev, picker) => {
+        const range =
+            picker.startDate.format('DD/MM/YYYY') +
+            ' - ' +
+            picker.endDate.format('DD/MM/YYYY');
+
+        // highlight the Custom button and write the text
+        setActive(document.getElementById('customDateRange'), range);
+        if (filterData !== undefined) {
+            filterData['start_time'] = picker.startDate.format('YYYY-MM-DD');
+            filterData['end_time'] = picker.endDate.format('YYYY-MM-DD');
+            updateCharts();
+        }
+        });
+        $('#monthPicker').on('showCalendar.daterangepicker', function (ev, picker) {
+        picker.container.find('td.disabled-date').each(function () {
+            const reason = 'No data available for this date';
+            $(this).attr('title', reason);
+        });
+        });
+    }
+
+    // 4. open the calendar pop-up programmatically
+    $input.data('daterangepicker').show();        // no extra click needed
+}
+
+
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const grid       = document.getElementById('calendarGrid');
+  const yearLbl    = document.getElementById('yearDisplay');
+  const out        = document.getElementById('monthPicker');
+  let   year       = new Date().getFullYear();
+  let   selectedEl = null;
+
+const monthInput = document.getElementById('monthPicker');
+monthInput.addEventListener('click', function (e) {
+  /* ── keep the daterangepicker from opening automatically ── */
+  const drp = $('#monthPicker').data('daterangepicker');
+  if (drp) {
+    e.stopImmediatePropagation();   // cancel the plugin’s click listener
+    drp.hide();                     // just in case it was already up
+  }
+
+  /* ── your original behaviour ── */
+  document.getElementById('timePicker').style.display = 'block';
+  buildGrid();
+});
+
+function formatRange(year, firstMonthIdx, lastMonthIdx) {
+  // firstMonthIdx & lastMonthIdx are 0-based (Jan = 0 … Dec = 11)
+  const start = new Date(year, firstMonthIdx, 1);            // 1st of first month
+  const end   = new Date(year, lastMonthIdx + 1, 0);         // 0th = last day prev-month
+
+  const toDDMMYYYY = d =>
+    String(d.getDate()).padStart(2,'0') + '/' +
+    String(d.getMonth()+1).padStart(2,'0') + '/' +
+    d.getFullYear();
+    const toYYYYMMDD = d =>
+        d.getFullYear() + '-' +
+        String(d.getMonth()+1).padStart(2,'0') + '-' +
+        String(d.getDate()).padStart(2,'0');
+    if (filterData !== undefined) {
+        filterData['start_time'] = toYYYYMMDD(start);
+        filterData['end_time'] = toYYYYMMDD(end);
+        updateCharts();
+    }
+    return `${toDDMMYYYY(start)} - ${toDDMMYYYY(end)}`;
+}
+
+function resetDateRange() {
+  if (filterData !== undefined) {
+    filterData['start_time'] = '';
+    filterData['end_time'] = '';
+    updateCharts();
+  }
+  out.value = '';
+  if (selectedEl) {
+    selectedEl.classList.remove('active');
+    selectedEl = null;
+  }
+  document.getElementById('timePicker').style.display = 'none';
+}
+  // ==== helpers ====
+  const pad = n => String(n).padStart(2,'0');
+  function setActive(el, label){
+    if (selectedEl) selectedEl.classList.remove('active');
+    selectedEl = el;  el.classList.add('active');
+    out.value = label;
+    document.getElementById('timePicker').style.display = 'none';
+  }
+
+  // ==== building the grid ====
+  function buildGrid(){
+    grid.innerHTML = '';
+    const quarters = [
+      {q:'Q1', m:[0,1,2]},
+      {q:'Q2', m:[3,4,5]},
+      {q:'Q3', m:[6,7,8]},
+      {q:'Q4', m:[9,10,11]},
+    ];
+
+    quarters.forEach((block, idx)=>{
+      /* ----- Quarter button (clickable) ----- */
+      const qBtn = document.createElement('div');
+      qBtn.textContent = block.q;
+      qBtn.className   = 'quarter-btn';
+      // Build Date objects for the first and last day of the quarter
+      const qStart = new Date(year, block.m[0] - 1, 1);          // 1st of first month
+      const qEnd   = new Date(year, block.m[2],     0);          // 0th day ⇒ last of prev month
+      if (!anyDateInRange(availableDateOptions, qStart, qEnd)) {
+        qBtn.classList.add('disabled');
+        qBtn.style.cursor = 'not-allowed';
+        qBtn.title = 'No data available for this quarter';
+      } else {
+        qBtn.classList.remove('disabled');
+        qBtn.style.cursor = 'pointer';
+        qBtn.title = '';
+      }
+      qBtn.onclick     = e=>{
+        const rangeStr = formatRange(year, block.m[0], block.m[2]);
+        setActive(qBtn, rangeStr);
+      };
+      grid.appendChild(qBtn);
+
+      /* ----- Three month buttons ----- */
+      block.m.forEach(m=>{
+        const mBtn = document.createElement('div');
+        mBtn.textContent = monthNames[m];
+        mBtn.className   = 'month-btn';
+        if (!anyDateInRange(availableDateOptions, new Date(year, m, 1), new Date(year, m + 1, 0))) {
+          mBtn.classList.add('disabled');
+          mBtn.style.cursor = 'not-allowed';
+          mBtn.title = 'No data available for this month';
+        } else {
+          mBtn.classList.remove('disabled');
+          mBtn.style.cursor = 'pointer';
+          mBtn.title = '';
+        }
+        mBtn.onclick     = () => setActive(mBtn, formatRange(year, m, m));
+        grid.appendChild(mBtn);
+      });
+
+      /* ----- Add semester button after Q2 & Q4 ----- */
+      if (idx === 1 || idx === 3) {
+        const sIdx = idx === 1 ? 'S1' : 'S2';
+        const start = idx === 1 ? '01' : '07';
+        const end   = idx === 1 ? '06' : '12';
+        const sBtn  = document.createElement('div');
+        sBtn.textContent = sIdx;
+        sBtn.className   = 'semester-btn';
+        sBtn.style.gridRow = `${idx}`;       // Top row of span
+        sBtn.style.gridRowEnd = 'span 2';   // merge ↓
+        sBtn.style.alignSelf  = 'center';   // vertical centring
+        const sStart  = idx === 1 ? 0 : 6;   // Jan or Jul (0-based)
+        const sEnd    = idx === 1 ? 5 : 11;  // Jun or Dec
+        if (!anyDateInRange(availableDateOptions, new Date(year, sStart, 1), new Date(year, sEnd + 1, 0))) {
+          sBtn.classList.add('disabled');
+          sBtn.style.cursor = 'not-allowed';
+          sBtn.title = 'No data available for this semester';
+        } else {
+          sBtn.classList.remove('disabled');
+          sBtn.style.cursor = 'pointer';
+          sBtn.title = '';
+        }
+        sBtn.onclick = ()=>setActive(sBtn, formatRange(year, sStart, sEnd));
+        grid.appendChild(sBtn);
+      }
+    });
+
+    /* ----- Full-year button ----- */
+    const yBtn = document.createElement('div');
+    yBtn.textContent = 'Full Year';
+    yBtn.className   = 'year-btn';
+    if (!anyDateInRange(availableDateOptions, new Date(year, 0, 1), new Date(year, 11, 31))) {
+      yBtn.classList.add('disabled');
+      yBtn.style.cursor = 'not-allowed';
+      yBtn.title = 'No data available for this year';
+    } else {
+      yBtn.classList.remove('disabled');
+      yBtn.style.cursor = 'pointer';
+      yBtn.title = '';
+    }
+    yBtn.onclick     = ()=>setActive(yBtn, formatRange(year, 0, 11));
+    grid.appendChild(yBtn);
+    const customBtn = document.createElement('div');
+    customBtn.textContent = 'Custom';
+    customBtn.className   = 'year-btn';
+    customBtn.id = 'customDateRange';
+    customBtn.style.cursor = 'pointer';
+    customBtn.title = '';
+    customBtn.onclick = ()=>selectCustomDateRange();
+    grid.appendChild(customBtn);
+    // reset button
+    const resetBtn = document.createElement('div');
+    resetBtn.textContent = 'Reset';
+    resetBtn.className   = 'year-btn';
+    resetBtn.id = 'resetDateRange';
+    resetBtn.style.cursor = 'pointer';
+    resetBtn.title = '';
+    resetBtn.onclick = ()=>resetDateRange();
+    grid.appendChild(resetBtn);
+  }
+
+  function changeYear(delta){
+    year += delta;
+    yearLbl.textContent = year;
+    buildGrid();
+    out.value = '';
+    selectedEl = null;
+  }
+
+document.getElementById('monthPicker').addEventListener('click', function() {
+  document.getElementById('timePicker').style.display = 'block';
+});
+document.addEventListener('click', e => {
+  // is the popup currently visible?
+  const isOpen = document.getElementById('timePicker').style.display === 'block';
+  // did we click *outside* both the popup and the button?
+  const clickOutside = !document.getElementById('timePicker').contains(e.target) && !document.getElementById('monthPicker').contains(e.target);
+  
+  if (isOpen && clickOutside) {
+    document.getElementById('timePicker').style.display = 'none';
+  }
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') document.getElementById('timePicker').style.display = 'none';
+});
+
+
+var availableDateOptions = [];
+var availSet = new Set();
+const fmt = d => d.format('DD/MM/YYYY');   
+async function getDateOptions(country=null) {
+  if (country) {
+    var data = await unifiedSendRequest(GETDATEOPTIONS + '?country=' + country, { method: 'GET' });
+  } else {
+    var data = await unifiedSendRequest(GETDATEOPTIONS, { method: 'GET' });
+  }
+  const availableTimestamps = Object.keys(data).map(str => {
+    const [d, m, y] = str.split('/').map(Number);
+    return new Date(y, m - 1, d).getTime();   // month is 0-based
+  });
+  availableDateOptions = availableTimestamps;
+  console.log('getDateOptions', availableDateOptions);
+  availSet = new Set(Object.keys(data)); 
+  changeYear(0);
+}
+
+/**
+ * @param {number[]} tsArr          – array of UTC ms (available dates)
+ * @param {Date}      startDate     – inclusive range start
+ * @param {Date}      endDate       – inclusive range end
+ * @return {boolean}
+ */
+ function anyDateInRange(tsArr, startDate, endDate) {
+    const lo = startDate.getTime();
+    const hi = endDate.getTime();
+    return tsArr.some(t => t >= lo && t <= hi);
+  }
+
+</script>

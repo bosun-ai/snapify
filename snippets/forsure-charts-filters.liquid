@@ -35,15 +35,16 @@ Usage:
     </select>
   </div>
 
-  <div class="filter-group" id="date-filter-guide">
-    {{ 'daterangepicker.css' | asset_url | stylesheet_tag }}
+  <div class="filter-group" id="date-filter-guide" style="position: relative;">
+    {% render 'forsure-custom-calendar' %}
+    {% comment %} {{ 'daterangepicker.css' | asset_url | stylesheet_tag }}
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <div class="filter-group-heading">Dates</div>
     <input
       type="text"
       class="btn dropdown-toggle bs-placeholder btn-default"
-      id="monthPicker" />
+      id="monthPicker" /> {% endcomment %}
   </div>
   <div class="filter-group" id="profile-filter-guide">
     <div class="filter-group-heading">Profiles</div>
