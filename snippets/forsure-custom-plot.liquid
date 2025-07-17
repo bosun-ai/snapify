@@ -255,7 +255,11 @@ Usage:
   border-style: solid;
   border-color: #555 transparent transparent transparent;
 } */
-
+#customChart {
+    margin-left: 5%;
+    margin-right: 5%;
+    height: 65vh;
+  }
 
 .dragYList, #columnsLeft {
   scrollbar-width: thin; /* "auto" or "thin" */
@@ -271,7 +275,7 @@ Usage:
   margin: auto 1rem!important;
 }
 
-.disabled .textBorder {
+.disabled-column .textBorder {
   background: #ccc;
 }
 
@@ -287,7 +291,7 @@ Usage:
   width: 100%;
 }
 
-.disabled .colItemContainer {
+.disabled-column .colItemContainer {
   cursor: not-allowed;
 }
 
@@ -537,7 +541,7 @@ Usage:
       listItem.setAttribute('data-name', col);
       listItem.classList.add('colItems');
       if (!available) {
-        listItem.classList.add('disabled');
+        listItem.classList.add('disabled-column');
         listItem.draggable = false;
         listItem.title = 'This column does not have any data';
       } else {

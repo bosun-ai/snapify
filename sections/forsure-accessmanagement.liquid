@@ -539,22 +539,17 @@ async function addUser() {
         const response = await unifiedSendRequest(ACCESS_ADD_USER, {formData: formData});
         if (response.status == 'success') {
             showMessage('User added successfully!', true);
-            const addUserButton = document.getElementById('addUserButton');
-            document.getElementById('addUserInput').style.display = 'none';
-            document.getElementById('addButton').style.display = 'none';
-            addUserButton.style.display = 'block';
             getUsers();
+            document.getElementById('addUserInput').value = '';
         } else {
             console.error('Failed to add user:', response);
             showMessage('Failed to add user. Please try again', false);
         }
     } catch (error) {
-        console.error('Error adding user:', error.message);
-        showMessage('Failed to add user' + error.message, false);
+        console.error('Error adding user:', error);
+        showMessage('Failed to add user', false);
     }
 }
-
-
 
 
 async function saveChanges(userId) {

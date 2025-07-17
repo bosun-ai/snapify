@@ -39,6 +39,7 @@
     }
   }
 {%- endstyle -%}
+{% render 'forsure-simple-notification' %}
 <script src="{{ 'section-footer.js' | asset_url }}" defer="defer"></script>
 <footer class="footer color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding" style="border-top: .25rem solid #2255ff;">
   {%- if section.blocks.size > 0 or section.settings.newsletter_enable or section.settings.show_social -%}

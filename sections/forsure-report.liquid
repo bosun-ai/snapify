@@ -293,6 +293,10 @@ div.display-flex {
     overflow-y: auto; /* Enable vertical scrolling */
 }
 
+.tabulator-col-sorter .tabulator-arrow {
+    display: block;
+}
+
 .greyed_out {
     cursor: not-allowed;
     background-color: grey!important;
@@ -2507,19 +2511,19 @@ async function openClientsModal() {
             }, {});
 
         // Generate Tabulator column definitions
-        const columns = [{ title: 'Client', field: 'client', headerSort: false, editor: 'input' },
+        const columns = [{ title: 'Client', field: 'client', headerSort: true, editor: 'input' },
                          { title: 'Country', field: 'country', headerSort: false, visible: false }];
         Object.keys(dynamicColumns).forEach((key) => {
             const group = dynamicColumns[key];
-            if (group.Login) columns.push({ title: `Login ${key}`, field: group.Login, headerSort: false, editor: 'input' });
-            if (group.Password) columns.push({ title: `Password ${key}`, field: group.Password, headerSort: false, editor: 'input',
+            if (group.Login) columns.push({ title: `Login ${key}`, field: group.Login, headerSort: true, editor: 'input' });
+            if (group.Password) columns.push({ title: `Password ${key}`, field: group.Password, headerSort: true, editor: 'input',
               formatter: (cell) => {
                   const value = cell.getValue();
                   return `<div class="blurred" title="Content blurred for privacy">${value}</div>`;
               }
             });
-            if (group.Notes) columns.push({ title: `Notes ${key}`, field: group.Notes, headerSort: false, editor: 'input' });
-            if (group.ExtraInfo) columns.push({ title: `Extra Info ${key}`, field: group.ExtraInfo, headerSort: false, editor: 'input' });
+            if (group.Notes) columns.push({ title: `Notes ${key}`, field: group.Notes, headerSort: true, editor: 'input' });
+            if (group.ExtraInfo) columns.push({ title: `Extra Info ${key}`, field: group.ExtraInfo, headerSort: true, editor: 'input' });
         });
 
         const table = new Tabulator("#clientsDatatableContainer", {
@@ -2528,6 +2532,17 @@ async function openClientsModal() {
             pagination: data.length > 10,
             paginationSize: 10,
             columns: columns,
+            movableColumns: true,
+            columnDefaults: {
+              headerMenu: [
+                  {
+                      label:"Hide Column",
+                      action:function(e, column){
+                          column.hide();
+                      }
+                  }
+              ]
+            }
         });
         datatable = table;
     }

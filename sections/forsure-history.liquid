@@ -1020,7 +1020,7 @@ function displayExcelReport(data, submit, fileName, fullPath) {
             return {
                 title: key_text, // Use alphabet for headers
                 field: key,
-                headerSort: true, // Disable sorting
+                headerSort: true, // Enable sorting
                 formatter: "plaintext", // Ensure raw text is displayed
                 cellMouseOver: (e, cell) => {
                     // Add tooltip on hover for full entry
