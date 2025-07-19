@@ -1,1 +1,885 @@
-{"general":{"password_page":{"login_form_heading":"Enter store using password:","login_password_button":"Enter using password","login_form_password_label":"Password","login_form_password_placeholder":"Your password","login_form_error":"Wrong password!","login_form_submit":"Enter","admin_link_html":"Are you the store owner? <a href=\"\/admin\" class=\"link underlined-link\">Log in here<\/a>","powered_by_shopify_html":" "},"social":{"alt_text":{"share_on_facebook":"Share on Facebook","share_on_twitter":"Tweet on Twitter","share_on_pinterest":"Pin on Pinterest"},"links":{"twitter":"Twitter","facebook":"Facebook","pinterest":"Pinterest","instagram":"Instagram","tumblr":"Tumblr","snapchat":"Snapchat","youtube":"YouTube","vimeo":"Vimeo","tiktok":"TikTok"}},"continue_shopping":"Continue shopping","pagination":{"label":"Pagination","page":"Page {{ number }}","next":"Next page","previous":"Previous page"},"search":{"search":"Search"},"cart":{"view":"View my cart ({{ count }})","item_added":"Item added to your cart"},"share":{"close":"Close share","copy_to_clipboard":"Copy link","share_url":"Link","success_message":"Link copied to clipboard"},"slider":{"of":"of","next_slide":"Slide right","previous_slide":"Slide left","name":"Slider"}},"newsletter":{"label":"Email","success":"Thanks for subscribing","button_label":"Subscribe"},"accessibility":{"skip_to_text":"Skip to content","skip_to_product_info":"Skip to product information","close":"Close","unit_price_separator":"per","vendor":"Vendor:","error":"Error","refresh_page":"Choosing a selection results in a full page refresh.","link_messages":{"new_window":"Opens in a new window.","external":"Opens external website."},"loading":"Loading...","total_reviews":"total reviews","star_reviews_info":"{{ rating_value }} out of {{ rating_max }} stars","collapsible_content_title":"Collapsible content","complementary_products":"Complementary products"},"blogs":{"article":{"blog":"Blog","read_more_title":"Read more: {{ title }}","comments":{"one":"{{ count }} comment","other":"{{ count }} comments"},"moderated":"Please note, comments need to be approved before they are published.","comment_form_title":"Leave a comment","name":"Name","email":"Email","message":"Comment","post":"Post comment","back_to_blog":"Back to blog","share":"Share this article","success":"Your comment was posted successfully! Thank you!","success_moderated":"Your comment was posted successfully. We will publish it in a little while, as our blog is moderated."}},"onboarding":{"product_title":"Example product title","collection_title":"Your collection's name"},"products":{"product":{"add_to_cart":"Schedule Demo","choose_options":"Schedule Demo","choose_product_options":"Choose options for {{ product_name }}","description":"Description","on_sale":"Sale","product_variants":"Product variants","media":{"gallery_viewer":"Gallery Viewer","load_image":"Load image {{ index }} in gallery view","load_model":"Load 3D Model {{ index }} in gallery view","load_video":"Play video {{ index }} in gallery view","image_available":"Image {{ index }} is now available in gallery view","open_media":"Open media {{ index }} in modal","play_model":"Play 3D Viewer","play_video":"Play video"},"quantity":{"label":"Quantity","input_label":"Quantity for {{ product }}","increase":"Increase quantity for {{ product }}","decrease":"Decrease quantity for {{ product }}"},"pickup_availability":{"view_store_info":"View store information","check_other_stores":"Check availability at other stores","pick_up_available":"Pickup available","pick_up_available_at_html":"Pickup available at <span class=\"color-foreground\">{{ location_name }}<\/span>","pick_up_unavailable_at_html":"Pickup currently unavailable at <span class=\"color-foreground\">{{ location_name }}<\/span>","unavailable":"Couldn't load pickup availability","refresh":"Refresh"},"price":{"from_price_html":"From {{ price }}","regular_price":"Regular price","sale_price":"Sale price","unit_price":"Unit price"},"share":"Share this product","sold_out":"Sold out","unavailable":"Unavailable","vendor":"Vendor","video_exit_message":"{{ title }} opens full screen video in same window.","view_full_details":"View full details","xr_button":"View in your space","xr_button_label":"View in your space, loads item in augmented reality window","include_taxes":"Tax included.","shipping_policy_html":"<a href=\"{{ link }}\">Shipping<\/a> calculated at checkout."},"modal":{"label":"Media gallery"},"facets":{"apply":"Apply","clear":"Clear","clear_all":"Remove all","from":"From","filter_and_sort":"Filter and sort","filter_by_label":"Filter:","filter_button":"Filter","filters_selected":{"one":"{{ count }} selected","other":"{{ count }} selected"},"filter_selected_accessibility":"{{ type }} ({{ count }} filters selected)","show_more":"Show more","show_less":"Show less","max_price":"The highest price is {{ price }}","product_count":{"one":"{{ product_count }} of {{ count }} product","other":"{{ product_count }} of {{ count }} products"},"product_count_simple":{"one":"{{ count }} product","other":"{{ count }} products"},"reset":"Reset","sort_button":"Sort","sort_by_label":"Sort by:","to":"To","clear_filter":"Remove filter"}},"templates":{"404":{"title":"Page not found","subtext":"404"},"search":{"no_results":"No results found for “{{ terms }}”. Check the spelling or use a different word or phrase.","page":"Page","products":"Products","results_with_count":{"one":"{{ count }} result","other":"{{ count }} results"},"results_with_count_and_term":{"one":"{{ count }} result found for “{{ terms }}”","other":"{{ count }} results found for “{{ terms }}”"},"title":"Search results","search_for":"Search for “{{ terms }}”"},"cart":{"cart":"Cart"},"contact":{"form":{"title":"Contact form","gender":"Gender","select_gender":"Title","male":"Mr.","female":"Ms.","nonbinary":"Non-binary","name":"Name","email":"Email","phone":"Phone number","company":"Company","comment":"Comment","send":"Send","post_success":"Thanks for contacting us. We'll get back to you as soon as possible.","error_heading":"Please adjust the following:","source_question":"How did you find us?","source_choice":"Select an option","source_partner":"Partner","source_social_media":"Social Media","source_search":"Search","source_friend":"Friend","source_other":"Other","source_partner_selection":"Which partner?","source_partner_option":"Select a partner","source_partner_other":"Choice not listed","source_partner_other_text":"Please specify the partner:","source_other_text":"Please specify:"}}},"sections":{"header":{"announcement":"Announcement","menu":"Menu","cart_count":{"one":"{{ count }} item","other":"{{ count }} items"}},"cart":{"title":"Your cart","caption":"Cart items","remove_title":"Remove {{ title }}","subtotal":"Subtotal","new_subtotal":"New subtotal","note":"Order special instructions","checkout":"Check out","empty":"Your cart is empty","cart_error":"There was an error while updating your cart. Please try again.","cart_quantity_error_html":"You can only add {{ quantity }} of this item to your cart.","taxes_and_shipping_policy_at_checkout_html":"Taxes are calculated at checkout","taxes_included_but_shipping_at_checkout":"Tax included and shipping calculated at checkout","taxes_included_and_shipping_policy_html":"Tax included. <a href=\"{{ link }}\">Shipping<\/a> calculated at checkout.","taxes_and_shipping_at_checkout":"Taxes are calculated at checkout","headings":{"product":"Product","price":"Price","total":"Total","quantity":"Quantity","image":"Product image"},"update":"Update","login":{"title":"Have an account?","paragraph_html":"<a href=\"{{ link }}\" class=\"link underlined-link\">Log in<\/a> to check out faster."}},"footer":{"payment":"Payment methods"},"featured_blog":{"view_all":"View all","onboarding_title":"Blog post","onboarding_content":"Give your customers a summary of your blog post"},"featured_collection":{"view_all":"View all","view_all_label":"View all products in the {{ collection_name }} collection"},"collection_list":{"view_all":"View all"},"collection_template":{"empty":"No products found","title":"Collection","use_fewer_filters_html":"Use fewer filters or <a class=\"{{ class }}\" href=\"{{ link }}\">remove all<\/a>"},"video":{"load_video":"Load video: {{ description }}"},"slideshow":{"load_slide":"Load slide","previous_slideshow":"Previous slide","next_slideshow":"Next slide","pause_slideshow":"Pause slideshow","play_slideshow":"Play slideshow","carousel":"Carousel","slide":"Slide"},"page":{"title":"Page title"},"popup":{"title":"Unlock More EPR \ninsights with ForSURE!","text":"If you found our blog enlightening, there's so much more we'd love to share. Subscribe to dive deeper into the world of EPR solutions and stay ahead of the curve.","caption":"","form_name":"Name","form_email":"Business Email","marketing":"I consent to receive emails from ForSURE and understand I can opt out anytime.","button":"Sign Up","closed_text":"Sign Up To The Newsletter","thank_title":"EPR: Your Journey Starts!","thank_caption":"Let's explore the future of responsible retailing together.","thank_text_bold":"Join the EPR Conversation!","thank_text":"Share your ForSURE journey with friends and colleagues.","thank_button":"Explore More","share_title":"ForSURE","share_text":"Just signed up for an amazing newsletter! Join me and stay updated on the latest news and insights about EPR!🌍✉️","share_url":"https:\/\/for-sure.net","share_copied":"Copied to clipboard!","error_valueMissing":"Please fill out this field.","error_typeMismatch":"Please include an @ in the email address.","error_first":"Please use a first name with more than 3 letters.","error_last":"Please use a last name with more than 3 letters."},"popup_whitepaper":{"title":"Access Our EPR UK Whitepaper","text":"Gain in-depth insights into UK EPR regulations with our detailed analysis. Enhance your compliance strategies and stay ahead!","note":"Your EPR Questions or Challenges","caption":"","company":"Company","form_name":"Name","form_email":"Business Email","marketing":"I consent to receive emails from ForSURE and understand I can opt out anytime.","button":"Whitepaper Sign Up","closed_text":"Get the whitepaper","thank_title":"Thank you for your interest","thank_caption":"We will send you an email with further details","thank_text_bold":"Join the EPR Conversation!","thank_text":"Thank you for subscribing","thank_button":"Explore More","share_title":"ForSURE","share_text":"Just signed up for an amazing newsletter! Join me and stay updated on the latest news and insights about EPR!🌍✉️","share_url":"https:\/\/for-sure.net","share_copied":"Copied to clipboard!","error_valueMissing":"Please fill out this field.","error_typeMismatch":"Please include an @ in the email address.","error_first":"Please use a first name with more than 3 letters.","error_last":"Please use a last name with more than 3 letters."}},"localization":{"country_label":"Country\/region","language_label":"Language","update_language":"Update language","update_country":"Update country\/region"},"customer":{"account":{"title":"Account","details":"Account details","view_addresses":"View addresses","return":"Return to Account details"},"unsubscribe":{"title":"Unsubscribe Now","button":"Unsubscribe"},"account_fallback":"Account","activate_account":{"title":"Activate account","subtext":"Set your password to activate your account.","password":"Password","password_confirm":"Confirm password","submit":"Activate account","cancel":"Decline invitation"},"addresses":{"title":"Addresses","default":"Default","add_new":"Add a new address","edit_address":"Edit address","first_name":"First name","last_name":"Last name","company":"Company","address1":"Address 1","address2":"Address 2","city":"City","country":"Country\/region","province":"Province","zip":"Postal\/ZIP code","phone":"Phone","set_default":"Set as default address","add":"Add address","update":"Update address","cancel":"Cancel","edit":"Edit","delete":"Delete","delete_confirm":"Are you sure you wish to delete this address?"},"log_in":"Log in","log_out":"Log out","login_page":{"cancel":"Cancel","create_account":"Create account","email":"Email","forgot_password":"Forgot your password?","guest_continue":"Continue","guest_title":"Continue as a guest","password":"Password","title":"Login","sign_in":"Sign in","submit":"Submit"},"order":{"title":"Order {{ name }}","date_html":"Placed on {{ date }}","cancelled_html":"Order Cancelled on {{ date }}","cancelled_reason":"Reason: {{ reason }}","billing_address":"Billing Address","payment_status":"Payment Status","shipping_address":"Shipping Address","fulfillment_status":"Fulfillment Status","discount":"Discount","shipping":"Shipping","tax":"Tax","product":"Product","sku":"SKU","price":"Price","quantity":"Quantity","total":"Total","fulfilled_at_html":"Fulfilled {{ date }}","track_shipment":"Track shipment","tracking_url":"Tracking link","tracking_company":"Carrier","tracking_number":"Tracking number","subtotal":"Subtotal","total_duties":"Duties"},"orders":{"title":"Order history","order_number":"Order","order_number_link":"Order number {{ number }}","date":"Date","payment_status":"Payment status","fulfillment_status":"Fulfillment status","total":"Total","none":"You haven't placed any orders yet."},"recover_password":{"title":"Reset your password","subtext":"We will send you an email to reset your password","success":"We've sent you an email with a link to update your password."},"register":{"title":"Sign up","first_name":"First name","last_name":"Last name","email":"Email","password":"Password","submit":"Sign up","error_business_email":"Please use a business email.","error_company":"Please use a valid company name with more than two letters.","error_email_wrong":"Please use an email which contains your first name, last name, or company name.","error_first_name":"Please use a valid first name with more than two letters.","error_last_name":"Please use a valid last name with more than two letters."},"reset_password":{"title":"Reset account password","subtext":"Enter a new password","password":"Password","password_confirm":"Confirm password","submit":"Reset password"}},"gift_cards":{"issued":{"title":"Here's your {{ value }} gift card for {{ shop }}!","subtext":"Your gift card","gift_card_code":"Gift card code","shop_link":"Continue shopping","remaining_html":"Remaining {{ balance }}","add_to_apple_wallet":"Add to Apple Wallet","qr_image_alt":"QR code — scan to redeem gift card","copy_code":"Copy code","expired":"Expired","copy_code_success":"Code copied successfully","print_gift_card":"Print"}},"shopify":{"links":{"powered_by_shopify":" "}},"software":{"guide":{"statistics":{"welcome":{"title":"Welcome","text":"We're thrilled you've chosen ForSURE!\\n\\nHere's a concise guide to help you navigate through the software with ease.","group":"Introduction"},"help":{"title":"Help","text":"Should you have any question, feel free to revisit this guide at any point by clicking here","group":"Navigation Bar"},"overview":{"title":"Overview","text":"Welcome to your homepage! This space provides a snapshot of your data through various statistics, offering insights at a glance.","group":"Navigation Bar"},"report":{"title":"Create Report","text":"This area allows you to either create a new report from scratch or upload existing data to be incorporated into your reports.","group":"Navigation Bar"},"history":{"title":"History","text":"This page houses a comprehensive history of all your reports, enabling you to delve deep into the data for detailed analysis of each report.","group":"Navigation Bar"},"categorylist":{"title":"Categorylist","text":"Utilize this page to upload and modify your category list. It serves as the foundation for all reports and charts, so ensuring its accuracy and currency is crucial.","group":"Navigation Bar"},"settings":{"title":"Settings","text":"Given that your existing order list or category list may differ in format, this section allows you to customize the labels for each value to ensure consistency.","group":"Navigation Bar"},"account":{"title":"Account","text":"Visit this section to review your account information and subscription details.","group":"Navigation Bar"},"createChart":{"title":"Create Chart","text":"This section enables you to craft customized charts tailored to your preferences, using the data you supply.","group":"Create Chart"},"yAxis":{"title":"Select Y-Axis","text":"To try it out, start by dragging this element to the Y Axis","group":"Create Chart"},"xAxis":{"title":"Select X-Axis","text":"Next, proceed by dragging this element to the X Axis.","group":"Create Chart"},"showChart":{"title":"Show Chart","text":"Upon completing these steps, the resulting chart will be instantly displayed.","group":"Create Chart"},"chartOptions":{"title":"Chart Options","text":"With these icons, you have the ability to: \\n- Change the chart type, \\n- View the chart in greater detail, and \\n- Save the chart for immediate display below.","group":"Create Chart"},"countryFilter":{"title":"Filters","text":"If your focus is on specific countries, you can apply the filter here. Choosing values will automatically refresh all charts to reflect your selections.","group":"Filters"},"dateFilter":{"title":"Filters","text":"Similarly, for date filters, such as if you're interested in data from the last month, applying this filter will update all charts to match your specified timeframe.","group":"Filters"},"profileFilter":{"title":"Filters","text":"Likewise, you can filter charts based on the source of your data, known as profiles, to tailor the displayed information accordingly.","group":"Filters"},"reportsDue":{"title":"Deadlines","text":"This section displays the upcoming deadlines for EPR reports.\\nIf the deadline field appears in blue, it indicates that our software has already generated the report, which can be found under the History section. If not, the report has yet to be completed.","group":"Saved charts"},"example":{"title":"Example","text":"Saving a chart will cause it to be displayed here alongside others.\\nThis section offers a quick snapshot of all the metrics you're interested in. \\nIf you decide a chart is no longer needed, you can easily unpin it to remove it from view. For a deeper dive into a chart's specifics and to understand which orders have contributed to its data, click on the icon located in the top right corner.\\n\\nAdditionally, you have the option to rearrange the order of the charts by dragging the entire chart to a new position.","group":"Saved charts"}},"report":{"welcome":{"title":"Welcome","text":"Welcome to the report page, where you have the flexibility to upload data from various sources and generate custom reports at your convenience.\\n\\nTo ensure a smooth process, please make sure to define the labels beforehand in the settings. \\n\\nYou can either use the live data using the toggle or drag and drop a file here. After you select the profile and click next, the file will be uploaded and an error might be displayed. The uploading process can take a few minutes depending on the size of the dataset.","group":"Introduction"}},"download":{"welcome":{"title":"Welcome","text":"Welcome to the download page. All reports that were automatically created or that you created manually are shown here.","group":"Introduction"},"inprogress":{"title":"In Progress","text":"In the first table you find the reports that are in progress. That means that the report deadline has not been reached yet, but we create daily updates to show you how much data you are already reporting until now.","group":"Types"},"history":{"title":"History","text":"In this table you find reports that are done and can be evaluated and send to the corresponding scheme","group":"Types"},"country":{"title":"Sorted by Country","text":"The reports are grouped by country","group":"Reports"},"debugger":{"title":"Debugger","text":"For each report you have a debugger that contains all raw data that was used in this report. This is especially important for audits.","group":"Reports"},"report":{"title":"Report","text":"This is the actual report that can be sent to the reporting scheme.","group":"Reports"},"open":{"title":"Open","text":"The first icon lets you view the report in full screen.","group":"Icons"},"download":{"title":"Download","text":"The second icon lets you download the EPR report as Excel sheet.","group":"Icons"},"share":{"title":"Share","text":"The third icon lets you share the report via mail.","group":"Icons"},"delete":{"title":"Delete","text":"The fourth icon lets you delete the report. If you do this, the report is deleted permanently and cannot be recovered.","group":"Icons"},"send":{"title":"Send","text":"The last icon lets you validate and send the report to the correct scheme.","group":"Icons"},"checkbox":{"title":"Checkbox","text":"The checkbox lets you select multiple reports to do grouped downloads or deletion.","group":"Icons"}},"settings":{"welcome":{"title":"Welcome","text":"On this settings page, you have the ability to define the labels for your order and category list, including specific details for each country. Additionally, you can set up a live connector to streamline your processes if desired.","group":"Introduction"},"profile":{"title":"Profile","text":"This dropdown menu allows you to select an existing profile or create a new one.\\n\\nIt's recommended to have one profile for each source of your data. For instance, you might have one profile for Shopify and another for WooCommerce, ensuring your data is organized by its origin.\\n\\nTo rename or delete a profile, simply click the pencil icon.","group":"General"},"liveData":{"title":"Live Data","text":"This slider enables the use of live data. By turning it on, you can establish a direct connection to your Shopify store, ensuring real-time data synchronization.","group":"Live Data"},"connectorConfig":{"title":"Connector","text":"In this section, you can input the URL of your Shopify store as well as the API token required for integration. For guidance on how to obtain these details, please refer to the following guide: <a href='https:\/\/help.shopify.com\/en\/manual\/apps\/app-types\/custom-apps'>Shopify Help Center - Custom Apps<\/a>.","group":"Live Data"},"orderlistConfig":{"title":"Orderlist","text":"In this area, you have the option to specify the column names for your order list, which is necessary if you're not using live data. It's important to enter the column name exactly as it appears in the uploaded file, paying close attention to the use of lower\/uppercase letters, to ensure it corresponds correctly to the data row.","group":"Orderlist"},"returnlistConfig":{"title":"Returnlist","text":"This section allows you to define the column names for your return list, applicable if you are not using live data. Similar to order list setup, it's crucial to pay attention to the casing of the letters in the column names to ensure they match precisely with those in your uploaded file.","group":"Returnlist"},"categorylistConfig":{"title":"Categorylist","text":"This area is designated for defining the labels for your category list. The category list can be uploaded in the categorylist tab and is the same for all profiles.\\n\\nOnly activate the Packaging, Batteries, and Electro if you need them.","group":"Categorylist"},"categorylistCountryConfig":{"title":"Categorylist","text":"For each country, there might be specific columns required in the category list to meet local regulations or reporting standards. In this section, you're encouraged to add the countries relevant to your operations and input the necessary labels for those columns. If certain elements, like Glass for example, do not apply to your sold products, you have the option to leave those columns empty, ensuring your category list is both accurate and compliant.","group":"Categorylist"}},"categorylist":{"welcome":{"title":"Welcome","text":"This page is designed for uploading your existing category list and provides the tools needed to edit it, ensuring it conforms to the required format. It's a streamlined process for efficiently managing and updating your category data.","group":"Introduction"},"upload":{"title":"Upload","text":"Simply click this button to navigate to your file selection. Once you've chosen the appropriate file, proceed to upload it here.","group":"Upload"},"edit":{"title":"Edit","text":"Here you have the flexibility to modify your category list by adding new rows or columns to better organize your data. To edit the content of any cell, simply double-click on it, allowing for quick and easy updates directly within your list.","group":"Edit"}}}},"team":{"linkedin":{"Niclas-Brinkmann":"https:\/\/www.linkedin.com\/in\/niclas-brinkmann\/","Isaak-Siebenga":"https:\/\/www.linkedin.com\/in\/isaak-siebenga-5a4425200\/","Daniel-Arians":"https:\/\/www.linkedin.com\/in\/daniel-arians-870a9716b\/","Daniel-Hamandouche":"https:\/\/www.linkedin.com\/in\/daniel-hamandouche\/"}}}
+{
+    "general": {
+        "password_page": {
+            "login_form_heading": "Enter store using password:",
+            "login_password_button": "Enter using password",
+            "login_form_password_label": "Password",
+            "login_form_password_placeholder": "Your password",
+            "login_form_error": "Wrong password!",
+            "login_form_submit": "Enter",
+            "admin_link_html": "Are you the store owner? <a href=\"\/admin\" class=\"link underlined-link\">Log in here<\/a>",
+            "powered_by_shopify_html": " "
+        },
+        "social": {
+            "alt_text": {
+                "share_on_facebook": "Share on Facebook",
+                "share_on_twitter": "Tweet on Twitter",
+                "share_on_pinterest": "Pin on Pinterest"
+            },
+            "links": {
+                "twitter": "Twitter",
+                "facebook": "Facebook",
+                "pinterest": "Pinterest",
+                "instagram": "Instagram",
+                "tumblr": "Tumblr",
+                "snapchat": "Snapchat",
+                "youtube": "YouTube",
+                "vimeo": "Vimeo",
+                "tiktok": "TikTok"
+            }
+        },
+        "continue_shopping": "Continue shopping",
+        "pagination": {
+            "label": "Pagination",
+            "page": "Page {{ number }}",
+            "next": "Next page",
+            "previous": "Previous page"
+        },
+        "search": {
+            "search": "Search"
+        },
+        "cart": {
+            "view": "View my cart ({{ count }})",
+            "item_added": "Item added to your cart"
+        },
+        "share": {
+            "close": "Close share",
+            "copy_to_clipboard": "Copy link",
+            "share_url": "Link",
+            "success_message": "Link copied to clipboard"
+        },
+        "slider": {
+            "of": "of",
+            "next_slide": "Slide right",
+            "previous_slide": "Slide left",
+            "name": "Slider"
+        }
+    },
+    "newsletter": {
+        "label": "Email",
+        "success": "Thanks for subscribing",
+        "button_label": "Subscribe"
+    },
+    "accessibility": {
+        "skip_to_text": "Skip to content",
+        "skip_to_product_info": "Skip to product information",
+        "close": "Close",
+        "unit_price_separator": "per",
+        "vendor": "Vendor:",
+        "error": "Error",
+        "refresh_page": "Choosing a selection results in a full page refresh.",
+        "link_messages": {
+            "new_window": "Opens in a new window.",
+            "external": "Opens external website."
+        },
+        "loading": "Loading...",
+        "total_reviews": "total reviews",
+        "star_reviews_info": "{{ rating_value }} out of {{ rating_max }} stars",
+        "collapsible_content_title": "Collapsible content",
+        "complementary_products": "Complementary products"
+    },
+    "blogs": {
+        "article": {
+            "blog": "Blog",
+            "read_more_title": "Read more: {{ title }}",
+            "comments": {
+                "one": "{{ count }} comment",
+                "other": "{{ count }} comments"
+            },
+            "moderated": "Please note, comments need to be approved before they are published.",
+            "comment_form_title": "Leave a comment",
+            "name": "Name",
+            "email": "Email",
+            "message": "Comment",
+            "post": "Post comment",
+            "back_to_blog": "Back to blog",
+            "share": "Share this article",
+            "success": "Your comment was posted successfully! Thank you!",
+            "success_moderated": "Your comment was posted successfully. We will publish it in a little while, as our blog is moderated."
+        }
+    },
+    "onboarding": {
+        "product_title": "Example product title",
+        "collection_title": "Your collection's name"
+    },
+    "products": {
+        "product": {
+            "add_to_cart": "Schedule Demo",
+            "choose_options": "Schedule Demo",
+            "choose_product_options": "Choose options for {{ product_name }}",
+            "description": "Description",
+            "on_sale": "Sale",
+            "product_variants": "Product variants",
+            "media": {
+                "gallery_viewer": "Gallery Viewer",
+                "load_image": "Load image {{ index }} in gallery view",
+                "load_model": "Load 3D Model {{ index }} in gallery view",
+                "load_video": "Play video {{ index }} in gallery view",
+                "image_available": "Image {{ index }} is now available in gallery view",
+                "open_media": "Open media {{ index }} in modal",
+                "play_model": "Play 3D Viewer",
+                "play_video": "Play video"
+            },
+            "quantity": {
+                "label": "Quantity",
+                "input_label": "Quantity for {{ product }}",
+                "increase": "Increase quantity for {{ product }}",
+                "decrease": "Decrease quantity for {{ product }}"
+            },
+            "pickup_availability": {
+                "view_store_info": "View store information",
+                "check_other_stores": "Check availability at other stores",
+                "pick_up_available": "Pickup available",
+                "pick_up_available_at_html": "Pickup available at <span class=\"color-foreground\">{{ location_name }}<\/span>",
+                "pick_up_unavailable_at_html": "Pickup currently unavailable at <span class=\"color-foreground\">{{ location_name }}<\/span>",
+                "unavailable": "Couldn't load pickup availability",
+                "refresh": "Refresh"
+            },
+            "price": {
+                "from_price_html": "From {{ price }}",
+                "regular_price": "Regular price",
+                "sale_price": "Sale price",
+                "unit_price": "Unit price"
+            },
+            "share": "Share this product",
+            "sold_out": "Sold out",
+            "unavailable": "Unavailable",
+            "vendor": "Vendor",
+            "video_exit_message": "{{ title }} opens full screen video in same window.",
+            "view_full_details": "View full details",
+            "xr_button": "View in your space",
+            "xr_button_label": "View in your space, loads item in augmented reality window",
+            "include_taxes": "Tax included.",
+            "shipping_policy_html": "<a href=\"{{ link }}\">Shipping<\/a> calculated at checkout."
+        },
+        "modal": {
+            "label": "Media gallery"
+        },
+        "facets": {
+            "apply": "Apply",
+            "clear": "Clear",
+            "clear_all": "Remove all",
+            "from": "From",
+            "filter_and_sort": "Filter and sort",
+            "filter_by_label": "Filter:",
+            "filter_button": "Filter",
+            "filters_selected": {
+                "one": "{{ count }} selected",
+                "other": "{{ count }} selected"
+            },
+            "filter_selected_accessibility": "{{ type }} ({{ count }} filters selected)",
+            "show_more": "Show more",
+            "show_less": "Show less",
+            "max_price": "The highest price is {{ price }}",
+            "product_count": {
+                "one": "{{ product_count }} of {{ count }} product",
+                "other": "{{ product_count }} of {{ count }} products"
+            },
+            "product_count_simple": {
+                "one": "{{ count }} product",
+                "other": "{{ count }} products"
+            },
+            "reset": "Reset",
+            "sort_button": "Sort",
+            "sort_by_label": "Sort by:",
+            "to": "To",
+            "clear_filter": "Remove filter"
+        }
+    },
+    "templates": {
+        "404": {
+            "title": "Page not found",
+            "subtext": "404",
+            "back_to_home": "Back to home"
+        },
+        "search": {
+            "no_results": "No results found for “{{ terms }}”. Check the spelling or use a different word or phrase.",
+            "page": "Page",
+            "products": "Products",
+            "results_with_count": {
+                "one": "{{ count }} result",
+                "other": "{{ count }} results"
+            },
+            "results_with_count_and_term": {
+                "one": "{{ count }} result found for “{{ terms }}”",
+                "other": "{{ count }} results found for “{{ terms }}”"
+            },
+            "title": "Search results",
+            "search_for": "Search for “{{ terms }}”"
+        },
+        "cart": {
+            "cart": "Cart"
+        },
+        "contact": {
+            "form": {
+                "title": "Contact form",
+                "gender": "Gender",
+                "select_gender": "Title",
+                "male": "Mr.",
+                "female": "Ms.",
+                "nonbinary": "Non-binary",
+                "name": "Name",
+                "email": "Email",
+                "phone": "Phone number",
+                "company": "Company",
+                "comment": "Comment",
+                "send": "Send",
+                "post_success": "Thanks for contacting us. We'll get back to you as soon as possible.",
+                "error_heading": "Please adjust the following:",
+                "source_question": "How did you find us?",
+                "source_choice": "Select an option",
+                "source_partner": "Partner",
+                "source_social_media": "Social Media",
+                "source_search": "Search",
+                "source_friend": "Friend",
+                "source_other": "Other",
+                "source_partner_selection": "Which partner?",
+                "source_partner_option": "Select a partner",
+                "source_partner_other": "Choice not listed",
+                "source_partner_other_text": "Please specify the partner:",
+                "source_other_text": "Please specify:"
+            }
+        }
+    },
+    "sections": {
+        "header": {
+            "announcement": "Announcement",
+            "menu": "Menu",
+            "cart_count": {
+                "one": "{{ count }} item",
+                "other": "{{ count }} items"
+            }
+        },
+        "cart": {
+            "title": "Your cart",
+            "caption": "Cart items",
+            "remove_title": "Remove {{ title }}",
+            "subtotal": "Subtotal",
+            "new_subtotal": "New subtotal",
+            "note": "Order special instructions",
+            "checkout": "Check out",
+            "empty": "Your cart is empty",
+            "cart_error": "There was an error while updating your cart. Please try again.",
+            "cart_quantity_error_html": "You can only add {{ quantity }} of this item to your cart.",
+            "taxes_and_shipping_policy_at_checkout_html": "Taxes are calculated at checkout",
+            "taxes_included_but_shipping_at_checkout": "Tax included and shipping calculated at checkout",
+            "taxes_included_and_shipping_policy_html": "Tax included. <a href=\"{{ link }}\">Shipping<\/a> calculated at checkout.",
+            "taxes_and_shipping_at_checkout": "Taxes are calculated at checkout",
+            "headings": {
+                "product": "Product",
+                "price": "Price",
+                "total": "Total",
+                "quantity": "Quantity",
+                "image": "Product image"
+            },
+            "update": "Update",
+            "login": {
+                "title": "Have an account?",
+                "paragraph_html": "<a href=\"{{ link }}\" class=\"link underlined-link\">Log in<\/a> to check out faster."
+            }
+        },
+        "footer": {
+            "payment": "Payment methods"
+        },
+        "featured_blog": {
+            "view_all": "View all",
+            "onboarding_title": "Blog post",
+            "onboarding_content": "Give your customers a summary of your blog post"
+        },
+        "featured_collection": {
+            "view_all": "View all",
+            "view_all_label": "View all products in the {{ collection_name }} collection"
+        },
+        "collection_list": {
+            "view_all": "View all"
+        },
+        "collection_template": {
+            "empty": "No products found",
+            "title": "Collection",
+            "use_fewer_filters_html": "Use fewer filters or <a class=\"{{ class }}\" href=\"{{ link }}\">remove all<\/a>"
+        },
+        "video": {
+            "load_video": "Load video: {{ description }}"
+        },
+        "slideshow": {
+            "load_slide": "Load slide",
+            "previous_slideshow": "Previous slide",
+            "next_slideshow": "Next slide",
+            "pause_slideshow": "Pause slideshow",
+            "play_slideshow": "Play slideshow",
+            "carousel": "Carousel",
+            "slide": "Slide"
+        },
+        "page": {
+            "title": "Page title"
+        },
+        "popup": {
+            "title": "Unlock More EPR \ninsights with ForSURE!",
+            "text": "If you found our blog enlightening, there's so much more we'd love to share. Subscribe to dive deeper into the world of EPR solutions and stay ahead of the curve.",
+            "caption": "",
+            "form_name": "Name",
+            "form_email": "Business Email",
+            "marketing": "I consent to receive emails from ForSURE and understand I can opt out anytime.",
+            "button": "Sign Up",
+            "closed_text": "Sign Up To The Newsletter",
+            "thank_title": "EPR: Your Journey Starts!",
+            "thank_caption": "Let's explore the future of responsible retailing together.",
+            "thank_text_bold": "Join the EPR Conversation!",
+            "thank_text": "Share your ForSURE journey with friends and colleagues.",
+            "thank_button": "Explore More",
+            "share_title": "ForSURE",
+            "share_text": "Just signed up for an amazing newsletter! Join me and stay updated on the latest news and insights about EPR!🌍✉️",
+            "share_url": "https:\/\/for-sure.net",
+            "share_copied": "Copied to clipboard!",
+            "error_valueMissing": "Please fill out this field.",
+            "error_typeMismatch": "Please include an @ in the email address.",
+            "error_first": "Please use a first name with more than 3 letters.",
+            "error_last": "Please use a last name with more than 3 letters."
+        },
+        "popup_whitepaper": {
+            "title": "Access Our EPR UK Whitepaper",
+            "text": "Gain in-depth insights into UK EPR regulations with our detailed analysis. Enhance your compliance strategies and stay ahead!",
+            "note": "Your EPR Questions or Challenges",
+            "caption": "",
+            "company": "Company",
+            "form_name": "Name",
+            "form_email": "Business Email",
+            "marketing": "I consent to receive emails from ForSURE and understand I can opt out anytime.",
+            "button": "Whitepaper Sign Up",
+            "closed_text": "Get the whitepaper",
+            "thank_title": "Thank you for your interest",
+            "thank_caption": "We will send you an email with further details",
+            "thank_text_bold": "Join the EPR Conversation!",
+            "thank_text": "Thank you for subscribing",
+            "thank_button": "Explore More",
+            "share_title": "ForSURE",
+            "share_text": "Just signed up for an amazing newsletter! Join me and stay updated on the latest news and insights about EPR!🌍✉️",
+            "share_url": "https:\/\/for-sure.net",
+            "share_copied": "Copied to clipboard!",
+            "error_valueMissing": "Please fill out this field.",
+            "error_typeMismatch": "Please include an @ in the email address.",
+            "error_first": "Please use a first name with more than 3 letters.",
+            "error_last": "Please use a last name with more than 3 letters."
+        }
+    },
+    "localization": {
+        "country_label": "Country\/region",
+        "language_label": "Language",
+        "update_language": "Update language",
+        "update_country": "Update country\/region"
+    },
+    "customer": {
+        "account": {
+            "title": "Account",
+            "details": "Account details",
+            "view_addresses": "View addresses",
+            "return": "Return to Account details"
+        },
+        "unsubscribe": {
+            "title": "Unsubscribe Now",
+            "button": "Unsubscribe"
+        },
+        "account_fallback": "Account",
+        "activate_account": {
+            "title": "Activate account",
+            "subtext": "Set your password to activate your account.",
+            "password": "Password",
+            "password_confirm": "Confirm password",
+            "submit": "Activate account",
+            "cancel": "Decline invitation"
+        },
+        "addresses": {
+            "title": "Addresses",
+            "default": "Default",
+            "add_new": "Add a new address",
+            "edit_address": "Edit address",
+            "first_name": "First name",
+            "last_name": "Last name",
+            "company": "Company",
+            "address1": "Address 1",
+            "address2": "Address 2",
+            "city": "City",
+            "country": "Country\/region",
+            "province": "Province",
+            "zip": "Postal\/ZIP code",
+            "phone": "Phone",
+            "set_default": "Set as default address",
+            "add": "Add address",
+            "update": "Update address",
+            "cancel": "Cancel",
+            "edit": "Edit",
+            "delete": "Delete",
+            "delete_confirm": "Are you sure you wish to delete this address?"
+        },
+        "log_in": "Log in",
+        "log_out": "Log out",
+        "login_page": {
+            "cancel": "Cancel",
+            "create_account": "Create account",
+            "email": "Email",
+            "forgot_password": "Forgot your password?",
+            "guest_continue": "Continue",
+            "guest_title": "Continue as a guest",
+            "password": "Password",
+            "title": "Login",
+            "sign_in": "Sign in",
+            "submit": "Submit"
+        },
+        "order": {
+            "title": "Order {{ name }}",
+            "date_html": "Placed on {{ date }}",
+            "cancelled_html": "Order Cancelled on {{ date }}",
+            "cancelled_reason": "Reason: {{ reason }}",
+            "billing_address": "Billing Address",
+            "payment_status": "Payment Status",
+            "shipping_address": "Shipping Address",
+            "fulfillment_status": "Fulfillment Status",
+            "discount": "Discount",
+            "shipping": "Shipping",
+            "tax": "Tax",
+            "product": "Product",
+            "sku": "SKU",
+            "price": "Price",
+            "quantity": "Quantity",
+            "total": "Total",
+            "fulfilled_at_html": "Fulfilled {{ date }}",
+            "track_shipment": "Track shipment",
+            "tracking_url": "Tracking link",
+            "tracking_company": "Carrier",
+            "tracking_number": "Tracking number",
+            "subtotal": "Subtotal",
+            "total_duties": "Duties"
+        },
+        "orders": {
+            "title": "Invoices",
+            "order_number": "Order",
+            "order_number_link": "Order number {{ number }}",
+            "date": "Date",
+            "payment_status": "Payment status",
+            "fulfillment_status": "Fulfillment status",
+            "total": "Total",
+            "none": "You don't have any invoices yet."
+        },
+        "recover_password": {
+            "title": "Reset your password",
+            "subtext": "We will send you an email to reset your password",
+            "success": "We've sent you an email with a link to update your password."
+        },
+        "register": {
+            "title": "Sign up",
+            "first_name": "First name",
+            "last_name": "Last name",
+            "email": "Email",
+            "password": "Password",
+            "submit": "Sign up",
+            "error_business_email": "Please use a business email.",
+            "error_company": "Please use a valid company name with more than two letters.",
+            "error_email_wrong": "Please use an email which contains your first name, last name, or company name.",
+            "error_first_name": "Please use a valid first name with more than two letters.",
+            "error_last_name": "Please use a valid last name with more than two letters."
+        },
+        "reset_password": {
+            "title": "Reset account password",
+            "subtext": "Enter a new password",
+            "password": "Password",
+            "password_confirm": "Confirm password",
+            "submit": "Reset password"
+        }
+    },
+    "gift_cards": {
+        "issued": {
+            "title": "Here's your {{ value }} gift card for {{ shop }}!",
+            "subtext": "Your gift card",
+            "gift_card_code": "Gift card code",
+            "shop_link": "Continue shopping",
+            "remaining_html": "Remaining {{ balance }}",
+            "add_to_apple_wallet": "Add to Apple Wallet",
+            "qr_image_alt": "QR code — scan to redeem gift card",
+            "copy_code": "Copy code",
+            "expired": "Expired",
+            "copy_code_success": "Code copied successfully",
+            "print_gift_card": "Print"
+        }
+    },
+    "shopify": {
+        "links": {
+            "powered_by_shopify": " "
+        }
+    },
+    "software": {
+        "guide": {
+            "statistics": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "Welcome to ForSURE, your EPR Reporting tool. To introduce you to the platform, we’ll start by taking you on a tour across it’s pages and functions. The onboarding will take about 10 minutes, and afterwards you’ll know what steps to take to generate and submit your EPR reports efficiently.",
+                    "group": "Introduction"
+                },
+                "help": {
+                    "title": "Help",
+                    "text": "Should you have any question later on, feel free to revisit this guide at any point by clicking here. This tour will give a general overview of each page and its function, but pressing this button on the other pages will explain the functionalities in depth.",
+                    "group": "Navigation Bar"
+                },
+                "overview": {
+                    "title": "Overview",
+                    "text": "This to your Overview page. This space provides a snapshot of your data through various statistics, offering insights at a glance. There’s also a table with upcoming EPR deadlines.",
+                    "group": "Navigation Bar"
+                },
+                "categorylist": {
+                    "title": "Categorylist",
+                    "text": "Utilize this page to upload and modify your category list. Your category list contains your product information. It serves as the foundation for all reports and charts, so ensuring its accuracy and currency is crucial.",
+                    "group": "Navigation Bar"
+                },
+                "report": {
+                    "title": "Create Report",
+                    "text": "This area allows you to either create a new report from scratch or upload existing data to be incorporated into your reports. You can also use this page to submit created reports.",
+                    "group": "Navigation Bar"
+                },
+                "history": {
+                    "title": "History",
+                    "text": "This page houses a comprehensive history of all your reports, enabling you to delve deep into the data for detailed analysis of each report.",
+                    "group": "Navigation Bar"
+                },
+                "settings": {
+                    "title": "Settings",
+                    "text": "On this page, you can configure your ForSURE account. This includes managing the access of the different users and setting country specific settings.",
+                    "group": "Navigation Bar"
+                },
+                "account": {
+                    "title": "Account",
+                    "text": "Finally, this is the account section. Visit this section to review your account information and subscription details.",
+                    "group": "Navigation Bar"
+                },
+                "overviewReportEnd": {
+                    "title": "Overview Report End",
+                    "text": "Now that we’ve shown you all the pages, let’s dive a little deeper into how to use the functionalities.",
+                    "group": "Navigation Bar"
+                },
+                "createChart": {
+                    "title": "Create Chart",
+                    "text": "In the overview page you’ll be able to see various statistics gathered from your data. This can give you concrete overviews related to your waste metrics. There are various ways you can view this using our interactive graph.",
+                    "group": "Create Chart"
+                },
+                "yAxis": {
+                    "title": "Select Y-Axis",
+                    "text": "To try it out, start by dragging this element to the Y Axis.",
+                    "group": "Create Chart"
+                },
+                "xAxis": {
+                    "title": "Select X-Axis",
+                    "text": "Next, proceed by dragging this element to the X Axis.",
+                    "group": "Create Chart"
+                },
+                "showChart": {
+                    "title": "Show Chart",
+                    "text": "Upon completing these steps, the resulting chart will be instantly displayed.",
+                    "group": "Create Chart"
+                },
+                "chartOptions": {
+                    "title": "Chart Options",
+                    "text": "With these icons, you have the ability to: \\n- Change the chart type, \\n- View the chart in greater detail, and \\n- Save the chart for immediate display below.",
+                    "group": "Create Chart"
+                },
+                "countryFilter": {
+                    "title": "Filters",
+                    "text": "If your focus is on specific countries, you can apply the filter here. Choosing values will automatically refresh all charts to reflect your selections.",
+                    "group": "Filters"
+                },
+                "dateFilter": {
+                    "title": "Filters",
+                    "text": "Similarly, for date filters, such as if you're interested in data from the last month, applying this filter will update all charts to match your specified timeframe.",
+                    "group": "Filters"
+                },
+                "profileFilter": {
+                    "title": "Filters",
+                    "text": "Likewise, you can filter charts based on the source of your data, known as profiles, to tailor the displayed information accordingly.",
+                    "group": "Filters"
+                },
+                "reportsDue": {
+                    "title": "Deadlines",
+                    "text": "This section displays the upcoming deadlines for EPR reports.\\nIf the deadline field appears in blue, it indicates that our software has already generated the report, which can be found under the History section. If not, the report has yet to be completed.",
+                    "group": "Saved charts"
+                },
+                "example": {
+                    "title": "Example",
+                    "text": "Saving a chart will cause it to be displayed here alongside others.\\nThis section offers a quick snapshot of all the metrics you're interested in. \\nIf you decide a chart is no longer needed, you can easily unpin it to remove it from view. For a deeper dive into a chart's specifics and to understand which orders have contributed to its data, click on the icon located in the top right corner.\\n\\nAdditionally, you have the option to rearrange the order of the charts by dragging the entire chart to a new position.",
+                    "group": "Saved charts"
+                }
+            },
+            "report": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "Welcome to the report page, please select one of the options, either creating a new report or submitting an existing one.",
+                    "group": "Introduction"
+                },
+                "upload": {
+                    "title": "Upload Reports",
+                    "text": "Here you can upload finished reports in different formats to be submitted directly to the corresponding scheme.",
+                    "group": "Upload"
+                },
+                "clients": {
+                    "title": "Clients",
+                    "text": "Here you can configure the client credentials for the different schemes.",
+                    "group": "Upload"
+                },
+                "uploadFile": {
+                    "title": "Upload Reports",
+                    "text": "Drag and drop any report here to submit it to the corresponding authority. The format of the report does not matter as long as it includes some relevant information such as company name, date and the weights to report.",
+                    "group": "Upload"
+                },
+                "notifications": {
+                    "title": "Notifications",
+                    "text": "If any error occurs, the error will be shown here. If configured, you can also receive an email with the error message.",
+                    "group": "Upload"
+                },
+                "create": {
+                    "title": "Create New Report",
+                    "text": "Click here to create a new report. Here you have the ability to upload data from various sources and generate custom reports at your convenience.",
+                    "group": "Create"
+                },
+                "liveData": {
+                    "title": "Live Data",
+                    "text": "If you want to use live data, you can turn on the live data toggle. This will connect to your online stores and use the latest data for the report.",
+                    "group": "Create"
+                },
+                "orderListDropZone": {
+                    "title": "Order List Drop Zone",
+                    "text": "If you want to manually upload orders, you can drag and drop them here. The uploading process can take a few minutes depending on the size of the dataset. Once you have uploaded the orders, you have to map the data to the labels you want to use for the data. You can select different variables in the dropdown, which should correspond with the dataset.",
+                    "group": "Create"
+                },
+                "next": {
+                    "title": "Next",
+                    "text": "In the next step you can add return data to the report. If you have chosen live data, the returns received from it will be used automatically, but you can also upload additionalreturns manually.\\n\\nIn the third step, you can select the country, report type and timeframe that you want to create the report for. Finally, you will see an overview of the report details and allow you to create the report you chose. The report will be shown in the history as soon as it is available.",
+                    "group": "Create"
+                }
+            },
+            "history": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "This is the report history page. All reports that were created or that you submitted are shown here as well as the confirmations if they were sent to the corresponding authority.",
+                    "group": "Introduction"
+                },
+                "filters": {
+                    "title": "Filters",
+                    "text": "Here you can filter the results shown below by the country, type of report and time.",
+                    "group": "Filters"
+                },
+                "receipts": {
+                    "title": "Receipts Only",
+                    "text": "If you only want to see the report confirmations, you can select that here. That gives you a quick overview of the reports that were sent to the corresponding authority.",
+                    "group": "Filters"
+                },
+                "search": {
+                    "title": "Search",
+                    "text": "Search for any company, report name or country using this search. The results are updated immediately.",
+                    "group": "Filters"
+                },
+                "download": {
+                    "title": "Download",
+                    "text": "To download all reports shown below (applying the filters that you've chosen), click this button. \\n\\nNote: This might take 1-2mins to get the compressed file ready.",
+                    "group": "Download"
+                }
+            },
+            "download": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "Welcome to the download page. All reports that were automatically created or that you created manually are shown here.",
+                    "group": "Introduction"
+                },
+                "inprogress": {
+                    "title": "In Progress",
+                    "text": "In the first table you find the reports that are in progress. That means that the report deadline has not been reached yet, but we create daily updates to show you how much data you are already reporting until now.",
+                    "group": "Types"
+                },
+                "history": {
+                    "title": "History",
+                    "text": "In this table you find reports that are done and can be evaluated and send to the corresponding scheme",
+                    "group": "Types"
+                },
+                "country": {
+                    "title": "Sorted by Country",
+                    "text": "The reports are grouped by country",
+                    "group": "Reports"
+                },
+                "debugger": {
+                    "title": "Debugger",
+                    "text": "For each report you have a debugger that contains all raw data that was used in this report. This is especially important for audits.",
+                    "group": "Reports"
+                },
+                "report": {
+                    "title": "Report",
+                    "text": "This is the actual report that can be sent to the reporting scheme.",
+                    "group": "Reports"
+                },
+                "open": {
+                    "title": "Open",
+                    "text": "The first icon lets you view the report in full screen.",
+                    "group": "Icons"
+                },
+                "download": {
+                    "title": "Download",
+                    "text": "The second icon lets you download the EPR report as Excel sheet.",
+                    "group": "Icons"
+                },
+                "share": {
+                    "title": "Share",
+                    "text": "The third icon lets you share the report via mail.",
+                    "group": "Icons"
+                },
+                "delete": {
+                    "title": "Delete",
+                    "text": "The fourth icon lets you delete the report. If you do this, the report is deleted permanently and cannot be recovered.",
+                    "group": "Icons"
+                },
+                "send": {
+                    "title": "Send",
+                    "text": "The last icon lets you validate and send the report to the correct scheme.",
+                    "group": "Icons"
+                },
+                "checkbox": {
+                    "title": "Checkbox",
+                    "text": "The checkbox lets you select multiple reports to do grouped downloads or deletion.",
+                    "group": "Icons"
+                }
+            },
+            "general": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "Welcome to the general settings page. Here you can configure the settings for your ForSURE account. This includes managing the access of the different users and setting country specific settings.",
+                    "group": "Introduction"
+                },
+                "users": {
+                    "title": "Users",
+                    "text": "Here you can manage the access of the different users. You can add new users, edit their roles for the different parts of the software and delete users. You can also define API tokens that can be used for interacting with the software via API.",
+                    "group": "Users"
+                },
+                "addUser": {
+                    "title": "Add User",
+                    "text": "Adding a user is done by clicking this button and entering the email address of the user you want to add. They will receive an email with a link to create a password and log in to the software.",
+                    "group": "Users"
+                },
+                "addAPIToken": {
+                    "title": "Add API Token",
+                    "text": "Adding an API token is done by clicking this button. You can then copy the token to your clipboard by clicking the copy button. Note that the token is only shown once, so make sure to save it in a secure location.",
+                    "group": "Users"
+                },
+                "configuration": {
+                    "title": "Configuration",
+                    "text": "Here you can configure the settings for your ForSURE account. This includes notifications for thresholds and country specific settings required for submitting reports to the different schemes.",
+                    "group": "Configuration"
+                },
+                "countryTabs": {
+                    "title": "Country Tabs",
+                    "text": "Please add all countries that you are selling to. You can then configure the settings for each country, such as the PRO you are using and enter the required information for the different schemes.",
+                    "group": "Configuration"
+                },
+                "saveChanges": {
+                    "title": "Save Changes",
+                    "text": "After you have made all the changes you want to make, you can save the changes by clicking the save button.",
+                    "group": "Configuration"
+                }
+            },
+            "settings": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "On this settings page, you have the ability to define the labels for your order and category list, including specific details for each country. Additionally, you can set up a live connector to streamline your processes if desired.",
+                    "group": "Introduction"
+                },
+                "profile": {
+                    "title": "Profile",
+                    "text": "This dropdown menu allows you to select an existing profile or create a new one.\\n\\nIt's recommended to have one profile for each source of your data. For instance, you might have one profile for Shopify and another for WooCommerce, ensuring your data is organized by its origin.\\n\\nTo rename or delete a profile, simply click the pencil icon.",
+                    "group": "General"
+                },
+                "liveData": {
+                    "title": "Live Data",
+                    "text": "This slider enables the use of live data. By turning it on, you can establish a direct connection to your Shopify store, ensuring real-time data synchronization.",
+                    "group": "Live Data"
+                },
+                "connectorConfig": {
+                    "title": "Connector",
+                    "text": "In this section, you can input the URL of your Shopify store as well as the API token required for integration. For guidance on how to obtain these details, please refer to the following guide: <a href='https:\/\/help.shopify.com\/en\/manual\/apps\/app-types\/custom-apps'>Shopify Help Center - Custom Apps<\/a>.",
+                    "group": "Live Data"
+                },
+                "orderlistConfig": {
+                    "title": "Orderlist",
+                    "text": "In this area, you have the option to specify the column names for your order list, which is necessary if you're not using live data. It's important to enter the column name exactly as it appears in the uploaded file, paying close attention to the use of lower\/uppercase letters, to ensure it corresponds correctly to the data row.",
+                    "group": "Orderlist"
+                },
+                "returnlistConfig": {
+                    "title": "Returnlist",
+                    "text": "This section allows you to define the column names for your return list, applicable if you are not using live data. Similar to order list setup, it's crucial to pay attention to the casing of the letters in the column names to ensure they match precisely with those in your uploaded file.",
+                    "group": "Returnlist"
+                },
+                "categorylistConfig": {
+                    "title": "Categorylist",
+                    "text": "This area is designated for defining the labels for your category list. The category list can be uploaded in the categorylist tab and is the same for all profiles.\\n\\nOnly activate the Packaging, Batteries, and Electro if you need them.",
+                    "group": "Categorylist"
+                },
+                "categorylistCountryConfig": {
+                    "title": "Categorylist",
+                    "text": "For each country, there might be specific columns required in the category list to meet local regulations or reporting standards. In this section, you're encouraged to add the countries relevant to your operations and input the necessary labels for those columns. If certain elements, like Glass for example, do not apply to your sold products, you have the option to leave those columns empty, ensuring your category list is both accurate and compliant.",
+                    "group": "Categorylist"
+                }
+            },
+            "categorylist": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "This page is designed for uploading your existing category list and provides the tools needed to edit it, ensuring it conforms to the required format. It's a streamlined process for efficiently managing and updating your category data.",
+                    "group": "Introduction"
+                },
+                "upload": {
+                    "title": "Upload",
+                    "text": "Simply click this button to add a category list. You can upload an existing categorylist by navigating to your file selection or you can add a categorylist from your Shopify store. \\n\\nOnce you've selected the categorylist, proceed to upload it here. This will create a popup where you can define the mappings, to make sure the uploaded categorylist is mapped to the labels our software can understand.",
+                    "group": "Upload"
+                },
+                "edit": {
+                    "title": "Edit",
+                    "text": "Here you have the flexibility to modify your category list by adding new rows or columns to better organize your data. \\n\\nTo edit the content of any cell, simply click on it. If only certain values are allowed, you can use the dropdown menu to select the correct value, otherwise you can just type in the value. \\n\\nIf you want details about the column, you can hover over the column header to see a tooltip with the details. Clicking on the column header will allow you to edit the column name.",
+                    "group": "Edit"
+                },
+                "addRow": {
+                    "title": "Add Row",
+                    "text": "Here you can add a new row to the category list. Each SKU is a new row and each row needs to have a unique SKU.",
+                    "group": "Edit"
+                },
+                "addColumn": {
+                    "title": "Add Column",
+                    "text": "Here you can add a new column to the category list. Columns are used to describe the properties of the products. For the countries that are supported by ForSURE, the columns can be mapped to predefined labels. For other countries, you should use Unmapped.",
+                    "group": "Edit"
+                },
+                "addRule": {
+                    "title": "Add Rule",
+                    "text": "With this button you can add a new rule to the category list. Rules are used to add exceptions to the category list. For example, if you want to exclude a product from the reports, you can add a rule to exclude it.",
+                    "group": "Edit"
+                },
+                "save": {
+                    "title": "Save",
+                    "text": "Here you can save the changes you made to the category list. Changes are not saved unless you click this button.",
+                    "group": "Edit"
+                },
+                "tabs": {
+                    "title": "Tabs",
+                    "text": "Here you can filter the category list to only see the columns required by the different countries.",
+                    "group": "Tabs"
+                },
+                "versions": {
+                    "title": "Versions",
+                    "text": "Here you can see the different versions of the category list to see the changes you made over time. Every time you save, you create a new version.",
+                    "group": "Versions"
+                },
+                "dropdown": {
+                    "title": "Dropdown",
+                    "text": "When you edit a cell, you can use the dropdown to select the correct value. Hovering over the options shows the description of the value. If the value is not in the dropdown, you can just type it in.",
+                    "group": "Dropdown"
+                }
+            }
+        }
+    },
+    "team": {
+        "linkedin": {
+            "Niclas-Brinkmann": "https:\/\/www.linkedin.com\/in\/niclas-brinkmann\/",
+            "Isaak-Siebenga": "https:\/\/www.linkedin.com\/in\/isaak-siebenga-5a4425200\/",
+            "Daniel-Arians": "https:\/\/www.linkedin.com\/in\/daniel-arians-870a9716b\/",
+            "Daniel-Hamandouche": "https:\/\/www.linkedin.com\/in\/daniel-hamandouche\/"
+        }
+    }
+}

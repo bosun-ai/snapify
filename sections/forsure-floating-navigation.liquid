@@ -113,10 +113,11 @@
     display: none; /* Hide the tooltip by default */
     position: absolute;
     top: 100%; /* Position above the element */
-    background: red;
+    background: var(--forsure-main-red);
     color: white;
     padding: 0.5rem;
     font-size: 0.9rem;
+    font-weight: 100;
     border-radius: 5px;
     white-space: nowrap;
     z-index: 1000;
@@ -125,6 +126,12 @@
 
 .active {
   background-color: #2255ff;
+}
+
+#gear-icon svg{
+  fill: #17161c;
+  height: 45px;
+  width: 45px;
 }
 
 #headerIcons .dropdown {
@@ -136,6 +143,7 @@
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
   <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
+  {% render 'forsure-login' %}
   {%- liquid
   assign columns_mobile_int = section.settings.columns_mobile | plus: 0
   assign show_mobile_slider = false
@@ -143,6 +151,7 @@
     assign show_mobile_slider = true
   endif
 -%}
+
   {% render 'forsure-notifications' %}
   {% render 'forsure-guide' %}
   <div id="navbar-side" class="page-width multicolumn color-{{ section.settings.color_scheme }} gradient{% unless section.settings.background_style == 'none' and settings.text_boxes_border_thickness > 0 or settings.text_boxes_shadow_opacity > 0 %} background-{{ section.settings.background_style }}{% endunless %}{% if section.settings.title == blank %} no-heading{% endif %}">
@@ -150,7 +159,7 @@
   <slider-component class="slider-mobile-gutter" style="display: flex;">
     <ul
       class="color-{{ section.settings.color_scheme }} grid--peek grid--3-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop slider slider--tablet collection-list--{{ section.blocks.size }}-items"
-      style="border-radius:1rem;padding:0;overflow-x: auto;list-style-type: none;width:fit-content;margin:auto;border:0.2rem solid #17161c"
+      style="border-radius:1rem;padding:0;overflow-x: auto;list-style-type: none;width:fit-content;margin:auto;border:0.2rem solid #17161c;margin-right: 1rem;"
       id="ul-submenu"
       role="list">
       {% assign foundCurrent = false %}
@@ -180,13 +189,13 @@
         {% if isCurrent %}
           <li
             id="list-element-{{ page_name }}"
-            class="list-element-active grid__item slider__slide slider__slide--full-width"
+            class="list-element-active grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
             style="width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
             <div class="greyedout-tooltip">Please upgrade to the full version to access this</div>
             <a
               href="{{ link.url }}"
               id="a-{{ page_name }}"
-              class="header__menu-item list-menu__item link link--text focus-inset content-link"
+              class="header__menu-item list-menu__item link link--text focus-inset content-link greyed_out"
               data-url="{{ link.url }}"
               style="display: flex;flex-wrap: nowrap;
                           background-color:#2255FF;list-style-type: none;width:fit-content;max-width:fit-content;padding-left:1rem;padding-right:1rem">
@@ -206,13 +215,13 @@
             {% else %}
               <li
                 id="list-element-{{ page_name }}"
-                class="list-element grid__item slider__slide slider__slide--full-width"
+                class="list-element grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
                 style="background-color: #fafafa;width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
                 <div class="greyedout-tooltip">Please upgrade to the full version to access this</div>
                 <a
                   href="{{ link.url }}"
                   id="a-{{ page_name }}"
-                  class="header__menu-item list-menu__item link link--text focus-inset content-link"
+                  class="header__menu-item list-menu__item link link--text focus-inset content-link greyed_out"
                   data-url="{{ link.url }}"
                   {% if link.current %}aria-current="page"{% endif %}
                   style="width:fit-content;max-width:fit-content;padding-left:1rem;padding-right:1rem">
@@ -231,31 +240,29 @@
         async function getNavbarElements() {
             try {
                 var data = await unifiedSendRequest(NAVBAR, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
-                console.log(data);
+                window.userPermissions = data;
                 var available_url = null;
                 for (const [nav_element, show] of Object.entries(data)) {
-                      if (!show) {
-                          // Add 'greyed_out' class to elements that should be hidden or disabled
-                          const element = document.getElementById(`a-${nav_element}`);
-                          const wrapper = document.getElementById(`list-element-${nav_element}`);
-                          if (element) {
-                              element.classList.add('greyed_out');
-                              wrapper.classList.add('greyed_out_wrapper');
+                    if (show) {
+                      // Add 'greyed_out' class to elements that should be hidden or disabled
+                      const element = document.getElementById(`a-${nav_element}`);
+                      const wrapper = document.getElementById(`list-element-${nav_element}`);
+                      if (element) {
+                          element.classList.remove('greyed_out');
+                          wrapper.classList.remove('greyed_out_wrapper');
+                          if (available_url === null) {
+                            available_url = nav_element;
                           }
-                      } else if (available_url === null) {
-                        available_url = nav_element;
                       }
+                    }
                  }
                 if (data['{{ currentLink }}'] === false) {
-                    console.log("You don't have access to this site, redirecting you.");
                     if (available_url === null) {
                       window.location.href = '/';
                     }
-                    
                     window.location.href = `{{ currentPath }}/${available_url}`;
                 }
                 if (data['{{ currentLink }}?logged_in'] === false) {
-                  console.log("You don't have access to this site, redirecting you.");
                   if (available_url === null) {
                       window.location.href = '/';
                     }
@@ -266,7 +273,7 @@
                 showMessage('Failed to get navigation: ' + error.message, false);
             }
         }
-        getNavbarElements()
+        document.addEventListener('DOMContentLoaded', getNavbarElements);
       </script>
       {%- if show_mobile_slider -%}
         <div class="slider-buttons no-js-hidden">
@@ -306,12 +313,15 @@
           </g>
           </svg>
       </div>
-      <div style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;" id="notificationBell">
+      <a id="gear-icon"  style="margin: auto;margin-top: 7px;cursor: pointer;background: #fafafa;" href="{{ pages['forsure-configuration'].url }}">
+        {% render 'icon-gear' %}
+      </a>
+      <div style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;position: relative;" id="notificationBell">
           <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
             <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"></path>
           </svg>
-          <div id="notification-badge" class="badgeNotification" style="top: 8px">1</div>
-        </div>
+          <div id="notification-badge" class="badgeNotification hidden" style="top: -1px">1</div>
+      </div>
       {% else %}
       <!-- temporary mockup -->
           <div id="headerIcons">
@@ -360,10 +370,15 @@
           </g>
           </svg>
       </div>
-      <svg id="notificationBell" onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+      <a id="gear-icon"  style="margin: auto;margin-top: 7px;cursor: pointer;background: #fafafa;" href="{{ pages['forsure-configuration'].url }}">
+        {% render 'icon-gear' %}
+      </a>
+      <div style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;background: #fafafa;position: relative;" id="notificationBell">
+        <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;" height="33" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                 <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"/>
-                <div id="notification-badge" class="badgeNotification hidden" style="top: 16px;">0</div>
               </svg>
+              <div id="notification-badge" class="badgeNotification hidden" style="top: -1px">1</div>
+      </div>
 
   <!-- end mockup -->
       {% endunless %}

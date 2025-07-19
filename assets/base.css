@@ -3083,3 +3083,8 @@ body {
     font-size: 1.6rem;
   }
 }
+
+
+:root {
+  --forsure-main-red: #a80000;
+}

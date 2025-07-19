@@ -14,9 +14,11 @@ var username = "test";
 var password = "test";
 
 
-function login(id, key) {
+async function login(id, key) {
   username = id;
   password = key;
+  data = await requestToken();
+  TOKEN = data["access_token"];
 }
 
 async function requestToken() {
@@ -26,7 +28,6 @@ async function requestToken() {
   formData.append("grant_type", "password");
   formData.append("client_id", "Shopify");
   formData.append("client_secret", client_secret);
-
   const response = await fetch(auth_url, {
     method: 'POST',
     body: formData
@@ -42,16 +43,13 @@ async function requestToken() {
 
 async function unifiedSendRequest(endpoint, options = {}) {
   const {formData = false, method = 'POST', headerArgs = false} = options;
-  console.log(`Calling unifiedSend with FormData ${formData} and method ${method} for endpoint ${endpoint}`)
   let response;
   for(let i=0;i<3;i++){
     if (!TOKEN) {
       try {
         data = await requestToken();
-        console.log(data);
         TOKEN = data["access_token"];
       } catch (error) {
-        console.error(error.message);
         TOKEN = false;
       }
     }
@@ -75,7 +73,6 @@ async function unifiedSendRequest(endpoint, options = {}) {
         headers: header,
       });
     }
-    console.log(response.status);
     if(response.status != 401) {
       break;
     }
@@ -90,13 +87,11 @@ async function unifiedSendRequest(endpoint, options = {}) {
     } else {
       // automatically download the file
       const contentDisposition = response.headers.get("content-disposition");
-      console.log(response.headers);
       let filename = 'EPR_report.xlsx';
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename\s*=\s*"([^"]+)"/i);
         if (filenameMatch && filenameMatch.length > 1) {
           filename = filenameMatch[1];
-          console.log(filename);
         }
       }
       // Handle file (blob) response
@@ -112,9 +107,7 @@ async function unifiedSendRequest(endpoint, options = {}) {
     }
   } else {
     const errorMessage = await response.json();
-    console.log(errorMessage);
     const errorDetails = errorMessage["detail"];
-    console.log(errorDetails);
     if (errorDetails === '') {
       errorDetails = await response.text();
     }
@@ -125,13 +118,11 @@ async function unifiedSendRequest(endpoint, options = {}) {
 
 async function unifiedSendRequestBlob(endpoint, options = {}) {
   const {formData = false, method = 'POST', headerArgs = false} = options;
-  console.log(`Calling unifiedSendBlob with FormData ${formData} and method ${method} for endpoint ${endpoint}`)
   let response;
   for(let i=0;i<3;i++){
     if (!TOKEN) {
       try {
         data = await requestToken();
-        console.log(data);
         TOKEN = data["access_token"];
       } catch (error) {
         console.error(error.message);
@@ -158,7 +149,6 @@ async function unifiedSendRequestBlob(endpoint, options = {}) {
         headers: header,
       });
     }
-    console.log(response.status);
     if(response.status != 401) {
       break;
     }
@@ -169,12 +159,25 @@ async function unifiedSendRequestBlob(endpoint, options = {}) {
       return await response.blob();
   } else {
     const errorMessage = await response.json();
-    console.log(errorMessage);
     const errorDetails = errorMessage["detail"];
-    console.log(errorDetails);
     if (errorDetails === '') {
       errorDetails = await response.text();
     }
     throw new Error(errorDetails);
   }
+}
+
+
+function waitForPermission(callback) {
+  const check = () => {
+    if (
+      window.userPermissions &&
+      Object.keys(window.userPermissions).length > 0
+    ) {
+      callback();
+    } else {
+      setTimeout(check, 50); // Try again in 100ms
+    }
+  };
+  check();
 }

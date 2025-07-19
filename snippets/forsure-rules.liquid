@@ -124,7 +124,7 @@ Usage:
 {% render 'forsure-simple-notification' %}
 {% render 'forsure-confirmation' %}
 <div id="overlayRules"></div>
-<div id="rules-table" style="display: none">
+<div id="rules-table" class="losensitive" style="display: none">
     <span class="close" onclick="hideModal()">&times;</span>
     <div class="modal-header">
         <h2 style="margin-right: auto">Rules</h2>
@@ -494,12 +494,10 @@ async function saveNewRule() {
         targetColumn2,
         conditions
     }
-    console.log(ruleData);
     try {
         const response = await unifiedSendRequest(CATEGORYLISTRULES, {
             formData: JSON.stringify(ruleData), headerArgs: { 'Content-Type': 'application/json'}
         });
-        console.log('Rule saved successfully:', response);
         showMessage('Rule saved successfully', true);
         await displayRules();
     } catch (error) {
@@ -530,7 +528,6 @@ function deleteCondition(button) {
 async function getColumns() {
     try {
         const response = await unifiedSendRequest(GETCATEGORYLISTCOLS, {method: 'GET'});
-        console.log(response);
         return response;
     } catch (error) {
         console.error('Failed to get categorylist columns:', error.message);
@@ -541,7 +538,6 @@ async function getColumns() {
 async function getRules() {
     try {
         const response = await unifiedSendRequest(CATEGORYLISTRULES, {method: 'GET'});
-        console.log(response);
         return response;
     } catch (error) {
         console.error('Failed to get categorylist rules:', error.message);
@@ -551,7 +547,6 @@ async function getRules() {
 async function deleteRule(ruleID) {
     try {
         const response = await unifiedSendRequest(CATEGORYLISTRULES + `?ruleID=${ruleID}`, {method: 'DELETE'});
-        console.log(response);
         await displayRules();
     } catch (error) {
         console.error('Failed to delete categorylist rules:', error.message);
@@ -564,7 +559,6 @@ async function updateStatus(ruleData) {
         const response = await unifiedSendRequest(CATEGORYLISTRULES, {
             formData: JSON.stringify(ruleData), headerArgs: { 'Content-Type': 'application/json'}
         });
-        console.log('Rule saved successfully:', response);
         showMessage('Rule saved successfully', true);
         await displayRules();
     } catch (error) {

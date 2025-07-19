@@ -1,0 +1,322 @@
+
+{% style %}
+#deadlineContainer {
+  scrollbar-width: none;
+  height: 60%;
+}
+
+#deadlineList {
+  list-style-type: none;
+  padding: 1rem 1rem 0 1rem;
+  text-align: left;
+}
+
+.deadline {
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  border: 0.2rem solid #17161c;
+  padding: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.past-deadline {
+  background-color: #a80000;
+  color: white;
+}
+.done-deadline {
+  background-color: #2255ff;
+  color: white;
+}
+
+
+.done-deadline div div svg #Electronics .st2,
+.past-deadline div div svg #Electronics .st2 {
+  stroke: #fafafa;
+}
+.done-deadline div div svg #Electronics .st5,
+.past-deadline div div svg #Electronics .st5 {
+  stroke: #fafafa;
+  fill: #fafafa;
+}
+.done-deadline div div svg #Batterie .st2, 
+.past-deadline div div svg #Batterie .st2 {
+  stroke: #fafafa;
+  /* fill: #fafafa; */
+}
+.done-deadline div div svg #Batterie .st5,
+.past-deadline div div svg #Batterie .st5 {
+  stroke: #fafafa;
+  fill: #fafafa;
+}
+
+.done-deadline div div svg #Packaging .st2,
+.past-deadline div div svg #Packaging .st2  {
+  stroke: #fafafa;
+  /* fill: #fafafa; */
+}
+.done-deadline div div svg #Packaging .st5,
+.past-deadline div div svg #Packaging .st5  {
+  stroke: #fafafa;
+  /* fill: #fafafa; */
+}
+.reportDeadlineName {
+  margin: auto;
+  margin-left: 1rem;
+}
+.typeDescription {
+  flex: 1;
+   display: flex; 
+   /* justify-content: center; */
+   margin-right: 3rem
+}
+.top-trigger {
+  display: block!important;
+  height: 1px;
+}
+@keyframes fadeIn {
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+.rounded-deadline {
+  flex: 1; /* Ensures it takes up available space */
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto; /* Adjusts dynamically */
+  position: relative;
+  height: 100%; /* Ensures full height */
+  padding: 0 1rem; /* Adds padding to prevent text from touching edges */
+  border-radius: 0 8px 8px 0; /* Optional: Adds a rounded effect */
+  padding: 1rem;
+  padding-right: 2rem;
+  padding-left: 2rem;
+}
+
+#no-deadlines {
+  width: 50%;
+  font-weight: bold;
+}
+{% endstyle %}
+
+<div id="deadlineContainer" class="widget grid-item widget-left">
+    <div id="deadlineTitle" class="grid-title">
+      <div>Deadlines</div>
+      <div class="icon-container">
+        {% comment %} <div onclick="openDeadlinesSettings()">{% render 'icon-gear' %}</div> {% endcomment %}
+      </div>
+    </div>
+      <ul id="deadlineList">
+        <div class="warning-item">
+          <div id="no-deadlines">
+              No deadlines
+          </div>
+      </div>
+      </ul>
+  </div>
+  
+  <script>
+    async function getReportsDue() {
+      try {
+          var data = await unifiedSendRequest(NEXTREPORTS, {method: 'GET'});
+          return data;
+      } catch(error){
+          console.error(`Failed to get data, received error ${error}`);
+          return errorMessage(error.message);
+      }
+  }
+
+  function createDeadlineList(results) {
+    const container = document.getElementById('deadlineContainer');
+    const deadlineList = document.getElementById('deadlineList');
+    deadlineList.innerHTML = '';
+
+    
+    const topTrigger = document.createElement('div');
+    topTrigger.className = 'top-trigger';
+    topTrigger.style.height = '1px';
+    deadlineList.appendChild(topTrigger);
+
+    let pastDeadlines = [];
+    let displayedDeadlines = [];
+
+    results.forEach(deadline => {
+      const listItem = document.createElement('li');
+      listItem.id = `${deadline.country}-${deadline.type}-${deadline.deadline}`;
+      listItem.title = deadline.description;
+      listItem.className = 'deadline';
+
+      const deadlineDate = new Date(deadline.deadline_timestamp);
+      const currentDate = new Date();
+      var className = '';
+      if (deadline.done === true) {
+        className = 'done-deadline';
+      }
+      else if (deadlineDate < currentDate) {
+        className = 'past-deadline';
+      }
+      if (deadlineDate < currentDate) {
+        listItem.style.display = 'none';
+        pastDeadlines.push(listItem);
+      } else {
+        displayedDeadlines.push(listItem);
+      }
+
+      let catImg;
+      if (deadline.type === 'WEEE') {
+        catImg = getWEEESVG();
+      } else if (deadline.type === 'Batteries') {
+        catImg = getBatteriesSVG();
+      } else if (deadline.type === 'Packaging') {
+        catImg = getPackagingSVG();
+      } else {
+        catImg = ''; // Default empty if unknown category
+      }
+
+      listItem.innerHTML = `
+        <div style="display: flex; align-items: center;">
+            <div style="flex: 1; font-size: large;font-weight: bold; text-align: left;margin-left:3rem">${deadline.country}</div>
+            <div class="typeDescription"><div style="display: flex">${catImg}<div class="reportDeadlineName">${deadline.type}</div></div></div>
+            <div class="${className} rounded-deadline" style="flex: 1; text-align: right; font-size: large;font-weight: bold;">${deadline.deadline}</div>
+        </div>
+      `;
+
+      deadlineList.appendChild(listItem);
+    });
+
+    
+    function loadOlderDeadlines() {
+      if (pastDeadlines.length === 0) return;
+
+      const scrollYBeforeAdding = container.scrollHeight - container.scrollTop;
+
+      // Take the next batch of past deadlines to display
+      let nextBatch = pastDeadlines.splice(-5); // Show the next 5 past deadlines
+      console.log(nextBatch);
+
+      nextBatch.forEach(item => {
+          item.style.display = 'block';
+          deadlineList.insertBefore(item, deadlineList.firstChild);
+      });
+
+      // Maintain scroll position
+      container.scrollTop = container.scrollHeight - scrollYBeforeAdding;
+    }
+    console.log(pastDeadlines);
+    const observer = new IntersectionObserver((entries) => {
+      console.log(entries);
+        if (entries[0].isIntersecting) {
+            loadOlderDeadlines();
+        }
+    }, { root: container, threshold: 0.1 });
+
+    observer.observe(topTrigger);
+
+  }
+
+  
+
+  
+
+function getWEEESVG() {
+  return `
+  <svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+  <style type="text/css">
+  .st2-weee{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+  .st5-weee{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+  </style>
+  <path class="st2-weee" d="M146.1,291v-97.83h207.8V291c0,49.51-40.14,89.64-89.64,89.64h-28.51C186.24,380.64,146.1,340.51,146.1,291z"
+  />
+  <g>
+  <path class="st2-weee" d="M187.67,154.27V18.49c0-6.02,4.88-10.9,10.9-10.9h3.47c6.02,0,10.9,4.88,10.9,10.9v135.78H187.67z"/>
+  <path class="st2-weee" d="M287.06,153.14V18.49c0-6.02,4.88-10.9,10.9-10.9h3.47c6.02,0,10.9,4.88,10.9,10.9v134.65H287.06z"/>
+  </g>
+  <path class="st5-weee" d="M115.04,176.12v-5.27c0-9.15,7.42-16.56,16.56-16.56h236.78c9.15,0,16.56,7.42,16.56,16.56v5.27
+  c0,9.15-7.42,16.56-16.56,16.56H131.61C122.46,192.68,115.04,185.27,115.04,176.12z"/>
+  <line class="st2-weee" x1="238.95" y1="494.11" x2="239.08" y2="383.94"/>
+  <line class="st2-weee" x1="271.94" y1="494.11" x2="272.07" y2="383.94"/>
+  </g>
+  <polygon class="st2-weee" points="282.39,275.45 248.85,275.59 280.03,215.42 225.39,290.48 258.93,290.34 235.83,350.84 "/>
+  </g>
+  </svg>`;
+}
+
+function getBatteriesSVG() {
+  return `<svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+      <style type="text/css">
+      .st2-batteries{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+      .st5-batteries{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+      </style>
+      <g id="Batterie">
+      <path class="st5-batteries" d="M203.89,51.98c-2.21-4.28,0.25,97.41,0.25,97.41s42.27,29.92,122.68,29.93
+      c94.48,0.01,119.49-35.82,119.49-35.82l-0.49-93.23c0,0-22.93,35.9-114.83,36.31S203.89,51.98,203.89,51.98z"/>
+      <path class="st5" d="M246.1,469.14c-6.69-27.84-3.99-39,3.54-59.36c7.53-20.36,27.4-36.29,27.4-36.29l72.18,21.06
+      c0,0-16.51,13.14-26.11,34.88c-9.6,21.74-1.54,61.43-1.54,61.43L246.1,469.14z"/>
+      <g>
+      <path class="st2-batteries" d="M202.76,340.43c0-90.59,0-292.84,0-292.84"/>
+      <path class="st2-batteries" d="M446.02,47.02c0,0,0,313.45,0,335.21c0,16.32-30.63,30.32-74.29,36.31"/>
+      <path class="st2-batteries" d="M368.3,49.3c0,6.83-19.17,12.37-42.81,12.37c-23.64,0-42.81-5.54-42.81-12.37"/>
+      <path class="st2-batteries" d="M445.93,140.06c0,21.76-54.44,39.4-121.59,39.4s-121.59-17.64-121.59-39.4"/>
+      <ellipse class="st2-batteries" cx="324.34" cy="46.45" rx="121.59" ry="39.4"/>
+      <ellipse class="st2-batteries" cx="325.48" cy="28.18" rx="42.81" ry="12.37"/>
+      <line class="st2-batteries" x1="282.62" y1="28.18" x2="282.73" y2="49.87"/>
+      <line class="st2-batteries" x1="368.24" y1="27.74" x2="368.35" y2="49.43"/>
+      </g>
+      <g>
+      <path class="st2-batteries" d="M252.82,469.19c-11.57-3.69-14.14-28.03-5.74-54.37c8.4-26.34,24.59-44.7,36.15-41.01"/>
+
+      <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -186.2469 634.8038)" class="st2-batteries" cx="341.22" cy="444.84" rx="50.06" ry="22.6"/>
+
+      <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -186.1162 635.1949)" class="st2-batteries" cx="341.56" cy="444.94" rx="17.63" ry="4.28"/>
+
+      <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -180.9776 651.7137)" class="st2-batteries" cx="355.43" cy="449.69" rx="17.63" ry="4.28"/>
+      <path class="st2-batteries" d="M327.51,493.05c0,0-251.63-80.23-269.1-85.8s-24.82-31.45-16.42-57.8c8.4-26.35,29.38-43.2,46.84-37.63
+      s268.64,85.66,268.64,85.66"/>
+      <line class="st2-batteries" x1="359.13" y1="432.04" x2="348.08" y2="428.52"/>
+      <line class="st2-batteries" x1="348.44" y1="465.63" x2="337.38" y2="462.11"/>
+      </g>
+      </g>
+      </svg>`;
+}
+
+function getPackagingSVG() {
+  return `<svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+      <style type="text/css">
+      .st2-packaging{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+      .st5-packaging{fill:#2255FF;}
+      </style>
+      <g id="Packaging">
+      <polygon class="st5-packaging" points="87.49,201.21 252.31,109.68 420.36,208 248.74,293.81 "/>
+      <polyline class="st2-packaging" points="227.5,282.17 249.62,266.08 273.3,282.28 "/>
+      <path class="st2-packaging" d="M422.56,286.91l0.51,84.24c0.06,10.33-5.71,19.81-14.92,24.49l-143.75,73.07c-7.68,3.9-16.76,3.95-24.48,0.12
+      L97.49,398.26c-9.23-4.57-15.1-13.96-15.17-24.26l-0.65-93.66"/>
+      <polygon class="st2-packaging" points="250.86,294.51 286.6,361.68 462.16,264.53 420.6,206.01 "/>
+      <polygon class="st2-packaging" points="250.24,295.75 84.67,201.45 44.56,257.95 214.78,361.02 "/>
+      <polyline class="st2-packaging" points="250.24,110.97 194.72,53.85 28.56,139.63 84.67,201.45 250.24,110.97 "/>
+      <polyline class="st2-packaging" points="250.24,110.97 420.26,205.45 478.13,139.44 308.96,53.38 250.24,110.97 "/>
+      <line class="st2-packaging" x1="250.24" y1="110.97" x2="250.24" y2="264.75"/>
+      </g>
+      </svg>`;
+}
+
+
+
+
+waitForPermission(async function() {
+  if (window.userPermissions['deadline'] && window.userPermissions['forsure-dashboard']) {
+    results = await getReportsDue();
+    createDeadlineList(results);
+  }
+});
+</script>

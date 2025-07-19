@@ -33,7 +33,6 @@ function getProfiles(filters) {
 // }
 
 function getFilters() {
-    console.log("Getting Filters");
     getCountries(filterData);
     getDates(filterData);
     getProfiles(filterData);
@@ -46,7 +45,6 @@ function updateCountry() {
         .from(this.options)
         .filter(option => option.selected)
         .map(option => option.value);
-    console.log(`Selected countries: ${selCountries}`);
     filterData['country'] = selCountries;
     updateCharts();
     // Update the dates, reports, and columns based on selected country
@@ -57,7 +55,6 @@ function updateCountry() {
 }
 
 function updateDatepicker(start, end) {
-    console.log(`Selected dates: ${start} until ${end}`);
     filterData['start_time'] = start.format('YYYY-MM-DD');
     filterData['end_time'] = end.format('YYYY-MM-DD');
     updateCharts();
@@ -74,7 +71,6 @@ function updateProfiles() {
         .from(this.options)
         .filter(option => option.selected)
         .map(option => option.value);
-    console.log(`Selected profiles: ${selProfiles}`);
     filterData['profile'] = selProfiles;
     updateCharts();
     // getReports(filterFormData);
@@ -132,13 +128,7 @@ const widgetChartParams = {}
 // }
 
 async function initDropdowns() {
-    console.log("Initing Dropdowns");
-    try {
-      let tokenreq = await requestToken();
-      TOKEN = tokenreq["access_token"];
-    } catch (error) {
-      console.log(error.message);
-    }
+    document.getElementById('filters').style.display = 'flex';
     getFilters();
   }
 
@@ -147,14 +137,12 @@ async function initDropdowns() {
     try {
         const response = await unifiedSendRequest(STATSREPORTS, {formData: JSON.stringify(filters), 
             headerArgs: {'Content-Type': 'application/json'}});
-        console.log(response);
 
         const dropdown = document.getElementById(dropdownId);
 
         dropdown.innerHTML = "";
 
         const entries = response[key];
-        console.log(`Filling dropdown ${key} with ${entries}`);
         
         entries.forEach(entry => {
             const option = document.createElement("option");
@@ -190,13 +178,11 @@ async function getDates() {
     try {
         const response = await unifiedSendRequest(STATSREPORTS, {formData: JSON.stringify(filters), 
             headerArgs: {'Content-Type': 'application/json'}});
-        console.log(response);
         // Find min start date and max end date
         const minDate = new Date(response.start_time);
         const maxDate = new Date(response.end_time);
         const startDate = new Date(maxDate);
         startDate.setDate(startDate.getDate() - 30);
-        console.log(minDate);
         function tsToDate(ts) {
             var d = new Date(ts);
             var lang = "en-NL";
@@ -248,7 +234,6 @@ async function getDates() {
             }
         }, function (start, end, label) {
             updateDatepicker(start, end);
-            // console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
             if (typeof redraw === 'function') {
                 // check that redraw is known
                 redraw();

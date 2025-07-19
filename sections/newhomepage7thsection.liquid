@@ -24,12 +24,7 @@
             "id": "button_label",
             "default": "Contact Us",
             "label": "Button"
-          }, {
-            "type": "url",
-            "id": "button_link",
-            "label": "Button Link"
           }
-  
   ],
         "presets": [
       {
@@ -104,7 +99,7 @@
       <div class="section7text" style="margin-top: 2%;">
         <h2 style="color:#fafafa">{{ section.settings.title }}</h2>
         <p style="color:#fafafa">{{ section.settings.text }}</p>
-        <a href="{{ section.settings.button_link }}" class="button button--primary" style="font-size: 1em; font-weight: bold; z-index:1;">{{ section.settings.button_label }}</a> 
+        <div onclick="event.stopPropagation(); showContactOptions()" class="button button--primary" style="font-size: 1em; font-weight: bold; z-index:1;">{{ section.settings.button_label }}</div> 
       </div>
     
     </div>

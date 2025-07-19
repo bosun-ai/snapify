@@ -1,4 +1,4 @@
-{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+{% comment %} {{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
 {{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
@@ -339,7 +339,6 @@ div.display-flex {
   async function getProfiles() {
     try {
       const data = await unifiedSendRequest(GETPROFILES, {method: 'GET'});
-      console.log(data);
       // Get the select dropdown element
       const dropdown = document.getElementById("profileDropdown");
       // Clear any existing options
@@ -371,7 +370,6 @@ div.display-flex {
   function onDropdownChange() {
     let dropdown = document.getElementById('profileDropdown');
     let selectedValue = dropdown.value;
-    console.log(`Selected profile: ${selectedValue}`);
     getCategorylistLabels();
     {% if customer.tags contains 'member' %}
       getOrderlistLabels();
@@ -405,14 +403,11 @@ function handleToggleOnProfileChange() {
   let dropdown = document.getElementById("profileDropdown");
   let profile = dropdown.value;
   let liveData = dropdown.options[dropdown.selectedIndex].dataset.liveData === "true";
-  console.log(`Using live data: ${liveData}`);
   var liveDataToggle = document.getElementById('liveDataToggle');
   if (liveData && !liveDataToggle.checked) {
     liveDataToggle.click();
-    console.log(`Clicked liveDataToggle to set it to on`);
   } else if (!liveData && liveDataToggle.checked) {
     liveDataToggle.click();
-    console.log(`Clicked liveDataToggle to set it to off`);
   }
 
 }
@@ -530,7 +525,6 @@ function createTable(configDiv, tableData) {
         if (['TOBATT', 'BATTWEIGHT'].includes(row.key)) {
           input.disabled = checkboxInputMap['BATT'].disabled;
         }
-        console.log(row.key);
         if ('api_token' === row.key) {
           input.type = 'password';
           input.placeholder = 'shpat_...';
@@ -591,7 +585,6 @@ function createTableCategory(configDiv, tableData, settings=false) {
         }
         var tableRow = document.createElement('tr');
          if (row.key === 'countries') {
-          console.log('check');
           var tableCol = document.createElement('td');
           tableCol.colSpan = 6;
           var tableId = 'countryTable';
@@ -675,7 +668,6 @@ function createTableCategory(configDiv, tableData, settings=false) {
             if (['TOBATT', 'BATTWEIGHT'].includes(row.key)) {
               input.disabled = checkboxInputMap['BATT'].disabled;
             }
-            console.log(row.key);
             if ('api_token' === row.key) {
               input.type = 'password';
               input.placeholder = 'shpat_...';
@@ -743,7 +735,6 @@ function createCountryPage(countryRow, settings=false) {
     var tabButton = addTab(key, settings);
     
     tabsContainer.appendChild(tabButton);
-    console.log('Added tab');
     contentContainer.appendChild(createTabContent(countryRow.value, key, settings));
   });
   const tabButtonPlus = document.createElement('button');
@@ -759,7 +750,6 @@ function createCountryPage(countryRow, settings=false) {
       getCountries(tabButtonPlusId, settings);
     };
   tabsContainer.appendChild(tabButtonPlus);
-  console.log('Adding stuff');
   container.appendChild(tabsContainer);
   container.appendChild(contentContainer);
   return container;
@@ -803,8 +793,6 @@ function createTabContent(data, key, settings) {
   container.classList.add("tab-content");
   
   Object.entries(data[key]).forEach(([category, details]) => {
-    console.log(category);
-    console.log(details);
     const table = document.createElement('table');
     table.classList.add(category);
     const thead = document.createElement('thead');
@@ -875,7 +863,6 @@ async function getCountries(tabButtonPlusId, settings=false) {
       // Create the list
       let list = document.createElement('ul');
       var tabsId = 'tabs';
-      console.log(settings);
       try {
         var url = GETCATEGORYLABELSCOUNTRIES;
         var countryURL = GETCATEGORYLABELSCOUNTRY;
@@ -891,7 +878,6 @@ async function getCountries(tabButtonPlusId, settings=false) {
         var add = settingsstr + 'add_country';
         var content = settingsstr + 'tab-content';
         var countryData = await unifiedSendRequest(url, {method: 'GET'});
-        console.log(countryData);
         countryData.forEach((item) => {
             if (!document.getElementById(tabId + item.country)) {
               let listItem = document.createElement('li');
@@ -899,17 +885,13 @@ async function getCountries(tabButtonPlusId, settings=false) {
               listItem.id = item.country; // Use the country property for the ID
               listItem.onclick = async () => {
                   var countryname = listItem.id;
-                  console.log(countryname);
 
                   var countryLabels = await unifiedSendRequest(countryURL + `?country=${countryname}`, {method: 'GET'});
-                  console.log(countryLabels);
                   var plusButton = document.getElementById(add);
                   var tabButton = addTab(countryname, settings);
                   document.getElementById(tabs).insertBefore(tabButton, plusButton);
                   var data = {[countryname]: countryLabels}; // Using computed property name syntax
-                  console.log(data);
                   var tabContent = createTabContent(data, countryname, settings);
-                  console.log(tabContent);
                   document.getElementById(content).appendChild(tabContent);
                   document.getElementById('countrySelectionContainer').style.display = 'none';
                   tabButton.click();
@@ -994,9 +976,7 @@ function createToolTip(col, title) {
 async function getCategorylistLabels() {
   try {
     let profile = document.getElementById("profileDropdown").value;
-    console.log(profile);
     const data = await unifiedSendRequest(GETCATEGORYLABELS + `?profile=${profile}`, {method: 'GET'});
-    console.log(data);
 
 // Get the configuration div
     const configDiv = document.getElementById("configurationCategory");
@@ -1018,7 +998,6 @@ async function getConnectorLabels() {
   try {
     let profile = document.getElementById("profileDropdown").value;
     const data = await unifiedSendRequest(CONNECTORCONFIG + `?profile=${profile}`, {method: 'GET'});
-    console.log(data);
 
 // Get the configuration div
     const configDiv = document.getElementById("configurationConnector");
@@ -1042,7 +1021,6 @@ async function getOrderlistLabels() {
   try {
     let profile = document.getElementById("profileDropdown").value;
     const data = await unifiedSendRequest(GETORDERLISTLABELS + `?profile=${profile}`, {method: 'GET'});
-    console.log(data);
 
 // Get the configuration div
     const configDiv = document.getElementById("configurationOrders");
@@ -1066,7 +1044,6 @@ async function getReturnlistLabels() {
   try {
     let profile = document.getElementById("profileDropdown").value;
     const data = await unifiedSendRequest(GETRETURNLABELS + `?profile=${profile}`, {method: 'GET'});
-    console.log(data);
 
 // Get the configuration div
     const configDiv = document.getElementById("configurationReturns");
@@ -1117,7 +1094,6 @@ async function sendCategoryLabels() {
     targetObject[inputName] = inputValue;
   });
 
-  console.log(dataToSend);
 
 // Send data to server
     let profile = document.getElementById("profileDropdown").value;
@@ -1141,7 +1117,6 @@ async function sendCategoryLabels() {
       });
     let profile = document.getElementById("profileDropdown").value;
     dataToSend['profile'] = profile;
-    console.log(dataToSend);
 // Send data to server
       unifiedSendRequest(GETORDERLISTLABELS, {formData: JSON.stringify(dataToSend), headerArgs: { 'Content-Type': 'application/json'}});
     }
@@ -1163,7 +1138,6 @@ async function sendCategoryLabels() {
 
       let profile = document.getElementById("profileDropdown").value;
       dataToSend['profile'] = profile;
-      console.log(dataToSend);
 // Send data to server
       unifiedSendRequest(GETRETURNLABELS, {formData: JSON.stringify(dataToSend), headerArgs: { 'Content-Type': 'application/json'}});
     }
@@ -1185,7 +1159,6 @@ async function sendCategoryLabels() {
       });
 
       let profile = document.getElementById("profileDropdown").value;
-      console.log(dataToSend);
 // Send data to server
       unifiedSendRequest(CONNECTORCONFIG + `?profile=${profile}`, {formData: JSON.stringify(dataToSend), headerArgs: { 'Content-Type': 'application/json'}});
     }
@@ -1197,7 +1170,6 @@ async function sendCategoryLabels() {
         'id': profile,
         'liveData': liveDataUsed
       }
-      console.log(profileData);
       unifiedSendRequest(PROFILERENAME, {formData: JSON.stringify(profileData), headerArgs: { 'Content-Type': 'application/json'}});
     }
 
@@ -1218,43 +1190,43 @@ async function sendCategoryLabels() {
 
     // Event listener for when the dropdown value changes
     document.getElementById("profileDropdown").addEventListener("change", async function() {
-    const dropdown = this;
-    if (dropdown.value === "add_new") {
-        try {
-            // Send request to ADDPROFILE
-            const profileName = `Profile ${dropdown.options.length}`;
-            var profile = {
-              name: profileName,
-              liveData: false
+        const dropdown = this;
+        if (dropdown.value === "add_new") {
+            try {
+                // Send request to ADDPROFILE
+                const profileName = `Profile ${dropdown.options.length}`;
+                var profile = {
+                  name: profileName,
+                  liveData: false
+                }
+                var response = await unifiedSendRequest(ADDPROFILE, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
+                // Remove the "add_new" option that was selected
+                dropdown.remove(dropdown.selectedIndex);
+                // Assume the response contains the new profile's ID
+                const newProfileId = response.id;
+
+                // Create a new profile option
+                const newOption = document.createElement("option");
+                newOption.value = newProfileId;
+                newOption.text = response.name;
+                dropdown.appendChild(newOption);
+
+                // Re-add the "Add New Profile" option
+                const addProfileOption = document.createElement("option");
+                addProfileOption.value = "add_new";
+                addProfileOption.text = "Add New Profile";
+                dropdown.appendChild(addProfileOption);
+
+                // Optionally, select the newly added profile
+                newOption.selected = true;
+
+            } catch (error) {
+                console.error(error.message);
+                showMessage('Failed to add profile ' + error.message, false);
             }
-            var response = await unifiedSendRequest(ADDPROFILE, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
-            // Remove the "add_new" option that was selected
-            dropdown.remove(dropdown.selectedIndex);
-            // Assume the response contains the new profile's ID
-            const newProfileId = response.id;
-
-            // Create a new profile option
-            const newOption = document.createElement("option");
-            newOption.value = newProfileId;
-            newOption.text = response.name;
-            dropdown.appendChild(newOption);
-
-            // Re-add the "Add New Profile" option
-            const addProfileOption = document.createElement("option");
-            addProfileOption.value = "add_new";
-            addProfileOption.text = "Add New Profile";
-            dropdown.appendChild(addProfileOption);
-
-            // Optionally, select the newly added profile
-            newOption.selected = true;
-
-        } catch (error) {
-            console.error(error.message);
-            showMessage('Failed to add profile ' + error.message, false);
         }
-    }
-    onDropdownChange();
-});
+        onDropdownChange();
+    });
 
     // Event listener for when the DOM content is fully loaded
     document.addEventListener('DOMContentLoaded', (event) => {
@@ -1302,7 +1274,6 @@ async function sendCategoryLabels() {
                     'name': input.value
                   }
                   var response = await unifiedSendRequest(PROFILERENAME, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
-                  console.log(response);
               } catch (error) {
                   console.error(error.message);
                   showMessage('Failed to rename profile ' + error.message, false);
@@ -1365,7 +1336,6 @@ async function sendCategoryLabels() {
         icon.addEventListener('click', function() {
 
 // Your click handling logic here
-          console.log('Icon clicked:', this);
         });
       });
 
@@ -1644,4 +1614,4 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     ]
   }
-{% endschema %}
+{% endschema %} {% endcomment %}

@@ -63,7 +63,7 @@ transform: rotate(0deg);
 .extended {
     transform: rotate(90deg)!important;
 }
-.overlay {
+.overlay-guide {
     display: none;
     position: fixed;
     top: 0;
@@ -78,7 +78,7 @@ transform: rotate(0deg);
   }
 
 </style>
-<div id="guideBackground" class="overlay" style="display:none"></div>
+<div id="guideBackground" class="overlay-guide" style="display:none"></div>
 <div id="guidePopup" class="guide-popup">
   <div onclick="endGuide()" style="position:absolute;top:5%;right:5%;cursor:pointer;z-index: 2;">X</div>
     <div id="guideContent" style="position:relative;margin: 1rem">
@@ -128,6 +128,8 @@ function showGuideStep(step) {
   if(step < guideSteps.length) {
     if (step == guideSteps.length -1 ) {
       document.getElementById('nextButton').innerText = 'Finish';
+    } else {
+      document.getElementById('nextButton').innerText = 'Next';
     }
     const targetElement = document.querySelector(guideSteps[step].element);
     if(targetElement) {
@@ -140,6 +142,9 @@ function showGuideStep(step) {
       document.getElementById('guideBackground').style.display = 'block';
       targetElement.style.zIndex = "2";
       previousTargetElement = targetElement;
+      if (guideSteps[step].runBefore) {
+        guideSteps[step].runBefore();
+      }
       document.getElementById('currentGuideNumber').innerText = `${currentStep+1}/${guideSteps.length}`;
       guideText.innerHTML = decodeHtmlEntities(guideSteps[step].text.replace(/\n/g, '<br />'));
       guideTitle.textContent = guideSteps[step].title;

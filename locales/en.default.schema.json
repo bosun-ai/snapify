@@ -2773,6 +2773,20 @@
         "name": "ForSURE AccessManagement"
       }
     },
+    "forsure_api": {
+      "name": "ForSURE API",
+      "settings": {},
+      "presets": {
+        "name": "ForSURE API"
+      }
+    },
+    "forsure_dashboard": {
+      "name": "ForSURE Dashboard",
+      "settings": {},
+      "presets": {
+        "name": "ForSURE Dashboard"
+      }
+    },
     "forsure_download": {
       "name": "ForSURE Download",
       "settings": {

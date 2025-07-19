@@ -6,29 +6,27 @@
     position: absolute;
     text-align: center;
     width: 120px;
-    height: 45px;
+    height: fit-content;
     padding: 2px;
     font: 12px sans-serif;
-    background: lightsteelblue;
+    /* background: lightsteelblue; */
+    text-color: #fafafa;
     border: 0;
+    opacity: 1!important;
     border-radius: 8px;
     pointer-events: none;
   }
 
   .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
-    px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
-    px;
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
 
 
   @media screen and (min-width: 750px) {
     .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}
-      px;
-      padding-bottom: {{ section.settings.padding_bottom }}
-      px;
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
   .image-with-text p {
@@ -51,7 +49,9 @@
   }
   th, td {
     border: 0.1rem solid #17161c!important;
+    position: relative;
   }
+
 
   .flex-header {
     display: flex;
@@ -270,33 +270,148 @@
     width: 10rem;
 }
 #versionsContainer .dropdown {
-    width: 15rem;
+    width: fit-content;
+}
+#versionsContainer {
+  margin-top: 5px;
 }
 #tabs-container .dropdown {
     width: fit-content!important;
 }
+
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    top: 1.5rem;
+    position: absolute;
+    right: 1.5rem;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .exclude {
+    text-decoration: line-through;
+  }
+
+  /* Loading spinner */
+#loadingSpinner, #loadingSpinnerCalendar {
+    border: 4px solid rgba(34, 85, 255, 0.1);
+    border-top: 4px solid #2255ff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+    display: flex;
+}
+#loadingSpinnerContainer, #loadingSpinnerCalendarContainer {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 1rem 2rem;
+  border: 1px solid #888;
+  width: fit-content;
+  max-width: 80vw;
+  margin: 15% auto;
+  box-sizing: border-box;
+}
+
+.profile-wrapper {
+  display: inline-block;
+  max-width: 100%;
+  padding: 2rem;
+  padding-top: 0;
+}
+
+#profileTable {
+  width: 100%;
+  table-layout: auto;
+}
+
+#profileTable th, #profileTable td {
+  white-space: nowrap;
+  padding: 0.5rem;
+  max-width: 20vw;
+}
+.invalid-entry {
+  border: 0.2rem solid red!important;
+}
+
+td input {
+  width: 100%;
+}
+
+#editableTable th:first-child,
+#editableTable td:first-child{
+    white-space:nowrap;
+}
+#editableTable th:not(:first-child){
+    white-space:normal;      /* allow wrapping                 */
+    min-width: 8ch;
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
-  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
-  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
-  {% render 'forsure-login' %}
   {% render 'forsure-simple-notification' %}
   <link href="https://cdn.datatables.net/v/dt/dt-1.13.7/datatables.min.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  {% comment %} <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> {% endcomment %}
   <script src="https://cdn.datatables.net/v/dt/dt-1.13.7/datatables.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script> {% endcomment %}
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script> {% endcomment %}
+  {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" /> {% endcomment %}
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<div class="section-{{ section.id }}-padding">
   <input
     type="file"
     id="category_list"
+    accept=".csv,.xls,.xlsx"
     style="display: none">
   <button id="deleteButton" style="position: absolute;display:none;z-index:2" onclick="deleteColumn()">X</button>
   <button id="deleteButtonRow" style="position: absolute;display:none;z-index:2" onclick="deleteRow()">X</button>
   {% render 'forsure-rules' %}
-  <div style="padding: 3rem;margin: 3rem;border-radius: 2rem;border:0.2rem solid #17161c">
+  <div id="loadingSpinnerContainer" style="display: none;">
+    <div id="loadingSpinner" style="display: block!important;"></div>
+  </div>
+  <div id="categorylistWrapper" style="padding: 3rem;margin: 3rem;margin-top: 0;border-radius: 2rem;border:0.2rem solid #17161c;display: none;">
     <div id="overlay"></div>
     <div id="popup" style="z-index:50;display: none">
       <div id="popupcontent" style="width: 70%; margin: auto">
@@ -343,13 +458,15 @@
       <div id="icons" style="display: flex;justify-content: space-between;">
         <div>
           <div id="addCategoryButton">
-              <a id="activateCategoryMode" onclick="activateCategorylistMode()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Category List</a>
+              <a id="activateCategoryMode" onclick="activateCategorylistMode()" class="button button--secondary" style="margin: 1rem;cursor: pointer;background-color: #fafafa;position: relative">Add Category List</a>
           </div>
           <div id="categoryModeActivated" style="display: none">
               <a id="deactivateCategorylistMode" onclick="deactivateCategorylistMode(false)" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Cancel</a>
               <a onclick="document.getElementById('category_list').click()" style="cursor:pointer;margin: 1rem;"
               class="button button--secondary" id="uploadCategorylistButton">Upload categorylist</a>
-              <a id="categorylistfromstore" onclick="openImportFromStorePopup()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add from Store</a>
+              <a id="categorylistfromstore" onclick="openImportFromStorePopup()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add from Store
+                <div class="greyedout-tooltip">Contact us to set up live data</div>
+              </a>
           </div>
         </div>
         <div id="onlinePeople">
@@ -358,11 +475,13 @@
           <a id="activateEditMode" onclick="activateEditMode()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Edit</a>
         </div>
         <div id="editModeActivated" style="display: none">
-          <a id="deactivateEditMode" onclick="deactivateEditMode(false)" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Cancel</a>
+          <a id="deactivateEditMode" onclick="deactivateEditMode()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Cancel</a>
           <a id="addRowBtn" onclick="addNewRow()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Row</a>
           <a id="addColumnBtn" onclick="addNewColumn()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Column</a>
-          <a id="addRuleBtn" onclick="displayRules()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Rule</a>
-          <a id="deactivateEditModeSave" onclick="deactivateEditMode(true)" class="button" style="margin: 1rem;cursor: pointer;">Save</a>
+          <a id="addRuleBtn" onclick="displayRules()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Rule
+            <div class="greyedout-tooltip">Contact us to set up rules</div>
+          </a>
+          <a id="deactivateEditModeSave" onclick="saveData()" class="button" style="margin: 1rem;cursor: pointer;">Save</a>
         </div>
       </div>
       <div style="display: flex;justify-content: space-between;">
@@ -371,69 +490,509 @@
             <select
                   id="categorylistVersions"
                   class="selectpicker"
-                  data-live-search="true">
+                  data-live-search="true"
+                  data-dropup-auto="false"
+                  data-dropdown-align-right="true">
             </select>
         </div>
       </div>
-      <div id="errorsDiv" style="color: red; display: none;text-align: center"></div>
+      <div id="errorsDiv" style="color: var(--forsure-main-red); display: none;text-align: center"></div>
       <table id="editableTable" style="width:100%; overflow-x: auto">
         <thead></thead>
       </table>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
+  <div id="profileModal" class="modal losensitive">
+    <div class="modal-content">
+      <span id="closeMapping" class="close">&times;</span>
+      <div class="profile-wrapper">
+      <div style="display: flex; justify-content: space-between;">
+        <h2>Select Mapping</h2>
+        <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
+      </div>
+      <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
+        If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
+      </div>
+      <div id="profileDetails">
+        <div style="display:flex;padding: 1rem 0;">
+          <strong>File:</strong>
+          <div id='profileFileName' style="margin-left:1rem"></div>
+        </div>
+        <table id="profileTable" style="margin: auto;">
+          <tr>
+            <th style="max-width: 20vw">Name</th>
+            <th style="max-width: 20vw">Preview</th>
+            <th style="max-width: 20vw">Mapping</th>
+            <th width="10%">Exclude</th>
+          </tr>
+          <tbody id="profileTableBody">
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="renameColumnModal" class="modal losensitive" style="display: none;">
+    <div class="modal-content" style="width: 45vw;">
+      <span id="closeRenameColumn" class="close" onclick="closeRenameColumnModal()">&times;</span>
+      <h2 style="margin: 2rem;">Rename Column</h2>
+      <div style="margin: 2rem;">
+        <label for="renameColumnInput" style="width: 50%;">Current Column Name:</label>
+        <span id="currentColumnName"></span>
+      </div>
+      <div style="margin: 2rem;">
+        <label for="renameColumnInput" style="width: 50%;">New Column Name:</label>
+        <input type="text" id="renameColumnInput" placeholder="New Column Name">
+      </div>
+      <div style="margin: 2rem;">
+        <label for="renameColumnInput" style="width: 50%;">Corresponding Mapping:</label>
+        <select id="renameColumnMapping" class="selectpicker">
+          <option value="">Unmapped</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: space-between;margin: 2rem;">
+        <div>
+          <button class="button" style="background-color: #17161c;" onclick="closeRenameColumnModal()">Cancel</button>
+        </div>
+        <div>
+          <button class="button" onclick="saveRenameColumn()">Rename</button>
+        </div>
+    </div>
+    </div>
+  </div>
+
+  <div id="addColumnModal" class="modal losensitive" style="display: none;">
+    <div class="modal-content" style="width: 45vw;">
+      <span id="closeAddColumn" class="close" onclick="closeAddColumnModal()">&times;</span>
+      <h2 style="margin: 2rem;">Add Column</h2>
+      <div style="margin: 2rem;">
+        <label for="addColumnInput" style="width: 50%;">New Column Name:</label>
+        <input type="text" id="addColumnInput" placeholder="New Column Name">
+      </div>
+      <div style="margin: 2rem;">
+        <label for="addColumnMapping" style="width: 50%;">Corresponding Mapping:</label>
+        <select id="addColumnMapping" class="selectpicker">
+          <option value="">Unmapped</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: space-between;margin: 2rem;">
+        <div>
+          <button class="button" style="background-color: #17161c;" onclick="closeAddColumnModal()">Cancel</button>
+        </div>
+        <div>
+          <button class="button" onclick="saveAddColumn()">Add</button>
+        </div>
+    </div>
+    </div>
+  </div>
+  <div id="confirmOverwriteModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+     background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
+    <h2>Confirm Overwrite</h2>
+    <p>Are you sure you want to overwrite the existing mapping?</p>
+    <div style="display: flex; justify-content: space-between;">
+      <button class="button" onclick="confirmOverwrite()">Yes</button>
+      <button class="button" style="background-color: #17161c;"onclick="closeConfirmOverwriteModal()">No</button>
+    </div>
+  </div>
+</div>
   <script>
-    document.getElementById('category_list').addEventListener('change', uploadCategoryList);
-    $(document).ready(getCategorylistDetails);
+    document.getElementById('category_list').addEventListener('change', openProfileModal);
 
-    async function uploadCategoryList() {
-      var errorDiv = document.getElementById('errorsDiv');
-      errorDiv.style.display = 'none';
-      var files = event.target.files;
-      if (files.length) {
-        try {
-          const file = event.target.files[0];
-          const formData = new FormData();
-          formData.append('category_list', file);
+async function parseCSV(fileInput, nrows=3) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(fileInput, {
+      header: true,
+      skipEmptyLines: true,
+      preview: nrows,
+      complete: function(results) {
+        const data = results.data;
+        const columnDict = {};
 
-// TODO remove profile
-          await unifiedSendRequest(UPLOADCATEGORYLIST + `?profile=1`, {formData: formData});
-          // window.location.reload();
-
-        } catch (error) {
-          console.error(error);
-          errorDiv.style.display = 'block';
-          errorDiv.innerText = error;
+        if (data.length > 0) {
+          const keys = Object.keys(data[0]);
+          keys.forEach(key => {
+            columnDict[key] = data.map(row => row[key]);
+          });
         }
+        resolve(columnDict);
+      },
+      error: function(err) {
+        console.error(err);
+        showMessage('Error parsing file ' + err.message, false);
+        reject(err);
+      }
+    });
+  });
+}
+
+async function parseExcel(file, nrows = 3) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+        const headers = jsonData[0];
+        const rows = jsonData.slice(1, nrows + 1);
+
+        const columnDict = {};
+        headers.forEach((header, colIndex) => {
+          columnDict[header] = rows.map(row => row[colIndex] ?? '');
+        });
+
+        resolve(columnDict);
+      } catch (err) {
+        console.error(err);
+        showMessage('Error parsing Excel file: ' + err.message, false);
+        reject(err);
+      }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+}
+    
+async function openProfileModal(event) {
+    const fileInput = event.target.files[0];
+    if (!fileInput) {
+      return;
+    }
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+    loadingSpinnerContainer.style.display = 'block';
+    const fileName = fileInput.name;
+    const modal = document.getElementById('profileModal');
+    const profileSelect = document.getElementById('profileSelect');
+    const profileDetails = document.getElementById('profileDetails');
+    const profileFileName = document.getElementById('profileFileName');
+    {% comment %} try { {% endcomment %}
+    let csvData;
+    if (fileInput.name.endsWith('.csv')) {
+      csvData = await parseCSV(fileInput);
+    } else if (
+      fileInput.name.endsWith('.xls') || 
+      fileInput.name.endsWith('.xlsx') || 
+      fileInput.type.includes('sheet')
+    ) {
+      csvData = await parseExcel(fileInput);
+    } else {
+      showMessage('Unsupported file type. Please upload a CSV or Excel file.', false);
+      loadingSpinnerContainer.style.display = 'none';
+      return;
+    }
+    var labelsV2Options = await getCategorylistLabelsV2Options();
+    profileFileName.textContent = fileName;
+    var profileTable = document.getElementById('profileTableBody');
+    profileTable.innerHTML = '';
+    Object.keys(csvData).forEach((key, index) => {
+      const tr = document.createElement('tr');
+      const tdKey = document.createElement('td');
+      tdKey.textContent = key;
+      tr.appendChild(tdKey);
+      const tdEntry = document.createElement('td');
+      var preview = csvData[key].filter(value => value !== '').join(', ');
+      if (preview.length > 30) { // limit the preview to 100 characters
+        preview = preview.slice(0, 30) + '...';
+      }
+      tdEntry.textContent = preview;
+      tr.appendChild(tdEntry);
+
+      const tdMapping = document.createElement('td');
+      const selectMapping = document.createElement('select');
+      selectMapping.classList.add('btn', 'bs-placeholder', 'btn-default');
+      selectMapping.style.width = '100%';
+      var defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Unmapped';
+      defaultOption.selected = true;
+      selectMapping.appendChild(defaultOption);
+      selectMapping.setAttribute('data-name', key);
+      // find closest match based on edit distance
+      let bestMatchValue = '';
+      let bestMatchScore = Infinity;
+      let bestMatchOptions = [];
+      Object.keys(labelsV2Options).forEach(groupKey => {
+        var optionGroup = document.createElement('optgroup');
+        optionGroup.label = groupKey;
+        optionGroup.setAttribute('data-name', groupKey);
+        labelsV2Options[groupKey].forEach(option => {
+          const optionElement = document.createElement('option');
+          optionElement.value = option.key;
+          optionElement.setAttribute('data-units', option.options);
+          var star = '';  
+          if (option.required) {
+            star = ' *';
+          }
+          optionElement.textContent = option.title + star;
+          optionElement.setAttribute('data-description', option.description);
+          {% comment %} optionElement.title = option.description; {% endcomment %}
+
+          optionGroup.appendChild(optionElement);
+
+
+          // Score similarity (very basic: case-insensitive substring match length)
+          const titleLower = option.title.toLowerCase();
+          const keyLower = key.toLowerCase();
+          const distance = levenshtein(keyLower, titleLower);
+
+          if (distance < bestMatchScore) {
+            bestMatchScore = distance;
+            bestMatchValue = option.key;
+            bestMatchOptions = [optionElement];
+          } else if (distance == bestMatchScore) {
+            bestMatchOptions.push(optionElement);
+          }
+        });
+        selectMapping.appendChild(optionGroup);
+      });
+      tdMapping.appendChild(selectMapping);
+      tr.appendChild(tdMapping);
+      const tdExclude = document.createElement('td');
+      const checkboxExclude = document.createElement('input');
+      checkboxExclude.type = 'checkbox';
+      checkboxExclude.title = 'Exclude this column from the upload';
+      checkboxExclude.addEventListener('change', function() {
+        toggleExclude(checkboxExclude);
+      });
+      tdExclude.appendChild(checkboxExclude);
+      tr.appendChild(tdExclude);
+      profileTable.appendChild(tr);
+
+      // dont select the best match if two are equally close
+      // TODO enable once tested properly
+      {% comment %} if (bestMatchOptions.length == 1) {
+        setTimeout(() => {
+          selectMapping.value = bestMatchOptions[0].value;
+          // Refresh the UI
+          $(selectMapping).selectpicker('refresh');
+        }, 500);
+        {% comment %} $(selectMapping).selectpicker('refresh'); {% endcomment %}
+      } else {
+        $(selectMapping).selectpicker('refresh');
+      } {% endcomment %}
+    });
+  {% comment %} } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to parse file ' + fileName, false);
+    return;
+  } {% endcomment %}
+
+
+    getCategorylistLabels();
+  // Display column details (mockup for demonstration)
+
+  // Show the modal
+  modal.style.display = 'block';
+
+  // Close modal on click of close button
+  document.getElementById('closeMapping').onclick = function() {
+    closeMappingModal();
+  };
+
+}
+
+function levenshtein(a, b) {
+  const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b[i - 1] === a[j - 1]) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,    // deletion
+          matrix[i][j - 1] + 1,    // insertion
+          matrix[i - 1][j - 1] + 1 // substitution
+        );
       }
     }
+  }
 
-    function openImportFromStorePopup() {
-      document.getElementById('popup').style.display = 'block';
-      document.getElementById('overlay').style.display = 'block';
+  return matrix[b.length][a.length];
+}
+
+function toggleExclude(checkbox) {
+  const row = checkbox.parentElement.parentElement;
+  const exclude = checkbox.checked;
+  row.classList.toggle('exclude', exclude);
+  row.querySelector('select').disabled = exclude;
+}
+
+async function getCategorylistLabelsV2Options() {
+  try {
+    const data = await unifiedSendRequest(GETCATEGORYLISTLABELSV2OPTIONS, {method: 'GET'});
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get categorylist label options ' + error.message, false);
+    return [];
+  }
+}
+
+
+async function getCategorylistLabels() {
+  try {
+    var categorylistLabels = await unifiedSendRequest(GETCATEGORYLISTLABELSV2 + `?version=latest`, {method: 'GET'});
+    var profileTable = document.getElementById('profileTableBody');
+    if (Object.keys(categorylistLabels).length > 0) {
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        if (select.getAttribute('data-name') in categorylistLabels) {
+          select.value = categorylistLabels[select.getAttribute('data-name')];
+        } else {
+          row.querySelector('input').click(); // if the column is not in the orderlist labels, then it is excluded
+        }
+      });
+    } else {
+      // new profile, so set all to unmapped
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        select.value = '';
+        if (row.querySelector('input').checked) {
+          row.querySelector('input').click();
+        }
+      });
     }
-    function hideModal() {
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('popup').style.display = 'none';
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist labels ' + error.message, false);
+  }
+}
+
+
+var request_data = {};
+    
+
+async function saveMapping() {
+  const mapping = {};
+  const profileTable = document.getElementById('profileTableBody');
+  const rows = profileTable.querySelectorAll('tr');
+  rows.forEach(row => {
+    var dropdown = row.querySelector('select');
+    var key = dropdown.getAttribute('data-name');
+    if (!dropdown.disabled) {
+      var value = dropdown.value;
+      mapping[key] = value;
     }
+  });
+  request_data = {'mapping': mapping};
+  try {
+    var response = await unifiedSendRequest(GETCATEGORYLISTLABELSV2COMPARE, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+    if (response) {
+      confirmOverwrite();
+    } else {
+      showConfirmOverwriteModal();
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
 
-    document.getElementById('overlay').addEventListener('click', hideModal);
 
+async function closeConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'none';
+}
+
+async function showConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'block';
+}
+
+async function closeMappingModal() {
+  document.getElementById('profileModal').style.display = 'none';
+  document.getElementById('loadingSpinnerContainer').style.display = 'none';
+}
+
+
+async function confirmOverwrite() {
+  try {
+    {% comment %} var response = await unifiedSendRequest(GETCATEGORYLISTLABELSV2, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}}); {% endcomment %}
+    await uploadCategoryList();
+    closeConfirmOverwriteModal();
+    closeMappingModal();
+    {% comment %} showMessage('Mapping saved successfully', true); {% endcomment %}
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+async function uploadCategoryList() {
+  var errorDiv = document.getElementById('errorsDiv');
+  errorDiv.style.display = 'none';
+  var files = document.getElementById('category_list').files;
+  if (files.length) {
+    try {
+      const file = files[0];
+      const formData = new FormData();
+      formData.append('category_list', file);
+      formData.append('categorylabels', JSON.stringify(request_data));
+
+      // TODO remove profile
+      res = await unifiedSendRequest(UPLOADCATEGORYLIST, {formData: formData});
+      if (res.message) {
+        showMessage('Categorylist uploaded successfully. ' + res.message, true);
+        await fillVersionDropdown();
+      } else {
+        showMessage('Categorylist uploaded successfully', true);
+      }
+      // window.location.reload();
+    } catch (error) {
+      console.error(error);
+      errorDiv.style.display = 'block';
+      errorDiv.innerText = error;
+    }
+  }
+}
+
+function openImportFromStorePopup() {
+  document.getElementById('popup').style.display = 'block';
+  document.getElementById('overlay').style.display = 'block';
+}
+function hideModalCategorylist() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('popup').style.display = 'none';
+}
+
+document.getElementById('overlay').addEventListener('click', hideModalCategorylist);
+
+var allColumns = [];
 async function selectCountries() {
     const tabsContainer = document.getElementById('tabs-container');
     tabsContainer.innerHTML = '';
     try {
-        let data = await unifiedSendRequest(GETCATEGORYLABELS, {method: 'GET'});
-        console.log(data);
-        const countriesItem = data.find(item => item.key === 'countries');
-        if (!countriesItem || !countriesItem.value) {
-            console.error('No countries found in response');
-            showMessage('Failed to get countries ' + error.message, false);
-            return;
+        const countryDict = {};
+        const generalDict = {};
+        for (const [entry, value] of Object.entries(categorylistLabels)) {
+            const group = value.group || 'Ungrouped';
+            if (group == 'General') {
+              generalDict[entry] = value;
+              allColumns.push(entry);
+            } else {
+              if (!countryDict[group]) {
+                  countryDict[group] = {};
+              }
+              countryDict[group][entry] = value;
+              allColumns.push(entry);
+            }
         }
-        const countries = countriesItem.value;
-        const countryCodes = Object.keys(countries);
+        const sortedCountryDict = Object.keys(countryDict).sort((a, b) => {
+          if (a === 'BE') return 1;    // BE goes after everything else
+          if (b === 'BE') return -1;
+          return a.localeCompare(b);  // default alphabetical
+        });
+
+        const countryCodes = sortedCountryDict;
         // Create buttons for first x countries
-        var lenDisplayedCountries = 2;
+        var lenDisplayedCountries = 10;
         countryCodes.slice(0, lenDisplayedCountries).forEach((countryCode, index) => {
             const tabButton = document.createElement('button');
             tabButton.textContent = countryCode;
@@ -443,7 +1002,7 @@ async function selectCountries() {
 
             tabButton.addEventListener('click', () => {
                 highlightActiveTab(index);
-                showCountryData(countries[countryCode], countryCode, data);
+                showCountryData(countryDict[countryCode], countryCode, generalDict);
             });
 
             tabsContainer.appendChild(tabButton);
@@ -494,7 +1053,7 @@ async function selectCountries() {
                         selectedButton.addEventListener('click', () => {
                             let index = document.querySelectorAll('.tab-button').length;
                             highlightActiveTab(index-1);
-                            showCountryData(countries[selectedCountry], selectedCountry, data);
+                            showCountryData(countryDict[selectedCountry], selectedCountry, generalDict);
                         });
 
                         tabsContainer.insertBefore(selectedButton, selectWrapper);
@@ -505,7 +1064,7 @@ async function selectCountries() {
                     highlightActiveTab(index);
 
                     // Call showCountryData immediately
-                    showCountryData(countries[selectedCountry], selectedCountry, data);
+                    showCountryData(countryDict[selectedCountry], selectedCountry, generalDict);
 
                     // Reset the dropdown to not remain selected
                     $(this).selectpicker('val', 'More');
@@ -517,7 +1076,6 @@ async function selectCountries() {
         showMessage('Failed to get countries ' + error.message, false);
     }
 }
-selectCountries();
 
 function highlightActiveTab(activeIndex) {
     const buttons = document.querySelectorAll('.tab-button');
@@ -528,7 +1086,7 @@ function highlightActiveTab(activeIndex) {
 
 let activeCountry = null;
 let previouslyHiddenColumns = new Set();
-function showCountryData(countryData, countryCode, data) {
+function showCountryData(countryData, countryCode, generalDict) {
     const table = $('#editableTable').DataTable();
 
     // If the same tab is clicked again -> show all columns
@@ -543,14 +1101,17 @@ function showCountryData(countryData, countryCode, data) {
     }
     // Otherwise, filter columns to match that country's labels
     activeCountry = countryCode;
-    const countryLabels = getCountryColumnLabels(countryData);
-    const generalColumns = getGeneralColumns(data);
+    const countryLabels = Object.keys(countryData);
+    const generalColumns = Object.keys(generalDict);
 
     // Loop through datatable columns and show/hide based on country data
     table.columns().every(function () {
         const column = this;
-        const headerText = $(column.header()).text().trim();
-
+        const headerText = $(column.header())
+        .text()
+        .trim()
+        .replace(/\u00A0/g, ' ')   // NO-BREAK SPACE → normal space
+        .replace(/\u2011/g, '-');  // NO-BREAK HYPHEN → hyphen
         if (countryLabels.includes(headerText) || generalColumns.includes(headerText)) {
             column.visible(true);
         } else {
@@ -562,33 +1123,24 @@ function showCountryData(countryData, countryCode, data) {
     });
 }
 
-function getCountryColumnLabels(countryData) {
-    let labels = [];
-    Object.values(countryData).forEach(category => {
-        Object.values(category).forEach(value => {
-            if (typeof value === 'string') {
-                labels.push(value);
-            }
-        });
-    });
-    return labels;
-}
-
-function getGeneralColumns(data) {
-    return data
-        .filter(entry => typeof entry.value === 'string' && entry.key !== 'countries')
-        .map(entry => entry.value);
-}
 var versionId = null;
 async function fillVersionDropdown() {
     try {
+        document.getElementById('activateEditMode').disabled = true;
+        document.getElementById('activateEditMode').style.backgroundColor = '#ddd';
+        document.getElementById('activateEditMode').style.cursor = 'not-allowed';
+        document.getElementById('activateEditMode').onclick = null;
         let data = await unifiedSendRequest(CATEGORYLISTVERSION, {method: 'GET'});
-        console.log(data);
+        
         if (!data || data.length === 0) {
-            console.log('No versions found, using mock data');
-            data = generateMockVersions();
+            {% comment %} data = generateMockVersions(); {% endcomment %}
+            document.getElementById('versionsContainer').style.display = 'none';
+            document.getElementById('activateEditMode').disabled = true;
+            document.getElementById('activateEditMode').style.backgroundColor = '#ddd';
+            document.getElementById('activateEditMode').style.cursor = 'not-allowed';
+            document.getElementById('activateEditMode').onclick = null;
+            return;
         }
-
         const dropdown = document.getElementById('categorylistVersions');
         dropdown.innerHTML = ''; // Clear existing options
 
@@ -596,7 +1148,7 @@ async function fillVersionDropdown() {
             const option = document.createElement('option');
             const icon = item.approved ? '✅' : '❌';
             option.value = item.version;
-            option.textContent = `${icon} ${item.version}`;
+            option.textContent = `${item.version}`;
             dropdown.appendChild(option);
         });
 
@@ -605,15 +1157,24 @@ async function fillVersionDropdown() {
 
         dropdown.addEventListener('change', async (event) => {
             versionId = event.target.value;  // single value
-            await getCategorylistDetails();
+            await getCategorylistDetails(versionId);
         });
-
+        versionId = data[0].version;
+        await getCategorylistDetails(versionId);
+        document.getElementById('activateEditMode').disabled = false;
+        document.getElementById('activateEditMode').style.backgroundColor = '#fafafa';
+        document.getElementById('activateEditMode').style.cursor = 'pointer';
+        document.getElementById('activateEditMode').onclick = function() {
+            activateEditMode();
+        };
+        if (document.getElementById('tabs-container').children[0]) {
+          document.getElementById('tabs-container').children[0].click();
+        }
     } catch (error) {
         console.error(error.message);
-        showMessage('Failed to get versions ' + error.message, false);
+        {% comment %} showMessage('Failed to get versions ' + error.message, false); {% endcomment %}
     }
 }
-fillVersionDropdown();
 
 // Optional mock data generator (last 5 months example)
 function generateMockVersions() {
@@ -630,70 +1191,6 @@ function generateMockVersions() {
     return mock;
 }
 
-
-async function fillDropdown(dropdownId, filters, key) {
-  dropdownId = "profileDropdown", 
-  filters = {
-      'country': [],
-      'start_time': null,
-      'end_time': null,
-      'profile': [],
-      'report_name': [],
-      'categories': []
-  };
-  key = 'profile'
-  try {
-      const response = await unifiedSendRequest(STATSREPORTS, {formData: JSON.stringify(filters), 
-          headerArgs: {'Content-Type': 'application/json'}});
-      console.log(response);
-
-      const dropdown = document.getElementById(dropdownId);
-
-      dropdown.innerHTML = "";
-
-      const entries = response[key];
-      console.log(`Filling dropdown ${key} with ${entries}`);
-      
-      entries.forEach(entry => {
-          const option = document.createElement("option");
-          if(key === 'profile'){
-              option.value = entry['profile_id'];
-              option.textContent = entry['profile_name'];
-          } else {
-              option.value = entry;
-              option.textContent = entry;
-          }
-          if (filters[key].includes(entry)) {
-              option.selected = true;
-          }
-          dropdown.appendChild(option);
-      });
-      $(`#${dropdownId}`).selectpicker('refresh');
-      let selectedOptions = $(`#${dropdownId}`).find('option:selected');
-      let displayText = selectedOptions.map(function() {
-          return $(this).text(); // or $(this).val() if you want to display the value
-      }).get().join(', ');
-      // Check if there is any selection, otherwise set to default text
-      displayText = displayText.length > 0 ? displayText : 'Nothing selected';
-
-      // Update the display text
-      $(`#${dropdownId}`).closest('.filter-group').find('.filter-option-inner-inner').text(displayText);
-  } catch (error) {
-      console.error(error.message);
-      TOKEN = false;
-  }
-}
-document.addEventListener('DOMContentLoaded', fillDropdown);
-var currentProfile = null;
-function updateProfile() {
-  const selProfiles = Array
-        .from(this.options)
-        .filter(option => option.selected)
-        .map(option => option.value);
-    console.log(`Selected profiles: ${selProfiles}`);
-    currentProfile = selProfiles;
-}
-document.getElementById('profileDropdown').addEventListener('change', updateProfile);
 
 var importStoreUpdateInterval = null;
 async function importFromStore() {
@@ -724,9 +1221,8 @@ async function importFromStoreUpdates() {
             showMessage('Fetched categorylist successfully', true);
             updateProgressBar(100);
             clearInterval(importStoreUpdateInterval);
-            hideModal();
+            hideModalCategorylist();
         } else if (response.status == 'in_progress') {
-            console.log(response);
             current_element = response.message[0];
             total_elements = response.message[1];
             const progressPercentage = (current_element / total_elements) * 100;
@@ -766,7 +1262,6 @@ function getUniqueColor(userid) {
 async function getToken() {
     if (!TOKEN) {
       data = await requestToken();
-      console.log(data);
       TOKEN = data["access_token"];
     }
   }
@@ -776,7 +1271,6 @@ var userid = '';
 
 
 ws.onopen = function(event) {
-    console.log("WebSocket is connected");
     getToken();
     // You can send an initial message like user information when they connect
     ws.send(JSON.stringify({ type: "join", token: TOKEN}));
@@ -784,7 +1278,6 @@ ws.onopen = function(event) {
 
 ws.onmessage = function(event) {
     const message = JSON.parse(event.data);
-    console.log("Message from server:", message);
     if (message.message === 'Invalid token') {
       getToken(); // TODO resend previous message
       if (message.previous === 'join') {
@@ -802,7 +1295,6 @@ ws.onmessage = function(event) {
 };
 
 ws.onclose = function(event) {
-    console.log("WebSocket is closed now.");
 };
 
 // Send a message when the user leaves the page
@@ -813,13 +1305,11 @@ window.onbeforeunload = function() {
 function updateActiveUsers(message) {
   var peopleIconContainer = document.getElementById('onlinePeople');
       peopleIconContainer.innerHTML = '';
-      if (message.users.length == 1) {
+      if (message.data.length == 1) {
         // only the current user is active so no need to show users
         return;
       }
-      message.users.forEach(name => {
-        console.log(name);
-        console.log(getUniqueColor(name));
+      message.data.forEach(name => {
         const fullName = name.split('_', 1)[0];
         const initials = fullName.split(' ').map(word => word[0]).join('');
         var title = fullName;
@@ -838,24 +1328,41 @@ function updateActiveUsers(message) {
 
 let editMode = false;
 var columnNames = {};
+var categorylistLabels = {};
+var col_order = [];
 async function getCategorylistDetails() {
+      var catlabels = await unifiedSendRequest(GETCATEGORYLISTLABELSV2DETAILS += `?version_id=${versionId}`, {method: 'GET'});
+      col_order = catlabels['col_order'];
+      categorylistLabels = catlabels['output_dict'];
       let url = GETCATEGORYLISTDETAILS;
-      if (versionId !== null) {
-        url += `?version_id=${versionId}`;
-      }
+      url += `?version_id=${versionId}`;
       var data = await unifiedSendRequest(url, {method: 'GET'});
       data = Object.values(data).map(item => {
-          for (let i = 1; i <= 100; i++) {
+          {% comment %} for (let i = 1; i <= 100; i++) {
               item[`HiddenColumn${i}`] = '';
-          }
-          return item;
+          } {% endcomment %}
+          const reorderedItem = {};
+          // Add keys from col_order first
+          col_order.forEach(key => {
+              reorderedItem[key] = item.hasOwnProperty(key) ? item[key] : '';
+          });
+
+          // Add remaining keys (not in col_order) after
+          Object.keys(item).forEach(key => {
+              if (!col_order.includes(key)) {
+                  reorderedItem[key] = item[key];
+              }
+          });
+
+          return reorderedItem;
       });
       var headers = Object.keys(data[Object.keys(data)[0]]);
       var cols = headers.map(key => {
-          return { data: key,
-                   visible: !key.startsWith('HiddenColumn')
+          return { data: key
+                   {% comment %} visible: !key.startsWith('HiddenColumn') {% endcomment %}
           };
       });
+      console.log('cols', cols);
       cols.forEach((col, index) => {
           columnNames[index] = col.data;
       });
@@ -864,10 +1371,8 @@ async function getCategorylistDetails() {
       thead.innerHTML = '';
 
       //var thead = document.createElement('thead');
-
       // Create and append the tr element
       var tr = document.createElement("tr");
-
 
       // Append th elements to the tr
       headers.forEach(function(header) {
@@ -875,6 +1380,9 @@ async function getCategorylistDetails() {
         th.textContent = header;
         th.addEventListener('mouseenter', function() {
             currentTh = this;
+            if (categorylistLabels[header]) {
+              th.title = categorylistLabels[header]['description'];
+            }
             deleteColumnButton();
         });
         th.addEventListener('mouseleave', function() {
@@ -899,7 +1407,7 @@ async function getCategorylistDetails() {
             rowCallback: function(row, data, dataIndex) {
               $(row).attr('id', data[idcol]);
               const firstTd = row.querySelector('td');
-
+              const api = this.api();
               if (firstTd) {
                   // Do something with the first td
                   firstTd.addEventListener('mouseenter', function() {
@@ -908,7 +1416,6 @@ async function getCategorylistDetails() {
                       deleteRowButton();
                   });
                   // row.addEventListener('mouseenter', function() {
-                  //   console.log('Row enter');
                   //   clearTimeout(deleteRowButtonTimer);
                   // });
                   firstTd.addEventListener('mouseleave', function() {
@@ -916,8 +1423,39 @@ async function getCategorylistDetails() {
                         $('#deleteButtonRow').hide();
                     }, 1000);
                   });
+                  $(row).find('td').each(function() {
+                    var cell = api.cell(this);
+                    var colIdx = cell.index().column;
+                    var columnName = api.column(colIdx).header().textContent.trim();
+                    var subentries = categorylistLabels[columnName]?.subentries || [];
+                
+                    if (subentries.length > 0) {
+                      let foundEntry = false;
+                      subentries.forEach(subentry => {
+                        if (String(cell.data()) === String(subentry.key)) {
+                          this.title = subentry.title;
+                          foundEntry = true;
+                        }
+                      });
+                      if (!foundEntry && cell.data() !== '') {
+                        this.title = 'Invalid entry found';
+                        this.classList.add('invalid-entry');
+                      } else {
+                        this.classList.remove('invalid-entry');
+                      }
+                    }
+                  });
               }
-          }});
+          },
+          headerCallback: function (thead/*, data, start, end, display*/) {
+            $(thead).find('th').each(function (idx) {
+                const original = headers[idx];          // unmodified text
+                console.log('original', original);
+                console.log('splitHeaderInTwo(original)', splitHeaderInTwo(original));
+                this.innerHTML = splitHeaderInTwo(original);
+            });
+        }
+        });
       $('#deleteButtonRow').mouseenter(function(){
         clearTimeout(deleteRowButtonTimer);
       })
@@ -932,68 +1470,317 @@ async function getCategorylistDetails() {
         if ($(this).find('input').length > 0) {
           return;
         }
+        closeCurrentEditor();
         var cell = categoryTable.cell(this);
         var originalContent = cell.data();
 
         if (typeof originalContent === 'undefined'){
           return; // skip as it is error message
         }
-        var input = $('<input>', {
-          type: 'text',
-          value: originalContent,
-          blur: function(e) {
-            var newValue = $(this).val();
-            cell.data(newValue).draw(false);
-          },
-          keyup: function(e) {
-            if (e.keyCode === 13) { // Enter key
-              $(this).blur();
-            }
-          }
-        });
+        var colIdx = categoryTable.cell(this).index().column;
+        var columnName = categoryTable.column(colIdx).header().textContent.trim();
+        var subentries = categorylistLabels[columnName]?.subentries || [];
+        var options = [];
+        const td = $(this);
+        $(this).empty();
+        if (subentries && subentries.length > 0) {
+          
+            // Create input field
+            const input = $('<input>', {
+              type: 'text',
+              class: 'inline-editor',
+              value: originalContent,
+              autocomplete: 'off',
+              css: {
+                width: '100%',
+                position: 'relative'
+              }
+            });
 
-        $(this).empty().append(input);
-        input.focus();
+            // Create suggestion dropdown
+            const dropdown = $('<div>', {
+              class: 'suggestion-box',
+              css: {
+                position: 'absolute',
+                top: td.position().bottom + td.height(),
+                left: 0,
+                background: '#fff',
+                border: '1px solid #ccc',
+                zIndex: 9999,
+                width: td.width() + 40,
+                maxHeight: '150px',
+                overflowY: 'auto'
+              }
+            });
+
+            // Add suggestions to dropdown
+            subentries.forEach(subentry => {
+              const option = $('<div>', {
+                text: subentry.key,
+                class: 'dropdown-option',  
+                title: subentry.title,
+                css: {
+                  padding: '4px 8px',
+                  cursor: 'pointer'
+                },
+                click: function () {
+                  input.val(subentry.key);
+                  saveValue();
+                },
+                mouseenter: function () {
+                  $(this).css('background', '#eee');
+                },
+                mouseleave: function () {
+                  $(this).css('background', '#fff');
+                }
+              });
+              dropdown.append(option);
+            });
+            input.on('keyup', function () {
+              const q = $(this).val().toLowerCase();
+
+              dropdown.find('.dropdown-option').each(function () {
+                const txt = $(this).text().toLowerCase();
+                const title = $(this).attr('title');
+                $(this).toggle(txt.includes(q) || title.toLowerCase().includes(q));
+              });
+            });
+
+            const saveValue = () => {
+              const newValue = input.val();
+              cell.data(newValue).draw(false);
+              td.empty().text(newValue);
+              dropdown.remove(); // cleanup
+            };
+
+            input.on('input', function () {
+              if (subentries.length > 0) {
+                dropdown.show();
+              }
+            });
+
+            let keepDropdownOpen = false;
+
+            dropdown.on('mousedown', function () {
+              keepDropdownOpen = true;
+            });
+
+            input.on('blur', function () {
+              if (!keepDropdownOpen) {
+                saveValue();
+              }
+              setTimeout(() => {
+                keepDropdownOpen = false; // reset
+              }, 200);
+            });
+
+            input.on('keydown', function (e) {
+              if (e.key === 'Enter') {
+                saveValue();
+              }
+              if (e.key === 'Escape') {
+                dropdown.remove();
+                td.empty().text(originalContent);
+              }
+            });
+
+            $(this).append(input);
+            $(this).append(dropdown);
+            input.focus();
+            currentEditor = input;
+            currentDropdown = dropdown;
+        } else {
+          input = $('<input>', {
+            type: 'text',
+            value: originalContent,
+            blur: function(e) {
+              var newValue = $(this).val();
+              cell.data(newValue).draw(false);
+            },
+            keyup: function(e) {
+              if (e.keyCode === 13) { // Enter key
+                $(this).blur();
+              }
+            }
+          });  
+          $(this).empty().append(input);
+          input.focus();
+          currentEditor = input;
+          currentDropdown = null;
+        }
+
+      });
+      $('#editableTable tbody').on('mouseenter', 'td', function() {
+        var colIdx = categoryTable.cell(this).index().column;
+        var td = categoryTable.cell(this).node();
+        // Get the column name from the column definition
+        var columnName = categoryTable.column(colIdx).header().textContent;
+
+        var subentries = categorylistLabels[columnName.trim()]?.subentries || [];
+        var cell = categoryTable.cell(this);
+        if (subentries && subentries.length > 0) {
+          var foundEntry = false;
+          subentries.forEach(subentry => {
+            if (String(cell.data()) === String(subentry.key)) {
+              td.title = subentry.title;
+              foundEntry = true;
+            }
+          });
+          if (!foundEntry && cell.data() !== '') {
+            td.title = 'Invalid entry found';
+          }
+        }
       });
 
       $('#editableTable').wrap('<div class="custom-table-wrapper"></div>');
+      selectCountries();
+      function closeCurrentEditor() {
+        if (currentEditor && currentEditor.length > 0) {
+          const tdElement = currentEditor.closest('td');
+          if (tdElement && tdElement.length > 0) {
+            const cell = categoryTable.cell(tdElement);
+            const newValue = currentEditor.val();
+            cell.data(newValue).draw(false);
+            tdElement.empty().text(newValue);
+          }
+        }
+      
+        if (currentDropdown && currentDropdown.length > 0) {
+          currentDropdown.remove();
+        }
+      
+        // Reset references
+        currentEditor = null;
+        currentDropdown = null;
+    }
+    
+    $(document).on('mousedown', function (e) {
+      const clickedInsideEditor = $(e.target).closest('td').find('.inline-editor').length > 0;
+      const clickedInsideDropdown = $(e.target).closest('.suggestion-box').length > 0;
+    
+      if (!clickedInsideEditor && !clickedInsideDropdown) {
+        try {
+          closeCurrentEditor();
+        } catch (error) {
+        }
+      }
+    });
 }
 
-$('#editableTable thead').on('click', 'th', function(e) {
+let currentEditor = null;
+let currentDropdown = null;
+
+
+$('#editableTable thead').on('click', 'th', async function(e) {
   if (editMode) {
-      // Prevent default sorting when in edit mode
-
-
-      var currentHeader = $(this);
-      var columnIndex = currentHeader.index();
-      if (currentHeader.find('input').length === 0) {
-        e.stopImmediatePropagation();
-        var currentText = currentHeader.text();
-        var inputField = $('<input>', {
-            type: 'text',
-            placeholder: currentText,
-            blur: function() {
-                if (this.value !== '') {
-                  currentHeader.text(this.value);
-                  columnNames[columnIndex] = this.value;
-                } else {
-                  currentHeader.text(currentText);
-                }
-                $(this).remove();
-            },
-            keyup: function(e) {
-                if (e.which === 13) { // Enter key
-                    $(this).blur();
-                }
-            }
-        });
-
-        currentHeader.html(inputField);
-        inputField.focus();
-      }
+      await renameColumn(this, e);
+      return;
   }
 });
 
+async function renameColumn(th, e) {
+  document.body.style.cursor = 'wait';
+  document.getElementById('editableTable').style.cursor = 'wait';
+  // Prevent default sorting when in edit mode
+  e.stopImmediatePropagation();
+  var currentHeader = $(th);
+  var columnIndex = currentHeader.index();
+  var currentText = currentHeader.text()
+      .trim()
+      .replace(/\u00A0/g, ' ')   // NO-BREAK SPACE → normal space
+      .replace(/\u2011/g, '-');  // NO-BREAK HYPHEN → hyphen
+  var currentLabel = categorylistLabels[currentText];
+  if (currentLabel) {
+    currentLabel = currentLabel.key;
+  } else {
+    currentLabel = '';
+  }
+  document.getElementById('currentColumnName').textContent = currentText;
+  document.getElementById('renameColumnInput').value = currentText;
+  var labelsV2Options = await getCategorylistLabelsV2Options();
+  Object.keys(labelsV2Options).forEach(groupKey => {
+    var optionGroup = document.createElement('optgroup');
+    optionGroup.label = groupKey;
+    optionGroup.setAttribute('data-name', groupKey);
+    labelsV2Options[groupKey].forEach(option => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option.key;
+      optionElement.setAttribute('data-units', option.options);
+      var star = '';  
+      if (option.required) {
+        star = ' *';
+      }
+      if (option.key === currentLabel) {
+        optionElement.selected = true;
+      }
+      optionElement.textContent = option.title + star;
+      optionGroup.appendChild(optionElement);
+    });
+    document.getElementById('renameColumnMapping').appendChild(optionGroup);
+  });
+  $('#renameColumnMapping').selectpicker({
+    dropupAuto: false,
+    size: 8
+  });
+  $('#renameColumnMapping').selectpicker('refresh');
+  document.getElementById('renameColumnModal').style.display = 'block';
+  $('#deleteButtonRow').hide();
+  $('#deleteButton').hide();
+  document.body.style.cursor = 'default';
+  document.getElementById('editableTable').style.cursor = 'default';
+  $('.selectpicker').selectpicker('refresh');
+}
+
+async function saveRenameColumn() {
+  var oldColumnName = document.getElementById('currentColumnName').textContent.trim();
+  var newColumnName = document.getElementById('renameColumnInput').value.trim();
+  var newMapping = document.getElementById('renameColumnMapping').value;
+  var oldMapping = categorylistLabels[oldColumnName];
+  if (oldMapping) {
+    oldMapping = oldMapping.key;
+  } else {
+    oldMapping = '';
+  }
+  var formData = new FormData();
+  formData.append('oldColumnName', oldColumnName);
+  formData.append('newColumnName', newColumnName);
+  formData.append('newMapping', newMapping);
+  formData.append('oldMapping', oldMapping);
+  formData.append('version_id', versionId);
+  var data = await unifiedSendRequest(CATEGORYLISTRENAMECOLUMN, {formData: formData});
+  if (data.success) {
+    closeRenameColumnModal();
+    showMessage(data.message, true);
+    await fillVersionDropdown();
+  } else {
+    showMessage(data.message, false);
+  }
+}
+
+function closeRenameColumnModal() {
+  document.getElementById('renameColumnModal').style.display = 'none';
+}
+
+function closeAddColumnModal() {
+  document.getElementById('addColumnModal').style.display = 'none';
+}
+
+async function saveAddColumn() {
+  var newColumnName = document.getElementById('addColumnInput').value.trim();
+  var newMapping = document.getElementById('addColumnMapping').value;
+  var formData = new FormData();
+  formData.append('newColumnName', newColumnName);
+  formData.append('newMapping', newMapping);
+  formData.append('version_id', versionId);
+  var data = await unifiedSendRequest(CATEGORYLISTADDCOLUMN, {formData: formData});
+  if (data.success) {
+    closeAddColumnModal();
+    showMessage(data.message, true);
+    await fillVersionDropdown();
+  } else {
+    showMessage(data.message, false);
+  }
+}
 
 function toggleSorting(enableSorting) {
     var table = $('#editableTable').DataTable();
@@ -1011,7 +1798,7 @@ async function addNewRow() {
 
     // Initialize an array to hold the new row data
     var newRowData = {};
-    var data = await unifiedSendRequest(GETCATEGORYLISTDETAILS, {method: 'GET'});
+    var data = await unifiedSendRequest(GETCATEGORYLISTDETAILS + `?version_id=${versionId}`, {method: 'GET'});
     var headers = Object.keys(data[Object.keys(data)[0]]);
     var idcol = await unifiedSendRequest(GETCATEGORYLISTIDCOL, {method: 'GET'});
     table.columns().every(function(index) {
@@ -1027,48 +1814,86 @@ async function addNewRow() {
     table.row.add(newRowData).draw();
 
     // Move to the last page where the new row is
-    table.page('last').draw('page');
+    {% comment %} table.page('last').draw('page'); {% endcomment %}
 }
 
-function addNewColumn() {
-  var table = $('#editableTable').DataTable();
-
-  // Find the first hidden column
-  var hiddenColumnIndex = -1;
-  for (let i = 0; i < table.columns().nodes().length; i++) {
-      if (!table.column(i).visible()) {
-          hiddenColumnIndex = i;
-          break;
+async function addNewColumn() {
+  document.getElementById('editableTable').style.cursor = 'wait';
+  document.body.style.cursor = 'wait';
+  var labelsV2Options = await getCategorylistLabelsV2Options();
+  document.getElementById('addColumnMapping').innerHTML = '';
+  var unmappedOption = document.createElement('option');
+  unmappedOption.value = '';
+  unmappedOption.textContent = 'Unmapped';
+  document.getElementById('addColumnMapping').appendChild(unmappedOption);
+  Object.keys(labelsV2Options).forEach(groupKey => {
+    var optionGroup = document.createElement('optgroup');
+    optionGroup.label = groupKey;
+    optionGroup.setAttribute('data-name', groupKey);
+    labelsV2Options[groupKey].forEach(option => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option.key;
+      optionElement.setAttribute('data-tooltip', option.description || '');
+      optionElement.setAttribute('data-units', option.options);
+      var star = '';  
+      if (option.required) {
+        star = ' *';
       }
-  }
-
-  // If a hidden column is found, make it visible and rename it
-  if (hiddenColumnIndex !== -1) {
-      // Make the column visible
-      table.column(hiddenColumnIndex).visible(true);
-
-      // Rename the column (updating the header in the DOM)
-      var header = $(table.column(hiddenColumnIndex).header());
-      header.text('New Column'); // If newColumnName is not provided, default to 'New Column'
-      columnNames[hiddenColumnIndex] = 'New Column';
-      var scrollBody = $(table.table().node()).parent();
-      scrollBody.animate({
-          scrollLeft: scrollBody.get(0).scrollWidth
-      }, 500); // 500ms for smooth scrolling animation
-      // Optionally, if the table needs to be redrawn for the changes to take effect
-      // table.draw();
-  }
+      optionElement.textContent = option.title + star;
+      optionGroup.appendChild(optionElement);
+    });
+    document.getElementById('addColumnMapping').appendChild(optionGroup);
+  });
+  document.getElementById('addColumnModal').style.display = 'block';
+  $('#addColumnMapping').selectpicker({
+    dropupAuto: false,
+    size: 8
+  });
+  $('#addColumnMapping').selectpicker('refresh');
+  setTimeout(() => {
+    const $options = $('#addColumnMapping option');
+    const $items = $('#addColumnMapping')
+      .parent()
+      .find('.dropdown-menu li:not(.divider):not(.dropdown-header) a');
+    $items.each(function (index) {
+      const tooltip = $options.eq(index).data('tooltip');
+      if (tooltip) {
+        $(this).attr('title', tooltip);
+      }
+    });
+    // Initialize Bootstrap tooltip
+    $items.tooltip({ container: 'body' });
+  }, 200);
+  $('#deleteButtonRow').hide();
+  $('#deleteButton').hide();
+  document.body.style.cursor = 'default';
+  document.getElementById('editableTable').style.cursor = 'default';
 
 }
 
   let currentTh = null;
-  async function deleteColumn() {
+async function deleteColumn() {
       // Delete the column
       // closePopup();
       const columnName = currentTh.textContent;
       if(confirm(`Are you sure you want to delete ${columnName}?`)){
-          var table = $('#editableTable').DataTable();
-          table.column(currentTh.cellIndex).visible(false);
+        var oldMapping = categorylistLabels[columnName];
+        if (oldMapping) {
+          oldMapping = oldMapping.key;
+        } else {
+          oldMapping = '';
+        }
+        var formData = new FormData();
+        formData.append('oldColumnName', columnName);
+        formData.append('oldMapping', oldMapping);
+        formData.append('version_id', versionId);
+        var data = await unifiedSendRequest(CATEGORYLISTDELETECOLUMN, {formData: formData});
+        if (data.success) {
+          showMessage(data.message, true);
+          await fillVersionDropdown();
+        } else {
+          showMessage(data.message, false);
+        }
       }
   }
   
@@ -1116,27 +1941,35 @@ function addNewColumn() {
       }
   }
 
-
-  function activateEditMode() {
+  async function activateEditMode() {
     document.getElementById('editModeActivated').style.display = 'block';
     document.getElementById('activateEditMode').style.display = 'none';
+    if (window.userPermissions['rules'] === false) {
+      document.getElementById('addRuleBtn').classList.add('greyed_out_wrapper');
+      document.getElementById('addRuleBtn').style.cursor = 'not-allowed';
+      document.getElementById('addRuleBtn').style.backgroundColor = '#ddd';
+      document.getElementById('addRuleBtn').onclick = null;
+    }
     editMode = true;
     toggleSorting(!editMode);
   }
 
-  async function deactivateEditMode(save) {
+  async function deactivateEditMode() {
     document.getElementById('editModeActivated').style.display = 'none';
     document.getElementById('activateEditMode').style.display = 'flex';
     document.getElementById('deleteButton').style.display = 'none';
     document.getElementById('deleteButtonRow').style.display = 'none';
     editMode = false;
     toggleSorting(!editMode);
-    if (save) {
-      await saveData();
-    }
   }
 
-  function activateCategorylistMode() {
+  async function activateCategorylistMode() {
+    if (window.userPermissions['livedata'] === false) {
+      document.getElementById('categorylistfromstore').style.cursor = 'not-allowed';
+      document.getElementById('categorylistfromstore').style.backgroundColor = '#ddd';
+      document.getElementById('categorylistfromstore').onclick = null;
+      document.getElementById('categorylistfromstore').classList.add('greyed_out_wrapper');
+    }
     document.getElementById('categoryModeActivated').style.display = 'block';
     document.getElementById('activateCategoryMode').style.display = 'none';
     editMode = true;
@@ -1160,8 +1993,8 @@ function addNewColumn() {
             var column = this;
             var key = column.dataSrc();
 
-            // Check if the column is visible
-            if (column.visible()) {
+            // Check if the column is visible or in previouslyHiddenColumns set
+            if (column.visible() || allColumns.includes(key)) {
                 // Use columnNames to get the new key name or use the original key
                 let newKey = columnNames[index] || key;
                 newRow[newKey] = row[key];
@@ -1174,8 +2007,8 @@ function addNewColumn() {
         formData.append('new_data', `${JSON.stringify(processedData)}`);
         var data = await unifiedSendRequest(SAVECATEGORYLIST, {formData: formData});
         if (data) {
-          console.log('Saved successfully');
-          showMessage('Saved changes ', true);
+          showMessage(data['status'], true);
+          await deactivateEditMode();
         }
       } catch (error) {
         console.error(error);
@@ -1183,22 +2016,87 @@ function addNewColumn() {
       }
   }
 
+    /**
+  * returns an HTML **string** where…
+  *   • the header is split in TWO halves (closest possible to 50 / 50)
+  *     **only** at " ", "/", "-", "_"                                  *
+  *   • every other occurrence of those characters becomes unbreakable  *
+  */
+  function splitHeaderInTwo(header) {
+    // characters at which we may split
+    const BREAK_CHARS = [' ', '/', '-', '_'];
+  
+    /* 1️⃣  collect the positions of every break-character */
+    const breakPoints = [...header]
+      .map((ch, idx) => BREAK_CHARS.includes(ch) ? idx : -1)
+      .filter(idx => idx !== -1);
+  
+    // nothing to split on → return as-is
+    if (breakPoints.length === 0) return header;
+  
+    /* 2️⃣  choose the position closest to the middle */
+    const mid      = header.length / 2;
+    const splitIdx = breakPoints.reduce(
+        (best, cur) => Math.abs(cur - mid) < Math.abs(best - mid) ? cur : best,
+        breakPoints[0]
+    );
+  
+    /* 3️⃣  rebuild the string with exactly one <wbr>
+           and NB-spaces / NB-hyphens everywhere else          */
+    let out = '';
+    for (let i = 0; i < header.length; i++) {
+      const ch = header[i];
+  
+      if (i === splitIdx) {               // ← chosen break-point
+        out += ch + '<wbr>';
+        continue;
+      }
+  
+      switch (ch) {                       // make all other breaks non-breaking
+        case ' ' : out += '&nbsp;';   break;   // non-breaking space
+        case '-' : out += '&#8209;';   break;  // non-breaking hyphen
+        default  : out += ch;                  // ‘/’ and ‘_’ never break anyway
+      }
+    }
+    return out;
+  }
+
+  function openDropdownGuide() {
+    // get the 16th td inside the row with id 1
+    var row = document.getElementById('editableTable').querySelector('tbody tr');
+    var td = row.querySelectorAll('td')[6];
+    td.click();
+  }
+
   function showGuide() {
     startGuide([
         { element: "main", group: "{{ 'software.guide.categorylist.welcome.group' | t }}", title: "{{ 'software.guide.categorylist.welcome.title' | t }}", text: "{{ 'software.guide.categorylist.welcome.text' | t }}", where: 'middle' },
-        { element: "#uploadCategorylistButton", group: "{{ 'software.guide.categorylist.upload.group' | t }}", title: "{{ 'software.guide.categorylist.upload.title' | t }}", text: "{{ 'software.guide.categorylist.upload.text' | t }}", where: 'below' },
-        { element: "#editButton", group: "{{ 'software.guide.categorylist.edit.group' | t }}", title: "{{ 'software.guide.categorylist.edit.title' | t }}", text: "{{ 'software.guide.categorylist.edit.text' | t }}", where: 'below', secondElement: '#editModeActivated' }
+        { element: "#activateCategoryMode", group: "{{ 'software.guide.categorylist.upload.group' | t }}", title: "{{ 'software.guide.categorylist.upload.title' | t }}", text: "{{ 'software.guide.categorylist.upload.text' | t }}", where: 'below' },
+        { element: "#editButton", group: "{{ 'software.guide.categorylist.edit.group' | t }}", title: "{{ 'software.guide.categorylist.edit.title' | t }}", text: "{{ 'software.guide.categorylist.edit.text' | t }}", where: 'below', secondElement: '#editModeActivated', runBefore: activateEditMode},
+        { element: "#addRowBtn", group: "{{ 'software.guide.categorylist.addRow.group' | t }}", title: "{{ 'software.guide.categorylist.addRow.title' | t }}", text: "{{ 'software.guide.categorylist.addRow.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#addColumnBtn", group: "{{ 'software.guide.categorylist.addColumn.group' | t }}", title: "{{ 'software.guide.categorylist.addColumn.title' | t }}", text: "{{ 'software.guide.categorylist.addColumn.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#addRuleBtn", group: "{{ 'software.guide.categorylist.addRule.group' | t }}", title: "{{ 'software.guide.categorylist.addRule.title' | t }}", text: "{{ 'software.guide.categorylist.addRule.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#deactivateEditModeSave", group: "{{ 'software.guide.categorylist.save.group' | t }}", title: "{{ 'software.guide.categorylist.save.title' | t }}", text: "{{ 'software.guide.categorylist.save.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#tabs-container", group: "{{ 'software.guide.categorylist.tabs.group' | t }}", title: "{{ 'software.guide.categorylist.tabs.title' | t }}", text: "{{ 'software.guide.categorylist.tabs.text' | t }}", where: 'below'},
+        { element: "#versionsContainer", group: "{{ 'software.guide.categorylist.versions.group' | t }}", title: "{{ 'software.guide.categorylist.versions.title' | t }}", text: "{{ 'software.guide.categorylist.versions.text' | t }}", where: 'below'},
+        { element: "#editableTable tbody tr", group: "{{ 'software.guide.categorylist.dropdown.group' | t }}", title: "{{ 'software.guide.categorylist.dropdown.title' | t }}", text: "{{ 'software.guide.categorylist.dropdown.text' | t }}", where: 'middle', runBefore: openDropdownGuide},
     ]);
     setCookie('showedGuideCategory', 'true', 300);
 }
+
 function showGuideFromButton(element) {
   showGuide();
 }
-document.addEventListener('DOMContentLoaded', function() {
-  if(readCookie('showedGuideCategory') === null) {
+
+waitForPermission(function() {
+  if (window.userPermissions['forsure-categorylist-editor']) {
+    document.getElementById('categorylistWrapper').style.display = 'block';
+    fillVersionDropdown();
+    if(readCookie('showedGuideCategory') === null) {
       setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
     }
-  });
+  }
+});
 
   </script>
 {% else %}

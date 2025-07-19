@@ -1,0 +1,147 @@
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+{{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+.section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+}
+
+.forsure-dashboard-container {
+  display: flex;
+  flex-wrap: wrap; /* Ensures wrapping on small screens */
+  gap: 1rem;
+}
+.dashboard-outer-container {
+  width: 90%;
+  margin: auto;
+}
+
+#bannerleft {
+  flex: 0 0 auto;
+  min-width: 420px; /* minimum to ensure deadlines are shown properly and aligned */
+  height: calc(90vh - 13rem);
+}
+
+.grid-title {
+    background-color: #484B52;
+    color: #fafafa;
+    font-weight: bold;
+    width: 100%;
+    height: 40px;
+    position: absolute;
+    padding: 1rem;
+    top: 0;
+    border-bottom: 0.2rem solid #17161c;
+    text-align: left;
+    position: sticky; /* Makes the title sticky */
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    font-size: large;
+    justify-content: space-between;
+  }
+
+  .widget {
+    border: 0.2rem solid #17161c!important;
+    margin: 5px;
+    box-sizing: border-box;
+    position: relative; /* Make the widget relative so that the svg can be positioned absolutely within it */
+    border-radius: 1rem;
+    background-color: #fafafa;
+    overflow-y: auto;
+  }
+
+  .icon-container {
+    display: flex;
+    gap: 1rem;
+  }
+
+
+.widget-left {  
+  width: fit-content;
+  min-width: 100%;
+}
+#bannerright {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.widget-right {
+  width: 100%;
+  height: calc(90vh - 13rem);
+}
+
+.icon-container div {
+  cursor: pointer;
+  display: flex;
+}
+
+{%- endstyle -%}
+{% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
+
+
+  <!-- Load d3.js -->
+  <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7"> </script>
+{% render 'forsure-simple-notification' %}
+{% render 'forsure-confirmation' %}
+<div class="section-{{ section.id }}-padding">
+     <div class="dashboard-outer-container">
+        <div class="forsure-dashboard-container">
+          <div id="bannerleft">
+            {% render 'forsure-deadline-widget' %}
+            {% render 'forsure-information-widget' %}
+          </div>
+          <div id="bannerright">
+            {% render 'forsure-information-details-widget' %}
+            {% render 'forsure-map-widget' %}
+          </div>
+        </div>
+     </div>
+</div>
+
+<script>
+
+</script>
+{% endif %}
+
+{% schema %}
+  {
+    "name": "t:sections.forsure_dashboard.name",
+    "class": "section",
+    "settings": [
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 36
+      }, {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 36
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.forsure_dashboard.presets.name"
+      }
+    ]
+  }
+{% endschema %}

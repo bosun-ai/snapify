@@ -48,7 +48,7 @@
   <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
 
   {% render 'forsure-login' %}
-  <div id="report-status" style="display: none;position: fixed; bottom: 10px; right: 10px; background-color: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+  <div id="report-status" style="display: none;position: fixed; bottom: 50px; right: 10px; background-color: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
     <div
       id="loading-icon"
       class="load"
@@ -61,24 +61,42 @@
   </div>
   <script>
     var timeout = 1000;
-
+    var repeatActionTimeout = null;
     function repeatAction() {
         unifiedSendRequest(GETREPORTPROGRESS, {method: 'GET'})
             .then(data => {
-                if (data === "1") {
-                    document.getElementById('report-status').style.display = 'flex';
-                    document.getElementById('loading-icon').style.display = 'block';
-                    document.getElementById('report-message').style.display = 'block';
-                    document.getElementById('report-link').style.display = 'none';
-                    timeout = 1000;
-                } else if (data === "0") {
-                    document.getElementById('loading-icon').style.display = 'none';
-                    document.getElementById('report-message').style.display = 'none';
-                    document.getElementById('report-link').style.display = 'block';
-                    timeout = 5000; // set higher, as it will run continuously
+              if (data['progress'] === 100) {
+                document.getElementById('loading-icon').style.display = 'none';
+                document.getElementById('report-message').style.display = 'none';
+                document.getElementById('report-link').style.display = 'block';
+                try {
+                  document.getElementById('reportInProgress').innerHTML = 'Report finished <br> <a href="/pages/forsure-downloads">See report</a>';
+                  
+                } catch (error) {
+                  console.error(error);
                 }
-    
-                setTimeout(repeatAction, timeout); // Call the function again after the specified timeout
+
+              } else if (data['progress'] === 'ERROR') {
+                showMessage(data['description'], false);
+                document.getElementById('report-status').style.display = 'none';
+                try {
+                  clearTimeout(repeatActionTimeout);
+                  document.getElementById('reportFailed').innerHTML = data['description'] + '<br> Please try again or contact the support at <a href="mailto:info@for-sure.net">info@for-sure.net</a>';
+                  document.getElementById('reportFailed').style.display = 'block';
+                  document.getElementById('reportInProgress').style.display = 'none';
+                  // remove the timeout
+                } catch (error) {
+                  console.error(error);
+                }
+              } else {
+                  document.getElementById('report-status').style.display = 'flex';
+                  document.getElementById('loading-icon').style.display = 'block';
+                  document.getElementById('report-message').style.display = 'block';
+                  document.getElementById('report-message').innerText = data['description'];
+                  document.getElementById('report-link').style.display = 'none';
+                  timeout = 1000;
+                  repeatActionTimeout = setTimeout(repeatAction, timeout); // Call the function again after the specified timeout
+              }
             })
             .catch(error => {
                 console.error(error);

@@ -209,7 +209,7 @@
         {{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}.
       </span>
     {%- endif -%}
-    <div id="emailError" style="color: red;width: 85%; margin-left: auto; margin-right: auto;"></div>
+    <div id="emailError" style="color: var(--forsure-main-red);width: 85%; margin-left: auto; margin-right: auto;"></div>
 
     <div class="" style="margin-top: 1.5rem;">
       <input
@@ -224,7 +224,7 @@
         checked />
       <label for="marketingConsent" style="font-size:11px;margin-top:2rem;margin-left:auto">{{ registerCheckbox }}</label>
     </div>
-    <div id="generalError" style="color: red;width: 85%; margin-left: auto; margin-right: auto;"></div>
+    <div id="generalError" style="color: var(--forsure-main-red);width: 85%; margin-left: auto; margin-right: auto;"></div>
     <button id="submitBtn" style="width:70%;margin: 1.5rem 0 1.5rem!important;font-size:21px" onclick="registerAccount()">
       {{ registerButton }}
     </button>
@@ -366,7 +366,7 @@
     document.getElementById('RegisterForm-CompanyNameHidden').value = "CompanyName: " + companyName + ";";
   }
 
-var serverUrl = 'https://automations.for-sure.net:4190/';
+var serverUrl = 'https://server.for-sure.net/register/';
  async function registerAccount() {
     var endpoint = 'register/new';
    var formData = new FormData();
@@ -391,7 +391,7 @@ var serverUrl = 'https://automations.for-sure.net:4190/';
       });
     if (response.status === 200){
       setCookieShort('recentlyRegistered', "true", 300);
-      window.location.href = '{{ pages['account-activation'].url }}';
+      window.location.href = '{{ pages['free-plan'].url }}';
     } else {
       var responseJson = await response.json();
       document.getElementById('generalError').textContent = responseJson['detail'];

@@ -273,7 +273,7 @@ Usage:
 
 {% comment %} <div id="overlayCustom"></div>
 <div id="customChart" style="display: none"> {% endcomment %}
-  <div id="chartSelectionContainer" style="margin: auto;width:fit-content"></div>
+  <div id="chartSelectionContainer" class="losensitive" style="margin: auto;width:fit-content"></div>
   <div style="display:flex;position:relative">
     <div id="columnsLeft" style="width: fit-content;overflow: auto;height: 60vh;position: relative;
             margin-right: 11rem;overflow-y: auto;overflow-x: clip;min-width:300px">
@@ -360,7 +360,6 @@ Usage:
     var data = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, {method: 'GET'});
     var columnsDiv = document.getElementById('columnsContentLeft');
     columnsDiv.innerHTML = ``;
-    console.log(data);
     var table = document.createElement('table');
     for(var key in data) {
         // Check if the key is actually a property of the data object
@@ -521,7 +520,6 @@ function getChartTypes() {
       listItem.classList.add('selected-chart-option');
       selectChartType = listItem.textContent;
       selectedChartTypeId = listItem.id;
-      console.log(chart);
       func(chart);
       if ('widgetCustom' in widgetChartParams) {
         // Access the 'widgetCustom' object
@@ -573,49 +571,48 @@ function disableChartTypeEnableRest() {
     }
 }
 
-  function createEmptyChart() {
-    var chartTag = 'widgetCustom';
-    var ctx = document.getElementById(chartTag).getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar', // or 'line', 'pie', etc.
-        data: {
-            labels: [], // No labels for an empty chart
-            datasets: [{
-                label: 'No Data',
-                data: [], // Empty data array
-                backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                borderColor: 'rgba(0, 123, 255, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-              y: {
+function createEmptyChart() {
+  var chartTag = 'widgetCustom';
+  var ctx = document.getElementById(chartTag).getContext('2d');
+  var myChart = new Chart(ctx, {
+      type: 'bar', // or 'line', 'pie', etc.
+      data: {
+          labels: [], // No labels for an empty chart
+          datasets: [{
+              label: 'No Data',
+              data: [], // Empty data array
+              backgroundColor: 'rgba(0, 123, 255, 0.5)',
+              borderColor: 'rgba(0, 123, 255, 1)',
+              borderWidth: 1
+          }]
+      },
+      options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              display: true, // This will display the Y-axis
+              title: {
+                  display: false,
+                  text: 'Value' // Title for the Y-axis
+              }
+            },
+            x: {
                 beginAtZero: true,
-                display: true, // This will display the Y-axis
+                display: true, // This will display the X-axis
                 title: {
                     display: false,
-                    text: 'Value' // Title for the Y-axis
+                    text: 'Category' // Title for the X-axis
                 }
-              },
-              x: {
-                  beginAtZero: true,
-                  display: true, // This will display the X-axis
-                  title: {
-                      display: false,
-                      text: 'Category' // Title for the X-axis
-                  }
-              }
             }
-        }
-    });
-    chart = myChart;
-  }
+          }
+      }
+  });
+  chart = myChart;
+}
 
 var draggedElementId = null;
 // drag and drop
 function handleDragStart(e) {
-  console.log('Name');
   draggedElementId = e.target.id;
   e.dataTransfer.setData('text/plain', e.target.id);
 }
@@ -626,69 +623,6 @@ var columnsLeft = document.getElementById('columnsLeft');
 var trashIconContainer = document.getElementById("trashIconContainer");
 // const tooltip = document.getElementById('tooltip');
 
-[chosenX, chosenY, columnsLeft].forEach(dropZone => {
-  dropZone.addEventListener('dragover', function(e) {
-    if (dropZone === columnsLeft) {
-      Array.from(document.getElementsByClassName('columnsLeftContent')).forEach(element => {element.style.opacity = '0.5';});
-      document.getElementById("trashIconContainer").style.display = 'block';
-    } else {
-      if (dropZone.querySelector(`#${draggedElementId}`) || dropZone.querySelector(`#moved${draggedElementId}`)) {
-        displayTooltip(draggedElementId, "Item already exists");
-        // element already exists in this dropZone, so disable dropping
-        return;
-      }
-      if (dropZone === chosenX && chosenY.querySelector(`#moved${draggedElementId}`)) { // if moved not yet in front, the item is new
-        displayTooltip(draggedElementId, "Item already exists in Y");
-        // element already exists in Y, so disable dropping
-        return;
-      }
-      if (dropZone === chosenY && chosenX.querySelector(`#moved${draggedElementId}`)) { // if moved not yet in front, the item is new
-        displayTooltip(draggedElementId, "Item already exists in X");
-        // element already exists in in X, so disable dropping
-        return;
-      }
-      if (dropZone === chosenX && chosenX.getElementsByTagName('li').length > 1) {
-        displayTooltip(draggedElementId, "Too many X values");
-        return;
-      }
-      if (dropZone === chosenY && chosenY.getElementsByTagName('li').length > 5) {
-        displayTooltip(draggedElementId, "Too many Y values");
-        return;
-      }
-    }
-      // tooltip.style.display = 'none';
-      e.preventDefault(); // Necessary to allow dropping
-      dropZone.style.backgroundColor = "#e0e0e0";
-      // TODO disable if length of X columns is already at 2
-  });
-
-  dropZone.addEventListener('dragleave', () => {
-      dragLeave(dropZone);
-  });
-
-  dropZone.addEventListener('drop', function(e) {
-    e.preventDefault();
-    dragLeave(dropZone);
-    var itemId = e.dataTransfer.getData('text/plain');
-    console.log('Dropped item on', dropZone.id, itemId);
-    if(dropZone === columnsLeft) {
-      var element = document.getElementById(itemId);
-      if(element.classList.contains('moved')) {
-          element.remove();
-      }
-    } else {
-      addElementDrop(dropZone.id, itemId);
-    }
-    ['chosenX', 'chosenY'].forEach(containerId => {
-    var container = document.getElementById(containerId);
-    var listItems = container.getElementsByTagName('li');
-    if(listItems.length == 0) {
-      document.getElementById(`${containerId}Placeholder`).style.display = 'block';
-    }
-  })
-    createPlot();
-  });
-})
 
 function dragLeave(dropZone) {
   dropZone.style.backgroundColor = "";
@@ -698,7 +632,6 @@ function dragLeave(dropZone) {
 }
 
 function displayTooltip(id, message) {
-  console.log(message);
   // TODO enable tooltip (positioning not working)
   // var boundingBox = document.getElementById(id).getBoundingClientRect();
   // tooltip.style.display = 'block';
@@ -742,7 +675,6 @@ var pieChartOnly = false;
 async function createPlot(){
   var xValues = getValues('chosenX');
   var yValues = getValues('chosenY');
-  console.log(`Selected the following values: X: ${xValues}, Y: ${yValues}`);
   if (xValues.length == 0 || yValues.length == 0) { // disabled because of pieplot
     pieChartOnly = true;
     return;
@@ -763,7 +695,6 @@ async function createPlot(){
   };
   try {
       var data = await unifiedSendRequest(CUSTOMCHARTCREATE, {formData: JSON.stringify(chartDataNew), headerArgs: {'Content-Type': 'application/json'}});
-      console.log(data);
       // chartData = data;
       lastX = xValues;
       lastY = yValues;
@@ -822,18 +753,16 @@ async function saveChart() {
     showTooltip("Cannot save: No data selected", false);
     return;
   }
-  console.log(`Saving the following values: X: ${xValues}, Y: ${yValues}`);
 
   let chartData = {
-    chart_type: selectChartType,
-    title: document.getElementById('chartTitle').innerText,
-    x_columns: Array.from(xValues),
-    y_columns: Array.from(yValues),
-    category: 'Custom'
-};
+      chart_type: selectChartType,
+      title: document.getElementById('chartTitle').innerText,
+      x_columns: Array.from(xValues),
+      y_columns: Array.from(yValues),
+      category: 'Custom'
+  };
   try {
     var data = await unifiedSendRequest(CUSTOMCHARTADD, {formData: JSON.stringify(chartData), headerArgs: {'Content-Type': 'application/json'}});
-    console.log(data);
     showTooltip("Chart saved successfully!", true);
     redraw();
   } catch (error) {
@@ -868,13 +797,83 @@ function updateYAxisPosition() {
   yAxisContainer.style.display = 'flex';
 }
 
-// Call this function on page load and whenever the layout changes
-// window.onload = updateYAxisPosition;
-window.onresize = updateYAxisPosition;
 
-getColumnsCustom();
-document.getElementById('chartTitle').addEventListener('dblclick', makeEditable);
-// document.getElementById('overlayCustom').addEventListener('click', hideModalCustom);
-document.addEventListener('DOMContentLoaded', getChartTypes);
-document.addEventListener('DOMContentLoaded', createEmptyChart);
+
+waitForPermission(function() {
+  if (window.userPermissions['forsure-statistics'] && window.userPermissions['customchart']) {
+    document.getElementById('customChart').style.display = 'block';
+
+
+    [chosenX, chosenY, columnsLeft].forEach(dropZone => {
+      dropZone.addEventListener('dragover', function(e) {
+        if (dropZone === columnsLeft) {
+          Array.from(document.getElementsByClassName('columnsLeftContent')).forEach(element => {element.style.opacity = '0.5';});
+          document.getElementById("trashIconContainer").style.display = 'block';
+        } else {
+          if (dropZone.querySelector(`#${draggedElementId}`) || dropZone.querySelector(`#moved${draggedElementId}`)) {
+            displayTooltip(draggedElementId, "Item already exists");
+            // element already exists in this dropZone, so disable dropping
+            return;
+          }
+          if (dropZone === chosenX && chosenY.querySelector(`#moved${draggedElementId}`)) { // if moved not yet in front, the item is new
+            displayTooltip(draggedElementId, "Item already exists in Y");
+            // element already exists in Y, so disable dropping
+            return;
+          }
+          if (dropZone === chosenY && chosenX.querySelector(`#moved${draggedElementId}`)) { // if moved not yet in front, the item is new
+            displayTooltip(draggedElementId, "Item already exists in X");
+            // element already exists in in X, so disable dropping
+            return;
+          }
+          if (dropZone === chosenX && chosenX.getElementsByTagName('li').length > 1) {
+            displayTooltip(draggedElementId, "Too many X values");
+            return;
+          }
+          if (dropZone === chosenY && chosenY.getElementsByTagName('li').length > 5) {
+            displayTooltip(draggedElementId, "Too many Y values");
+            return;
+          }
+        }
+          // tooltip.style.display = 'none';
+          e.preventDefault(); // Necessary to allow dropping
+          dropZone.style.backgroundColor = "#e0e0e0";
+          // TODO disable if length of X columns is already at 2
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+          dragLeave(dropZone);
+      });
+
+      dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dragLeave(dropZone);
+        var itemId = e.dataTransfer.getData('text/plain');
+        if(dropZone === columnsLeft) {
+          var element = document.getElementById(itemId);
+          if(element.classList.contains('moved')) {
+              element.remove();
+          }
+        } else {
+          addElementDrop(dropZone.id, itemId);
+        }
+        ['chosenX', 'chosenY'].forEach(containerId => {
+        var container = document.getElementById(containerId);
+        var listItems = container.getElementsByTagName('li');
+        if(listItems.length == 0) {
+          document.getElementById(`${containerId}Placeholder`).style.display = 'block';
+        }
+      })
+        createPlot();
+      });
+    })
+    // Call this function on page load and whenever the layout changes
+    //window.onload = updateYAxisPosition;
+    window.onresize = updateYAxisPosition;
+    getColumnsCustom();
+    document.getElementById('chartTitle').addEventListener('dblclick', makeEditable);
+    // document.getElementById('overlayCustom').addEventListener('click', hideModalCustom);
+    getChartTypes();
+    createEmptyChart();
+  }
+});
 </script>

@@ -50,7 +50,7 @@
     scroll-behavior: smooth; 
 }
 .dropZone.error {
-    border-color: red;
+    border-color: var(--forsure-main-red);
 }
 #progressIcons {
     display: flex;
@@ -295,7 +295,7 @@ div.display-flex {
 
 .greyed_out {
     cursor: not-allowed;
-    background-color: grey;
+    background-color: grey!important;
     opacity: 0.5;
     position: relative; /* Needed for positioning the tooltip */
     pointer-events: none; /* Disable clicks on links */
@@ -313,7 +313,7 @@ div.display-flex {
     top: 50%; /* Position above the element */
     left: 50%;
     transform: translateX(-50%);
-    background: red;
+    background: var(--forsure-main-red);
     color: white;
     padding: 0.5rem;
     font-size: 0.9rem;
@@ -513,16 +513,131 @@ content: "\2713"
   margin-bottom: 1rem;
 }
 
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    top: 1.5rem;
+    position: absolute;
+    right: 1.5rem;
+  }
+  .closeError {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    top: 0.5rem;
+  }
+  .close:hover,
+  .close:focus, .closeError:hover, .closeError:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .exclude {
+    text-decoration: line-through;
+  }
+
+
+  .modal-content {
+  background-color: #fefefe;
+  padding: 1rem 2rem;
+  border: 1px solid #888;
+  width: fit-content;
+  max-width: 80vw;
+  margin: 15% auto;
+  box-sizing: border-box;
+}
+
+.profile-wrapper {
+  display: inline-block;
+  max-width: 100%;
+  padding: 2rem;
+  padding-top: 0;
+}
+
+#profileTable {
+  width: 100%;
+  table-layout: auto;
+}
+
+#profileTable th, #profileTable td {
+  white-space: nowrap;
+  padding: 0.5rem;
+}
+#resolutionSelect {
+  padding: 1rem;
+}
+.disableclicks {
+  pointer-events: none;
+}
+
+
+#returnListDropZone {
+  margin-top: 9.55rem;
+}
+
+
+
+
+.picker      { max-width: 650px; margin: auto; }
+    .year-nav    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .calendar-grid        { display: grid;
+                   grid-template-columns: 80px repeat(3, 1fr) 80px; /* Q | 3×month | S  */
+                   grid-auto-rows: 40px;
+                   gap: var(--gap); }
+    .quarter-btn,
+    .month-btn,
+    .semester-btn,
+    .year-btn    { display: flex; justify-content: center; align-items: center;
+                   border: 1px solid #ccc; border-radius: 4px; user-select: none; 
+                   width: 5rem;
+                   height: 4rem;cursor: pointer;
+                  }
+    .quarter-btn { font-weight: 600; background:#fafafa; }
+    .year-btn    { grid-column: 1 / -1; margin-top: var(--gap); font-weight: 600; width: 90.5%;}
+    /* ======== INTERACTION STATES ======== */
+    .month-btn:hover,
+    .quarter-btn:hover,
+    .semester-btn:hover,
+    .year-btn:hover         { background:#f0f0f0; }
+    .active                 { background:#007bff; color:#fff; border-color:#007bff; }
+
+
+.disabled {
+  background-color: #ccc;
+}
+.disabled-date {
+  background-color: #ccc;
+}
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
-  <div id="reportcontainer" style="min-height: 100vh;padding-bottom: 5rem;">
+  <div id="reportcontainer" class="section-{{ section.id }}-padding" style="min-height: 100vh;padding-bottom: 5rem;display: none">
   <!-- Load d3.js -->
   <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
   {% comment %} <script src="https://cdn.jsdelivr.net/npm/d3@7"></script> {% endcomment %}
-  <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
-  <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
   {% render 'forsure-simple-notification' %}
   {% render 'forsure-confirmation' %}
   
@@ -532,16 +647,16 @@ content: "\2713"
   {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> {% endcomment %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> {% endcomment %}
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>-->
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script
+{% comment %} <script src="https://code.jquery.com/jquery-3.6.0.js"></script> {% endcomment %}
+{%comment %}<script
   src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
   integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-  crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" />
+  crossorigin="anonymous"></script> {% endcomment %}
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script> {% endcomment %}
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script> {% endcomment %}
+{% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.css" /> {% endcomment %}
 
   <!-- Create a div where the graph will take place -->
 <div id="uploadSteps" class="border-uploads page-width" style="border-radius:1rem;">
@@ -569,7 +684,7 @@ content: "\2713"
             <!-- Option: Create New Report -->
              <div id="createNewReportWrapper" style="position: relative">
               <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
-                <div id="createNewReport" class="option-card greyed_out" onclick="selectOption('new')">
+                <div id="createNewReport" class="option-card greyed_out" style="position: relative;background-color: #fafafa;" onclick="selectOption('new')">
                     <h3>Create New Report</h3>
                     <p>Start a new report by selecting<br>the required files and settings.</p>
                     <div style="height: 50%;margin-top: 5rem">
@@ -581,7 +696,7 @@ content: "\2713"
             <!-- Option: Upload Existing Reports -->
              <div id="uploadExistingReportsWrapper" style="position: relative">
               <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
-                <div id="uploadExistingReports" class="option-card" onclick="selectOption('upload')">
+                <div id="uploadExistingReports" class="option-card greyed_out" style="position: relative;background-color: #fafafa;" onclick="selectOption('upload')">
                     <h3>Submit Reports</h3>
                     <p>Upload one or more completed<br>reports for submission.</p>
                     <div style="height: 50%;margin-top: 5rem">
@@ -612,7 +727,7 @@ content: "\2713"
                 <div id="imagecontainer-imageuploadreports/" style="padding:2rem">
                   <img width="220px" id="upload-imageuploadreports/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
                 </div>
-                <div id="upload-textuploadreports/">Drag & Drop your Reports here<br></div>
+                <div id="upload-textuploadreports/">Drag & Drop your Reports here<br>You can upload multiple files at once.</div>
                 <div class="fileList" id="fileList_report_list" style="width:100%; padding:2rem"></div>
               </div>
             </div>
@@ -623,7 +738,7 @@ content: "\2713"
             <button class="button" onclick="uploadReports()">Hand in reports</button>
         </div>
 
-        <div id="editClientsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
+        <div id="editClientsModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
             <div style="display: flex;justify-content: space-between;">
               <h3>Edit Clients File</h3>
               <div>
@@ -648,16 +763,21 @@ content: "\2713"
     </div>
 
 
-    <div class="step" id="step1" style="display: none;">
+    <div class="step losensitive" id="step1" style="display: none;">
         <h2 class="heading">Select Orderlist</h2>
-        <div class="display-flex" style="margin: auto;width: fit-content;display:flex">
-        <h3 id="liveDataText" class="toggle-options">Use live data</h3>
+        <div class="display-flex" style="margin: auto;width: fit-content;display:flex;height: 7rem;">
+          <h3 id="liveDataText" class="toggle-options">Use live data</h3>
           <label id="liveData" class="toggle-container">
             <input type="checkbox" id="liveDataToggle">
-            <span class="toggle-slider"></span>
+            <span id="liveDataToggleSlider" class="toggle-slider">
+              <div class="greyedout-tooltip">Contact us to set up live data</div>
+            </span>
           </label>
+
         </div>
-        <div class="dropZone" data-input="order_list" data-url="uploadorders/">
+        <div id="ordersReceived" style="margin: auto;width: fit-content;display: none;color:red">
+        </div>
+        <div class="dropZone" data-input="order_list" data-url="uploadorders/" id="orderListDropZone" style="position: relative;background: #fafafa;">
             <div>
               <div style="padding:2rem">
                 <img width="220px" id="upload-imageuploadorders/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
@@ -668,14 +788,14 @@ content: "\2713"
         </div>
         <input type="file" id="order_list" style="display: none" multiple>
         <div id="errorsorder_list"></div>
-        <div class="navButtons">
-            <button class="nextButton button" onclick="uploadOrders('uploadorders/')" id="nextBtnuploadorders/" disabled>Next</button>
+        <div class="navButtons" id="navButtonsStep1">
+            <button class="nextButton button" onclick="uploadOrders('uploadorders/')" id="nextBtnuploadorders" style="position: relative;" disabled>Next</button>
         </div>
     </div>
 
-  <div class="step" id="step2" style="display: none">
+  <div class="step losensitive" id="step2" style="display: none">
       <h2 class="heading">Select Returnlist</h2>
-      <div class="dropZone" data-input="return_list" data-url="uploadreturns/">
+      <div class="dropZone" data-input="return_list" data-url="uploadreturns/" id="returnListDropZone">
         <div>
           <div style="padding:2rem">
             <img width="220px" id="upload-imageuploadreturns/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
@@ -688,10 +808,55 @@ content: "\2713"
       <div id="errorsreturn_list"></div>
       <div class="navButtons">
           <button class="prevButton button offbutton" onclick="prevStep(1)">Back</button>
-          <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns/">Next</button>
+          <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns">Next</button>
       </div>
   </div>
-  <div class="step" id="step3" style="display: none;">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
+  <div id="profileModal" class="losensitive modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="profile-wrapper">
+        <div style="display: flex; justify-content: space-between;">
+          <h2>Select Mapping</h2>
+          <div id="profileDropdownContainer" style="margin: auto 0;border-radius: 4px;padding-right: 0.4rem;">
+            <select id="profileSelect" class="btn dropdown-toggle bs-placeholder btn-default" style="position: relative">
+            </select>
+            <a id="editIcon" href="#" title="Edit">
+              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+              </a>
+          </div>
+          <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
+        </div>
+        <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
+          If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
+        </div>
+        <div id="profileDetails">
+          <div style="display:flex;padding: 1rem 0;">
+            <strong>File:</strong>
+            <div id='profileFileName' style="margin-left:1rem"></div>
+          </div>
+          <table id="profileTable" style="margin: auto;">
+            <tr>
+              <th>Name</th>
+              <th>Preview</th>
+              <th>Mapping</th>
+              <th>Exclude</th>
+            </tr>
+            <tbody id="profileTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="confirmOverwriteModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+     background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
+    <h2>Confirm Overwrite</h2>
+    <p>Are you sure you want to overwrite the existing mapping?</p>
+    <button class="button" onclick="confirmOverwrite()">Yes</button>
+    <button class="button" onclick="closeConfirmOverwriteModal()">No</button>
+  </div>
+  <div class="step losensitive" id="step3" style="display: none;">
       <h2 class="heading">Select country and timeframe</h2>
 
 
@@ -714,20 +879,40 @@ content: "\2713"
 
           <div class="row mb-3">
             <div class="col-md-6">
+              <label for="proSelect" class="form-label">Select PRO</label>
+              <select id="proSelect" class="selectpicker form-select" data-live-search="true">
+              </select>
+            </div>
+
+            
+            <div class="col-md-6" style="position: relative">
               {{ 'daterangepicker.css' | asset_url | stylesheet_tag }}
               <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
               <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
               <label for="monthPicker" class="form-label">Select Timeframe</label>
-              <input type="text" class="form-control small-date-input" style="width: fit-content;" id="monthPicker" placeholder="Choose date range" />
-            </div>
-            <div class="col-md-6">
-              <label for="templateSelect" class="form-label">Load Predefined Template</label>
-              <select id="templateSelect" class="selectpicker form-select" data-live-search="true">
-              </select>
+              <input type="text"
+                autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false" class="form-control small-date-input" style="width: fit-content;" id="monthPicker" placeholder="Choose date range" />
+              <input type="hidden" id="customDateRangePicker" />
+              <div id="timePicker" class="picker" style="display: none;position: absolute;background: white;margin: 2rem;padding: 3rem;border: 0.2rem solid #17161c;border-radius: 2rem;top: 100%;left: 0;transform: translate(-23%, 0);z-index: 2;">                <!-- YEAR NAVIGATION -->
+                <div class="year-nav">
+                  <div onclick="changeYear(-1)" style="width: 30px;transform: rotate(90deg);cursor: pointer">{% render 'icon-arrow-rounded' %}</div>
+                  <div id="yearDisplay"></div>
+                  <div onclick="changeYear(1)" style="width: 30px;transform: rotate(-90deg);cursor: pointer">{% render 'icon-arrow-rounded' %}</div>
+                </div>
+              
+                <!-- CALENDAR GRID -->
+                <div id="calendarGrid" class="calendar-grid"></div>
+              
+                <!-- READOUT -->
+                {% comment %} <p id="monthPicker" style="font-weight:600; margin-top:1rem;"></p> {% endcomment %}
+              </div>
             </div>
           </div>
 
-          <div class="row mb-3">
+          <div id="customFieldsContainer" class="row mb-3" style="display: none;">
             <div class="col-md-6">
               <label for="customFields" class="form-label">Select Fields for Report</label>
               <select id="customFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
@@ -738,10 +923,15 @@ content: "\2713"
             </div>
           </div>
 
-          <div class="row mb-3">
-            <div class="col-md-6 d-flex align-items-center">
+          <div id="templateContainer" class="row mb-3" style="display: none;">
+            <div class="col-md-6">
+              <label for="templateSelect" class="form-label">Load Predefined Template</label>
+              <select id="templateSelect" class="selectpicker form-select" data-live-search="true">
+              </select>
+            </div>
+            <div class="col-md-6">
               <label for="ruleSelect" class="form-label">Rules</label>
-              <div style="display: flex">
+              <div style="display: flex;width: 220px;">
                   <select id="ruleSelect" class="selectpicker form-select wide-select" multiple data-live-search="true">
                   </select>
                   <div onclick="editRules()" style="cursor:pointer;margin: auto;margin-left: 1rem;">
@@ -753,7 +943,7 @@ content: "\2713"
             </div>
           </div>
 
-          <div class="row mb-3">
+          <div id="includeReturnsContainer" class="row mb-3" style="display: none">
             <div class="col-md-6 d-flex align-items-center">
               <input type="checkbox" class="form-check-input me-2" id="useReturns">
               <label class="form-check-label" for="useReturns">Include Returns</label>
@@ -769,7 +959,7 @@ content: "\2713"
 
 
 
-  <div class="step" id="step4" style="display: none;">
+  <div class="step losensitive" id="step4" style="display: none;">
       <h2 class="heading">Confirm</h2>
 
         <div class="container">
@@ -783,7 +973,7 @@ content: "\2713"
                     <th>Category</th>
                     <th>Start</th>
                     <th>End</th>
-                    <th>Returns</th>
+                    {% comment %} <th>Returns</th> {% endcomment %}
                     <th>Orderlist</th>
                     <th>Returnlist</th>
                   </tr>
@@ -794,7 +984,7 @@ content: "\2713"
                     <td id="confirm-category"></td>
                     <td id="confirm-start"></td>
                     <td id="confirm-end"></td>
-                    <td id="confirm-returns"></td>
+                    {% comment %} <td id="confirm-returns"></td> {% endcomment %}
                     <td id="confirm-orderlist"></td>
                     <td id="confirm-returnlist"></td>
                   </tr>
@@ -803,8 +993,8 @@ content: "\2713"
             </div>
           </div>
 
-        <h4 style="text-align: center;">Template Selection</h4>
-          <div class="row mb-4" style="gap:3rem">
+          <div id="confirmNoAgency" class="row mb-4" style="gap:3rem;display: none;">
+            <h4 style="text-align: center;">Template Selection</h4>
             <div class="col-md-4 mb-3">
               <div class="card shadow-sm">
                 <div class="card-body">
@@ -833,6 +1023,17 @@ content: "\2713"
               </div>
             </div>
           </div>
+          <div id="confirmAgency" class="row mb-3" style="gap:3rem;display: none;">
+            <div class="col-mb-6 d-flex align-items-center">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-diagram-3"></i> Template Overview</h5>
+                  <div class="separator"></div>
+                  <ul id="confirm-template" class="list-group list-group-flush"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
       <div class="text-center mt-4" style="margin-bottom: 3rem;">
@@ -840,43 +1041,100 @@ content: "\2713"
           <button class="nextButton button" onclick="createReport()">Create Report</button>
       </div>
   </div>
-  <div class="step" id="stepDone" style="display: none;">
+  <div class="step losensitive" id="stepDone" style="display: none;">
     <h2 class="heading">Report in progress</h2>
-    <div id="reportInProgress" style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report is in progress, you can leave this page.</div>
-    <div id="reportFailed" style="display:none;margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Failed to create report, please try again or contact the support.</div>
+    <div id="reportInProgress" style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report is in progress, you can leave this page. If you have any questions, please contact the support at <a href="mailto:info@for-sure.net">info@for-sure.net</a></div>
+    <div id="reportFailed" style="display:none;margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Failed to create report, please try again or contact the support at <a href="mailto:info@for-sure.net">info@for-sure.net</a></div>
     <div id="showReport" style="display:none">
       <div style="margin: auto;width: 20%;text-align:center;margin-top: 10rem;    font-size: 14pt;">Report finished</div>
       <a href="/pages/forsure-downloads" class="nextButton button" id="btnShowReports"
       style="margin: auto;width: fit-content;display: flex;margin-top: 3rem;">Show Reports</a>
     </div>
     <div class="navButtons">
-          <a href="/pages/forsure-statistics" class="nextButton button" id="btnOverview">Overview</a>
+          <a href="/pages/forsure-dashboard" class="nextButton button" id="btnOverview">Overview</a>
       </div>
   </div>
 </div>
+<div id="errorModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+  <div style="display:flex;gap:1rem;">
+    <h2 id="error-modal-title">Errors</h2>
+    <div style="display:flex;gap:1rem;margin: auto;margin-right: 1rem;height: fit-content;">
+      <select id="resolutionSelect" style="padding 1rem">
+      </select>
+      <button id="nextErrorButton" class="nextButton button">Next</button>
+    </div>
+    <span class="closeError" onclick="closeErrorModal()">&times;</span>
+  </div>
+  <div id="error-description">
+  </div>
+  <div id="error-table-data"></div>
+  <input id="fileid" type="hidden" style="display:none;">
+  <input id="orders" type="hidden" style="display:none;">
 </div>
-{% render 'forsure-login' %}
+<div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
+</div>
 
 <script>
-
 async function cancreatereports() {
     try {
-        let data = await unifiedSendRequest(CANCREATEREPORTS, {method: 'GET'});
-        console.log(data);
-        if (data) {
+        if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-creation'] === true) {
             document.getElementById('createNewReport').classList.remove('greyed_out');
             document.getElementById('createNewReportWrapper').classList.remove('greyed_out_wrapper');
         } else {
             document.getElementById('createNewReport').classList.add('greyed_out');
             document.getElementById('createNewReportWrapper').classList.add('greyed_out_wrapper');
         }
+        if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-upload'] === true) {
+            document.getElementById('uploadExistingReports').classList.remove('greyed_out');
+            document.getElementById('uploadExistingReportsWrapper').classList.remove('greyed_out_wrapper');
+        } else {
+            document.getElementById('uploadExistingReports').classList.add('greyed_out');
+            document.getElementById('uploadExistingReportsWrapper').classList.add('greyed_out_wrapper');
+        }
+        if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-creation'] === true && window.userPermissions['report-upload'] === false) {
+          selectOption('new');  // For end customers, we don't need to show the upload option
+        }
+
+        allowedToCreateReports = data;
     } catch (error) {
         console.error(error.message);
         showMessage('Failed to get history ' + error.message, false);
     }
+    canuselivedata();
 }
-cancreatereports();
 
+
+async function canuselivedata() {
+  try {
+    if (window.userPermissions['forsure-report'] === false || window.userPermissions['livedata'] === false) {
+      document.getElementById('liveDataToggleSlider').style.cursor = 'not-allowed';
+      document.getElementById('liveDataToggleSlider').style.backgroundColor = '#ddd';
+      document.getElementById('liveDataToggle').disabled = true;
+      document.getElementById('liveDataToggleSlider').onclick = null;
+      document.getElementById('liveDataToggleSlider').classList.add('greyed_out_wrapper');
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+var ordersReceived = 0;
+async function getOrdersReceived() {
+  try {
+    let data = await unifiedSendRequest(UPLOADORDERSRECEIVED, {method: 'GET'});
+    ordersReceived = data['Orders']['used'];
+    if (ordersReceived > 0) {
+      document.getElementById('nextBtnuploadorders').disabled = false;
+      document.getElementById('nextBtnuploadorders').title = 'Please upload orders first';
+    } else {
+      document.getElementById('ordersReceived').innerHTML = 'No Orders Received yet';
+      document.getElementById('nextBtnuploadorders').disabled = true;
+    }
+    document.getElementById('ordersReceived').style.display = 'block';
+  } catch (error) {
+    console.error(error.message);
+  }
+}
 
 const createReportBtn = document.getElementById('createReport');
 
@@ -888,28 +1146,43 @@ document.getElementById('liveDataToggle').addEventListener('change', function() 
     var liveDataText = document.getElementById('liveDataText');
     if (this.checked) {
       liveDataText.innerText = "Using live data";
-      document.getElementById('nextBtnuploadorders/').disabled = false;
+      if (ordersReceived > 0) {
+        document.getElementById('nextBtnuploadorders').disabled = false;
+        document.getElementById('nextBtnuploadorders').title = 'Please upload orders first';
+      } else {
+        document.getElementById('nextBtnuploadorders').disabled = true;
+      }
     } else {
       liveDataText.innerText = "Use live data";
-      document.getElementById('nextBtnuploadorders/').disabled = true; // todo check if file was added
+      document.getElementById('nextBtnuploadorders').disabled = true; // todo check if file was added
     }
 });
 
 
 var guideToShow = null;
-function selectOption(option) {
+async function selectOption(option) {
     document.getElementById('chooseoption').style.display = 'none';
     if (option === 'new') {
-        document.getElementById('progressIcons').style.display = 'flex';
-        document.getElementById('step1').style.display = 'block';
+      document.getElementById('uploadReport').style.display = 'none';
+      document.getElementById('progressIcons').style.display = 'flex';
+        document.getElementById('step1').style.display = 'block';  // TODO change to step 1
+        {% comment %} nextStep(3);  // TODO remove {% endcomment %}
         sessionStorage.setItem('currentFlow', 'new');
         guideToShow = 'new';
+        await getOrdersReceived();
     } else if (option === 'upload') {
+        getClientsFile();
+        document.getElementById('progressIcons').style.display = 'none';
+        document.getElementById('step1').style.display = 'none';
         document.getElementById('uploadReport').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'upload');
         guideToShow = 'upload';
+    } else if (option === 'overview') {
+      document.getElementById('progressIcons').style.display = 'none';
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('uploadReport').style.display = 'none';
+      document.getElementById('chooseoption').style.display = 'block';
     }
-    showGuideAfterSelection();
 }
 
 dropZones.forEach(dropZone => {
@@ -948,13 +1221,18 @@ dropZones.forEach(dropZone => {
     fileInput.addEventListener('change', async function() {
         const fileList = document.getElementById('fileList_' + inputId);
         var availableProfiles  = null;
-        if (inputId !== 'report_list') {
-            availableProfiles = await getProfiles();
-        }
-
-        for (let i = 0; i < fileInput.files.length; i++) {
+        if (inputId === 'report_list') {
+          for (let i = 0; i < fileInput.files.length; i++) {
             const row = createNewFileRow(fileInput.files[i].name, availableProfiles, dropZone.getAttribute('data-url'), inputId, fileInput.files[i]);
             fileList.appendChild(row);
+          }
+        } else {
+          availableProfiles = await getProfiles();
+          for (let i = 0; i < fileInput.files.length; i++) {
+            const row = createNewFileRowCreation(fileInput.files[i].name, availableProfiles, dropZone.getAttribute('data-url'), inputId, fileInput.files[i]);
+            fileList.appendChild(row);
+          }
+          updateNextButton(dropZone.getAttribute('data-url'));
         }
     });
 });
@@ -969,7 +1247,6 @@ document.querySelectorAll('.fileList').forEach(fileList => {
 async function getProfiles() {
   try {
     const data = await unifiedSendRequest(GETPROFILES, {method: 'GET'});
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error.message);
@@ -1055,8 +1332,8 @@ function createNewFileRow(fileName, availableProfiles, dataUrl, inputId, file) {
     if (!reports && newWidth > 0) {
         image.style.width = newWidth + 'px';
     }
-    if (document.getElementById("nextBtn" + dataUrl)) {
-        document.getElementById("nextBtn" + dataUrl).disabled = false;
+    if (document.getElementById("nextBtn" + dataUrl.replace('/', ''))) {
+        document.getElementById("nextBtn" + dataUrl.replace('/', '')).disabled = false;
     }
     if (orders) {
         selectedFilesOrders[uniqueId] = { file: file, filename: fileName };
@@ -1069,6 +1346,873 @@ function createNewFileRow(fileName, availableProfiles, dataUrl, inputId, file) {
     return row;
 }
 
+var dataUrlCurrent = '';
+
+function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId, file) {
+  dataUrlCurrent = dataUrl;
+  var orders = (dataUrl === 'uploadorders/');
+  var returns = (dataUrl === 'uploadreturns/');
+  var reports = false;
+
+  // Create a new "card" for the file
+  const row = document.createElement('div');
+  row.classList.add('file-row'); // Styled as a grid item
+  const uniqueId = generateUniqueId();
+  row.style.display = 'block';
+  row.id = uniqueId;
+  var filePartTitle = document.createElement('div');
+  filePartTitle.style.display = 'flex';
+  filePartTitle.classList.add('file-part-title');
+  var filePartProfile = document.createElement('div');
+  filePartProfile.title = 'Click to create mapping';
+  filePartProfile.classList.add('file-part-profile');
+  var filePartError = document.createElement('div');
+  filePartError.classList.add('file-part-error');
+  // Add filename
+  const nameCell = document.createElement('div');
+  {% comment %} const invisibleSpace = "\u200B"; // Unicode zero-width space
+  const updatedFileName = fileName.replace(/_/g, `_${invisibleSpace}`); {% endcomment %}
+  var updatedFileName = fileName;
+  if (updatedFileName.length > 20) {
+    updatedFileName = updatedFileName.slice(0, 10) + '...' + updatedFileName.slice(-10);
+  }
+  nameCell.textContent = updatedFileName;
+  nameCell.style.fontWeight = 'bold';
+  nameCell.style.marginBottom = '0.5rem';
+  nameCell.style.cursor = 'pointer';
+  nameCell.style.margin = 'auto';
+  nameCell.addEventListener('click', async () => {
+    await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
+  });
+  filePartTitle.appendChild(nameCell);
+
+  filePartTitle.appendChild(deleteButton(uniqueId, orders, returns, reports, dataUrl, row));
+
+  // Add profile name
+  const profileNameCell = document.createElement('div');
+  profileNameCell.classList.add('profile-name');
+  profileNameCell.textContent = 'Unmapped';
+  profileNameCell.style.fontWeight = 'bold';
+  profileNameCell.style.color = 'red';
+  profileNameCell.style.margin = 'auto';
+  profileNameCell.dataset.value = '';
+  profileNameCell.addEventListener('click', async () => {
+    await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
+  });
+  filePartProfile.appendChild(profileNameCell);
+
+  // Adjust image width (if applicable)
+  updateImageWidth(dataUrl);
+
+  if (orders) {
+      selectedFilesOrders[uniqueId] = { file: file, filename: fileName };
+  } else if (returns) {
+      selectedFilesReturns[uniqueId] = { file: file, filename: fileName };
+  }
+  row.appendChild(filePartTitle);
+  row.appendChild(filePartProfile);
+  row.appendChild(filePartError);
+  const resolvedCell = document.createElement('div');
+  resolvedCell.classList.add('resolve-cell');
+  resolvedCell.textContent = 'Click to resolve';
+  resolvedCell.addEventListener('click', async () => {
+    await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
+  });
+  row.appendChild(resolvedCell);
+  return row;
+}
+
+function updateNextButton(dataUrl) {
+  var allFilesValid = true;
+  var allfiles = document.querySelectorAll('.file-row');
+  allfiles.forEach(file => {
+    if (file.querySelector('.profile-name').getAttribute('data-value') === '') {
+      allFilesValid = false;
+    }
+    if (file.querySelector('.file-part-error').getAttribute('data-value') === 'error') {
+      allFilesValid = false;
+    }
+  });
+  if (allfiles.length === 0 && ordersReceived == 0) {
+    allFilesValid = false;
+  }
+  if (allFilesValid) {
+    if (document.getElementById("nextBtn" + dataUrl.replace('/', ''))) {
+      document.getElementById("nextBtn" + dataUrl.replace('/', '')).disabled = false;
+      return;
+    }
+  }
+  document.getElementById("nextBtn" + dataUrl.replace('/', '')).disabled = true;
+}
+
+function updateImageWidth(dataUrl) {
+  var image = document.getElementById('upload-image' + dataUrl);
+  var currentWidth = image.clientWidth;
+  var decrement = 30; // define how much to decrease each time
+
+  var newWidth = currentWidth - decrement;
+  if (newWidth > 0) {
+      image.style.width = newWidth + 'px';
+  }
+}
+
+function deleteButton(uniqueId, orders, returns, reports, dataUrl, row) {
+  // Add delete button
+  const deleteCell = document.createElement('div');
+  deleteCell.style.margin = 'auto';
+  const deleteButton = document.createElement('button');
+  deleteButton.classList.add('deletebtn');
+  deleteButton.textContent = 'X';
+  deleteButton.style.margin = 'auto';
+  deleteButton.addEventListener('click', function (event) {
+    event.stopPropagation();
+      // Remove the row from the grid
+      row.remove();
+
+      // Additional logic to handle file deletion
+      handleFileDeletion(uniqueId, orders, returns, reports, dataUrl);
+      updateNextButton(dataUrl);
+  });
+  return deleteButton;
+}
+
+async function parseCSV(text, nrows=3) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(text, {
+      header: true,
+      skipEmptyLines: true,
+      preview: nrows,
+      complete: function(results) {
+        const data = results.data;
+        const columnDict = {};
+
+        if (data.length > 0) {
+          const keys = Object.keys(data[0]);
+          keys.forEach(key => {
+            columnDict[key] = data.map(row => row[key]);
+          });
+        }
+        resolve(columnDict);
+      },
+      error: function(err) {
+        console.error(err);
+        showMessage('Error parsing file ' + err.message, false);
+        reject(err);
+      }
+    });
+  });
+}
+
+async function parseExcel(file, nrows = 3) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+        const headers = jsonData[0];
+        const rows = jsonData.slice(1, nrows + 1);
+
+        const columnDict = {};
+        headers.forEach((header, colIndex) => {
+          columnDict[header] = rows.map(row => row[colIndex] ?? '');
+        });
+
+        resolve(columnDict);
+      } catch (err) {
+        console.error(err);
+        showMessage('Error parsing Excel file: ' + err.message, false);
+        reject(err);
+      }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+
+async function openProfileModal(availableProfiles, fileName, fileInput, rowId, orders, returns) {
+  {% comment %} if (fileInput.type !== 'text/csv' && fileInput.type !== 'application/vnd.ms-excel') {
+    showMessage('Please upload a CSV file', false);
+    return;
+  } {% endcomment %}
+  let csvData;
+  if (fileInput.name.endsWith('.csv')) {
+    var text;
+    if (orders) {
+      if (rowId in selectedFilesOrders && selectedFilesOrders[rowId].text) {
+        text = selectedFilesOrders[rowId].text;
+      } else {
+        text = await fileInput.text();
+        selectedFilesOrders[rowId].text = text;
+      }
+    } else if (returns) {
+      if (rowId in selectedFilesReturns && selectedFilesReturns[rowId].text) {
+        text = selectedFilesReturns[rowId].text;
+      } else {
+        text = await fileInput.text();
+        selectedFilesReturns[rowId].text = text;
+      }
+    }
+    csvData = await parseCSV(text);
+  } else if (
+    fileInput.name.endsWith('.xls') || 
+    fileInput.name.endsWith('.xlsx') || 
+    fileInput.type.includes('sheet')
+  ) {
+    csvData = await parseExcel(fileInput);
+  } else {
+    showMessage('Unsupported file type. Please upload a CSV or Excel file.', false);
+    return;
+  }
+  const modal = document.getElementById('profileModal');
+  modal.dataset.row = rowId;
+  {% comment %} try { {% endcomment %}
+
+    addProfileModal(availableProfiles, fileName, csvData, modal);
+}
+
+async function addProfileModal(availableProfiles, fileName, csvData, modal) {
+    if (dataUrlCurrent == 'uploadorders/') {
+      var labelsV2Options = await getOrderlistLabelsV2Options();
+    } else {
+      var labelsV2Options = await getReturnlistLabelsV2Options();
+    }
+    const profileSelect = document.getElementById('profileSelect');
+    const profileDetails = document.getElementById('profileDetails');
+    const profileFileName = document.getElementById('profileFileName');
+    profileFileName.textContent = fileName;
+    var profileTable = document.getElementById('profileTableBody');
+    profileTable.innerHTML = '';
+    Object.keys(csvData).forEach((key, index) => {
+      const tr = document.createElement('tr');
+      const tdKey = document.createElement('td');
+      tdKey.textContent = key;
+      tr.appendChild(tdKey);
+      const tdEntry = document.createElement('td');
+      var preview = csvData[key].join(', ');
+      if (preview.length > 50) { // limit the preview to 100 characters
+        preview = preview.slice(0, 50) + '...';
+      }
+      tdEntry.textContent = preview;
+      tr.appendChild(tdEntry);
+
+      const tdMapping = document.createElement('td');
+      const selectMapping = document.createElement('select');
+      selectMapping.classList.add('btn', 'bs-placeholder', 'btn-default');
+      var defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Unmapped';
+      defaultOption.selected = true;
+      selectMapping.appendChild(defaultOption);
+      selectMapping.setAttribute('data-name', key);
+      labelsV2Options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.key;
+        var star = '';  
+        if (option.required) {
+          star = ' *';
+        }
+        optionElement.textContent = option.title + star;
+        optionElement.setAttribute('data-description', option.description);
+        optionElement.title = option.description;
+        selectMapping.appendChild(optionElement);
+      });
+      tdMapping.appendChild(selectMapping);
+      tr.appendChild(tdMapping);
+
+      const tdExclude = document.createElement('td');
+      const checkboxExclude = document.createElement('input');
+      checkboxExclude.type = 'checkbox';
+      checkboxExclude.title = 'Exclude this column from the upload';
+      checkboxExclude.addEventListener('change', function() {
+        toggleExclude(checkboxExclude);
+      });
+      tdExclude.appendChild(checkboxExclude);
+      tr.appendChild(tdExclude);
+      profileTable.appendChild(tr);
+    });
+    {% comment %} } catch (error) {
+      console.error(error.message);
+      showMessage('Failed to parse file ' + fileName, false);
+      return;
+    } {% endcomment %}
+
+
+    // Populate the select dropdown
+    profileSelect.innerHTML = '';
+    availableProfiles.forEach(profile => {
+      const option = document.createElement('option');
+      option.value = profile.id;
+      option.textContent = profile.name;
+      profileSelect.appendChild(option);
+    });
+    addNewProfileOption(profileSelect);
+    if (dataUrlCurrent == 'uploadorders/') {
+      getOrderlistLabels(profileSelect.value);
+    } else {
+      getReturnlistLabels(profileSelect.value);
+    }
+    // Display column details (mockup for demonstration)
+
+    // Show the modal
+    modal.style.display = 'block';
+
+    // Close modal on click of close button
+    document.querySelector('.close').onclick = function() {
+      modal.style.display = 'none';
+    };
+}
+
+function toggleExclude(checkbox) {
+  const row = checkbox.parentElement.parentElement;
+  const exclude = checkbox.checked;
+  row.classList.toggle('exclude', exclude);
+  row.querySelector('select').disabled = exclude;
+}
+var request_data = {};
+
+async function saveMapping() {
+  const selectedProfile = document.getElementById('profileSelect').value;
+  const mapping = {};
+  const profileTable = document.getElementById('profileTableBody');
+  const rows = profileTable.querySelectorAll('tr');
+  rows.forEach(row => {
+    var dropdown = row.querySelector('select');
+    var key = dropdown.getAttribute('data-name');
+    if (!dropdown.disabled) {
+      var value = dropdown.value;
+      mapping[key] = value;
+    }
+  });
+  request_data = {'profile': selectedProfile, 'mapping': mapping};
+  var url = GETORDERLISTLABELSV2COMPARE;
+  if (dataUrlCurrent == 'uploadreturns/') {
+    url = GETRETURNLISTLABELSV2COMPARE;
+  }
+
+  try {
+    var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+    if (response) {
+      confirmOverwrite();
+    } else {
+      showConfirmOverwriteModal();
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+async function confirmOverwrite() {
+  try {
+    var url = GETORDERLISTLABELSV2;
+    if (dataUrlCurrent == 'uploadreturns/') {
+      url = GETRETURNLISTLABELSV2;
+    }
+    var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+    document.getElementById('profileModal').style.display = 'none';
+    showMessage('Mapping saved successfully', true);
+    var fileId = document.getElementById('profileModal').dataset.row;
+    var rowElement = document.getElementById(fileId);
+    var profileName = document.getElementById('profileSelect').options[document.getElementById('profileSelect').selectedIndex].textContent;
+    rowElement.querySelector('.profile-name').textContent = profileName;
+    rowElement.querySelector('.profile-name').dataset.value = profileName;
+    rowElement.querySelector('.profile-name').dataset.id = document.getElementById('profileSelect').value;
+    rowElement.querySelector('.profile-name').style.color = 'green';
+    if (dataUrlCurrent == 'uploadreturns/') {
+      const filteredFile = await parseAndFilterCSV(selectedFilesReturns[fileId].text, request_data, selectedFilesReturns[fileId].file.name, selectedFilesReturns[fileId].file.type, selectedFilesReturns[fileId].file.lastModified, selectedFilesReturns[fileId].file.lastModifiedDate);
+      selectedFilesReturns[fileId]['fileFiltered'] = filteredFile;
+      selectedFilesReturns[fileId]['profileId'] = document.getElementById('profileSelect').value;
+    } else {
+      const filteredFile = await parseAndFilterCSV(selectedFilesOrders[fileId].text, request_data, selectedFilesOrders[fileId].file.name, selectedFilesOrders[fileId].file.type, selectedFilesOrders[fileId].file.lastModified, selectedFilesOrders[fileId].file.lastModifiedDate);
+      selectedFilesOrders[fileId]['fileFiltered'] = filteredFile;
+      selectedFilesOrders[fileId]['profileId'] = document.getElementById('profileSelect').value;
+    }
+    closeConfirmOverwriteModal();
+    if (dataUrlCurrent == 'uploadreturns/') {
+      await checkReturnsFile(fileId, rowElement);
+    } else {
+      await checkOrdersFile(fileId, rowElement);
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+async function parseAndFilterCSV(text, allowedColumns, fileName, fileType, lastModified, lastModifiedDate) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(text, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const filteredData = results.data.map(row => {
+          const filteredRow = {};
+          for (const key in row) {
+            if (allowedColumns['mapping'].hasOwnProperty(key)) {
+              filteredRow[key] = row[key];
+            }
+          }
+          return filteredRow;
+        });
+        const csv = Papa.unparse(filteredData);
+        const blob = new File([csv], fileName, {
+          type: fileType,
+          lastModified: lastModified,
+          lastModifiedDate: lastModifiedDate,
+        });
+        resolve(blob);
+      },
+      error: function(err) {
+        console.error(err);
+        showMessage('Error parsing file ' + err.message, false);
+        reject(err);
+      }
+    });
+  });
+}
+
+async function checkOrdersFile(fileId, rowElement) {
+  var file = selectedFilesOrders[fileId];
+  var formData = new FormData();
+  formData.append('order_list', file.fileFiltered);
+  formData.append('profile', file.profileId);
+  formData.append('file_id', fileId);
+  var response = await unifiedSendRequest(CHECKORDERSFILE, {formData: formData});
+  if (response.success) {
+    selectedFilesOrders[fileId]['failed'] = {};
+    rowElement.querySelector('.file-part-error').textContent = '';
+    rowElement.querySelector('.file-part-error').style.display = 'none';
+    rowElement.querySelector('.resolve-cell').style.display = 'none';
+    rowElement.style.color = '#17161c';
+  } else {
+    var details = {};
+    for (const [k, v] of Object.entries(response.details)) {
+      details[k] = JSON.parse(v);
+    }
+    selectedFilesOrders[fileId]['failed'] = details;
+    selectedFilesOrders[fileId]['failedDescription'] = response.description;
+    rowElement.querySelector('.file-part-error').textContent = `${response.missing_orders}/${response.total_orders} orders failed`;
+    rowElement.querySelector('.file-part-error').style.display = 'block';
+    rowElement.style.cursor = 'pointer';
+    rowElement.style.color = 'red';
+    rowElement.querySelector('.file-part-error').setAttribute('data-value', 'error');
+    rowElement.onclick = function() {
+      displayErrorReport(details, fileId, true);
+    }
+    rowElement.querySelector('.file-part-profile').classList.add('disableclicks');
+    rowElement.querySelector('.file-part-title div').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').style.display = 'block';
+  }
+  updateNextButton(dataUrlCurrent);
+}
+
+
+async function checkReturnsFile(fileId, rowElement) {
+  var file = selectedFilesReturns[fileId];
+  var formData = new FormData();
+  formData.append('return_list', file.fileFiltered);
+  formData.append('profile', file.profileId);
+  formData.append('file_id', fileId);
+  var response = await unifiedSendRequest(CHECKRETURNSFILE, {formData: formData});
+  if (response.success) {
+    selectedFilesReturns[fileId]['failed'] = {};
+    rowElement.querySelector('.file-part-error').textContent = '';
+    rowElement.querySelector('.file-part-error').style.display = 'none';
+    rowElement.querySelector('.resolve-cell').style.display = 'none';
+    rowElement.style.color = '#17161c';
+  } else {
+    var details = {};
+    for (const [k, v] of Object.entries(response.details)) {
+      details[k] = JSON.parse(v);
+    }
+    selectedFilesReturns[fileId]['failed'] = details;
+    selectedFilesReturns[fileId]['failedDescription'] = response.description;
+    rowElement.querySelector('.file-part-error').textContent = `${response.missing_returns}/${response.total_returns} returns failed`;
+    rowElement.querySelector('.file-part-error').style.display = 'block';
+    rowElement.style.cursor = 'pointer';
+    rowElement.style.color = 'red';
+    rowElement.querySelector('.file-part-error').setAttribute('data-value', 'error');
+    rowElement.onclick = function() {
+      displayErrorReport(details, fileId, false);
+    }
+    rowElement.querySelector('.file-part-profile').classList.add('disableclicks');
+    rowElement.querySelector('.file-part-title div').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').classList.add('disableclicks');
+    rowElement.querySelector('.resolve-cell').style.display = 'block';
+  }
+  updateNextButton(dataUrlCurrent);
+}
+
+
+let currentErrorIndex = 0;
+var resolutionMap = {};
+
+function displayErrorReport(data, fileId, orders) {
+  currentErrorIndex = 0;
+  resolutionMap = {};  // Reset previous selections
+
+  document.getElementById('errorModal').style.display = 'block';
+  document.getElementById('modalOverlayError').style.display = 'block';
+  document.getElementById('fileid').value = fileId;
+  document.getElementById('orders').value = orders;
+  loadErrorAtIndex(currentErrorIndex);
+}
+
+function loadErrorAtIndex(index) {
+  const tableContainer = document.getElementById('error-table-data');
+  tableContainer.innerHTML = ''; // Clear previous table
+  var orders = document.getElementById('orders').value;
+  var fileId = document.getElementById('fileid').value;
+  var file = {};
+  if (orders == 'true') {
+    file = selectedFilesOrders[fileId];
+  } else {
+    file = selectedFilesReturns[fileId];
+  }
+  var errorTypes = Object.keys(file['failed']);
+  if (index >= errorTypes.length) {
+    file['resolutions'] = resolutionMap;
+    var row = document.getElementById(fileId);
+    row.style.color = '#17161c';
+    var errorRow = row.querySelector('.file-part-error');
+    errorRow.textContent = 'Resolved';
+    errorRow.setAttribute('data-value', 'resolved');
+    closeErrorModal();
+    row.querySelector('.file-part-profile').classList.remove('disableclicks');
+    row.querySelector('.file-part-title div').classList.remove('disableclicks');
+    row.querySelector('.resolve-cell').classList.remove('disableclicks');
+    row.querySelector('.resolve-cell').style.display = 'none';
+    row.onclick = null;
+    updateNextButton(dataUrlCurrent);
+    return;
+  }
+  if (index == errorTypes.length - 1) {
+    document.getElementById('nextErrorButton').textContent = 'Save';
+  } else {
+    document.getElementById('nextErrorButton').textContent = 'Next';
+  }
+  const errorType = errorTypes[index];
+  const entries = file['failed'][errorType];
+  var defaultResolution = 'ignore';
+  document.getElementById('error-description').textContent = file['failedDescription'][errorType];
+  // Update title
+  if (errorType.includes('Duplicated')) {
+    // update resolutionSelect to contain keep first and keep last
+    const resolutionSelect = document.getElementById('resolutionSelect');
+    resolutionSelect.innerHTML = '';
+    const option1 = document.createElement('option');
+    option1.value = 'keep_first';
+    option1.textContent = 'Keep First';
+    option1.title = 'Keep the first value and ignore the other values';
+    resolutionSelect.appendChild(option1);
+    const option2 = document.createElement('option');
+    option2.value = 'keep_last';
+    option2.textContent = 'Keep Last';
+    option2.title = 'Keep the last value and ignore the other values';
+    resolutionSelect.appendChild(option2);
+    defaultResolution = 'keep_first';
+  } else {
+    resolutionSelect.innerHTML = '';
+    const option1 = document.createElement('option');
+    option1.value = 'ignore';
+    option1.textContent = 'Keep old';
+    option1.title = 'Keep the old values and ignore the new values';
+    resolutionSelect.appendChild(option1);
+    const option2 = document.createElement('option');
+    option2.value = 'replace';
+    option2.textContent = 'Replace';
+    option2.title = 'Replace the old values with the new values';
+    resolutionSelect.appendChild(option2);
+    defaultResolution = 'ignore';
+  }
+  document.getElementById('error-modal-title').innerText = `Error: ${errorType}`;
+
+  // Default resolution (if not set before)
+  document.getElementById('resolutionSelect').value = resolutionMap[errorType] || defaultResolution;
+  var sheetData = Object.values(entries);
+  // Render Tabulator table
+  new Tabulator("#error-table-data", {
+    data: sheetData,
+    layout: "fitDataFill",
+    responsiveLayout: false,
+    autoColumns: true,
+    pagination: sheetData.length > 10,
+    paginationCounter: "rows",
+    paginationSize: 10
+  });
+}
+
+// Save resolution and show next error
+document.getElementById('nextErrorButton').addEventListener('click', () => {
+  const resolution = document.getElementById('resolutionSelect').value;
+  var orders = document.getElementById('orders').value;
+  var fileId = document.getElementById('fileid').value;
+  var file = {};
+  if (orders == 'true') {
+    file = selectedFilesOrders[fileId];
+  } else {
+    file = selectedFilesReturns[fileId];
+  }
+  const currentError = Object.keys(file['failed'])[currentErrorIndex];
+  resolutionMap[currentError] = resolution;
+
+  currentErrorIndex++;
+  loadErrorAtIndex(currentErrorIndex);
+});
+
+document.getElementById('modalOverlayError').addEventListener('click', function() {
+  closeErrorModal();
+});
+
+function closeErrorModal() {
+  document.getElementById('errorModal').style.display = 'none';
+  document.getElementById('modalOverlayError').style.display = 'none';
+}
+
+
+async function closeConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'none';
+  updateNextButton(dataUrlCurrent);
+}
+async function showConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'block';
+}
+
+async function getOrderlistLabelsV2Options() {
+  try {
+    const data = await unifiedSendRequest(GETORDERLISTLABELSV2OPTIONS, {method: 'GET'});
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist label options ' + error.message, false);
+    TOKEN = false;
+  }
+}
+
+async function getReturnlistLabelsV2Options() {
+  try {
+    const data = await unifiedSendRequest(GETRETURNLISTLABELSV2OPTIONS, {method: 'GET'});
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist label options ' + error.message, false);
+    TOKEN = false;
+  }
+}
+
+
+function addNewProfileOption(profileSelect) {
+  const addProfileOption = document.createElement('option');
+  addProfileOption.value = 'add_new';
+  addProfileOption.textContent = 'Add New Profile';
+  profileSelect.appendChild(addProfileOption);
+}
+
+
+// Add an event listener to the SVG for click events
+document.getElementById("editIcon").addEventListener("click", async function() {
+  const dropdown = document.getElementById("profileSelect");
+  const selectedOption = dropdown.options[dropdown.selectedIndex];
+  const editIcon = document.getElementById("editIcon");
+
+  // Change the selected option to an input field to edit the name
+  const input = document.createElement("input");
+  input.value = selectedOption.text;
+  input.style.width = "70%";
+  input.style.marginRight = '1rem';
+  const checkIcon = document.createElement("span");
+  checkIcon.innerHTML = "✔";
+  checkIcon.style.cursor = "pointer";
+  checkIcon.style.marginRight = "5px";
+  const xIcon = document.createElement("span");
+  xIcon.innerHTML = "✖";
+  xIcon.style.cursor = "pointer";
+  xIcon.style.marginRight = "5px";
+  const deleteIcon = document.createElement("span");
+  deleteIcon.innerHTML = '<img width="20px" src="{{ section.settings.trashcan | image_url }}" alt="{{ section.settings.trashcan.alt | escape }}" loading="lazy">';
+  deleteIcon.style.cursor = "pointer";
+
+  input.addEventListener("keyup", async function(event) {
+      // If "Enter" key is pressed
+      if (event.key === "Enter") {
+          await handleSave();
+      }
+  });
+
+  checkIcon.addEventListener("click", async function() {
+      await handleSave();
+  });
+  async function handleSave() {
+      selectedOption.text = input.value;
+      try {
+              var profile = {
+                'id': selectedOption.value,
+                'name': input.value
+              }
+              var response = await unifiedSendRequest(PROFILERENAME, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
+          } catch (error) {
+              console.error(error.message);
+              showMessage('Failed to rename profile ' + error.message, false);
+          }
+      revertToOriginalState();
+  }
+  xIcon.addEventListener("click", function() {
+      // Revert without changes
+      revertToOriginalState();
+  });
+  function revertToOriginalState() {
+    // Remove the input field and icons, show the dropdown and editIcon
+    dropdown.parentElement.removeChild(input);
+    dropdown.parentElement.removeChild(checkIcon);
+    dropdown.parentElement.removeChild(deleteIcon);
+    dropdown.parentElement.removeChild(xIcon);
+    dropdown.style.removeProperty('display');  // Remove the display style
+    editIcon.style.display = "inline";
+}
+
+deleteIcon.addEventListener("click", async function() {
+    const isConfirmed = confirm("Are you sure you want to delete this profile?");
+    if (isConfirmed) {
+        try {
+            // Send request to DELETEPROFILE endpoint
+            const profileIdToDelete = selectedOption.value;
+            const response = await unifiedSendRequest(DELETEPROFILE + `?profile_id=${profileIdToDelete}`, {method: 'DELETE'});
+
+            // Check if deletion was successful
+            if (response.success) {
+                // Remove the profile from the dropdown
+                dropdown.remove(dropdown.selectedIndex);
+                revertToOriginalState();
+            } else {
+                alert("Failed to delete the profile.");
+            }
+        } catch (error) {
+            console.error(error.message);
+            showMessage('Failed to delete profile ' + error.message, false);
+        }
+    }
+  });
+
+  // Hide the dropdown and editIcon, and insert the input and icons
+  dropdown.style.display = "none";
+  editIcon.style.display = "none";
+  dropdown.parentElement.insertBefore(input, dropdown);
+  dropdown.parentElement.insertBefore(checkIcon, dropdown);
+  dropdown.parentElement.insertBefore(xIcon, dropdown);
+  dropdown.parentElement.insertBefore(deleteIcon, dropdown);
+  input.focus();
+});
+
+document.getElementById("profileSelect").addEventListener("change", async function() {
+  const dropdown = this;
+  if (dropdown.value === "add_new") {
+      try {
+          // Send request to ADDPROFILE
+          const profileName = `Profile ${dropdown.options.length}`;
+          var profile = {
+            name: profileName,
+            liveData: false
+          }
+          var response = await unifiedSendRequest(ADDPROFILE, {formData: JSON.stringify(profile), headerArgs: {'Content-Type': 'application/json'}});
+          // Remove the "add_new" option that was selected
+          dropdown.remove(dropdown.selectedIndex);
+          // Assume the response contains the new profile's ID
+          const newProfileId = response.id;
+
+          // Create a new profile option
+          const newOption = document.createElement("option");
+          newOption.value = newProfileId;
+          newOption.text = response.name;
+          dropdown.appendChild(newOption);
+
+          // Re-add the "Add New Profile" option
+          const addProfileOption = document.createElement("option");
+          addProfileOption.value = "add_new";
+          addProfileOption.text = "Add New Profile";
+          dropdown.appendChild(addProfileOption);
+
+          // Optionally, select the newly added profile
+          newOption.selected = true;
+
+      } catch (error) {
+          console.error(error.message);
+          showMessage('Failed to add profile ' + error.message, false);
+      }
+  } else {
+    if (dataUrlCurrent == 'uploadorders/') {
+      getOrderlistLabels(dropdown.value);
+    } else {
+      getReturnlistLabels(dropdown.value);
+    }
+  }
+
+});
+
+async function getOrderlistLabels(profile) {
+  try {
+    var orderlistLabels = await unifiedSendRequest(GETORDERLISTLABELSV2 + `?profile=${profile}`, {method: 'GET'});
+    var profileTable = document.getElementById('profileTableBody');
+    if (Object.keys(orderlistLabels).length > 0) {
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        if (select.getAttribute('data-name') in orderlistLabels) {
+          select.value = orderlistLabels[select.getAttribute('data-name')];
+        } else {
+          row.querySelector('input').click(); // if the column is not in the orderlist labels, then it is excluded
+        }
+      });
+    } else {
+      // new profile, so set all to unmapped
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        select.value = '';
+        if (row.querySelector('input').checked) {
+          row.querySelector('input').click();
+        }
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist labels ' + error.message, false);
+  }
+}
+
+async function getReturnlistLabels(profile) {
+  try {
+    var returnlistLabels = await unifiedSendRequest(GETRETURNLISTLABELSV2 + `?profile=${profile}`, {method: 'GET'});
+    var profileTable = document.getElementById('profileTableBody');
+    if (Object.keys(returnlistLabels).length > 0) {
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        if (select.getAttribute('data-name') in returnlistLabels) {
+          select.value = returnlistLabels[select.getAttribute('data-name')];
+        } else {
+          row.querySelector('input').click(); // if the column is not in the orderlist labels, then it is excluded
+        }
+      });
+    } else {
+      // new profile, so set all to unmapped
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        select.value = '';
+        if (row.querySelector('input').checked) {
+          row.querySelector('input').click();
+        }
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get returnlist labels ' + error.message, false);
+  }
+}
 
 function handleFileDeletion(uniqueId, orders, returns, reports, dataUrl) {
   if (orders) {
@@ -1104,29 +2248,35 @@ function handleFileDeletion(uniqueId, orders, returns, reports, dataUrl) {
 
 async function uploadOrders(endpoint) {
     document.getElementById('uploadSteps').style.cursor = 'wait';
-    document.getElementById('nextBtnuploadorders/').disabled = true;
+    document.getElementById('nextBtnuploadorders').disabled = true;
     document.getElementsByClassName('dropZone')[0].style.cursor = 'wait';
     const formData = new FormData();
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
     // Assuming each row in your table has a class 'file-row'
-    const rows = document.querySelectorAll('.file-row');
-    console.log(rows);
-    rows.forEach((row, index)=> {
+    const rows = document.querySelectorAll('#fileList_order_list .file-row');
+    rows.forEach(row => {
         const fileId = row.id;
-        console.log(fileId);
         if (selectedFilesOrders.hasOwnProperty(fileId)){
-            formData.append('order_lists', selectedFilesOrders[fileId].file);
-            formData.append('profiles', row.querySelector('select').value);
-            formData.append('fileId', fileId);
+          var file = selectedFilesOrders[fileId];
+          if (file.fileFiltered) {
+            formData.append('order_lists', file.fileFiltered);
+          } else {
+            formData.append('order_lists', file.file);
+          }
+          if (file.resolutions) {
+            formData.append('resolutions', JSON.stringify(file.resolutions));
+          } else {
+            formData.append('resolutions', '{}');
+          }
+          formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
+          formData.append('fileId', fileId);
         }
     });
     try {
         const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 400) {
           data['data'].forEach(failedData => {
-            console.log(failedData['file_id']);
             var failedRow = document.getElementById(failedData['file_id']);
             failedRow.style.color = 'red';
             let errorMessage = failedRow.querySelector('.upload-error-message');
@@ -1143,13 +2293,13 @@ async function uploadOrders(endpoint) {
         } else {
           nextStep(2);
         }
-        document.getElementById('nextBtnuploadorders/').disabled = false;
+        document.getElementById('nextBtnuploadorders').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
     } catch (error) {
         console.error(error);
-        document.getElementById('nextBtnuploadorders/').disabled = false;
+        document.getElementById('nextBtnuploadorders').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
@@ -1158,30 +2308,36 @@ async function uploadOrders(endpoint) {
 }
 
 async function uploadReturns(endpoint) {
-    document.getElementById('nextBtnuploadreturns/').disabled = true;
-    document.getElementById('uploadSteps').style.cursor = 'wait';
+  document.getElementById('uploadSteps').style.cursor = 'wait';
+    document.getElementById('nextBtnuploadreturns').disabled = true;
     document.getElementsByClassName('dropZone')[1].style.cursor = 'wait';
     const formData = new FormData();
     formData.append('live_data', document.getElementById('liveDataToggle').checked);
     // Assuming each row in your table has a class 'file-row'
-    const rows = document.querySelectorAll('.file-row');
-    console.log(rows);
+    const rows = document.querySelectorAll('#fileList_return_list .file-row');
     rows.forEach((row, index)=> {
         const fileId = row.id;
-        console.log(fileId);
         if (selectedFilesReturns.hasOwnProperty(fileId)){
-            formData.append('return_lists', selectedFilesReturns[fileId].file);
-            formData.append('profiles', row.querySelector('select').value);
-            formData.append('fileId', fileId);
+          var file = selectedFilesReturns[fileId];
+          if (file.fileFiltered) {
+            formData.append('return_lists', file.fileFiltered);
+          } else {
+            formData.append('return_lists', file.file);
+          }
+          if (file.resolutions) {
+            formData.append('resolutions', JSON.stringify(file.resolutions));
+          } else {
+            formData.append('resolutions', '{}');
+          }
+          formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
+          formData.append('fileId', fileId);
         }
     });
     try {
         const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 400) {
           data['data'].forEach(failedData => {
-            console.log(failedData['id']);
             var failedRow = document.getElementById(failedData['id']);
             failedRow.style.color = 'red';
             let errorMessage = failedRow.querySelector('.upload-error-message');
@@ -1198,13 +2354,13 @@ async function uploadReturns(endpoint) {
         } else {
           nextStep(3);
         }
-        document.getElementById('nextBtnuploadreturns/').disabled = false;
+        document.getElementById('nextBtnuploadreturns').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
     } catch (error) {
         console.error(error);
-        document.getElementById('nextBtnuploadreturns/').disabled = false;
+        document.getElementById('nextBtnuploadreturns').disabled = false;
         document.getElementById('uploadSteps').style.cursor = 'default';
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
@@ -1221,10 +2377,8 @@ async function uploadReports() {
     const formData = new FormData();
     // Assuming each row in your table has a class 'file-row'
     const rows = document.querySelectorAll('.file-row');
-    console.log(rows);
     rows.forEach((row, index)=> {
         const fileId = row.id;
-        console.log(fileId);
         if (selectedFilesReports.hasOwnProperty(fileId)){
             formData.append('reports', selectedFilesReports[fileId].file);
             formData.append('fileId', fileId);
@@ -1232,11 +2386,9 @@ async function uploadReports() {
     });
     try {
         const data = await unifiedSendRequest(UPLOADREPORTS, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 400) {
           data['data'].forEach(failedData => {
-            console.log(failedData['file_id']);
             var failedRow = document.getElementById(failedData['file_id']);
             failedRow.style.color = 'red';
             let errorMessage = failedRow.querySelector('.upload-error-message');
@@ -1266,7 +2418,6 @@ var clientData = null;
 async function getClientsFile() {
   try {
         const data = await unifiedSendRequest(CLIENTSFILE, {method: 'GET'});
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 200) {
           var data_found = data['data'];
@@ -1283,7 +2434,6 @@ async function getClientsFile() {
         showMessage('Failed to fetch clients file ' + error.message, false);
     }
 }
-getClientsFile();
 
 async function handleClientsUpload(input, additionalInfo) {
     const file = input.files[0];
@@ -1294,7 +2444,6 @@ async function handleClientsUpload(input, additionalInfo) {
         formData.append('wastestream', additionalInfo.wastestream || '');
         formData.append('scheme', additionalInfo.scheme || '');
         const data = await unifiedSendRequest(CLIENTSFILE, { formData: formData });
-        console.log(data);
         // Check if an error message already exists
         if (data['status_code'] === 200) {
             document.getElementById('clientsFileName').textContent = file.name;
@@ -1408,6 +2557,7 @@ async function openClientsModal() {
                 if (field.startsWith('Login')) acc[baseField]['Login'] = field;
                 if (field.startsWith('Password')) acc[baseField]['Password'] = field;
                 if (field.startsWith('Notes')) acc[baseField]['Notes'] = field;
+                if (field.startsWith('ExtraInfo')) acc[baseField]['ExtraInfo'] = field;
                 return acc;
             }, {});
 
@@ -1424,6 +2574,7 @@ async function openClientsModal() {
               }
             });
             if (group.Notes) columns.push({ title: `Notes ${key}`, field: group.Notes, headerSort: false, editor: 'input' });
+            if (group.ExtraInfo) columns.push({ title: `Extra Info ${key}`, field: group.ExtraInfo, headerSort: false, editor: 'input' });
         });
 
         const table = new Tabulator("#clientsDatatableContainer", {
@@ -1436,8 +2587,6 @@ async function openClientsModal() {
         datatable = table;
     }
 }
-
-
 
 // Function to add a new row after the last entry
 function addNewRow() {
@@ -1471,7 +2620,6 @@ function addNewColumn() {
     table.setColumns(columns); // Update column definitions
     table.replaceData(data);
 
-    console.log(`New column "${columnName}" added.`);
 }
 
 
@@ -1510,7 +2658,6 @@ async function saveClientsEdits() {
 
         // Handle response
         if (response.status_code === 200) {
-            console.log('Data saved successfully:', response);
             showMessage('Clients data saved successfully.', true);
             closeClientsModal();
         } else {
@@ -1522,8 +2669,6 @@ async function saveClientsEdits() {
         showMessage('Failed to save clients data: ' + error.message, false);
     }
 }
-
-
 
 function updateProgressIcons(currentStep) {
     const icons = document.querySelectorAll('.progressIcon');
@@ -1543,18 +2688,21 @@ function updateProgressIcons(currentStep) {
         }
     });
 }
+
 function nextStep(stepNumber) {
     stepFunctions(stepNumber);
     steps.forEach(step => step.style.display = 'none');
     document.getElementById('step' + stepNumber).style.display = 'block';
     updateProgressIcons(stepNumber);
 }
+
 function prevStep(stepNumber) {
     stepFunctions(stepNumber);
     steps.forEach(step => step.style.display = 'none');
     document.getElementById('step' + stepNumber).style.display = 'block';
     updateProgressIcons(stepNumber);
 }
+
 function stepFunctions(stepNumber){
     if (stepNumber === 3) {
       getTimesAndCountry();
@@ -1564,17 +2712,7 @@ function stepFunctions(stepNumber){
     }
 }
 
-const reportTemplates = {
-  'IE Batteries': {
-    fields: ['amount_total', 'Batt Weight (g)'],
-    groupBy: ['Type of Batteries', 'b2b']
-  },
-  'DE WEEE': {
-    fields: ['amount_total', 'Product Net Weight (g)'],
-    groupBy: ['DE']
-  }
-};
-
+let allTemplates = [];
 async function getTimesAndCountry() {
   try {
     var data = await unifiedSendRequest(GETREPORTTIMES, { method: 'GET' });
@@ -1601,7 +2739,9 @@ async function getTimesAndCountry() {
     const quarterEnd = moment(`${lastQuarterYear}-01-01`).quarter(lastQuarter).endOf('quarter');
     const twoYearsAgoYear = moment().subtract(2, 'year').year();
 
-    const ranges = {
+
+  changeYear(0);
+    {% comment %} const ranges = {
         'Last Month': [
             moment().subtract(1, 'month').startOf('month'),
             moment().subtract(1, 'month').endOf('month')
@@ -1627,16 +2767,233 @@ async function getTimesAndCountry() {
       maxDate: moment(maxDate),
       locale: { format: 'DD/MM/YYYY' },
       ranges: ranges
-    });
+    }); {% endcomment %}
+
     var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS, { method: 'GET' });
     fillColumnSelectors(availableColumns);
+    await populateTemplateSelector();
+    if (!window.userPermissions['reporttemplate']) {
+      document.getElementById('confirmAgency').style.display = 'block';
+      return;
+    }
+    document.getElementById('confirmNoAgency').style.display = 'block';
+    document.getElementById('customFieldsContainer').style.display = 'flex';
+    document.getElementById('templateContainer').style.display = 'flex';
+    document.getElementById('includeReturnsContainer').style.display = 'flex';
     await populateRulesDropdown();
-    populateTemplateSelector();
   } catch (error) {
     console.error(error.message);
     showMessage('Failed to retrieve countries from orders ' + error.message, false);
   }
 }
+
+function selectCustomDateRange () {
+  // 1. hide the preset grid
+  document.getElementById('timePicker').style.display = 'none';
+
+  // 2. prepare the daterangepicker on the *same* input, but only once
+  const $input = $('#monthPicker');
+  if (!$input.data('daterangepicker')) {
+    $input.daterangepicker({
+      locale: { format: 'DD/MM/YYYY' },
+      autoUpdateInput: false,                    // keep empty until user hits Apply
+        /* add a custom class so we can colour the available ones ------------ */
+      isCustomDate(date) {
+        return availSet.has(fmt(date)) ? '' : 'disabled-date';           // class name or ''
+      }
+    });
+
+    // 3. when a range is chosen
+    $input.on('apply.daterangepicker', (ev, picker) => {
+      const range =
+        picker.startDate.format('DD/MM/YYYY') +
+        ' - ' +
+        picker.endDate.format('DD/MM/YYYY');
+
+      // highlight the Custom button and write the text
+      setActive(document.getElementById('customDateRange'), range);
+    });
+    $('#monthPicker').on('showCalendar.daterangepicker', function (ev, picker) {
+      picker.container.find('td.disabled-date').each(function () {
+        const reason = 'No data available for this date';
+        $(this).attr('title', reason);
+      });
+    });
+  }
+
+  // 4. open the calendar pop-up programmatically
+  $input.data('daterangepicker').show();        // no extra click needed
+}
+
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const grid       = document.getElementById('calendarGrid');
+  const yearLbl    = document.getElementById('yearDisplay');
+  const out        = document.getElementById('monthPicker');
+  let   year       = new Date().getFullYear();
+  let   selectedEl = null;
+
+const monthInput = document.getElementById('monthPicker');
+monthInput.addEventListener('click', function (e) {
+  /* ── keep the daterangepicker from opening automatically ── */
+  const drp = $('#monthPicker').data('daterangepicker');
+  if (drp) {
+    e.stopImmediatePropagation();   // cancel the plugin’s click listener
+    drp.hide();                     // just in case it was already up
+  }
+
+  /* ── your original behaviour ── */
+  document.getElementById('timePicker').style.display = 'block';
+  buildGrid();
+});
+
+function formatRange(year, firstMonthIdx, lastMonthIdx) {
+  // firstMonthIdx & lastMonthIdx are 0-based (Jan = 0 … Dec = 11)
+  const start = new Date(year, firstMonthIdx, 1);            // 1st of first month
+  const end   = new Date(year, lastMonthIdx + 1, 0);         // 0th = last day prev-month
+
+  const toDDMMYYYY = d =>
+    String(d.getDate()).padStart(2,'0') + '/' +
+    String(d.getMonth()+1).padStart(2,'0') + '/' +
+    d.getFullYear();
+
+  return `${toDDMMYYYY(start)} - ${toDDMMYYYY(end)}`;
+}
+  // ==== helpers ====
+  const pad = n => String(n).padStart(2,'0');
+  function setActive(el, label){
+    if (selectedEl) selectedEl.classList.remove('active');
+    selectedEl = el;  el.classList.add('active');
+    out.value = label;
+    document.getElementById('timePicker').style.display = 'none';
+  }
+
+  // ==== building the grid ====
+  function buildGrid(){
+    grid.innerHTML = '';
+    const quarters = [
+      {q:'Q1', m:[0,1,2]},
+      {q:'Q2', m:[3,4,5]},
+      {q:'Q3', m:[6,7,8]},
+      {q:'Q4', m:[9,10,11]},
+    ];
+
+    quarters.forEach((block, idx)=>{
+      /* ----- Quarter button (clickable) ----- */
+      const qBtn = document.createElement('div');
+      qBtn.textContent = block.q;
+      qBtn.className   = 'quarter-btn';
+      // Build Date objects for the first and last day of the quarter
+      const qStart = new Date(year, block.m[0] - 1, 1);          // 1st of first month
+      const qEnd   = new Date(year, block.m[2],     0);          // 0th day ⇒ last of prev month
+      if (!anyDateInRange(availableDateOptions, qStart, qEnd)) {
+        qBtn.classList.add('disabled');
+        qBtn.style.cursor = 'not-allowed';
+        qBtn.title = 'No data available for this quarter';
+      } else {
+        qBtn.classList.remove('disabled');
+        qBtn.style.cursor = 'pointer';
+        qBtn.title = '';
+      }
+      qBtn.onclick     = e=>{
+        const rangeStr = formatRange(year, block.m[0], block.m[2]);
+        setActive(qBtn, rangeStr);
+      };
+      grid.appendChild(qBtn);
+
+      /* ----- Three month buttons ----- */
+      block.m.forEach(m=>{
+        const mBtn = document.createElement('div');
+        mBtn.textContent = monthNames[m];
+        mBtn.className   = 'month-btn';
+        if (!anyDateInRange(availableDateOptions, new Date(year, m, 1), new Date(year, m + 1, 0))) {
+          mBtn.classList.add('disabled');
+          mBtn.style.cursor = 'not-allowed';
+          mBtn.title = 'No data available for this month';
+        } else {
+          mBtn.classList.remove('disabled');
+          mBtn.style.cursor = 'pointer';
+          mBtn.title = '';
+        }
+        mBtn.onclick     = () => setActive(mBtn, formatRange(year, m, m));
+        grid.appendChild(mBtn);
+      });
+
+      /* ----- Add semester button after Q2 & Q4 ----- */
+      if (idx === 1 || idx === 3) {
+        const sIdx = idx === 1 ? 'S1' : 'S2';
+        const start = idx === 1 ? '01' : '07';
+        const end   = idx === 1 ? '06' : '12';
+        const sBtn  = document.createElement('div');
+        sBtn.textContent = sIdx;
+        sBtn.className   = 'semester-btn';
+        sBtn.style.gridRow = `${idx}`;       // Top row of span
+        sBtn.style.gridRowEnd = 'span 2';   // merge ↓
+        sBtn.style.alignSelf  = 'center';   // vertical centring
+        const sStart  = idx === 1 ? 0 : 6;   // Jan or Jul (0-based)
+        const sEnd    = idx === 1 ? 5 : 11;  // Jun or Dec
+        if (!anyDateInRange(availableDateOptions, new Date(year, sStart, 1), new Date(year, sEnd + 1, 0))) {
+          sBtn.classList.add('disabled');
+          sBtn.style.cursor = 'not-allowed';
+          sBtn.title = 'No data available for this semester';
+        } else {
+          sBtn.classList.remove('disabled');
+          sBtn.style.cursor = 'pointer';
+          sBtn.title = '';
+        }
+        sBtn.onclick = ()=>setActive(sBtn, formatRange(year, sStart, sEnd));
+        grid.appendChild(sBtn);
+      }
+    });
+
+    /* ----- Full-year button ----- */
+    const yBtn = document.createElement('div');
+    yBtn.textContent = 'Full Year';
+    yBtn.className   = 'year-btn';
+    if (!anyDateInRange(availableDateOptions, new Date(year, 0, 1), new Date(year, 11, 31))) {
+      yBtn.classList.add('disabled');
+      yBtn.style.cursor = 'not-allowed';
+      yBtn.title = 'No data available for this year';
+    } else {
+      yBtn.classList.remove('disabled');
+      yBtn.style.cursor = 'pointer';
+      yBtn.title = '';
+    }
+    yBtn.onclick     = ()=>setActive(yBtn, formatRange(year, 0, 11));
+    grid.appendChild(yBtn);
+    const customBtn = document.createElement('div');
+    customBtn.textContent = 'Custom';
+    customBtn.className   = 'year-btn';
+    customBtn.id = 'customDateRange';
+    customBtn.style.cursor = 'pointer';
+    customBtn.title = '';
+    customBtn.onclick = ()=>selectCustomDateRange();
+    grid.appendChild(customBtn);
+  }
+
+  function changeYear(delta){
+    year += delta;
+    yearLbl.textContent = year;
+    buildGrid();
+    out.value = '';
+    selectedEl = null;
+  }
+
+document.getElementById('monthPicker').addEventListener('click', function() {
+  document.getElementById('timePicker').style.display = 'block';
+});
+document.addEventListener('click', e => {
+  // is the popup currently visible?
+  const isOpen = document.getElementById('timePicker').style.display === 'block';
+  // did we click *outside* both the popup and the button?
+  const clickOutside = !document.getElementById('timePicker').contains(e.target) && !document.getElementById('monthPicker').contains(e.target);
+  
+  if (isOpen && clickOutside) {
+    document.getElementById('timePicker').style.display = 'none';
+  }
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') document.getElementById('timePicker').style.display = 'none';
+});
 
 function fillColumnSelectors(columns) {
   const fieldsDropdown = document.getElementById('customFields');
@@ -1709,27 +3066,203 @@ async function editRules() {
     await displayRules(populateRulesDropdown);
 }
 
-function populateTemplateSelector() {
+async function populateTemplateSelector() {
   const templateSelect = document.getElementById('templateSelect');
-  templateSelect.innerHTML = '<option value="">-- Select a template --</option>';
-
-  Object.keys(reportTemplates).forEach(templateName => {
-    const option = document.createElement('option');
-    option.value = templateName;
-    option.textContent = templateName;
-    templateSelect.appendChild(option);
-  });
-
+  templateSelect.innerHTML = '<option value="default">-- Select a template --</option>';
+  allTemplates = await unifiedSendRequest(GETTEMPLATES, { method: 'GET' });
+  updateTemplateOptions();
   $('.selectpicker').selectpicker('refresh');
 
   $('#templateSelect').on('changed.bs.select', function () {
     const selectedTemplate = $(this).val();
-    if (selectedTemplate && reportTemplates[selectedTemplate]) {
-      const templateData = reportTemplates[selectedTemplate];
-      $('#customFields').selectpicker('val', templateData.fields);
-      $('#groupByFields').selectpicker('val', templateData.groupBy);
+    const template = allTemplates.find(t => `${t.country}-${t.year}-${t.report_type}-${t.pro}` === selectedTemplate);
+    if (!template || selectedTemplate === "default") {
+      document.getElementById('customFields').disabled = false;
+      $('#customFields').selectpicker('refresh');
+      document.getElementById('groupByFields').disabled = false;
+      $('#groupByFields').selectpicker('refresh');
+      return;
+    }
+    $('#customFields').selectpicker('val', null);
+    document.getElementById('customFields').disabled = true;
+    $('#customFields').selectpicker('refresh');
+    $('#groupByFields').selectpicker('val', null);
+    document.getElementById('groupByFields').disabled = true;
+    $('#groupByFields').selectpicker('refresh');
+    let dynamicRanges = {};
+
+    if (template.deadlines) {
+      template.deadlines.forEach(deadline => {
+        if (!deadline.timeframeStart || !deadline.timeframeEnd || !deadline.recurrence) return;
+  
+        const recurrenceName = deadline.recurrence.replace('ly', ''); // Yearly -> Year, Monthly -> Month
+        const label = `Last ${recurrenceName}`;
+  
+        const now = moment();
+  
+        if (deadline.recurrence.toLowerCase() === "monthly") {
+          const lastMonth = now.clone().subtract(1, 'month');
+          periodStart = lastMonth.clone().startOf('month');
+          periodEnd = lastMonth.clone().endOf('month');
+      
+        } else if (deadline.recurrence.toLowerCase() === "quarterly") {
+          const currentQuarter = Math.floor((now.month()) / 3) + 1;
+          const lastQuarter = currentQuarter - 1 <= 0 ? 4 : currentQuarter - 1;
+          const lastQuarterYear = currentQuarter - 1 <= 0 ? now.year() - 1 : now.year();
+          const quarterStartMonth = (lastQuarter - 1) * 3;
+      
+          periodStart = moment({ year: lastQuarterYear, month: quarterStartMonth, day: 1 });
+          periodEnd = periodStart.clone().add(2, 'months').endOf('month');
+          // TODO periodEnd doesn't seem to be correct
+        } else if (deadline.recurrence.toLowerCase() === "semesterly") {
+          const month = now.month() + 1;
+          if (month >= 1 && month <= 6) {
+            // In Jan-Jun -> previous semester is July-Dec of last year
+            periodStart = moment({ year: now.year() - 1, month: 6, day: 1 }); // July
+            periodEnd = periodStart.clone().add(5, 'months').endOf('month'); // Dec
+          } else {
+            // In Jul-Dec -> previous semester is Jan-Jun this year
+            periodStart = moment({ year: now.year(), month: 0, day: 1 }); // January
+            periodEnd = periodStart.clone().add(5, 'months').endOf('month'); // June
+          }
+      
+        } else if (deadline.recurrence.toLowerCase() === "yearly") {
+          const lastYear = now.clone().subtract(1, 'year');
+          periodStart = moment({ year: lastYear.year(), month: 0, day: 1 });
+          periodEnd = moment({ year: lastYear.year(), month: 11, day: 31 });
+        }
+        const startDay = Number(deadline.timeframeStart.split('-')[2]);
+        const endDay = Number(deadline.timeframeEnd.split('-')[2]);
+
+        const from = periodStart.clone().date(startDay);
+
+        const to = (endDay >= 28)
+          ? periodEnd
+          : periodStart.clone().date(endDay);
+  
+        dynamicRanges[label] = [from, to];
+      });
+    }
+  
+    // Fallback: if no template deadlines, at least offer standard choices
+    if (Object.keys(dynamicRanges).length === 0) {
+      dynamicRanges = {
+        'Last Month': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
+        'Last Year': [
+          moment().subtract(1, 'year').startOf('year'),
+          moment().subtract(1, 'year').endOf('year')
+        ]
+      };
+    }
+
+    const sortedRangesArray = Object.entries(dynamicRanges).sort((a, b) => {
+      const [ , [aStart, aEnd] ] = a;
+      const [ , [bStart, bEnd] ] = b;
+    
+      const aDuration = aEnd.diff(aStart, 'days');
+      const bDuration = bEnd.diff(bStart, 'days');
+    
+      return aDuration - bDuration; // Shortest first
+    });
+    
+    // Step 2: Rebuild dynamicRanges object in sorted order
+    dynamicRanges = Object.fromEntries(sortedRangesArray);
+    $('#monthPicker').val(Object.values(dynamicRanges)[0][0].format('DD/MM/YYYY') + ' - ' + Object.values(dynamicRanges)[0][1].format('DD/MM/YYYY'));
+    // Replace existing datepicker with new dynamic ranges
+    {% comment %} $('#monthPicker').daterangepicker({
+      startDate: Object.values(dynamicRanges)[0][0],  // Set first option as default
+      endDate: Object.values(dynamicRanges)[0][1],
+      minDate: moment().subtract(5, 'year'),
+      maxDate: moment().add(1, 'year'),
+      locale: { format: 'DD/MM/YYYY' },
+      ranges: dynamicRanges
+    }); {% endcomment %}
+  });
+}
+
+function updateTemplateOptions(refreshPRO=true) {
+  const templateSelect = document.getElementById('templateSelect');
+  const proDropdown = document.getElementById('proSelect');
+  var initPro = false;
+  if (refreshPRO) {
+    $('#proSelect').val('');
+    proDropdown.innerHTML = '<option value="">-- Select a PRO --</option>';
+  }
+  const selectedPro = $('#proSelect').val();
+  const selectedCountry = $('#country').val();
+  const selectedCategory = $('#category').val();
+
+  templateSelect.innerHTML = '<option value="default">-- Select a template --</option>'; // Clear
+  
+  lastTemplate = 'default';
+  allTemplates.forEach(template => {
+    // Match filtering: if no selection, or matching the selected value
+    const matchCountry = !selectedCountry || template.country === selectedCountry;
+    const matchCategory = !selectedCategory || template.report_type === selectedCategory;
+    const matchPro = !selectedPro || template.pro === selectedPro;
+
+    if (matchCountry && matchCategory && refreshPRO) {
+      const option = document.createElement('option');
+      option.value = template.pro;
+      option.textContent = template.pro;
+      proDropdown.appendChild(option);
+    }
+    if (matchCountry && matchCategory && matchPro) {
+      const option = document.createElement('option');
+      option.value = `${template.country}-${template.year}-${template.report_type}-${template.pro}`;
+      lastTemplate = option.value;
+      option.textContent = `${template.country} ${template.year} ${template.report_type} ${template.pro}`;
+      templateSelect.appendChild(option);
     }
   });
+  if (refreshPRO == false) {
+    $('#templateSelect').val(lastTemplate);
+    $('#templateSelect').trigger('change');
+    $('.selectpicker').selectpicker('refresh'); // needed twice for it to work
+  }
+  $('.selectpicker').selectpicker('refresh'); // Re-render
+}
+
+$('#country').on('changed.bs.select', function() {
+  getDateOptions();
+  updateTemplateOptions();
+});
+$('#category').on('changed.bs.select', function() {
+  updateTemplateOptions();
+});
+
+$('#proSelect').on('changed.bs.select', function() {
+  updateTemplateOptions(refreshPRO=false);
+});
+
+var availableDateOptions = [];
+var availSet = new Set();
+const fmt = d => d.format('DD/MM/YYYY');   
+async function getDateOptions() {
+  var data = await unifiedSendRequest(GETDATEOPTIONS + '?country=' + $('#country').val(), { method: 'GET' });
+  const availableTimestamps = Object.keys(data).map(str => {
+    const [d, m, y] = str.split('/').map(Number);
+    return new Date(y, m - 1, d).getTime();   // month is 0-based
+  });
+  availableDateOptions = availableTimestamps;
+  console.log('getDateOptions', availableDateOptions);
+  availSet = new Set(Object.keys(data)); 
+  changeYear(0);
+}
+
+/**
+ * @param {number[]} tsArr          – array of UTC ms (available dates)
+ * @param {Date}      startDate     – inclusive range start
+ * @param {Date}      endDate       – inclusive range end
+ * @return {boolean}
+ */
+ function anyDateInRange(tsArr, startDate, endDate) {
+  const lo = startDate.getTime();
+  const hi = endDate.getTime();
+  return tsArr.some(t => t >= lo && t <= hi);
 }
 
 async function showConfirmationDetails() {
@@ -1740,10 +3273,31 @@ async function showConfirmationDetails() {
     const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
     document.getElementById('confirm-start').textContent = selectedStartDateValue;
     document.getElementById('confirm-end').textContent = selectedEndDateValue;
-    const selectedFields = $('#customFields').val() || [];
-    addOptionsConfirmation(selectedFields, 'confirm-fields');
-    const selectedGroupBy = $('#groupByFields').val() || [];
-    addOptionsConfirmation(selectedGroupBy, 'confirm-groupby');
+    var selectedFields = $('#customFields').val() || [];
+    var selectedGroupBy = $('#groupByFields').val() || [];
+    var selectedTemplate = $('#templateSelect').val();
+    if (!window.userPermissions['reporttemplate']) {
+      var year = moment().year();
+      selectedTemplate = `${$('#country').val()}-${year}-${$('#category').val()}-${$('#proSelect').val()}`;
+    }
+    if (selectedTemplate !== "default" && selectedTemplate !== null) {
+      selectedFields = [`Using template ${selectedTemplate}`];
+      selectedGroupBy = [`Using template ${selectedTemplate}`];
+      var pro = $('#proSelect').val();
+      selectedTemplateName = [$('#country').val(), $('#category').val()];
+      if (pro !== "default" && pro !== null) {
+        selectedTemplateName.push(pro);
+      }
+    }
+    if (selectedFields.length > 0) {
+      addOptionsConfirmation(selectedFields, 'confirm-fields');
+    }
+    if (selectedGroupBy.length > 0) {
+      addOptionsConfirmation(selectedGroupBy, 'confirm-groupby');
+    }
+    if (selectedTemplateName !== null) {
+      addOptionsConfirmation(selectedTemplateName, 'confirm-template');
+    }
     const selectedRules = $('#ruleSelect').val() || [];
     ruleOptions = await getRules();
     const selectedRulesText = selectedRules
@@ -1753,9 +3307,11 @@ async function showConfirmationDetails() {
       })
       .filter(name => name !== null);
 
-    addOptionsConfirmation(selectedRulesText, 'confirm-rules', false);
-    document.getElementById('confirm-returns').textContent = document.getElementById('useReturns').checked ? 'Yes': 'No';
+    if (selectedRules.length > 0) {
+      addOptionsConfirmation(selectedRulesText, 'confirm-rules', false);
+    }
 
+    {% comment %} document.getElementById('confirm-returns').textContent = document.getElementById('useReturns').checked ? 'Yes': 'No'; {% endcomment %}
     var selectedOrderListFileValue = Object.values(selectedFilesOrders).map(file => file.filename);
     var selectedReturnListFileValue = Object.values(selectedFilesReturns).map(file => file.filename);
     var textContentOrders = selectedOrderListFileValue.length > 0 ? selectedOrderListFileValue.join('<br>') : 'No file selected';
@@ -1807,7 +3363,12 @@ async function createReport() {
         const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
         countryData.append("start_date", convertToISO(selectedStartDateValue));
         countryData.append("end_date", convertToISO(selectedEndDateValue));
-        countryData.append("report_id", '-1');
+        var selectedTemplate = $('#templateSelect').val();
+        if (!window.userPermissions['reporttemplate']) {
+          var year = moment().year();
+          selectedTemplate = `${$('#country').val()}-${year}-${$('#category').val()}-${$('#proSelect').val()}`;
+        }
+        countryData.append("template_id", selectedTemplate);
         countryData.append("use_returns", document.getElementById('useReturns').checked);
         const selectedFields = $('#customFields').val() || [];
         countryData.append("output_fields", selectedFields.join(','));
@@ -1815,10 +3376,8 @@ async function createReport() {
         countryData.append("groupby_fields", selectedGroupBy.join(','));
         const selectedRules = $('#ruleSelect').val() || [];
         countryData.append("rules", selectedRules.join(','));
-
-        data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});
-        // Handle file response
-        console.log(data);
+        setTimeout(repeatAction, 100);
+        data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});        // Handle file response
     } catch (error) {
         console.error(error.message);
         TOKEN = false;
@@ -1834,61 +3393,59 @@ async function createReport() {
     document.querySelectorAll('.prevButton').forEach(node => {node.disabled = false;})
 }
 
-var timeout = 1000;
-var inprogress = false;
-
-function repeatActionReport() {
-  unifiedSendRequest(GETREPORTPROGRESS, {method: 'GET'}).then(data => {
-    console.log(data);
-    if (data === "1") {
-      setTimeout(repeatActionReport, timeout); // Call the function again after the specified timeout
-      inprogress = true;
-    } else if (data === "0" && inprogress) {
-      if (!failedCreation) {
-        document.getElementById('reportInProgress').style.display = 'none';
-        document.getElementById('showReport').style.display = 'block';
-      }
-      inprogress = false;
-    } else if (data === "0") {
-      setTimeout(repeatActionReport, timeout);
-    }
-  }).catch(error => {
-    console.error(error);
-    setTimeout(repeatActionReport, timeout); // Ensure the function is called again even if there's an error
-  });
-}
-
 
 function showGuide() {
   if(guideToShow == 'new') {// create new report 
-    startGuide([
-        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' },
-        { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle' },
-    ]);
+    var guideSteps = [];
+    guideSteps.push({ element: "main", group: "{{ 'software.guide.report.create.group' | t }}", title: "{{ 'software.guide.report.create.title' | t }}", text: "{{ 'software.guide.report.create.text' | t }}", where: 'middle'});
+    guideSteps.push({ element: "#liveDataToggleSlider", group: "{{ 'software.guide.report.liveData.group' | t }}", title: "{{ 'software.guide.report.liveData.title' | t }}", text: "{{ 'software.guide.report.liveData.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    guideSteps.push({ element: "#orderListDropZone", group: "{{ 'software.guide.report.orderListDropZone.group' | t }}", title: "{{ 'software.guide.report.orderListDropZone.title' | t }}", text: "{{ 'software.guide.report.orderListDropZone.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    guideSteps.push({ element: "#navButtonsStep1", group: "{{ 'software.guide.report.next.group' | t }}", title: "{{ 'software.guide.report.next.title' | t }}", text: "{{ 'software.guide.report.next.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    startGuide(guideSteps);
   } else if (guideToShow == 'upload') {
-    startGuide([
-        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report page, where you have the option to upload any report to be submitted to the corresponding authority. Please make sure to configure the client credentials before uploading the report.", where: 'middle' },
-        { element: "#clientsUploadSection", group: "Clients", title: "Clients", text: "Here you can upload or modify the credentials for the clients for the different schemes.", where: 'below' },
-        // { element: "#editClientsModal", group: "Clients", title: "Clients", text: "Click into any field to update the existing value. You can add a new row to add new clients or add columns for additional schemes.", where: 'below' },
-        { element: "#uploadreportlistContainer", group: "Reports", title: "Upload Reports", text: "Drag and drop any report here to submit it to the corresponding authority. The format of the report does not matter as long as it includes some relevant information such as company name, date and the weights to report.", where: 'right' },
-        { element: "#notificationBell", group: "Reports", title: "Notifications", text: "If any error occurs with submitting the report, the error will be shown here. If configured, you can also receive an email with the error message.", where: 'below' },
-    ]);
+    var guideSteps = [];
+    guideSteps.push({ element: "main", group: "{{ 'software.guide.report.upload.group' | t }}", title: "{{ 'software.guide.report.upload.title' | t }}", text: "{{ 'software.guide.report.upload.text' | t }}", where: 'middle'});
+    guideSteps.push({ element: "#clientsUploadSection", group: "{{ 'software.guide.report.clients.group' | t }}", title: "{{ 'software.guide.report.clients.title' | t }}", text: "{{ 'software.guide.report.clients.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')} });
+    guideSteps.push({ element: "#uploadreportlistContainer", group: "{{ 'software.guide.report.uploadFile.group' | t }}", title: "{{ 'software.guide.report.uploadFile.title' | t }}", text: "{{ 'software.guide.report.uploadFile.text' | t }}", where: 'right', runBefore: function() {selectOption('upload')}  });
+    guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  });
+    startGuide(guideSteps);
   } else {
-    startGuide([
-        { element: "main", group: "Introduction", title: "Welcome", text: "Welcome to the report page, please select one of the options, either creating a new report or submitting an existing one.", where: 'middle' },
-    ]);
+    var guideSteps = [
+      { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle', runBefore: function() {selectOption('overview')} }
+
+    ];
+    if (allowedToCreateReports['create_reports']) {
+      guideSteps.push({ element: "#createNewReport", group: "{{ 'software.guide.report.create.group' | t }}", title: "{{ 'software.guide.report.create.title' | t }}", text: "{{ 'software.guide.report.create.text' | t }}", where: 'right', runBefore: function() {selectOption('overview')} });
+      guideSteps.push({ element: "#liveDataToggleSlider", group: "{{ 'software.guide.report.liveData.group' | t }}", title: "{{ 'software.guide.report.liveData.title' | t }}", text: "{{ 'software.guide.report.liveData.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+      guideSteps.push({ element: "#orderListDropZone", group: "{{ 'software.guide.report.orderListDropZone.group' | t }}", title: "{{ 'software.guide.report.orderListDropZone.title' | t }}", text: "{{ 'software.guide.report.orderListDropZone.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+      guideSteps.push({ element: "#navButtonsStep1", group: "{{ 'software.guide.report.next.group' | t }}", title: "{{ 'software.guide.report.next.title' | t }}", text: "{{ 'software.guide.report.next.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
+    }
+    if (allowedToCreateReports['upload_reports']) {
+      guideSteps.push({ element: "#uploadExistingReports", group: "{{ 'software.guide.report.upload.group' | t }}", title: "{{ 'software.guide.report.upload.title' | t }}", text: "{{ 'software.guide.report.upload.text' | t }}", where: 'left', runBefore: function() {selectOption('overview')} });
+      guideSteps.push({ element: "#clientsUploadSection", group: "{{ 'software.guide.report.clients.group' | t }}", title: "{{ 'software.guide.report.clients.title' | t }}", text: "{{ 'software.guide.report.clients.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')} });
+      guideSteps.push({ element: "#uploadreportlistContainer", group: "{{ 'software.guide.report.uploadFile.group' | t }}", title: "{{ 'software.guide.report.uploadFile.title' | t }}", text: "{{ 'software.guide.report.uploadFile.text' | t }}", where: 'right', runBefore: function() {selectOption('upload')}  });
+      guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  });
+    }
+    startGuide(guideSteps);
   }
   setCookie('showedGuideReport', 'true', 300);
 }
+
+waitForPermission(function() {
+  if (window.userPermissions['forsure-report']) {
+    document.getElementById('reportcontainer').style.display = 'block';
+    cancreatereports();
+
+    if(readCookie('showedGuideReport') === null) {
+      setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    }
+  }
+});
+
 function showGuideFromButton(element) {
   showGuide();
 }
 
-function showGuideAfterSelection() {
-  if(readCookie('showedGuideReport') === null) {
-    setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
-  }
-}
 
 </script>
 

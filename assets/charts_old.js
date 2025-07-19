@@ -239,11 +239,8 @@ function drawPieChart(chart, dataObj, columnName, headerText) {
     var data = keys.map(key => {
         return { "Type": key, "Value": dataObj[columnName][key] };
     });
-    console.log(data);
     let totalValue = d3.sum(data, d => d.Value);
-    console.log(totalValue);
     data = data.filter(d => d.Value / totalValue > 0.01); // Ignore data below 1%
-    console.log(data);
     data.sort((a, b) => b.Value - a.Value); // Sort data by size
 
     var pieGroup = svg.append("g")

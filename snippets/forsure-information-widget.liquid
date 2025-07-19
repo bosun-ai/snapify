@@ -1,0 +1,538 @@
+
+{% style %}
+.information-item {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding: 10px;
+    cursor: pointer;
+}
+.information-item-title {
+    width: 50%;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+#no-information {
+    width: 50%;
+    font-weight: bold;
+}
+#collapseInformation {
+    display: none;
+}
+#informationList {
+    transition: max-height .3s ease-in-out, transform .3s ease-in-out;
+    /* overflow: hidden;  */
+    /* height: auto; */
+}
+#informationList.open {
+    max-height: 999px;            /* any value larger than the tallest content */
+    height: 100%;
+}
+
+#informationSettingsOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+}
+
+.modal-content {
+    width: fit-content;
+    height: fit-content;
+    top: 50%;
+    left: 50%;
+    min-width: 70rem;
+    transform: translate(-50%, -50%);
+    position: absolute !important;
+    background-color: #fafafa;
+    padding: 20px;
+    border-radius: 1rem;
+}
+
+.modal-body {
+    display: flex;
+    gap: 20px;
+    padding: 1.5rem;
+    font-family: sans-serif;
+}
+
+.modal-title {
+    margin-left: 15px;
+    margin-right: 15px;
+    justify-content: space-between;
+    display: flex;
+}
+
+#buttons {
+    display: flex;
+    gap: 10px;
+    margin: auto;
+    width: fit-content;
+}
+
+#buttons > div {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.2s ease;`
+}
+
+#buttons > div:hover {
+    background-color: #eaeaea;
+}
+
+#buttons > div.selected {
+    background-color: #2255ff;
+    color: #fafafa;
+    border-color: #2255ff;
+}
+
+#buttons-options {
+    display: flex;
+    gap: 10px;
+    margin: auto;
+    width: fit-content;
+}
+
+#buttons-options button {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.2s ease;
+}
+
+#buttons-options button:hover {
+    background-color: #eaeaea;
+}
+
+#buttons-options button.selected {
+    background-color: #2255ff;
+    color: #fafafa;
+    border-color: #2255ff;
+}
+#informationContainer {
+    height: 39%;
+    flex-direction: column;
+    display: flex;
+}
+
+#expandInformation svg path, #collapseInformation svg path {
+    fill: #fafafa;
+}
+
+#expandInformation svg, #collapseInformation svg {
+    height: 32px;
+    margin: auto;
+}
+
+#informationTitle {
+    flex: 0 0 auto;
+}
+
+.information-row {
+    cursor: pointer;
+}
+
+.information-row-active {
+    background-color: #2255ff;
+    color: #fafafa;
+}
+.information-table th, .information-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+
+.information-scroll-wrapper {
+  overflow-y: auto;
+  border-top: 1px solid #ccc;
+  flex: 1 1 auto;
+}
+
+/* Ensures sticky header */
+.information-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.information-header-cell {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  font-weight: bold;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+
+.information-cell {
+  padding: 10px;
+  border: 1px solid #ddd;
+  word-wrap: break-word;
+}
+
+.information-row-active {
+  background-color: #2255ff;
+  color: #fafafa;
+}
+
+.information-table th, .information-table td {
+    border: none!important;
+}
+
+.information-row-active .information-cell div svg .st2-weee {
+        stroke: #fafafa;
+    }
+.information-row-active .information-cell div svg .st5-weee {
+    stroke: #fafafa;
+    fill: #fafafa;
+}
+.information-row-active .information-cell div svg .st2-batteries {
+    stroke: #fafafa;    
+}
+.information-row-active .information-cell div svg .st5-batteries {
+    stroke: #fafafa;
+    fill: #fafafa;
+}
+
+.information-row-active .information-cell div svg .st2-packaging {
+    stroke: #fafafa;
+}
+.information-row-active .information-cell div svg .st5-packaging {
+    stroke: #fafafa;
+    /* fill: #fafafa; */
+}
+
+.information-cell svg {
+    width: 30px;
+    height: 30px;
+}
+{% endstyle %}
+
+<div id="informationContainer" class="widget grid-item widget-left">
+    <div id="informationTitle" class="grid-title">
+      <div>Information</div>
+      <div class="icon-container">
+        <div onclick="collapseInformation()" id="collapseInformation">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                height="2rem"
+                viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path fill="#17161c" d="M160 64c0-17.7-14.3-32-32-32s-32 14.3-32 32v64H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h96c17.7 0 32-14.3 32-32V64zM32 320c-17.7 0-32 14.3-32 32s14.3 32 32 32H96v64c0 17.7 14.3 32 32 32s32-14.3 32-32V352c0-17.7-14.3-32-32-32H32zM352 64c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H352V64zM320 320c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32s32-14.3 32-32V384h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H320z" /></svg>
+        </div>
+        <div onclick="expandInformation()" id="expandInformation">
+            <svg xmlns="http://www.w3.org/2000/svg" height="4rem" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path fill="#17161c" d="M32 32C14.3 32 0 46.3 0 64v96c0 17.7 14.3 32 32 32s32-14.3 32-32V96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V352zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h64v64c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H320zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32v64H320c-17.7 0-32 14.3-32 32s14.3 32 32 32h96c17.7 0 32-14.3 32-32V352z"></path></svg>
+        </div>
+        <div onclick="openInformationSettings()">{% render 'icon-gear' %}</div>
+      </div>
+    </div>
+      <div id="informationList" class="information-scroll-wrapper">
+        {% comment %} <div class="warning-item">
+            <div class="warning-item-title">
+                <div>Warning 1</div>
+            </div>
+            <div class="warning-item-description">
+                <div>No data received</div>
+            </div>
+        </div> {% endcomment %}
+        <div class="information-item">
+            <div id="no-information">
+                <div>No information available</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="informationSettingsOverlay"></div>
+<div id="informationSettingsModal" class="modal">
+    <div class="modal-content">
+        <div id="informationSettingsStep1">
+            <h2 class="modal-title">Information Settings
+                <div>
+                <button class="button button--secondary" onclick="closeInformationSettings()">Cancel</button>
+                <button class="button" onclick="saveInformationSettings()">Save</button>
+                </div>
+            </h2>
+            <div class="modal-body" style="flex-direction: column;">
+                <div>
+                <h3>Which information do you want to see and how do you want to receive it?</h3>
+                <div id="buttons">
+                    <div id="button-email" onclick="selectNotificationMethod('email')">Email</div>
+                    <div id="button-notification" onclick="selectNotificationMethod('notification')">Notification</div>
+                    <div id="button-email-notification" onclick="selectNotificationMethod('both')">Email and Notification</div>
+                </div>
+                </div>
+                <div>
+                    <h3>What types of information do you want to receive?</h3>
+                    <div id="buttons-options">
+                    <button id="button-updates-option" onclick="selectInformationType('updates')">Updates</button>
+                    <button id="button-warnings-option" onclick="selectInformationType('warnings')">Warnings</button>
+                    <button id="button-errors-option" onclick="selectInformationType('errors')">Errors</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <script>
+    let selectedNotificationMethod = null;
+    let selectedInformationTypes = new Set();
+
+    function expandInformation() {
+      document.getElementById('deadlineContainer').style.display = 'none';
+      document.getElementById('informationContainer').classList.add('open');
+      document.getElementById('collapseInformation').style.display = 'flex';
+      document.getElementById('expandInformation').style.display = 'none';
+      document.getElementById('informationContainer').style.height = '100%';
+    }
+    
+    function collapseInformation() {
+        document.getElementById('deadlineContainer').style.display = 'block';
+        document.getElementById('informationContainer').classList.remove('open');
+        document.getElementById('collapseInformation').style.display = 'none';
+        document.getElementById('expandInformation').style.display = 'flex';
+        document.getElementById('informationContainer').style.height = '39%';
+    }
+
+    function openInformationSettings() {
+        document.getElementById('informationSettingsOverlay').style.display = 'block';
+        document.getElementById('informationSettingsModal').style.display = 'block';
+        document.getElementById('informationSettingsStep1').style.display = 'block';
+        selectedNotificationMethod = null;
+        selectedInformationTypes.clear();
+        getInformationSettings();
+        updateButtonStates();
+    }
+
+    function closeInformationSettings() {
+        document.getElementById('informationSettingsOverlay').style.display = 'none';
+        document.getElementById('informationSettingsModal').style.display = 'none';
+    }
+
+    function selectNotificationMethod(method) {
+        selectedNotificationMethod = method;
+        updateButtonStates();
+    }
+
+    function selectInformationType(type) {
+        if (selectedInformationTypes.has(type)) {
+            selectedInformationTypes.delete(type);
+        } else {
+            selectedInformationTypes.add(type);
+        }
+        updateButtonStates();
+    }
+
+    function updateButtonStates() {
+        // Update notification method buttons
+        document.getElementById('button-email').classList.remove('selected');
+        document.getElementById('button-notification').classList.remove('selected');
+        document.getElementById('button-email-notification').classList.remove('selected');
+        
+        if (selectedNotificationMethod) {
+            document.getElementById(`button-${selectedNotificationMethod === 'both' ? 'email-notification' : selectedNotificationMethod}`).classList.add('selected');
+        }
+
+        // Update information type buttons
+        document.getElementById('button-updates-option').classList.remove('selected');
+        document.getElementById('button-warnings-option').classList.remove('selected');
+        document.getElementById('button-errors-option').classList.remove('selected');
+        
+        selectedInformationTypes.forEach(type => {
+            document.getElementById(`button-${type}-option`).classList.add('selected');
+        });
+    }
+
+    async function getInformationSettings() {
+        try {
+            var data = await unifiedSendRequest(INFORMATION_SETTINGS, {method: 'GET'});
+            selectedNotificationMethod = data.notification_method;
+            selectedInformationTypes = new Set(data.informationTypes.split(','));
+            updateButtonStates();
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message, false);
+        }
+    }
+
+    async function saveInformationSettings() {
+        if (!selectedNotificationMethod) {
+            alert('Please select a notification method');
+            return;
+        }
+        if (selectedInformationTypes.size === 0) {
+            alert('Please select at least one information type');
+            return;
+        }
+        try {
+            var formData = new FormData();
+            formData.append('notificationMethod', selectedNotificationMethod);
+            formData.append('informationTypes', Array.from(selectedInformationTypes));
+            var data = await unifiedSendRequest(INFORMATION_SETTINGS, {formData: formData});
+            showMessage('Information settings saved successfully!', true);
+            closeInformationSettings();
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message, false);
+        }
+    }
+
+    async function getInformation() {
+        try {
+            var data = await unifiedSendRequest(INFORMATION, {method: 'GET'});
+            return data;
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message, false);
+        }
+    }
+
+    var activeInformation = null;
+    function updateInformation(data) {
+        const scrollWrapper = document.getElementById('informationList');
+        scrollWrapper.innerHTML = '';
+
+        const table = document.createElement('table');
+        table.className = 'information-table';
+
+        // Create header
+        const tableHeader = document.createElement('thead');
+        const tableHeaderRow = document.createElement('tr');
+        tableHeaderRow.className = 'information-header-row';
+
+        const headers = ['Status', 'Country', 'Report Type', 'PRO'];
+        headers.forEach(headerText => {
+            const th = document.createElement('th');
+            th.className = 'information-header-cell';
+            var content = document.createElement('div');
+            content.style.width = 'fit-content';
+            content.style.margin = 'auto';
+            content.style.display = 'flex';
+            content.innerText = headerText;
+            th.appendChild(content);
+            tableHeaderRow.appendChild(th);
+        });
+        tableHeader.appendChild(tableHeaderRow);
+        table.appendChild(tableHeader);
+
+        // Create body
+        const tableBody = document.createElement('tbody');
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'information-row';
+
+            if (activeInformation &&
+                activeInformation.country === item.country &&
+                activeInformation.report_type === item.report_type &&
+                activeInformation.pro === item.pro) {
+                row.classList.add('information-row-active');
+            }
+
+            const values = [item.status, item.country, item.report_type, item.pro];
+            values.forEach(val => {
+                const td = document.createElement('td');
+                td.className = 'information-cell';
+                var content = document.createElement('div');
+                content.style.width = 'fit-content';
+                content.style.margin = 'auto';
+                content.style.display = 'flex';
+
+                if (val === 'ERROR') {
+                    content.innerHTML = `{% render 'forsure-icon-error' %}`;
+                }
+                else if (val === 'WARNING') {
+                    content.innerHTML = `{% render 'forsure-icon-warning' %}`;
+                }else if (val === 'Batteries') {
+                    content.innerHTML = getBatteriesSVG();
+                }
+                else if (val === 'WEEE') {
+                    content.innerHTML = getWEEESVG();
+                }
+                else if (val === 'Packaging') {
+                    content.innerHTML = getPackagingSVG();
+                }
+                else {
+                    content.innerText = val;
+                }
+                td.appendChild(content);
+                row.appendChild(td);
+            });
+
+            row.onclick = (function(currentItem, currentData) {
+                return function() {
+                    activeInformation = currentData;
+                    const rows = document.getElementsByClassName('information-row');
+                    if (currentItem.classList.contains('information-row-active')) {
+                        closeInformationDetails();
+                        currentItem.classList.remove('information-row-active');
+                        activeInformation = null;
+                    } else {
+                        for (const row of rows) {
+                            row.classList.remove('information-row-active');
+                        }
+                        currentItem.classList.add('information-row-active');
+                        openInformationDetails(currentData);
+                    }
+                };
+            })(row, item);
+
+            tableBody.appendChild(row);
+        });
+
+        table.appendChild(tableBody);
+        scrollWrapper.appendChild(table);
+    }
+
+    function openInformationDetails(item) {
+
+        document.getElementById('informationDetails').innerHTML = `
+        <h3 style="text-align: center;">Received the following ${item.status[0].toUpperCase() + item.status.slice(1).toLowerCase()}:</h3>    
+            <table style="margin: auto;margin-top: 1rem">
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">Country</td>
+                    <td>${item.country}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">Report Type</td>
+                    <td>${item.report_type}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">PRO</td>
+                    <td>${item.pro}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;width: 50%;">Description</td>
+                    <td>${item.description}</td>
+                </tr>
+            </table>
+        `;
+        document.getElementById('informationDetailsContainer').style.display = 'block';
+        document.getElementById('mapContainer').style.display = 'none';
+    }
+
+    function closeInformationDetails() {
+        document.getElementById('informationDetailsContainer').style.display = 'none';
+        document.getElementById('mapContainer').style.display = 'block';
+    }
+
+    waitForPermission(function() {
+        if (window.userPermissions['forsure-dashboard']) {
+          getInformation().then(data => {
+            updateInformation(data);
+          });
+      
+          setInterval(() => {
+            getInformation().then(data => {
+                updateInformation(data);
+            });
+          }, 10000);
+        }
+      });
+  </script>

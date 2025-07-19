@@ -73,7 +73,6 @@ Usage:
       pinnedCharts = ["xfdKfjo1XUkDlZRJ"];
     }
     let requestPromises = [];
-    console.log(availableCharts);
     const categoriesDicts = {};
 
     Object.keys(availableCharts).forEach(key => {
@@ -88,12 +87,10 @@ Usage:
         // Add the item to its respective category
         categoriesDicts[category][key] = item;
     });
-    console.log(categoriesDicts);
     let categories = categoriesDicts;
     for (let chartCategory in categories) {
       let chartCategoryName = chartCategory.replace(' ', '');
       let chartCategoryData = categories[chartCategory];
-      console.log(chartCategoryData);
 
 // remove already added ones
       possibleCharts = Object.entries(chartCategoryData).filter(([key, val]) => ! pinnedCharts.includes(key)).reduce((acc, [key, val]) => {
@@ -101,7 +98,6 @@ Usage:
         return acc;
       }, {});
       let endpoints = Object.values(possibleCharts);
-      console.log(endpoints.length);
       if (endpoints.length == 0) {
         continue;
       }

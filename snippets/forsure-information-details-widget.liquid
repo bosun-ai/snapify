@@ -1,0 +1,21 @@
+{% style %}
+  #closeInformationDetails {
+    cursor: pointer;
+  }
+  #closeInformationDetails svg {
+    height: 25px;
+  }
+  #closeInformationDetails svg path {
+    stroke: #fafafa;
+  }
+{% endstyle %}
+
+<div id="informationDetailsContainer" class="widget grid-item widget-right" style="display: none;">
+    <div id="informationTitle" class="grid-title">
+      <div>Information Details</div>
+      <div class="icon-container">
+        <div id="closeInformationDetails" onclick="closeInformationDetails()">{% render 'icon-close' %}</div>
+      </div>
+    </div>
+      <div id="informationDetails"></div>
+  </div>

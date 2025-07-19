@@ -237,7 +237,7 @@
   <div class="page-width">
     <div style="border-radius: 2.5rem;    overflow: hidden;">
     <div style="background: #fafafa;">
-      <div class="container" style="background: #fafafa;margin:auto;padding:3%;display:flex;width: 90%;position:relative">
+      <div class="container" style="background: #fafafa;margin:auto;padding:3%;display:flex;width: 90%;position:relative;height: fit-content">
         <div class="buttonList">
           <div style="justify-content: center;padding-top:5%">
             <a id="leftButtonContact" class="buttonleft button button--primary" disabled>{{ section.settings.leftbar_contact }}</a> 
@@ -386,7 +386,7 @@
               {{ section.settings.submit_text }}
             </div>
             <input type="hidden" required id="source" class="field__input" autocapitalize="off">
-            <div class="customer" style="display: grid;grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+            <div class="customer" style="display: grid;grid-template-columns: 1fr 1fr; grid-gap: 20px;margin-left: 0;padding:0">
               <div class="field">
                   <select id="sourceSelect" required class="contactGrey" onchange="handleSelection(this.value)">
                     <option value="" selected disabled>{{ 'templates.contact.form.source_question' | t }}</option>
@@ -576,7 +576,7 @@ function checkField(id, name, setError) {
       return false;
     }
     if(id === 'phone') {
-      var phoneRegex = /^[+]?[0-9]+$/;
+      var phoneRegex = /^[+][0-9]+$/;
       if (!phoneRegex.test(fieldvalue)) {
         if(setError) {
           document.getElementById(`error-${id}`).textContent = '{{ section.settings.error_phone2 }}';
@@ -597,7 +597,7 @@ function checkField(id, name, setError) {
     return true;
   }
 
-var serverUrl = 'https://automations.for-sure.net:4190/';
+var serverUrl = 'https://server.for-sure.net/register/';
 async function updateCustomer(endpoint, formData) {
   var response = await fetch(serverUrl + endpoint, {
         method: 'POST',

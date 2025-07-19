@@ -20,7 +20,7 @@
       <ul class="pagination__list list-unstyled" role="list">
       {%- if paginate.previous -%}
         <li>
-          <a href="{{ paginate.previous.url }}{{ anchor }}" class="pagination__item pagination__item--next pagination__item-arrow link motion-reduce" aria-label="{{ 'general.pagination.previous' | t }}"
+          <a href="{{ paginate.previous.url }}{{ anchor }}" class="pagination__item pagination__item--prev pagination__item-arrow link motion-reduce" aria-label="{{ 'general.pagination.previous' | t }}"
             style="transform: rotate(90deg);">
             {% render 'icon-caret' %}
           </a>
@@ -43,7 +43,7 @@
 
       {%- if paginate.next -%}
         <li>
-          <a href="{{ paginate.next.url }}{{ anchor }}" class="pagination__item pagination__item--prev pagination__item-arrow link motion-reduce" aria-label="{{ 'general.pagination.next' | t }}" 
+          <a href="{{ paginate.next.url }}{{ anchor }}" class="pagination__item pagination__item--next pagination__item-arrow link motion-reduce" aria-label="{{ 'general.pagination.next' | t }}" 
             style="transform: rotate(270deg);">
             {%- render 'icon-caret' -%}
           </a>

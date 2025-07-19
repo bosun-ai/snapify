@@ -332,6 +332,14 @@ div.display-flex {
 #countrySelectionContainer li:last-child {
   border-bottom: none;
 }
+.modal-content {
+    position: absolute!important;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 30%;
+}
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
 
@@ -342,11 +350,10 @@ div.display-flex {
   <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
   <script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
   {% render 'forsure-login' %}
-  {% render 'forsure-guide' %}
   {% render 'forsure-simple-notification' %}
   {% render 'forsure-confirmation' %}
-  <div class="section-{{ section.id }}-padding">
-    <div class="configbox page-width border" style="border-radius: 1rem">
+  <div id="accessManagementWrapper" class="section-{{ section.id }}-padding" style="display: none;">
+    <div id="accessManagement" class="configbox page-width border" style="border-radius: 1rem;position:relative;background: #fafafa;">
         <div><h2>Manage Access</h2></div>
         <table>
             <thead>
@@ -357,27 +364,24 @@ div.display-flex {
                     <th style="width: 10%">Delete</th>
                 </tr>
             </thead>
-            <tbody id="userList">          
+            <tbody id="userList">
             </tbody>
         </table>
-        <div id="editModal" class="modal">
-
+        <div id="editModal" class="modal losensitive">
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
-                <h1 style="margin-left: auto;margin-right: auto;width: fit-content;">Edit User Roles</h1>
+                <h2 style="margin-left: auto;margin-right: auto;width: fit-content;">Edit User Roles</h2>
                 <div style="margin: 3rem auto;width: fit-content;"><select id="rolesDropdown" style="border: 0.2rem solid #17161c;text-align: left;" class="btn"></select></div>
                 <div id="roleOptions"></div>
                 <div style="margin: 2rem auto;width: fit-content;"><button class="button" onclick="saveChanges(currentEditingUserId)">Save Changes</button></div>
             </div>
         </div>
-        <div id="container" style="padding-bottom: 2rem; display: flex">
-            <button id="addUserButton" class="button" style="z-index:1" onclick="addInputField()">Add User</button>
-            <input type="email" id="emailInput" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;display: none">
-            <button id="addButton" class="button" style="display: none">Add User</button>
+        <div id="container" style="padding-bottom: 2rem; display: flex;margin-left: auto;width: fit-content;">
+            <input type="email" id="emailInput" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;">
+            <button id="addButton" class="button" onclick="addUser()">Add User</button>
         </div>
+    </div>
 </div>
-</div>
-
 <script>
 function addToTable(user) {
     var table = document.getElementById('userList');
@@ -411,7 +415,6 @@ async function getUsers() {
     try {
         var data = await unifiedSendRequest(ACCESS_MANAGER, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
         document.getElementById('userList').innerHTML = '';
-        console.log(data);
         for (user of data) {
             addToTable(user);
         }
@@ -510,7 +513,6 @@ async function deleteUser(userId) {
         var formData = new FormData();
         formData.append('user_id_to_remove', userId);
         const response = await unifiedSendRequest(ACCESS_DELETE_USER, {formData: formData});
-        console.log(response);
         if (response.status == 'success') {
             showMessage('User deleted successfully!', true);
             closeConfirmationModal();
@@ -525,19 +527,8 @@ async function deleteUser(userId) {
     }
 }
 
-function addInputField() {
-    const container = document.getElementById('container');
-    const addUserButton = document.getElementById('addUserButton');
-    addUserButton.style.display = 'none';
-    document.getElementById('emailInput').style.display = 'block';
-    var addButton = document.getElementById('addButton');
-    addButton.style.display = 'block';
-    addButton.onclick = function() {
-            addUser(document.getElementById('emailInput').value);
-    };
-}
-
-async function addUser(userEmail) {
+async function addUser() {
+  userEmail = document.getElementById('emailInput').value;
     try {
         var formData = new FormData();
         if (!document.getElementById('emailInput').value.includes('@')) {
@@ -546,7 +537,6 @@ async function addUser(userEmail) {
         }
         formData.append('user_email', userEmail);
         const response = await unifiedSendRequest(ACCESS_ADD_USER, {formData: formData});
-        console.log(response);
         if (response.status == 'success') {
             showMessage('User added successfully!', true);
             const addUserButton = document.getElementById('addUserButton');
@@ -563,6 +553,8 @@ async function addUser(userEmail) {
         showMessage('Failed to add user' + error.message, false);
     }
 }
+
+
 
 
 async function saveChanges(userId) {
@@ -587,7 +579,6 @@ async function saveChanges(userId) {
     }
     try {
         const response = await unifiedSendRequest(ACCESS_EDIT, {formData: formData});
-        console.log(response);
         if (response.status == 'success') {
             showMessage('Updated roles successfully', true);
             getUsers();
@@ -615,7 +606,13 @@ window.onclick = function(event) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', getUsers);
+waitForPermission(function() {
+    if (window.userPermissions['forsure-configuration'] && window.userPermissions['accessmanagement']) {
+      document.getElementById('accessManagementWrapper').style.display = 'block';
+      getUsers();
+    }
+  });
+
 
 </script>
 {% endif %}
