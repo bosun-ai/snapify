@@ -14,7 +14,7 @@ Usage:
   $(function() {
     $("#widgetContainer").sortable({
       placeholder: "ui-state-highlight widget",
-      items: "> :not(:first-child)", 
+      items: ">",
       update: function(event, ui) {
         const order = [];
         $("#widgetContainer").children().each(function(index) {
@@ -55,11 +55,11 @@ Usage:
     let availableCharts = await getPinnedCharts();
     await drawCharts(availableCharts, containerId, hard);
 
-    let count = document.querySelectorAll(`#${containerId} > li`).length;
+    {% comment %} let count = document.querySelectorAll(`#${containerId} > li`).length;
     var widgetContainerHeight = `${
       calculateContainerHeight(count) // TODO remove 1 once add more is elsewhere
     }px`;
-    document.getElementById(containerId).style.height = widgetContainerHeight;
+    document.getElementById(containerId).style.height = widgetContainerHeight; {% endcomment %}
   }
 
 

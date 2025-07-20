@@ -257,19 +257,12 @@
                       tooltip.innerText = show;
                     }
                 }
-                if (data['{{ currentLink }}'] != true) {
+                if (data['{{ currentLink }}'] != true && data['{{ currentLink }}?logged_in'] != true) {
                     if (available_url === null) {
                       window.location.href = '/';
                     } else {
                       window.location.href = `{{ currentPath }}/${available_url}`;
                     }
-                }
-                console.log(data['{{ currentLink }}?logged_in']);
-                if (data['{{ currentLink }}?logged_in'] != undefined && data['{{ currentLink }}?logged_in'] != true) {
-                  if (available_url === null) {
-                      window.location.href = '/';
-                    }
-                    {% comment %} window.location.href = `{{ currentPath }}/${available_url}`; {% endcomment %}
                 }
             } catch (error) {
                 console.error('Failed to get navigation:', error);
