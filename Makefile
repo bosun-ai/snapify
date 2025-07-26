@@ -120,11 +120,26 @@ status:
 	@echo "Node environment:"
 	@if [ -d ".nodeenv" ]; then echo "  ✓ .nodeenv exists"; else echo "  ✗ .nodeenv missing"; fi
 	@echo "Shopify CLI:"
-	@if command -v shopify >/dev/null 2>&1; then echo "  ✓ Shopify CLI installed"; else echo "  ✗ Shopify CLI not found"; fi
+	@if [ -d ".nodeenv" ]; then \
+		echo "  ✓ Shopify CLI installed ($$(. .nodeenv/bin/activate && shopify version 2>/dev/null || echo 'version unknown'))"; \
+		echo "    Path: $$(. .nodeenv/bin/activate && which shopify 2>/dev/null || echo 'not found')"; \
+	else \
+		echo "  ✗ .nodeenv missing"; \
+	fi
 	@echo "Node.js:"
-	@if command -v node >/dev/null 2>&1; then echo "  ✓ Node.js installed ($(shell node -v))"; else echo "  ✗ Node.js not found"; fi
+	@if [ -d ".nodeenv" ]; then \
+		echo "  ✓ Node.js installed ($$(. .nodeenv/bin/activate && node -v))"; \
+		echo "    Path: $$(. .nodeenv/bin/activate && which node)"; \
+	else \
+		echo "  ✗ .nodeenv missing"; \
+	fi
 	@echo "npm:"
-	@if command -v npm >/dev/null 2>&1; then echo "  ✓ npm installed ($(shell npm -v))"; else echo "  ✗ npm not found"; fi
+	@if [ -d ".nodeenv" ]; then \
+		echo "  ✓ npm installed ($$(. .nodeenv/bin/activate && npm -v))"; \
+		echo "    Path: $$(. .nodeenv/bin/activate && which npm)"; \
+	else \
+		echo "  ✗ .nodeenv missing"; \
+	fi
 
 # Show current configuration
 config:
