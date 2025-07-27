@@ -652,31 +652,65 @@
                     "group": "Create"
                 }
             },
+            "reportUpdates": {
+                "clients": {
+                    "title": "Update: Client credentials",
+                    "text": "You can now drag and drop the columns for the client credentials or hide them using the menu in the column header to make editing the passwords easier. The original layout is restored when opening the client credentials again.",
+                    "group": "Upload"
+                },
+                "upload": {
+                    "title": "Update: Create Zero Declaration",
+                    "text": "You can now create a zero declaration report by clicking the button. This will open a popup where you can select the report details. You can then automatically create zero declarations for all companies selected.",
+                    "group": "Upload"
+                }
+            },
             "history": {
                 "welcome": {
-                    "title": "Welcome",
+                    "title": "Report history",
                     "text": "This is the report history page. All reports that were created or that you submitted are shown here as well as the confirmations if they were sent to the corresponding authority.",
                     "group": "Introduction"
                 },
                 "filters": {
                     "title": "Filters",
-                    "text": "Here you can filter the results shown below by the country, type of report and time.",
+                    "text": "Here you can filter the results shown below by the country, type of report and time. The results are updated immediately.",
                     "group": "Filters"
                 },
                 "receipts": {
-                    "title": "Receipts Only",
-                    "text": "If you only want to see the report confirmations, you can select that here. That gives you a quick overview of the reports that were sent to the corresponding authority.",
+                    "title": "Additional Filters",
+                    "text": "Filter the results to only show the receipt or the new reports. \\n\\nYou can choose the option Mine to only show the reports that you created yourself.\\n\\nYou can also choose the option New to only show the reports that were created today.",
                     "group": "Filters"
                 },
                 "search": {
                     "title": "Search",
-                    "text": "Search for any company, report name or country using this search. The results are updated immediately.",
+                    "text": "Search for specifics of the report. \\n\\nYou can search for the company name, country, report type, PRO, timeframe, report name and when it was updated.\\n\\nYou can also try these options: \\n\\n25.06: finds all reports that were last updated on the 25th of June\\n\\nThis Week: Finds all reports that were last updated this week.\\n\\nOther special searches are: today, yesterday, this month, last month",
                     "group": "Filters"
                 },
                 "download": {
                     "title": "Download",
                     "text": "To download all reports shown below (applying the filters that you've chosen), click this button. \\n\\nNote: This might take 1-2mins to get the compressed file ready.",
                     "group": "Download"
+                }
+            },
+            "historyUpdates": {
+                "filters": {
+                    "title": "Update: New Filter Selection",
+                    "text": "We have improved the filtering such that the results are updated immediately.",
+                    "group": "Filters"
+                },
+                "receipts": {
+                    "title": "Update: Additional Filters",
+                    "text": "You can now choose the option Mine to only show the reports that you created yourself.\\n\\nYou can also choose the option New to only show the reports that were created today.",
+                    "group": "Filters"
+                },
+                "search": {
+                    "title": "Update: Improved Search",
+                    "text": "You can now search for more details of the report.\\n\\nTry these options: \\n\\n25.06: finds all reports that were last updated on the 25th of June\\n\\nThis Week: Finds all reports that were last updated this week.\\n\\nOther special searches are: today, yesterday, this month, last month",
+                    "group": "Filters"
+                },
+                "status": {
+                    "title": "Update: Status Overview",
+                    "text": "You can now see the status of the reports in the overview. This will help you to see which reports are still in progress and which are done. You can also click on the status to filter the reports. Clicking a status again will remove the filter.",  
+                    "group": "Filters"
                 }
             },
             "download": {

@@ -679,18 +679,27 @@ content: "\2713"
     </div>
     <div class="uploadExisting" id="uploadReport" style="display: none;">
         <h2 class="heading">Upload Existing Reports</h2>
-        <div id="clientsUploadSection" style="margin-bottom: 2rem;width: fit-content;margin: auto;position: relative;background: rgb(250, 250, 250);padding: 1px 1rem;border-radius: 1rem;">
-          <div style="margin: auto">
-              <h3 style="margin-bottom: 1rem">Upload Clients File</h3>
-              <div id="clientsFileContainer" style="display: flex; align-items: center; padding: 0.5rem 0;border: 0.2rem solid #17161c;background-color: #fff;border-color: #ccc;margin-bottom: 1.5rem;">
-                  <span id="clientsFileName" style="margin: auto">No file uploaded</span>
+        <div style="margin-bottom: 2rem;margin: auto;position: relative;background: rgb(250, 250, 250);padding: 1px 1rem;border-radius: 1rem;">
+          <div style="display: flex; justify-content: space-evenly;gap: 2rem;">
+          <div id="clientsUploadSection" style="margin-bottom: 1rem;position: relative;background:#fafafa">
+            <h3 style="margin-bottom: 1rem;text-align: center;">Client Credentials</h3>
+            <button class="button" onclick="openClientsModal()">Manage Login Details</button>
+              {% comment %} <div id="clientsFileContainer" style="display: flex; align-items: center; padding: 0.5rem 0;border: 0.2rem solid #17161c;background-color: #fff;border-color: #ccc;margin-bottom: 1.5rem;">
+                
+                  {% comment %} <span id="clientsFileName" style="margin: auto">No file uploaded</span>
                   <a id="editIconClients" href="#" title="Edit" onclick="openClientsModal()" style="margin-left: 1rem;margin-right: 1rem;  margin-top: 0.5rem; display: none">
                     <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
-                  </a>
-                  <img width="20px" id="upload-clients" style="margin-left: 1rem; margin-right: 1rem; cursor: pointer" onclick="document.getElementById('clientsFileInput').click()" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
-              </div>
+                  </a> {% endcomment %}
+                  
+                  {% comment %} <img width="20px" id="upload-clients" style="margin-left: 1rem; margin-right: 1rem; cursor: pointer" onclick="document.getElementById('clientsFileInput').click()" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy"> {% endcomment %}
+              </div> {% endcomment %}
               <input type="file" id="clientsFileInput" style="display: none;" accept=".xlsx" onchange="handleClientsUpload(this)">
+          </div>
+          <div id="createZeroDeclarationWrapper" style="display: block;margin-bottom: 1rem;position: relative;background:#fafafa">
+              <h3 style="margin-bottom: 1rem;text-align: center;">Zero Declaration</h3>
+              <button class="button" onclick="openZeroDeclarationModal()">Submit Zero Report</button>
             </div>
+          </div>
         </div>
 
         <div class="dropZone" data-input="report_list" data-url="uploadreports/" style="overflow-y: auto;position: relative;background: #fafafa;" id="uploadreportlistContainer">
@@ -711,9 +720,9 @@ content: "\2713"
 
         <div id="editClientsModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
             <div style="display: flex;justify-content: space-between;">
-              <h3>Edit Clients File</h3>
+              <h3>Edit Client Credentials</h3>
               <div>
-                  <a id="replaceFileBtn" onclick="document.getElementById('replaceClientsFileInput').click()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Upload</a>    
+                  {% comment %} <a id="replaceFileBtn" onclick="document.getElementById('replaceClientsFileInput').click()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Upload</a>     {% endcomment %}
                   <a id="addRowBtn" onclick="addNewRow()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add Row</a>
                   {% comment %} TODO enable once I define what columns they can choose {% endcomment %}
                   {% comment %} <a id="addColumnBtn" onclick="addNewColumn()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Add Column</a> {% endcomment %}
@@ -724,13 +733,82 @@ content: "\2713"
             <div id="clientsDatatableContainer">
                 <!-- Datatable for Clients File will be dynamically rendered here -->
             </div>
-            <input type="file" id="replaceClientsFileInput" accept=".xlsx" onchange="handleClientsUploadReplacePrompt(this)" style="display: none">
+            {% comment %} <input type="file" id="replaceClientsFileInput" accept=".xlsx" onchange="handleClientsUploadReplacePrompt(this)" style="display: none"> {% endcomment %}
             <div style="margin-top: 1rem;">
                 <button class="button" onclick="saveClientsEdits()">Save</button>
                 <button class="button" onclick="closeClientsModal()" style="background-color: #17161c;">Cancel</button>
             </div>
         </div>
         <div id="clientsModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeClientsModal()"></div>
+
+        <div id="zeroDeclarationModal" class="losensitive modal" style="z-index: 3;">
+          <div class="modal-content" style="height: 54rem;margin: 10% auto;width: 80vw;">
+            <h2>Zero Declaration</h2>
+            <p>Select the companies and countries you want to submit a zero declaration for.</p>
+            <div style="display: flex;flex-direction: column;gap: 1rem;margin-bottom: 3rem;">
+              <div style="display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 2rem;">
+                <div class="filter-group" id="profile-filter-guide">
+                  <div class="filter-group-heading">Country</div>
+                  <select
+                    id="countryDropdown"
+                    class="selectpicker"
+                    data-live-search="true"></select>
+                </div>
+                <div class="filter-group" id="profile-filter-guide">
+                  <div class="filter-group-heading">Report Type</div>
+                  <select
+                    id="reporttypeDropdown"
+                    class="selectpicker"
+                    data-live-search="true"></select>
+                </div>
+                <div class="filter-group" id="profile-filter-guide">
+                  <div class="filter-group-heading">PRO</div>
+                  <select
+                    id="proDropdown"
+                    class="selectpicker"
+                    data-live-search="true"></select>
+                </div>
+                <div class="filter-group" id="profile-filter-guide">
+                  <div class="filter-group-heading">Timeframe</div>
+                  <select
+                    id="timeframeDropdown"
+                    class="selectpicker"
+                    data-live-search="true"></select>
+                </div>
+                <div class="filter-group" id="profile-filter-guide">
+                  <div class="filter-group-heading">Company</div>
+                  <select
+                    id="companyDropdown"
+                    class="selectpicker"
+                    multiple
+                    data-live-search="true"></select>
+                </div>
+              </div>
+            </div>
+            <div id="zeroDeclarationTableContainer" style="overflow-y: auto;height: 25rem;margin-bottom: 1rem;">
+              <table style="width: -webkit-fill-available;max-width: 80vw;min-width: 60rem;table-layout: auto;">
+                <thead>
+                  <tr>
+                    <th>Country</th>
+                    <th>Report Type</th>
+                    <th>PRO</th>
+                    <th>Timeframe</th>
+                    <th>Company</th>
+                    <th>Delete</th>
+                  </tr>
+                </thead>
+                <tbody id="zeroDeclarationTableBody">
+                </tbody>
+              </table>
+              <!-- Datatable for Zero Declaration will be dynamically rendered here -->
+            </div>
+            <div style="display: flex;justify-content: space-between;">
+              <button class="button" onclick="closeZeroDeclarationModal()">Cancel</button>
+              <button class="button" onclick="submitZeroDeclaration()">Submit</button>
+            </div>
+          </div>
+        </div>
+
     </div>
 
 
@@ -1044,7 +1122,6 @@ async function cancreatereports() {
           selectOption('new');  // For end customers, we don't need to show the upload option
         }
 
-        allowedToCreateReports = data;
     } catch (error) {
         console.error(error.message);
         showMessage('Failed to get history ' + error.message, false);
@@ -2371,9 +2448,9 @@ async function getClientsFile() {
         if (data['status_code'] === 200) {
           var data_found = data['data'];
           if (data_found['filename']) {
-            document.getElementById('clientsFileName').textContent = data_found['filename'];
-            document.getElementById('editIconClients').style.display = 'block';
-            document.getElementById('upload-clients').style.display = 'none';
+            {% comment %} document.getElementById('clientsFileName').textContent = data_found['filename']; {% endcomment %}
+            {% comment %} document.getElementById('editIconClients').style.display = 'block';
+            document.getElementById('upload-clients').style.display = 'none'; {% endcomment %}
             clientData = data_found['data'];
             return data_found['data'];
           }
@@ -2395,9 +2472,9 @@ async function handleClientsUpload(input, additionalInfo) {
         const data = await unifiedSendRequest(CLIENTSFILE, { formData: formData });
         // Check if an error message already exists
         if (data['status_code'] === 200) {
-            document.getElementById('clientsFileName').textContent = file.name;
-            document.getElementById('editIconClients').style.display = 'block';
-            document.getElementById('upload-clients').style.display = 'none';
+            {% comment %} document.getElementById('clientsFileName').textContent = file.name; {% endcomment %}
+            {% comment %} document.getElementById('editIconClients').style.display = 'block';
+            document.getElementById('upload-clients').style.display = 'none'; {% endcomment %}
         } else {
             console.error(data);
             showMessage('Failed to upload clients file', false);
@@ -2408,7 +2485,7 @@ async function handleClientsUpload(input, additionalInfo) {
     }
 }
 
-function handleClientsUploadReplacePrompt(input) {
+{% comment %} function handleClientsUploadReplacePrompt(input) {
   const modalContent = `
         <div>
             <label>Country: <input type="text" id="countryInput" placeholder="Enter country"></label><br>
@@ -2432,13 +2509,13 @@ function handleClientsUploadReplacePrompt(input) {
         },
         true // Allow HTML content inside the modal
     );
-}
+} {% endcomment %}
 
-async function handleClientsUploadReplace(input, additionalInfo) {
+{% comment %} async function handleClientsUploadReplace(input, additionalInfo) {
   closeConfirmationModal();
   await handleClientsUpload(input, additionalInfo);
   await openClientsModal();
-}
+} {% endcomment %}
 
 var datatable = null;
 
@@ -3119,6 +3196,205 @@ async function createReport() {
 }
 
 
+async function openZeroDeclarationModal() {
+  document.getElementById('zeroDeclarationModal').style.display = 'block';
+  try {
+    data = await unifiedSendRequest(REPORTTYPES, {method: 'GET'});
+    console.log(data);
+    const countryDropdown = document.getElementById("countryDropdown");
+    const reporttypeDropdown = document.getElementById("reporttypeDropdown");
+    const proDropdown = document.getElementById("proDropdown");
+    const timeframeDropdown = document.getElementById("timeframeDropdown"); 
+    const companyDropdown = document.getElementById("companyDropdown");
+    countryDropdown.innerHTML = '';
+    reporttypeDropdown.innerHTML = '';
+    proDropdown.innerHTML = '';
+    timeframeDropdown.innerHTML = '';
+    companyDropdown.innerHTML = '';
+    Object.keys(data).forEach(country => {
+      const option = new Option(country, country);
+      countryDropdown.appendChild(option);
+    });
+
+    // Handle country change
+    countryDropdown.addEventListener("change", function () {
+      const selectedCountry = this.value;
+      const reportTypes = Object.keys(data[selectedCountry] || {});
+
+      // Clear and populate report types
+      reporttypeDropdown.innerHTML = "";
+      timeframeDropdown.innerHTML = "";
+      proDropdown.innerHTML = "";
+      timeframeDropdown.innerHTML = "";
+      companyDropdown.innerHTML = "";
+
+      reportTypes.forEach(reportType => {
+        const option = new Option(reportType, reportType);
+        reporttypeDropdown.appendChild(option);
+      });
+      if (reportTypes.length == 1) {
+        reporttypeDropdown.value = reportTypes[0];
+        reporttypeDropdown.dispatchEvent(new Event('change'));
+      }
+      console.log('Chose country, report type', country, reportTypes);
+      $('.selectpicker').selectpicker('refresh');
+    });
+
+    // Handle report type change
+    reporttypeDropdown.addEventListener("change", function () {
+      const country = countryDropdown.value;
+      const reportType = this.value;
+
+      const pros = (data[country]?.[reportType] || {});
+      proDropdown.innerHTML = "";
+      timeframeDropdown.innerHTML = "";
+      companyDropdown.innerHTML = "";
+
+      Object.keys(pros).forEach((pro) => {
+        const label = `${pro}`;
+        const option = new Option(label, label);
+        proDropdown.appendChild(option);
+      });
+      if (Object.keys(pros).length == 1) {
+        proDropdown.value = Object.keys(pros)[0];
+        proDropdown.dispatchEvent(new Event('change'));
+      }
+      console.log('Chose report type, pro', reportType, pros);
+      $('.selectpicker').selectpicker('refresh');
+    });
+
+    proDropdown.addEventListener("change", function () {
+      const country = countryDropdown.value;
+      const reportType = reporttypeDropdown.value;
+      const pro = this.value;
+      const timeframes = (data[country]?.[reportType]?.[pro] || []);
+      timeframeDropdown.innerHTML = "";
+      companyDropdown.innerHTML = "";
+      timeframes.forEach((timeframe) => {
+        const [timeframeMonth, year] = timeframe;
+        if (timeframeMonth === '') {
+          label = `${year}`;
+        } else {
+          label = `${timeframeMonth} ${year}`;
+        }
+        const option = new Option(label, label);
+        timeframeDropdown.appendChild(option);
+      });
+      if (timeframes.length == 1) {
+        timeframeDropdown.value = timeframes[0];
+        timeframeDropdown.dispatchEvent(new Event('change'));
+      }
+      console.log('Chose pro, timeframe', pro, timeframes);
+      $('.selectpicker').selectpicker('refresh');
+    });
+
+    timeframeDropdown.addEventListener("change", function () {
+      const country = countryDropdown.value;
+      const reportType = reporttypeDropdown.value;
+      const pro = proDropdown.value;
+      const timeframe = this.value;
+      console.log('Chose timeframe', timeframe);
+      const companies = ["Caterpillar_Financial_Services_Netherlands_B_V_", "Company B", "Company C"];
+      {% comment %} const companies = (data[country]?.[reportType]?.[pro]?.[timeframe] || []); {% endcomment %}
+      companyDropdown.innerHTML = "";
+      companies.forEach(company => {
+        const option = new Option(company, company);
+        companyDropdown.appendChild(option);
+      });
+      $('.selectpicker').selectpicker('refresh');
+    });
+
+    companyDropdown.addEventListener("change", function () {
+      console.log('Chose company', this.value);
+      const country = countryDropdown.value;
+      const reportType = reporttypeDropdown.value;
+      const pro = proDropdown.value;
+      const timeframe = timeframeDropdown.value;
+      for (const option of this.options) {
+        var rowExists = document.getElementById(`zeroDeclarationRow_${country}_${reportType}_${pro}_${timeframe}_${option.value}`);
+        if (option.selected && !rowExists) {
+          const row = document.createElement('tr');
+          row.id = `zeroDeclarationRow_${country}_${reportType}_${pro}_${timeframe}_${option.value}`;
+          row.innerHTML = `
+            <td>${country}</td>
+            <td>${reportType}</td>
+            <td>${pro}</td>
+            <td>${timeframe}</td>
+            <td>${option.value}</td>
+            <td><button class="deleteButton button" onclick="deleteZeroDeclarationRow('${row.id}')" style="background: #17161c;">Delete</button></td>
+          `;
+          document.getElementById('zeroDeclarationTableBody').appendChild(row);
+        } else if (!option.selected && rowExists) {
+          rowExists.remove();
+        }
+      }
+    });
+    $('.selectpicker').selectpicker('refresh');
+    // data is this:
+    {% comment %} for country, country_data in worker['supported_services'].items():
+        for report_type, report_type_data in country_data.items():
+            for pro, timeframes in report_type_data.items():
+                for report_time in timeframes:
+                    timeframe, year = get_current_time(report_time)
+                    if (timeframe, year) not in services[country][report_type][pro]:
+                        services[country][report_type][pro].append((timeframe, year)) {% endcomment %}
+    
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to create zero declaration ' + error.message, false);
+  }
+}
+
+function deleteZeroDeclarationRow(rowId) {
+  const row = document.getElementById(rowId);
+  row.remove();
+}
+
+function closeZeroDeclarationModal() {
+  document.getElementById('zeroDeclarationModal').style.display = 'none';
+}
+
+async function submitZeroDeclaration() {
+  const rows = document.querySelectorAll('#zeroDeclarationTableBody tr');
+  const data = [];
+  rows.forEach(row => {
+    var timeframe = row.querySelector('td:nth-child(4)').textContent;
+    var timeframeMonth = '';
+    var year = timeframe;
+    if (timeframe.includes(' ')) {
+      [timeframeMonth, year] = timeframe.split(' ');
+    }
+    data.push({
+      report_id: row.id,
+      country: row.querySelector('td:nth-child(1)').textContent,
+      report_type: row.querySelector('td:nth-child(2)').textContent,
+      pro: row.querySelector('td:nth-child(3)').textContent,
+      timeframe: timeframeMonth,
+      year: year,
+      company: row.querySelector('td:nth-child(5)').textContent
+    });
+  });
+  console.log(data);
+  try {
+    res = await unifiedSendRequest(UPLOADZERO, {formData: JSON.stringify(data), headerArgs: {'Content-Type': 'application/json'}, method: 'POST'});
+    console.log(res);
+    if (res.status != 200) {
+      showMessage('Failed to upload zero declaration ' + res.message, false);
+      for (const row of res.data) {
+        document.getElementById(row.report_id).style.backgroundColor = 'red';
+        document.getElementById(row.report_id).style.color= '#fafafa';
+        document.getElementById(row.report_id).title = row.error;
+      }
+      return;
+    }
+    showMessage('Zero declaration uploaded successfully', true);
+    closeZeroDeclarationModal();
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to upload zero declaration', false);
+  }
+  }
+
 function showGuide() {
   if(guideToShow == 'new') {// create new report 
     var guideSteps = [];
@@ -3132,28 +3408,39 @@ function showGuide() {
     guideSteps.push({ element: "main", group: "{{ 'software.guide.report.upload.group' | t }}", title: "{{ 'software.guide.report.upload.title' | t }}", text: "{{ 'software.guide.report.upload.text' | t }}", where: 'middle'});
     guideSteps.push({ element: "#clientsUploadSection", group: "{{ 'software.guide.report.clients.group' | t }}", title: "{{ 'software.guide.report.clients.title' | t }}", text: "{{ 'software.guide.report.clients.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')} });
     guideSteps.push({ element: "#uploadreportlistContainer", group: "{{ 'software.guide.report.uploadFile.group' | t }}", title: "{{ 'software.guide.report.uploadFile.title' | t }}", text: "{{ 'software.guide.report.uploadFile.text' | t }}", where: 'right', runBefore: function() {selectOption('upload')}  });
-    guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  });
+    {% comment %} guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  }); {% endcomment %}
     startGuide(guideSteps);
   } else {
     var guideSteps = [
       { element: "main", group: "{{ 'software.guide.report.welcome.group' | t }}", title: "{{ 'software.guide.report.welcome.title' | t }}", text: "{{ 'software.guide.report.welcome.text' | t }}", where: 'middle', runBefore: function() {selectOption('overview')} }
 
     ];
-    if (allowedToCreateReports['create_reports']) {
+    if (window.userPermissions['report-creation']) {
       guideSteps.push({ element: "#createNewReport", group: "{{ 'software.guide.report.create.group' | t }}", title: "{{ 'software.guide.report.create.title' | t }}", text: "{{ 'software.guide.report.create.text' | t }}", where: 'right', runBefore: function() {selectOption('overview')} });
       guideSteps.push({ element: "#liveDataToggleSlider", group: "{{ 'software.guide.report.liveData.group' | t }}", title: "{{ 'software.guide.report.liveData.title' | t }}", text: "{{ 'software.guide.report.liveData.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
       guideSteps.push({ element: "#orderListDropZone", group: "{{ 'software.guide.report.orderListDropZone.group' | t }}", title: "{{ 'software.guide.report.orderListDropZone.title' | t }}", text: "{{ 'software.guide.report.orderListDropZone.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
       guideSteps.push({ element: "#navButtonsStep1", group: "{{ 'software.guide.report.next.group' | t }}", title: "{{ 'software.guide.report.next.title' | t }}", text: "{{ 'software.guide.report.next.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });
     }
-    if (allowedToCreateReports['upload_reports']) {
+    if (window.userPermissions['report-upload']) {
       guideSteps.push({ element: "#uploadExistingReports", group: "{{ 'software.guide.report.upload.group' | t }}", title: "{{ 'software.guide.report.upload.title' | t }}", text: "{{ 'software.guide.report.upload.text' | t }}", where: 'left', runBefore: function() {selectOption('overview')} });
       guideSteps.push({ element: "#clientsUploadSection", group: "{{ 'software.guide.report.clients.group' | t }}", title: "{{ 'software.guide.report.clients.title' | t }}", text: "{{ 'software.guide.report.clients.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')} });
       guideSteps.push({ element: "#uploadreportlistContainer", group: "{{ 'software.guide.report.uploadFile.group' | t }}", title: "{{ 'software.guide.report.uploadFile.title' | t }}", text: "{{ 'software.guide.report.uploadFile.text' | t }}", where: 'right', runBefore: function() {selectOption('upload')}  });
-      guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  });
+      {% comment %} guideSteps.push({ element: "#notificationBell", group: "{{ 'software.guide.report.notifications.group' | t }}", title: "{{ 'software.guide.report.notifications.title' | t }}", text: "{{ 'software.guide.report.notifications.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  }); {% endcomment %}
     }
     startGuide(guideSteps);
   }
   setCookie('showedGuideReport', 'true', 300);
+}
+
+function showGuideUpdates() {
+  if (!window.userPermissions['report-upload']) {
+    return;
+  }
+  startGuide([
+    { element: "#clientsUploadSection", group: "{{ 'software.guide.reportUpdates.clients.group' | t }}", title: "{{ 'software.guide.reportUpdates.clients.title' | t }}", text: "{{ 'software.guide.reportUpdates.clients.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  },
+    { element: "#createZeroDeclarationWrapper", group: "{{ 'software.guide.reportUpdates.upload.group' | t }}", title: "{{ 'software.guide.reportUpdates.upload.title' | t }}", text: "{{ 'software.guide.reportUpdates.upload.text' | t }}", where: 'below', runBefore: function() {selectOption('upload')}  },
+  ]);
+  setCookie('showedGuideReportUpdates', 'true', 300);
 }
 
 waitForPermission(function() {
@@ -3163,6 +3450,8 @@ waitForPermission(function() {
 
     if(readCookie('showedGuideReport') === null) {
       setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    } else if (readCookie('showedGuideReportUpdates') === null) {
+      setTimeout(showGuideUpdates, 1000);
     }
   }
 });

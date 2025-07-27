@@ -40,6 +40,7 @@
   }
 {%- endstyle -%}
 {% render 'forsure-simple-notification' %}
+{% render 'forsure-guide' %}
 <script src="{{ 'section-footer.js' | asset_url }}" defer="defer"></script>
 <footer class="footer color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding" style="border-top: .25rem solid #2255ff;">
   {%- if section.blocks.size > 0 or section.settings.newsletter_enable or section.settings.show_social -%}
@@ -370,7 +371,7 @@
     s.parentNode.insertBefore(b, s);})(window.lintrk);
   </script>
   <noscript>
-    <img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=6797682&fmt=gif" />
+    <img height="1" width="1" style="display:none;" alt="LinkedIn Pixel" src="https://px.ads.linkedin.com/collect/?pid=6797682&fmt=gif" />
   </noscript>
 </footer>
 

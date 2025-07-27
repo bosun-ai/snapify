@@ -377,7 +377,7 @@ div.display-flex {
             </div>
         </div>
         <div id="container" style="padding-bottom: 2rem; display: flex;margin-left: auto;width: fit-content;">
-            <input type="email" id="addUserInput" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;">
+            <input type="text" id="addUserInput" name="new_user" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="Enter User Email" class="btn-default btn" style="margin-right: 10px; cursor: text;">
             <button id="addButton" class="button" onclick="addUser()">Add User</button>
         </div>
     </div>
@@ -550,6 +550,8 @@ async function addUser() {
         showMessage('Failed to add user', false);
     }
 }
+
+
 
 
 async function saveChanges(userId) {

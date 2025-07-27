@@ -169,7 +169,7 @@
     -%}
 
   {% render 'forsure-notifications' %}
-  {% render 'forsure-guide' %}
+  
   <div id="navbar-side" class="header__inline-menu page-width multicolumn color-{{ section.settings.color_scheme }} gradient{% unless section.settings.background_style == 'none' and settings.text_boxes_border_thickness > 0 or settings.text_boxes_shadow_opacity > 0 %} background-{{ section.settings.background_style }}{% endunless %}{% if section.settings.title == blank %} no-heading{% endif %}">
   <!-- <nav> -->
   <slider-component class="slider-mobile-gutter" style="display: flex;">

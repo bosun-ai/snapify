@@ -370,13 +370,14 @@ tr {
                 data-live-search="true"></select>
             </div>
             <div class="filter-group" id="receiptsContainer" style="background-color: #fafafa;position: relative;">
-              <div class="filter-group-heading">Receipts only</div>
+              <div class="filter-group-heading">Additional filters</div>
               <select
                 id="receiptsDropdown"
                 class="selectpicker"
+                multiple
                 data-live-search="true"></select>
             </div>
-            <div class="filter-group" id="searchContainer" style="background-color: #fafafa;position: relative;">
+            <div class="filter-group" id="searchContainer" style="background-color: #fafafa;position: relative;" title="Search by report information or date of update, e.g. yesterday, last month,15.06.2025">
               <div class="filter-group-heading" style="width: 12rem">Search</div>
               <input type="text" id="companySearch" class="form-control" placeholder="Search"  style="width: 12rem"/>
           </div>
@@ -388,6 +389,9 @@ tr {
                   alt="{{ section.settings.download.alt | escape }}"
                   loading="lazy"></i>
             </span>
+        </div>
+        <div id="reportStatusContainer" style="display: none;">
+          <div id="reportStatus" style="display: flex;gap: 1rem;padding: 1rem;margin-left: 2rem;position: relative;width: fit-content;background-color: #fafafa;"></div>
         </div>
         <div id="reportshistory" class="table-header-title" style="min-height: 65px"></div>
       </div>
@@ -461,27 +465,32 @@ async function checkHistoryVersion() {
 }
 
 function extractBaseFilename(filename) {
-  const parts = filename.split('/');
-  const fullName = parts[parts.length - 1];
-
   // Remove known prefixes
-  const base = fullName.replace(/^(Debugger_|Excluded_data_|Audit_Trail_)/, '');
+  const base = filename.replace(/^(Debugger_|Excluded_data_|Audit_Trail_)/, '');
   return base;
 }
 
 function buildHierarchy(paths) {
   const hierarchy = {};
+  const tags = {};
 
   const groupMap = {}; // baseFilename -> array of file entries
 
   paths.forEach(file => {
     const path = file['filename'];
-    const parts = path.split('/');
+    const parts = [file['company'], file['country'], file['report_type'], file['year']];
+    if (file['timeframe'] != '') {
+      parts.push(file['timeframe']);
+    }
     const baseName = extractBaseFilename(path);
 
-    const key = parts.slice(0, -1).join('/') + '/' + baseName;
+    const key = parts.join('/') + '/' + baseName;
     if (!groupMap[key]) groupMap[key] = [];
-    groupMap[key].push(file);
+    groupMap[key].push(file);  // TODO make sure that file is only used for Audit Trail, Excluded and for the report validation things
+    tags[key] = []
+    if (file['new']) {
+      tags[key].push('new');
+    }
   });
 
   Object.entries(groupMap).forEach(([basePath, groupFiles]) => {
@@ -494,6 +503,7 @@ function buildHierarchy(paths) {
         currentLevel.files.push({
           type: 'group',
           part: part,
+          tags: tags[basePath],
           children: groupFiles,
         });
       } else {
@@ -502,12 +512,13 @@ function buildHierarchy(paths) {
       }
     });
   });
-
-  return hierarchy;
+  console.log('hierarchy', hierarchy);
+  return {hierarchy, tags};
 }
 
-function createFolderStructure(configDiv, hierarchy) {
+function createFolderStructure(configDiv, hierarchy, tags) {
   configDiv.innerHTML = ''; // Clear existing content
+  console.log('tags', tags);
 
   // Recursive function to create the structure
   function renderLevel(level, parentElement, path, depth = 0) {
@@ -521,6 +532,7 @@ function createFolderStructure(configDiv, hierarchy) {
             fileRow.className = 'history-row folder-row';
             fileRow.style.paddingLeft = `${(depth + 1) * 2}rem`;
             fileRow.style.display = 'inline-flex';
+            fileRow.style.alignItems = 'center';
       
             const arrowSvg = `<svg class="svg-arrow collapsed" style="margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" version="1.1" fill="2255ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 66.91"><g><path fill="#2255ff" d="M11.68,1.95C8.95-0.7,4.6-0.64,1.95,2.08c-2.65,2.72-2.59,7.08,0.13,9.73l54.79,53.13l4.8-4.93l-4.8,4.95 c2.74,2.65,7.1,2.58,9.75-0.15c0.08-0.08,0.15-0.16,0.22-0.24l53.95-52.76c2.73-2.65,2.79-7.01,0.14-9.73 c-2.65-2.72-7.01-2.79-9.73-0.13L61.65,50.41L11.68,1.95L11.68,1.95z"/></g></svg>`;
             fileRow.innerHTML = `${arrowSvg}`;
@@ -534,10 +546,10 @@ function createFolderStructure(configDiv, hierarchy) {
             fileNameSpan.innerHTML = file.part;
             fileName.appendChild(fileNameSpan);
 
-            const tags = document.createElement('div');
-            tags.style.marginRight = '5rem';
-            tags.style.marginLeft = '1rem';
-            tags.style.textIndent = 0;
+            const tagsDiv = document.createElement('div');
+            tagsDiv.style.marginRight = '5rem';
+            tagsDiv.style.marginLeft = '1rem';
+            tagsDiv.style.textIndent = 0;
 
             // Optional: tag style wrapper
             if (file.part.toLowerCase().includes('inprogress')) {
@@ -549,11 +561,24 @@ function createFolderStructure(configDiv, hierarchy) {
               inprogressTag.style.display = 'flex';
               inprogressTag.style.borderRadius = '1rem';
               inprogressTag.title = 'Inprogress';
-              tags.appendChild(inprogressTag);
+              tagsDiv.appendChild(inprogressTag);
             }
+            if (file.tags.includes('new')) {
+              // Only show new tag if it's the root folder or if there are multiple subfolders
+              const newTag = createColReport(`New`);
+              newTag.style.background = '#2255ff';
+              newTag.style.color = '#fafafa';
+              newTag.style.margin = 0;
+              newTag.style.padding = '0.4rem 1rem';
+              newTag.style.justifyContent = 'center';
+              newTag.style.display = 'flex';
+              newTag.style.borderRadius = '1rem';
+              newTag.title = 'Report was recently updated';
+              tagsDiv.appendChild(newTag);
+          }
 
             fileRow.appendChild(fileName); // ← Filename block
-            fileRow.appendChild(tags);     // ← Tag rendered next to it, not inside
+            fileRow.appendChild(tagsDiv);     // ← Tag rendered next to it, not inside
 
       
             const groupContainer = document.createElement('div');
@@ -578,6 +603,27 @@ function createFolderStructure(configDiv, hierarchy) {
       
               const fileNameDiv = document.createElement('div');
               fileNameDiv.textContent = childFileName;
+
+              const tagsDiv = document.createElement('div');
+              tagsDiv.style.marginRight = '5rem';
+              tagsDiv.style.marginLeft = '1rem';
+              tagsDiv.style.textIndent = 0;
+              var statusMatch = statusMapping(child.status);
+              console.log('status', statusMatch.status);
+              console.log('color', statusMatch.color);
+              const statusTag = createColReport(`${statusMatch.status}`);
+              if (statusMatch.status == 'Deleted') {
+                statusTag.style.textDecoration = 'line-through';
+              }
+              statusTag.style.background = statusMatch.color;
+              statusTag.style.color = '#fafafa';
+              statusTag.style.margin = 0;
+              statusTag.style.padding = '0.4rem 1rem';
+              statusTag.style.justifyContent = 'center';
+              statusTag.style.display = 'flex';
+              statusTag.style.borderRadius = '1rem';
+              statusTag.title = statusMatch.description;
+              tagsDiv.appendChild(statusTag);
       
               const icons = document.createElement('div');
               icons.style.display = 'flex';
@@ -604,6 +650,7 @@ function createFolderStructure(configDiv, hierarchy) {
               icons.appendChild(icon);
       
               childRow.appendChild(fileNameDiv);
+              childRow.appendChild(tagsDiv);
               childRow.appendChild(icons);
               groupContainer.appendChild(childRow);
             });
@@ -611,85 +658,56 @@ function createFolderStructure(configDiv, hierarchy) {
             parentElement.appendChild(fileRow);
             parentElement.appendChild(groupContainer);
       
-          } else {
-            filename = file['part'];
-            const fullPath = `${path}/${filename}`; // Construct full path
-            const fileRow = document.createElement('div');
-            fileRow.className = 'history-row file-row'; // Add CSS class for consistent styling
-            fileRow.style.paddingLeft = `${depth * 2}rem`; // Offset based on depth
-
-            //fileRow.textContent = filename;
-            const fileNameDiv = document.createElement('div');
-            fileNameDiv.textContent = filename;
-            fileNameDiv.style.display = 'flex';
-
-            const tags = document.createElement('div');
-            tags.style.marginRight = '5rem';
-            tags.style.marginLeft = '1rem';
-            tags.style.textIndent = 0;
-            if (file["inprogress"]) {
-                const inprogressTag = createColReport(`<svg height="12px" fill="#fafafa" title="In Progress" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M32 0C14.3 0 0 14.3 0 32S14.3 64 32 64l0 11c0 42.4 16.9 83.1 46.9 113.1L146.7 256 78.9 323.9C48.9 353.9 32 394.6 32 437l0 11c-17.7 0-32 14.3-32 32s14.3 32 32 32l32 0 256 0 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-11c0-42.4-16.9-83.1-46.9-113.1L237.3 256l67.9-67.9c30-30 46.9-70.7 46.9-113.1l0-11c17.7 0 32-14.3 32-32s-14.3-32-32-32L320 0 64 0 32 0zM96 75l0-11 192 0 0 11c0 19-5.6 37.4-16 53L112 128c-10.3-15.6-16-34-16-53zm16 309c3.5-5.3 7.6-10.3 12.1-14.9L192 301.3l67.9 67.9c4.6 4.6 8.6 9.6 12.1 14.9L112 384z"/></svg>`);
-                inprogressTag.style.background = '#2255ff';
-                inprogressTag.style.margin = 0;
-                inprogressTag.style.padding = '0.4rem 1rem';
-                inprogressTag.style.justifyContent = 'center';
-                inprogressTag.style.display = 'flex';
-                inprogressTag.style.borderRadius = '1rem';
-                inprogressTag.title = 'Inprogress';
-                tags.appendChild(inprogressTag);
-            }
-            fileNameDiv.appendChild(tags);
-            
-            fileRow.style.justifyContent = 'space-between';
-            fileRow.style.alignItems = 'center'; // Vertically center items          
-            
-            const icons = document.createElement('div');
-            icons.style.marginRight = '5rem';
-            icons.style.display = 'flex';
-            // Add icons
-            const openCol = addOpenIconReport(filename, fullPath);
-            const downloadCol = addDownloadIcon(filename, fullPath);
-
-            var shareCol = addShareCol(filename, fullPath);
-
-            var trashCol = null;
-            if (file["can_delete"]) {
-                trashCol = addTrashIcon(filename);
-            } else {
-                trashCol = emptyCol();
-            }
-            var submitCol = null;
-            if (file["can_submit"]) {
-              submitCol = sendReportIcon(filename, fullPath, window.userPermissions['filereport'], file.no_submit_reason);
-            } else {
-              submitCol = emptyCol();
-            }
-            {% comment %} var checkboxCol = addCheckboxCol(fullPath); {% endcomment %}
-    
-            icons.appendChild(openCol);
-            icons.appendChild(downloadCol);
-            icons.appendChild(shareCol);
-            icons.appendChild(trashCol);
-            icons.appendChild(submitCol);
-            {% comment %} icons.appendChild(checkboxCol); {% endcomment %}
-            fileRow.appendChild(fileNameDiv);
-            fileRow.appendChild(icons);
-            parentElement.appendChild(fileRow);
           }
         });
       } else {
+        tag_key_wanted = `${path}/${key}`.slice(1);  // Remove first /
+
+        relevantTags = [];
+        Object.entries(tags).forEach(([tag_key, tag_value]) => {
+          if (tag_key.includes(tag_key_wanted)) {
+            relevantTags = tag_value;
+          }
+        });
         // Render folder
         const folderRow = document.createElement('div');
         folderRow.className = 'history-row folder-row'; // Add CSS class for consistent styling
         folderRow.style.paddingLeft = `${depth * 2}rem`; // Offset text for hierarchy
+        folderRow.style.display = 'inline-flex';
+        folderRow.style.alignItems = 'center';
 
         // Add the SVG arrow
-        const svg = `<svg class="svg-arrow collapsed" style="margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" version="1.1" fill="2255ff" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 66.91" style="margin: auto;height: 100%;display: flex;width: 100%;" xml:space="preserve">
+        const svg = `<svg class="svg-arrow collapsed" style="margin-left: 2rem;margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" version="1.1" fill="2255ff" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 66.91" style="margin: auto;height: 100%;display: flex;width: 100%;" xml:space="preserve">
                         <g><path fill="#2255ff" d="M11.68,1.95C8.95-0.7,4.6-0.64,1.95,2.08c-2.65,2.72-2.59,7.08,0.13,9.73l54.79,53.13l4.8-4.93l-4.8,4.95 c2.74,2.65,7.1,2.58,9.75-0.15c0.08-0.08,0.15-0.16,0.22-0.24l53.95-52.76c2.73-2.65,2.79-7.01,0.14-9.73 c-2.65-2.72-7.01-2.79-9.73-0.13L61.65,50.41L11.68,1.95L11.68,1.95z"/></g>
                     </svg>`;
+        folderRow.innerHTML = `${svg}`;
+        const folderName = document.createElement('div');
+        folderName.style.cssText = 'text-indent: 0 !important;';
+        folderName.style.display = 'flex';
 
-        folderRow.innerHTML = `${svg}<span>${key}</span>`;
+        const folderNameSpan = document.createElement('span');
+        folderNameSpan.innerHTML = key;
 
+        const tagsDiv = document.createElement('div');
+        tagsDiv.style.marginRight = '5rem';
+        tagsDiv.style.marginLeft = '1rem';
+        tagsDiv.style.textIndent = 0;
+        if (relevantTags.includes('new') && (Object.keys(level).length !== 1 || path === '')) {
+            // Only show new tag if it's the root folder or if there are multiple subfolders
+            const newTag = createColReport(`New`);
+            newTag.style.background = '#2255ff';
+            newTag.style.color = '#fafafa';
+            newTag.style.margin = 0;
+            newTag.style.padding = '0.4rem 1rem';
+            newTag.style.justifyContent = 'center';
+            newTag.style.display = 'flex';
+            newTag.style.borderRadius = '1rem';
+            newTag.title = 'Report was recently updated';
+            tagsDiv.appendChild(newTag);
+        }
+        folderName.appendChild(folderNameSpan);
+        folderRow.appendChild(folderName);
+        folderRow.appendChild(tagsDiv);
         const folderContent = document.createElement('div');
         folderContent.style.display = 'none'; // Initially hidden
 
@@ -715,6 +733,33 @@ function createFolderStructure(configDiv, hierarchy) {
   renderLevel(hierarchy, configDiv, '', 0);
 }
 
+
+function statusMapping(status) {
+  switch (status) {
+    case 'created':
+      return {'status': 'Uploaded', 'color': '#2255ff', 'description': 'Report was uploaded, will now be sorted'};
+    case 'in_progress':
+      return {'status': 'In Progress', 'color': '#2255ff', 'description': 'Report is being processed'};
+    case 'metadata_extracted':
+      return {'status': 'Sorted', 'color': '#2255ff', 'description': 'Report was sorted, data will now be extracted'};
+    case 'data_extracted':
+      return {'status': 'Data Extracted', 'color': '#2255ff', 'description': 'Data was extracted, will now be submitted'};
+    case 'waiting':
+      return {'status': 'User Input Needed', 'color': '#E6B83C', 'description': 'Report is waiting for user input, please check the notifications.'};
+    case 'submitted':
+      return {'status': 'Submitted', 'color': '#2255ff', 'description': 'Report was submitted, will now be validated'};
+    case 'validated':
+      return {'status': 'Validated', 'color': '#21FF3D', 'description': 'Report was validated'};
+    case 'done':
+      return {'status': 'Done', 'color': '#21FF3D', 'description': 'Report is done'};
+    case 'error':
+      return {'status': 'Error', 'color': '#E63C6B', 'description': 'Report had an error, please check the notifications.'};
+    case 'deferred':
+      return {'status': 'Deleted', 'color': '#4E5366', 'description': 'Report was deleted'};
+    default:
+      return {'status': 'Unknown', 'color': '#4E5366', 'description': 'Status is unknown'};
+  }
+}
 
 function createColReport(content, title = '', alignRight = false) {
     const col = document.createElement('div');
@@ -1202,20 +1247,7 @@ function displayPdfInModal(pdfBlob) {
     modalOverlay.style.display = 'block';
 }
 
-var reportFilters = {
-  'countries': [],
-  'report_types': [],
-  'reporting_periods': [],
-  'search_filter': [],
-  'receipt_only': '',
-}
-search_filter = [];
 
-var totalPossibleCompanies = new Set();
-var totalPossibleCountries = new Set();
-var totalPossibleReportTypes = new Set();
-var totalPossiblePeriods = new Set();
-var totalPossibleReceipts = ['All', 'Receipts only', 'Reports only'];
 var allReports = [];
 async function getReports(init=true) {
     try {
@@ -1227,84 +1259,278 @@ async function getReports(init=true) {
     loadingSpinner.id = 'loadingSpinner';
     loadingSpinnerContainer.appendChild(loadingSpinner);
     configDiv.appendChild(loadingSpinnerContainer);
-    let data = await unifiedSendRequest(GETREPORTSONEDRIVE, {method: 'POST', formData: JSON.stringify(reportFilters), 
-                                        headerArgs: {'Content-Type': 'application/json'}});
+    let data = await unifiedSendRequest(GETREPORTSONEDRIVE, {method: 'POST', headerArgs: {'Content-Type': 'application/json'}});
     allReports = data;
-    await filterCompanySearch(document.getElementById("companySearch").value, init);
-    // createOverview(data, init);
+    filterReportHistory();
     } catch (error) {
     console.error(error.message);
     TOKEN = false;
     }
 }
 
+var activeStatus = '';
+
+function updateReportStatusOverview(data) {
+  const reportStatusContainer = document.getElementById('reportStatusContainer');
+  reportStatusContainer.style.display = 'block';
+  const reportStatus = document.getElementById('reportStatus');
+  reportStatus.style.display = 'flex';
+  reportStatus.innerHTML = '';
+
+  const statusCounts = {};
+  for (let report of data) {
+    if (report.receipt) {
+      continue;
+    }
+    if (report.status == 'deferred') {
+      continue;
+    }
+    if (statusCounts[report.status] == undefined) {
+      statusCounts[report.status] = 1;
+    } else {
+      statusCounts[report.status]++;
+    }
+  }
+  const statusCountsSorted = Object.entries(statusCounts).sort((a, b) => b[1] - a[1]);
+  for (let status of statusCountsSorted) {
+    const col = document.createElement('div');
+    const statusMatch = statusMapping(status[0]);
+    col.innerHTML = `${statusMatch.status}: ${status[1]}`;
+    col.style.background = statusMatch.color;
+    col.style.cursor = 'pointer';
+    col.title = statusMatch.description;
+    col.onclick = function() {
+      if (activeStatus == status[0]) {
+        filterReportHistory();
+        activeStatus = '';
+      } else {
+        filterReportHistory(status[0]);
+        activeStatus = status[0];
+      }
+    }
+    col.style.color = '#fafafa';
+    col.style.margin = 0;
+    col.style.padding = '0.4rem 1rem';
+    col.style.justifyContent = 'center';
+    col.style.display = 'flex';
+    col.style.borderRadius = '1rem';
+    reportStatus.appendChild(col);
+  }
+}
+
 function createOverview(data, init) {
     const configDiv = document.getElementById("reportshistory");
-    const hierarchy = buildHierarchy(data);
+    const {hierarchy, tags} = buildHierarchy(data);
+    console.log(hierarchy);
 
     var possibleCompanies = new Set();
     var possibleCountries = new Set();
     var possibleReportTypes = new Set();
     var possiblePeriods = new Set();
-    for (let file of data) { // Corrected loop
-          filename = file['filename'];
-          let filename_split = filename.split('/');
-
-          possibleCompanies.add(filename_split[0]);
-          possibleCountries.add(filename_split[1]);
-          possibleReportTypes.add(filename_split[2]);
-
-          let possiblePeriod = filename_split[3];
-          if (filename_split.length > 5) {
-              possiblePeriod += ` ${filename_split[4]}`;
-          }
-          possiblePeriods.add(possiblePeriod);
-      }
-    if (init) {
-      totalPossibleCompanies = possibleCompanies;
-      totalPossibleCountries = possibleCountries;
-      totalPossibleReportTypes = possibleReportTypes;
-      totalPossiblePeriods = possiblePeriods;
-      
-      // TODO do this smart when selecting e.g. a country
-      fillDropdowns('countryDropdown', possibleCountries, 'countries');
-      fillDropdowns('reporttypeDropdown', possibleReportTypes, 'report_types');
-      fillDropdowns('receiptsDropdown', totalPossibleReceipts, 'receipt_only');
+    var possibleReceipts = new Set(['Mine', 'New', 'Receipts only', 'Reports only']);
+    for (let file of data) {
+        possibleCompanies.add(file['company']);
+        possibleCountries.add(file['country']);
+        possibleReportTypes.add(file['report_type']);
+        if (file['timeframe'] != '') {
+            possiblePeriods.add(file['timeframe'] + ' ' + file['year']);
+        } else {
+            possiblePeriods.add(`${file['year']}`);
+        }
     }
-    fillDropdowns('periodDropdown', possiblePeriods, 'reporting_periods');  // only reporting period currently really variable
-    createFolderStructure(configDiv, hierarchy);
+    fillDropdowns('countryDropdown', possibleCountries, 'countries');
+    fillDropdowns('reporttypeDropdown', possibleReportTypes, 'report_types');
+    fillDropdowns('periodDropdown', possiblePeriods, 'reporting_periods');
+    fillDropdowns('receiptsDropdown', possibleReceipts, 'receipt_only');
+    createFolderStructure(configDiv, hierarchy, tags);
 }
 
 document.getElementById("companySearch").addEventListener("input", async function () {
-    await filterCompanySearch(this.value, false);
+    filterReportHistory();
+    filterReportHistory();
 });
 
-async function filterCompanySearch(searchQuery, init) {
-  searchQuery = searchQuery.toLowerCase().trim().replace(' ', '_').replace('.', '_').replace(',', '_').replace('/', '_'); // Get input and normalize case
+function normalizeString(str) {
+  return str.toLowerCase().trim().replaceAll('_', ' ').replaceAll('.', ' ').replaceAll(',', ' ').replaceAll('/', ' ');
+}
 
-  let filteredData;
+function filterReportHistory(status = '') {
+  const searchQuery = document.getElementById("companySearch").value;
+  const searchQueryNormalized = normalizeString(searchQuery);
+  console.log('searchQuery', searchQuery);
+  console.log('searchQueryNormalized', searchQueryNormalized);
+  const countriesSelected = Array
+        .from(document.getElementById('countryDropdown').options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+  const reportTypesSelected = Array
+        .from(document.getElementById('reporttypeDropdown').options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+  const periodsSelected = Array
+        .from(document.getElementById('periodDropdown').options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+  const receiptsSelected = Array
+        .from(document.getElementById('receiptsDropdown').options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+  const filteredData = allReports.filter(file => {
+    if (countriesSelected.length > 0 && !countriesSelected.includes(file['country'])) {
+      console.log('country not selected', file['country']);
+      return false;
+    }
+    if (reportTypesSelected.length > 0 && !reportTypesSelected.includes(file['report_type'])) {
+      console.log('report type not selected', file['report_type']);
+      return false;
+    }
+    timeframeYear = file['timeframe'] != '' ? `${file['timeframe']} ${file['year']}` : `${file['year']}`;
+    if (periodsSelected.length > 0 && !periodsSelected.includes(timeframeYear)) {
+      console.log('period not selected', timeframeYear);
+      return false;
+    }
+    if (status != '' && file['status'] != status) {
+      console.log('status not selected', file['status']);
+      return false;
+    }
+    if (receiptsSelected.length > 0) {
+      if (receiptsSelected.includes('Mine') && file['mine'] == false) {
+        console.log('mine not selected', file['mine']);
+        return false;
+      }
+      if (receiptsSelected.includes('New') && file['new'] == false) {
+        console.log('new not selected', file['new']);
+        return false;
+      }
+      if (receiptsSelected.includes('Receipts only') && file['receipt'] == false) {
+        console.log('receipts not selected', file['receipt']);
+        return false;
+      }
+      if (receiptsSelected.includes('Reports only') && file['receipt'] == true) {
+        console.log('reports not selected', file['receipt']);
+        return false;
+      }
+    }
+    field_to_search = ['company', 'country', 'brand', 'report_type', 'pro', 'timeframe', 'year', 'filename', 'updated_at'];
+    for (let field of field_to_search) {
+      if (normalizeString(`${file[field]}`).includes(searchQueryNormalized)) {
+        return true;
+      }
+    }
+    if (normalizeString(`${file['timeframe']} ${file['year']}`).includes(searchQueryNormalized)) {
+      return true;
+    }
+    if (formatDate(file['updated_at']).dot.includes(searchQueryNormalized)) {
+      return true;
+    }
+    if (formatDate(file['updated_at']).slash.includes(searchQueryNormalized)) {
+      return true;
+    }
+    {% comment %} if (searchQueryNormalized == 'today') {
+      const today = new Date();
+      const todayString = today.toISOString().split('T')[0];
+      if (file['updated_at'].includes(todayString)) {
+        return true;
+      }
+    } {% endcomment %}
+    if (matchesSearchQuery(file, searchQueryNormalized)) {
+      return true;
+    }
+    return false;
+  });
+  filteredData.sort((a, b) => {
+    return a['company'].localeCompare(b['company']);
+  });
+  updateReportStatusOverview(filteredData);
+  createOverview(filteredData, false);
+}
 
-  if (searchQuery === '') {
-      filteredData = allReports; // If empty input, show all reports
-  } else {
-      filteredData = allReports.filter(file =>
-          file.filename.toLowerCase().includes(searchQuery)
-      );
+function formatDate(date) {
+  const dObj = new Date(date);
+  const day = String(dObj.getDate()).padStart(2, '0');
+  const month = String(dObj.getMonth() + 1).padStart(2, '0'); // months are 0-based
+  const year = dObj.getFullYear();
+
+  return {
+    dot: `${day}.${month}.${year}`,
+    slash: `${day}/${month}/${year}`
+  };
+}
+
+function matchesSearchQuery(file, searchQueryNormalized) {
+  const updatedAt = file['updated_at']; // ISO string
+  const updatedDate = new Date(updatedAt);
+  const today = new Date();
+
+  // Helper to get midnight and end-of-day
+  const startOfDay = (d) => new Date(d.setHours(0, 0, 0, 0));
+  const endOfDay = (d) => new Date(d.setHours(23, 59, 59, 999));
+
+  switch (searchQueryNormalized) {
+    case 'today': {
+      const start = startOfDay(new Date(today));
+      const end = endOfDay(new Date(today));
+      return updatedDate >= start && updatedDate <= end;
+    }
+
+    case 'yesterday': {
+      const d = new Date(today);
+      d.setDate(d.getDate() - 1);
+      const start = startOfDay(new Date(d));
+      const end = endOfDay(new Date(d));
+      return updatedDate >= start && updatedDate <= end;
+    }
+
+    case 'this week': {
+      const start = new Date(today);
+      const day = start.getDay(); // 0 (Sun) to 6 (Sat)
+      const diffToMonday = (day + 6) % 7; // if Monday = 0
+      start.setDate(today.getDate() - diffToMonday);
+      const end = new Date(); // today
+      return updatedDate >= startOfDay(start) && updatedDate <= endOfDay(end);
+    }
+
+    case 'last week': {
+      const start = new Date(today);
+      const day = start.getDay();
+      const diffToLastMonday = (day + 6) % 7 + 7;
+      start.setDate(today.getDate() - diffToLastMonday);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      return updatedDate >= startOfDay(start) && updatedDate <= endOfDay(end);
+    }
+
+    case 'this month': {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      return updatedDate >= startOfDay(start) && updatedDate <= endOfDay(end);
+    }
+
+    case 'last month': {
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return updatedDate >= startOfDay(start) && updatedDate <= endOfDay(end);
+    }
+
+    default:
+      return false;
   }
-  search_filter = filteredData;
-  createOverview(filteredData, init); // Refresh the overview
 }
 
 
 function fillDropdowns(dropdownId, entries, key) {
     const dropdown = document.getElementById(dropdownId);
+    const selected = Array
+        .from(dropdown.options)
+        .filter(option => option.selected)
+        .map(option => option.value);
     dropdown.innerHTML = "";
 
     [...entries].sort().forEach(entry => {
         const option = document.createElement("option");
         option.value = entry;
         option.textContent = entry;
-        if (reportFilters[key].includes(entry)) {
+        if (selected.includes(entry)) {
             option.selected = true;
         }
         dropdown.appendChild(option);
@@ -1321,44 +1547,28 @@ function fillDropdowns(dropdownId, entries, key) {
     $(`#${dropdownId}`).closest('.filter-group').find('.filter-option-inner-inner').text(displayText);
 }
 document.getElementById('countryDropdown').addEventListener('change', function() {
-  const selCountries = Array
-        .from(this.options)
-        .filter(option => option.selected)
-        .map(option => option.value);
-    reportFilters['countries'] = selCountries;
-    getReports(false);
+  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
+  filterReportHistory();
 });
 
 document.getElementById('reporttypeDropdown').addEventListener('change', function() {
-  const selCountries = Array
-        .from(this.options)
-        .filter(option => option.selected)
-        .map(option => option.value);
-    reportFilters['report_types'] = selCountries;
-    getReports(false);
+  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
+  filterReportHistory();
 });
 
 document.getElementById('periodDropdown').addEventListener('change', function() {
-  const selCountries = Array
-        .from(this.options)
-        .filter(option => option.selected)
-        .map(option => option.value);
-    reportFilters['reporting_periods'] = selCountries;
-    getReports(false);
+  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
+  filterReportHistory();
 });
 
 document.getElementById('receiptsDropdown').addEventListener('change', function() {
-  const selCountries = Array
-        .from(this.options)
-        .filter(option => option.selected)
-        .map(option => option.value);
-    reportFilters['receipt_only'] = selCountries[0];
-    getReports(false);
+  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
+  filterReportHistory();
 });
 
 document.getElementById('downloadAllReports').addEventListener('click', async function() {
   try {
-    var reportFiltersDownload = reportFilters;
+    var reportFiltersDownload = reportFilters;  // TODO
     reportFiltersDownload['search_filter'] = search_filter;
     this.style.cursor = 'not-allowed';
     this.title = 'In Progress, this can take 1-2mins, please wait';
@@ -1414,17 +1624,33 @@ function showGuideFromButton(element) {
   showGuide();
 }
 
-waitForPermission(function() {
+function showGuideUpdates() {
+  startGuide([
+    { element: "#filterContainer", group: "{{ 'software.guide.historyUpdates.filters.group' | t }}", title: "{{ 'software.guide.historyUpdates.filters.title' | t }}", text: "{{ 'software.guide.historyUpdates.filters.text' | t }}", where: 'below' },
+    { element: "#receiptsContainer", group: "{{ 'software.guide.historyUpdates.receipts.group' | t }}", title: "{{ 'software.guide.historyUpdates.receipts.title' | t }}", text: "{{ 'software.guide.historyUpdates.receipts.text' | t }}", where: 'below' },
+    { element: "#searchContainer", group: "{{ 'software.guide.historyUpdates.search.group' | t }}", title: "{{ 'software.guide.historyUpdates.search.title' | t }}", text: "{{ 'software.guide.historyUpdates.search.text' | t }}", where: 'below' },
+    { element: "#reportStatus", group: "{{ 'software.guide.historyUpdates.status.group' | t }}", title: "{{ 'software.guide.historyUpdates.status.title' | t }}", text: "{{ 'software.guide.historyUpdates.status.text' | t }}", where: 'below' },
+  ]);
+  setCookie('showedGuideHistoryUpdates', 'true', 300);
+}
+
+async function startPage() {
   if (window.userPermissions['forsure-downloads'] === true) {
     document.getElementById('reportcontainer').style.display = 'block';
     checkHistoryVersion();
-    getReports();
+    await getReports();
 
     if(readCookie('showedGuideHistory') === null) {
         setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+    } else if (readCookie('showedGuideHistoryUpdates') === null) {
+      setTimeout(showGuideUpdates, 1000);
     }
 
   }
+}
+
+waitForPermission(function() {
+  startPage();
 });
 
 

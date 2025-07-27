@@ -140,7 +140,9 @@ function showGuideStep(step) {
         hideAfter = null;
       }
       document.getElementById('guideBackground').style.display = 'block';
-      targetElement.style.zIndex = "2";
+      if (guideSteps[step].element != 'main') {
+        targetElement.style.zIndex = "2";
+      }
       previousTargetElement = targetElement;
       if (guideSteps[step].runBefore) {
         guideSteps[step].runBefore();
