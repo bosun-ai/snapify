@@ -222,6 +222,9 @@
     width: fit-content;
     /* margin: auto; */
 }
+.information-cell-content-centered {
+    margin: auto;
+}
 {% endstyle %}
 
 <div id="informationContainer" class="widget grid-item widget-left">
@@ -445,6 +448,9 @@
                 td.className = 'information-cell';
                 var content = document.createElement('div');
                 content.className = 'information-cell-content';
+                if (val !== item.pro) {
+                    content.classList.add('information-cell-content-centered');
+                }
 
                 if (val === 'ERROR') {
                     content.innerHTML = `{% render 'forsure-icon-error' %}`;

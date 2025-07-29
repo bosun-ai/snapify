@@ -90,9 +90,9 @@
 }
 .left, .right {
     flex: 1;  /* Each div will take up half the width of the parent container */
-.offbutton {
-  color: #FAFAFA;
-  background: #17161c
+
+.button--secondary {
+    border: 0.2rem solid #17161c !important;
 }
 
 .fileList {
@@ -681,9 +681,9 @@ content: "\2713"
         <h2 class="heading">Upload Existing Reports</h2>
         <div style="margin-bottom: 2rem;margin: auto;position: relative;background: rgb(250, 250, 250);padding: 1px 1rem;border-radius: 1rem;">
           <div style="display: flex; justify-content: space-evenly;gap: 2rem;">
-          <div id="clientsUploadSection" style="margin-bottom: 1rem;position: relative;background:#fafafa">
+          <div id="clientsUploadSection" style="margin: 0 2rem 2rem 2rem;position: relative;background:#fafafa">
             <h3 style="margin-bottom: 1rem;text-align: center;">Client Credentials</h3>
-            <button class="button" onclick="openClientsModal()">Manage Login Details</button>
+            <button class="button button--secondary" onclick="openClientsModal()">Manage Login Details</button>
               {% comment %} <div id="clientsFileContainer" style="display: flex; align-items: center; padding: 0.5rem 0;border: 0.2rem solid #17161c;background-color: #fff;border-color: #ccc;margin-bottom: 1.5rem;">
                 
                   {% comment %} <span id="clientsFileName" style="margin: auto">No file uploaded</span>
@@ -695,11 +695,7 @@ content: "\2713"
               </div> {% endcomment %}
               <input type="file" id="clientsFileInput" style="display: none;" accept=".xlsx" onchange="handleClientsUpload(this)">
           </div>
-          <div id="createZeroDeclarationWrapper" style="display: block;margin-bottom: 1rem;position: relative;background:#fafafa">
-              <h3 style="margin-bottom: 1rem;text-align: center;">Zero Declaration</h3>
-              <button class="button" onclick="openZeroDeclarationModal()">Submit Zero Report</button>
-            </div>
-          </div>
+        </div>
         </div>
 
         <div class="dropZone" data-input="report_list" data-url="uploadreports/" style="overflow-y: auto;position: relative;background: #fafafa;" id="uploadreportlistContainer">
@@ -715,11 +711,12 @@ content: "\2713"
         <input type="file" id="report_list" style="display: none" multiple>
         <div id="errorsreport_list"></div>
         <div class="navButtons">
+            <button class="button" style="background-color: #17161c;" onclick="openZeroDeclarationModal()">Add Zero Report</button>
             <button class="button" onclick="uploadReports()">Hand in reports</button>
         </div>
 
         <div id="editClientsModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75%; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;">
-            <div style="display: flex;justify-content: space-between;">
+            <div style="display: flex;justify-content: space-between;align-items: center;">
               <h3>Edit Client Credentials</h3>
               <div>
                   {% comment %} <a id="replaceFileBtn" onclick="document.getElementById('replaceClientsFileInput').click()" class="button button--secondary" style="border: 0.2rem solid #17161c !important;margin: 1rem;cursor: pointer;">Upload</a>     {% endcomment %}
@@ -734,19 +731,19 @@ content: "\2713"
                 <!-- Datatable for Clients File will be dynamically rendered here -->
             </div>
             {% comment %} <input type="file" id="replaceClientsFileInput" accept=".xlsx" onchange="handleClientsUploadReplacePrompt(this)" style="display: none"> {% endcomment %}
-            <div style="margin-top: 1rem;">
-                <button class="button" onclick="saveClientsEdits()">Save</button>
-                <button class="button" onclick="closeClientsModal()" style="background-color: #17161c;">Cancel</button>
+            <div style="margin-top: 1rem;margin-left: auto;width: fit-content;">
+              <button class="button button--secondary" onclick="closeClientsModal()">Cancel</button>
+              <button class="button" onclick="saveClientsEdits()">Save</button>
             </div>
         </div>
         <div id="clientsModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 90;" onclick="closeClientsModal()"></div>
 
         <div id="zeroDeclarationModal" class="losensitive modal" style="z-index: 3;">
-          <div class="modal-content" style="height: 54rem;margin: 10% auto;width: 80vw;">
-            <h2>Zero Declaration</h2>
-            <p>Select the companies and countries you want to submit a zero declaration for.</p>
+          <div class="modal-content" style="width: 80vw;">
+            <h2 style="margin: 0;">Zero Declaration</h2>
+            <p>Select the companies and countries for whichyou want to submit a zero declaration.</p>
             <div style="display: flex;flex-direction: column;gap: 1rem;margin-bottom: 3rem;">
-              <div style="display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 2rem;">
+              <div style="display: grid;grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));gap: 2rem;">
                 <div class="filter-group" id="profile-filter-guide">
                   <div class="filter-group-heading">Country</div>
                   <select
@@ -785,7 +782,7 @@ content: "\2713"
                 </div>
               </div>
             </div>
-            <div id="zeroDeclarationTableContainer" style="overflow-y: auto;height: 25rem;margin-bottom: 1rem;">
+            {% comment %} <div id="zeroDeclarationTableContainer" style="overflow-y: auto;height: 25rem;margin-bottom: 1rem;">
               <table style="width: -webkit-fill-available;max-width: 80vw;min-width: 60rem;table-layout: auto;">
                 <thead>
                   <tr>
@@ -801,10 +798,10 @@ content: "\2713"
                 </tbody>
               </table>
               <!-- Datatable for Zero Declaration will be dynamically rendered here -->
-            </div>
+            </div> {% endcomment %}
             <div style="display: flex;justify-content: space-between;">
-              <button class="button" onclick="closeZeroDeclarationModal()">Cancel</button>
-              <button class="button" onclick="submitZeroDeclaration()">Submit</button>
+              <button class="button button--secondary" onclick="closeZeroDeclarationModal()">Cancel</button>
+              <button class="button" onclick="addZeroDeclaration()">Create</button>
             </div>
           </div>
         </div>
@@ -856,7 +853,7 @@ content: "\2713"
       <input type="file" id="return_list" style="display: none" multiple>
       <div id="errorsreturn_list"></div>
       <div class="navButtons">
-          <button class="prevButton button offbutton" onclick="prevStep(1)">Back</button>
+          <button class="prevButton button button--secondary" onclick="prevStep(1)">Back</button>
           <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns">Next</button>
       </div>
   </div>
@@ -978,7 +975,7 @@ content: "\2713"
           </div>
 
           <div class="text-center mt-4">
-            <button class="prevButton button offbutton" onclick="prevStep(2)">Back</button>
+            <button class="prevButton button button--secondary" onclick="prevStep(2)">Back</button>
             <button class="nextButton button button" onclick="nextStep(4)">Next</button>
           </div>
       </div>
@@ -1064,7 +1061,7 @@ content: "\2713"
         </div>
 
       <div class="text-center mt-4" style="margin-bottom: 3rem;">
-          <button class="prevButton button offbutton" onclick="prevStep(3)">Back</button>
+          <button class="prevButton button button--secondary" onclick="prevStep(3)">Back</button>
           <button class="nextButton button" onclick="createReport()">Create Report</button>
       </div>
   </div>
@@ -1342,6 +1339,10 @@ function createNewFileRow(fileName, availableProfiles, dataUrl, inputId, file) {
         // Remove the row from the grid
         row.remove();
 
+        if (document.getElementById('fileList_report_list').children.length == 0 && dataUrl == 'uploadreports/') {
+          document.getElementById('upload-imageuploadreports/').style.display = 'flex';
+          document.getElementById('upload-imageuploadreports/').style.margin = 'auto';
+        }
         // Additional logic to handle file deletion
         handleFileDeletion(uniqueId, orders, returns, reports, dataUrl);
     });
@@ -1445,6 +1446,47 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
     await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
   });
   row.appendChild(resolvedCell);
+  return row;
+}
+
+var zeroDeclarationRows = {};
+var zeroDeclarationToAdd = {};
+function createNewFileRowZeroDeclaration(country, reportType, pro, timeframe, year, company) {
+  // Create a new "card" for the file
+  const row = document.createElement('div');
+  row.classList.add('file-row'); // Styled as a grid item
+  const uniqueId = 'Zero Declaration ' + country + ' ' + reportType + ' ' + pro + ' ' + timeframe + ' ' + year + ' ' + company;
+  if (zeroDeclarationRows[uniqueId]) {
+    return;
+  }
+  // Add filename
+  const nameCell = document.createElement('div');
+  nameCell.textContent = 'Zero Declaration ' + company + ' ' + country+ ' ' + reportType;
+  nameCell.style.fontWeight = 'bold';
+  nameCell.style.marginBottom = '0.5rem';
+  row.appendChild(nameCell);
+
+  // Add delete button
+  const deleteCell = document.createElement('div');
+  deleteCell.style.margin = 'auto';
+  const deleteButton = document.createElement('button');
+  deleteButton.classList.add('deletebtn');
+  deleteButton.textContent = 'X';
+  deleteButton.style.marginTop = '0.5rem';
+  deleteButton.addEventListener('click', function () {
+      // Remove the row from the grid
+      row.remove();
+      if (document.getElementById('fileList_report_list').children.length == 0) {
+        document.getElementById('upload-imageuploadreports/').style.display = 'flex';
+        document.getElementById('upload-imageuploadreports/').style.margin = 'auto';
+      }
+      delete zeroDeclarationRows[uniqueId];
+  });
+
+  deleteCell.appendChild(deleteButton);
+  row.appendChild(deleteCell);
+  zeroDeclarationRows[uniqueId] = {report_id: uniqueId, country: country, report_type: reportType, pro: pro, timeframe: timeframe, year: year, company: company};
+  row.id = uniqueId;
   return row;
 }
 
@@ -2395,11 +2437,18 @@ async function uploadReturns(endpoint) {
 }
 
 async function uploadReports() {
-    if (Object.keys(selectedFilesReports).length === 0) {
+    if (Object.keys(selectedFilesReports).length === 0 && Object.keys(zeroDeclarationRows).length === 0) {
       showMessage('Please upload your reports first', false);
       return;
     }
     document.getElementsByClassName('dropZone')[0].style.cursor = 'wait';
+    if (Object.keys(zeroDeclarationRows).length > 0) {
+      submitZeroDeclaration();
+    }
+    if (Object.keys(selectedFilesReports).length == 0) {
+      document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
+      return;
+    }
     const formData = new FormData();
     // Assuming each row in your table has a class 'file-row'
     const rows = document.querySelectorAll('.file-row');
@@ -2410,6 +2459,7 @@ async function uploadReports() {
             formData.append('fileId', fileId);
         }
     });
+
     try {
         const data = await unifiedSendRequest(UPLOADREPORTS, { formData: formData });
         // Check if an error message already exists
@@ -2432,6 +2482,8 @@ async function uploadReports() {
           showMessage('Successfully uploaded reports, they will be handed in now', true);
           document.getElementById('fileList_report_list').innerHTML = '';
 
+          document.getElementById('upload-textuploadreports/').style.display = 'block';
+          document.getElementById('imagecontainer-imageuploadreports/').style.display = 'block';
         }
         document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
     } catch (error) {
@@ -3200,7 +3252,9 @@ async function openZeroDeclarationModal() {
   document.getElementById('zeroDeclarationModal').style.display = 'block';
   try {
     data = await unifiedSendRequest(REPORTTYPES, {method: 'GET'});
-    console.log(data);
+    clients = data['clients'];
+    data = data['data'];
+    console.log(clients);
     const countryDropdown = document.getElementById("countryDropdown");
     const reporttypeDropdown = document.getElementById("reporttypeDropdown");
     const proDropdown = document.getElementById("proDropdown");
@@ -3223,6 +3277,7 @@ async function openZeroDeclarationModal() {
 
       // Clear and populate report types
       reporttypeDropdown.innerHTML = "";
+      reporttypeDropdown.value = "";
       timeframeDropdown.innerHTML = "";
       proDropdown.innerHTML = "";
       timeframeDropdown.innerHTML = "";
@@ -3232,10 +3287,9 @@ async function openZeroDeclarationModal() {
         const option = new Option(reportType, reportType);
         reporttypeDropdown.appendChild(option);
       });
-      if (reportTypes.length == 1) {
-        reporttypeDropdown.value = reportTypes[0];
-        reporttypeDropdown.dispatchEvent(new Event('change'));
-      }
+      // always select first value to avoid it being unselectable
+      reporttypeDropdown.value = reportTypes[0];
+      reporttypeDropdown.dispatchEvent(new Event('change'));
       console.log('Chose country, report type', country, reportTypes);
       $('.selectpicker').selectpicker('refresh');
     });
@@ -3247,6 +3301,7 @@ async function openZeroDeclarationModal() {
 
       const pros = (data[country]?.[reportType] || {});
       proDropdown.innerHTML = "";
+      proDropdown.value = "";
       timeframeDropdown.innerHTML = "";
       companyDropdown.innerHTML = "";
 
@@ -3255,10 +3310,9 @@ async function openZeroDeclarationModal() {
         const option = new Option(label, label);
         proDropdown.appendChild(option);
       });
-      if (Object.keys(pros).length == 1) {
-        proDropdown.value = Object.keys(pros)[0];
-        proDropdown.dispatchEvent(new Event('change'));
-      }
+      // always select first value to avoid it being unselectable
+      proDropdown.value = Object.keys(pros)[0];
+      proDropdown.dispatchEvent(new Event('change'));
       console.log('Chose report type, pro', reportType, pros);
       $('.selectpicker').selectpicker('refresh');
     });
@@ -3269,6 +3323,7 @@ async function openZeroDeclarationModal() {
       const pro = this.value;
       const timeframes = (data[country]?.[reportType]?.[pro] || []);
       timeframeDropdown.innerHTML = "";
+      timeframeDropdown.value = "";
       companyDropdown.innerHTML = "";
       timeframes.forEach((timeframe) => {
         const [timeframeMonth, year] = timeframe;
@@ -3280,8 +3335,11 @@ async function openZeroDeclarationModal() {
         const option = new Option(label, label);
         timeframeDropdown.appendChild(option);
       });
-      if (timeframes.length == 1) {
-        timeframeDropdown.value = timeframes[0];
+      // always select first value to avoid it being unselectable
+      const lastTimeframe = timeframes[timeframes.length - 1];
+      if (lastTimeframe) {
+        const label = lastTimeframe[0] === '' ? `${lastTimeframe[1]}` : `${lastTimeframe[0]} ${lastTimeframe[1]}`;
+        timeframeDropdown.value = label;
         timeframeDropdown.dispatchEvent(new Event('change'));
       }
       console.log('Chose pro, timeframe', pro, timeframes);
@@ -3294,9 +3352,10 @@ async function openZeroDeclarationModal() {
       const pro = proDropdown.value;
       const timeframe = this.value;
       console.log('Chose timeframe', timeframe);
-      const companies = ["Caterpillar_Financial_Services_Netherlands_B_V_", "Company B", "Company C"];
-      {% comment %} const companies = (data[country]?.[reportType]?.[pro]?.[timeframe] || []); {% endcomment %}
+      console.log(clients);
+      const companies = clients[country]?.[reportType]?.[pro] || [];
       companyDropdown.innerHTML = "";
+      companyDropdown.value = "";
       companies.forEach(company => {
         const option = new Option(company, company);
         companyDropdown.appendChild(option);
@@ -3311,33 +3370,29 @@ async function openZeroDeclarationModal() {
       const pro = proDropdown.value;
       const timeframe = timeframeDropdown.value;
       for (const option of this.options) {
-        var rowExists = document.getElementById(`zeroDeclarationRow_${country}_${reportType}_${pro}_${timeframe}_${option.value}`);
-        if (option.selected && !rowExists) {
-          const row = document.createElement('tr');
-          row.id = `zeroDeclarationRow_${country}_${reportType}_${pro}_${timeframe}_${option.value}`;
-          row.innerHTML = `
-            <td>${country}</td>
-            <td>${reportType}</td>
-            <td>${pro}</td>
-            <td>${timeframe}</td>
-            <td>${option.value}</td>
-            <td><button class="deleteButton button" onclick="deleteZeroDeclarationRow('${row.id}')" style="background: #17161c;">Delete</button></td>
-          `;
-          document.getElementById('zeroDeclarationTableBody').appendChild(row);
-        } else if (!option.selected && rowExists) {
-          rowExists.remove();
+        let timeframeMonth = '';
+        let year = timeframe;
+        if (timeframe.includes(' ')) {
+          timeframeMonth = timeframe.split(' ')[0];
+          year = timeframe.split(' ')[1];
+        }
+        const key = `${country}_${reportType}_${pro}_${timeframe}_${year}_${option.value}`;
+        console.log(key);
+        if (option.selected) {
+          zeroDeclarationToAdd[key] = {country: country, reportType: reportType, pro: pro, timeframe: timeframeMonth, year: year, company: option.value};
+        } else {
+          delete zeroDeclarationToAdd[key];
         }
       }
     });
+
+    const firstCountry = Object.keys(data)[0];
+    if (firstCountry) {
+      countryDropdown.value = firstCountry;
+      countryDropdown.dispatchEvent(new Event('change'));
+      $('.selectpicker').selectpicker('refresh');
+    }
     $('.selectpicker').selectpicker('refresh');
-    // data is this:
-    {% comment %} for country, country_data in worker['supported_services'].items():
-        for report_type, report_type_data in country_data.items():
-            for pro, timeframes in report_type_data.items():
-                for report_time in timeframes:
-                    timeframe, year = get_current_time(report_time)
-                    if (timeframe, year) not in services[country][report_type][pro]:
-                        services[country][report_type][pro].append((timeframe, year)) {% endcomment %}
     
   } catch (error) {
     console.error(error.message);
@@ -3345,40 +3400,32 @@ async function openZeroDeclarationModal() {
   }
 }
 
-function deleteZeroDeclarationRow(rowId) {
-  const row = document.getElementById(rowId);
-  row.remove();
-}
-
 function closeZeroDeclarationModal() {
+  zeroDeclarationToAdd = {};
   document.getElementById('zeroDeclarationModal').style.display = 'none';
 }
 
+async function addZeroDeclaration() {
+  const fileList = document.getElementById('fileList_report_list');
+  Object.values(zeroDeclarationToAdd).forEach(row => {
+    row = createNewFileRowZeroDeclaration(row.country, row.reportType, row.pro, row.timeframe, row.year, row.company);
+    fileList.appendChild(row);
+    document.getElementById('upload-imageuploadreports/').style.display = 'none';
+  });
+  closeZeroDeclarationModal();
+}
+
+
 async function submitZeroDeclaration() {
-  const rows = document.querySelectorAll('#zeroDeclarationTableBody tr');
   const data = [];
-  rows.forEach(row => {
-    var timeframe = row.querySelector('td:nth-child(4)').textContent;
-    var timeframeMonth = '';
-    var year = timeframe;
-    if (timeframe.includes(' ')) {
-      [timeframeMonth, year] = timeframe.split(' ');
-    }
-    data.push({
-      report_id: row.id,
-      country: row.querySelector('td:nth-child(1)').textContent,
-      report_type: row.querySelector('td:nth-child(2)').textContent,
-      pro: row.querySelector('td:nth-child(3)').textContent,
-      timeframe: timeframeMonth,
-      year: year,
-      company: row.querySelector('td:nth-child(5)').textContent
-    });
+  Object.values(zeroDeclarationRows).forEach(row => {
+    data.push(row);
   });
   console.log(data);
   try {
     res = await unifiedSendRequest(UPLOADZERO, {formData: JSON.stringify(data), headerArgs: {'Content-Type': 'application/json'}, method: 'POST'});
     console.log(res);
-    if (res.status != 200) {
+    if (res.status_code != 200) {
       showMessage('Failed to upload zero declaration ' + res.message, false);
       for (const row of res.data) {
         document.getElementById(row.report_id).style.backgroundColor = 'red';
@@ -3393,7 +3440,8 @@ async function submitZeroDeclaration() {
     console.error(error.message);
     showMessage('Failed to upload zero declaration', false);
   }
-  }
+}
+
 
 function showGuide() {
   if(guideToShow == 'new') {// create new report 
