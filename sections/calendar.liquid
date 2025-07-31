@@ -1020,7 +1020,7 @@ fieldset[disabled] .btn-default:hover {
                   </script>
                 {%- endif -%}
                 <div class="contact__button button-center" style="margin-top: 2rem;">
-                  <button type="submit" class="button">Submit</button>
+                  <button type="submit" class="button" id="submitButton">Submit</button>
                 </div>
               {%- endform -%}
             </div>
@@ -1063,7 +1063,6 @@ fieldset[disabled] .btn-default:hover {
     
     async function request(endpoint, options = {}) {
       const { formData = false, method = 'POST', headerArgs = false } = options;
-      console.log(`Calling calendar send with FormData ${formData} and method ${method} for endpoint ${endpoint}`);
       let response;
       for (let i = 0; i < 3; i++) {
         const header = {};
@@ -1089,7 +1088,6 @@ fieldset[disabled] .btn-default:hover {
           break;
         }
       }
-      console.log(response);
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
@@ -1098,9 +1096,8 @@ fieldset[disabled] .btn-default:hover {
         }
       } else {
         const errorMessage = await response.json();
-        console.log(errorMessage);
+        console.error(errorMessage);
         const errorDetails = errorMessage['detail'];
-        console.log(errorDetails);
         if (errorDetails === '') {
           errorDetails = await response.text();
         }
@@ -1115,7 +1112,7 @@ function gtag_report_conversion() {
   });
 }
 
-    async function generateCalendar(jsMonth, year) {
+    async function generateCalendar(jsMonth, year, init=false) {
       if (new Date(year, jsMonth + 1) < new Date()) {
         // +1 to check the end of the month
         return;
@@ -1139,7 +1136,7 @@ function gtag_report_conversion() {
         row.appendChild(th);
       });
       thead.appendChild(row);
-
+      var availableFound = false;
       // Add days of the week to the table body
       let isRunning = true;
       let dayCount = 0 - (dt.getDay() === 0 ? 5 : dt.getDay() - 2); // Adjust start day to be Monday
@@ -1156,6 +1153,7 @@ function gtag_report_conversion() {
           const divWrapper = document.createElement('div');
           divWrapper.className = 'text-wrapper';
           if (availability && availability[dayStr]) {
+            availableFound = true;
             dayCell.classList.add('possibletime');
             dayCell.classList.add('clickable');
             dayCell.onclick = () => {
@@ -1198,11 +1196,13 @@ function gtag_report_conversion() {
       const monthName = document.getElementById('month');
       monthName.innerText = formatDate(dt, false);
       cal.appendChild(table);
+      if (init && !availableFound) {
+        changeMonth(1);
+      }
     }
 
     function changeMonth(difference) {
       var newDate = new Date(currentYear, currentMonth);
-      console.log(newDate);
       newDate.setMonth(newDate.getMonth() + difference);
       generateCalendar(newDate.getMonth(), newDate.getFullYear());
       canChangeMonths();
@@ -1211,7 +1211,6 @@ function gtag_report_conversion() {
     function canChangeMonths() {
       newDate = new Date(currentYear, currentMonth);
       newDate.setMonth(newDate.getMonth()) - 1;
-      console.log(newDate);
       if (newDate > new Date()) {
         document.getElementById('prevMonth').classList.remove('arrow-disabled');
       } else {
@@ -1223,15 +1222,12 @@ function gtag_report_conversion() {
     function displayTimes(date, datestr, availableTimes) {
       // document.getElementById('leftSide').style.display = 'none';
       // document.getElementById('borderMiddle').style.display = 'none';
-      console.log(`Selected ${date}`);
       const container = document.getElementById('times');
       document.getElementById('leftSide').style.minWidth = document.getElementById('leftSide').innerwidth;
-      console.log('leftSide', document.getElementById('leftSide').style.minWidth);
       document.getElementById('timesContainer').style.display = 'block';
       setTimeout(() => {
         // document.getElementById('container').style.transform = 'translateX(-25rem)';
         document.getElementById('container').classList.add('transitionContainer');
-        console.log('window.innerWidth', window.innerWidth);
         if (window.innerWidth <= 1590 && window.innerWidth >= 1500) {
           const baseWidth = 1590;
           const baseRem = -21;
@@ -1250,7 +1246,6 @@ function gtag_report_conversion() {
             let translateX = baseRem + (baseWidth - window.innerWidth) * remPerPixel;
             document.getElementById('container').style.transform = `translateX(${translateX}rem)`;
         }
-        console.log('container', document.getElementById('container').style.transform);
         document.getElementById('timesContainer').style.transform = 'translateX(1rem)';
       }, 50); // Small delay to allow DOM update
       // document.getElementById('timesContainer').style.transform = 'translateX(-150px)';
@@ -1418,7 +1413,6 @@ function gtag_report_conversion() {
     }
 
     async function fillEventInfoQuestions(date, time) {
-      console.log(event_details);
       var timeSplit = time.split(':');
       var endDate = new Date(date);
       endDate.setHours(timeSplit[0], timeSplit[1], timeSplit[2]);
@@ -1616,12 +1610,10 @@ function gtag_report_conversion() {
         }
       try {
         event_details = await request(`event?event_link=${event_link}`, { method: 'GET' });
-        console.log(event_details);
         availability = await request(`check/avail?event_link=${event_link}&month=${currentMonth + 1}&timezone=${timezone}`, { method: 'GET' });
-        console.log(availability);
         await fillEventInfo();
         canChangeMonths();
-        await generateCalendar(currentMonth, currentYear);
+        await generateCalendar(currentMonth, currentYear, true);
       } catch (error) {
         console.error('Error fetching event:', error);
       } finally {
@@ -1629,11 +1621,16 @@ function gtag_report_conversion() {
       }
     }
 
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async function submitForm(event) {
       event.preventDefault();
-      console.log('Submitting questions');
+      document.getElementById('submitButton').disabled = true;
+      document.getElementById('submitButton').innerText = 'Submitting...';
+      document.body.style.cursor = 'wait';
       const questions = document.querySelectorAll('.to_send');
-      console.log(questions);
       formDataDict = {};
       for (const question of questions) {
           if (question.name) {
@@ -1645,24 +1642,20 @@ function gtag_report_conversion() {
       dataToSend['date'] = chosenDatestr;
       dataToSend['time'] = chosenTime;
       dataToSend['timezone'] = timezone;
-      console.log(formDataDict);
       try {
-        console.log(JSON.stringify(dataToSend));
         await request(`create`, {
-          method: 'POST',
-          formData: JSON.stringify(dataToSend),
-          headerArgs: { 'Content-Type': 'application/json' },
-        });
-        console.log('Event Scheduled');
+            method: 'POST',
+            formData: JSON.stringify(dataToSend),
+            headerArgs: { 'Content-Type': 'application/json' },
+          });
         gtag('js', new Date());
-        console.log('JS Date');
         gtag('config', 'G-TN3P2D6506');
-        console.log('Config log');
         gtag_report_conversion();
-        console.log('Report Conversion log');
         window.lintrk('track', { conversion_id: 19886530 });
-        console.log('LinkedIn Log');
         showMessage("You are scheduled. A calendar invitation has been sent to your email address.", true);
+        document.getElementById('submitButton').disabled = false;
+        document.getElementById('submitButton').innerText = 'Submit';
+        document.body.style.cursor = 'default';
       } catch (error) {
         console.error('Error submitting questions:', error);
         showMessage('Failed to submit questions. Please try again.', false);

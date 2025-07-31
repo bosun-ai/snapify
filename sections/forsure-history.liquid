@@ -481,53 +481,7 @@ function extractBaseFilename(filename) {
   return base;
 }
 
-function buildHierarchy(paths) {
-  const hierarchy = {};
-  const tags = {};
-
-  const groupMap = {}; // baseFilename -> array of file entries
-
-  paths.forEach(file => {
-    const path = file['filename'];
-    const parts = [file['company'], file['country'], file['report_type'], file['year']];
-    if (file['timeframe'] != '') {
-      parts.push(file['timeframe']);
-    }
-    const baseName = extractBaseFilename(path);
-
-    const key = parts.join('/') + '/' + baseName;
-    if (!groupMap[key]) groupMap[key] = [];
-    groupMap[key].push(file);  // TODO make sure that file is only used for Audit Trail, Excluded and for the report validation things
-    tags[key] = []
-    if (file['new']) {
-      tags[key].push('new');
-    }
-  });
-
-  Object.entries(groupMap).forEach(([basePath, groupFiles]) => {
-    const baseParts = basePath.split('/');
-    let currentLevel = hierarchy;
-
-    baseParts.forEach((part, index) => {
-      if (index === baseParts.length - 1) {
-        if (!Array.isArray(currentLevel.files)) currentLevel.files = [];
-        currentLevel.files.push({
-          type: 'group',
-          part: part,
-          tags: tags[basePath],
-          children: groupFiles,
-        });
-      } else {
-        if (!currentLevel[part]) currentLevel[part] = {};
-        currentLevel = currentLevel[part];
-      }
-    });
-  });
-  console.log('hierarchy', hierarchy);
-  return {hierarchy, tags};
-}
-
-function createFolderStructure(configDiv, hierarchy, tags) {
+function createFolderStructure(configDiv, data) {
   configDiv.innerHTML = ''; // Clear existing content
 
   // Recursive function to create the structure
@@ -1398,28 +1352,91 @@ var allReports = [];
 var lastUpdated = null;
 async function getReports(init=true) { // gets only the reports for that user to reduce load time
     try {
-    const configDiv = document.getElementById("reportshistory");
-    configDiv.innerHTML = '';
-    var loadingSpinnerContainer = document.createElement('div');
-    loadingSpinnerContainer.id = 'loadingSpinnerContainer';
-    var loadingSpinner = document.createElement('div');
-    loadingSpinner.id = 'loadingSpinner';
-    loadingSpinnerContainer.appendChild(loadingSpinner);
-    configDiv.appendChild(loadingSpinnerContainer);
-    let data = await unifiedSendRequest(GETREPORTSONEDRIVE + '?only_user_reports=true', {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
-    allReports = data['data'];
-    lastUpdated = data['last_updated'];
-    filterReportHistory('', true, true);
+        const configDiv = document.getElementById("reportshistory");
+        configDiv.innerHTML = '';
+        var loadingSpinnerContainer = document.createElement('div');
+        loadingSpinnerContainer.id = 'loadingSpinnerContainer';
+        var loadingSpinner = document.createElement('div');
+        loadingSpinner.id = 'loadingSpinner';
+        loadingSpinnerContainer.appendChild(loadingSpinner);
+        configDiv.appendChild(loadingSpinnerContainer);
+        let data = await unifiedSendRequest(GETREPORTSOVERVIEW + '?only_user_reports=true', {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+        lastUpdated = data['last_updated'];
+        console.log(data);
+        updateReportStatusOverview(data['status_overview']);
+        createFolderStructureOverview(configDiv, data['reports']);
+        createOverview(data['reports'], true);
     } catch (error) {
-    console.error(error.message);
-    showMessage("Failed to get reports", false);
-    document.getElementById('loadingSpinnerContainer').style.display = 'none';
-    TOKEN = false;
+        console.error(error.message);
+        showMessage("Failed to get reports", false);
+        document.getElementById('loadingSpinnerContainer').style.display = 'none';
+        TOKEN = false;
     }
 }
 
-async function getReportsAll() {
+async function getReportsDetails(company, country, reportType) { // gets only the reports for the given company, country, report type
   try {
+    console.log('company', company);
+    console.log('country', country);
+    console.log('reportType', reportType);
+      let repsFound = allReports.filter(report => {
+        if (company) {
+          if (report['company'] != company) {
+            return false;
+          }
+        }
+        if (country) {
+          if (report['country'] != country) {
+            return false;
+          }
+        }
+        if (reportType) {
+          if (report['report_type'] != reportType) {
+            return false;
+          }
+        }
+        return true;
+      })
+      if (repsFound.length > 0) {
+        console.log('report already loaded', repsFound);
+        return repsFound;
+      }
+      const receiptsSelected = Array
+      .from(document.getElementById('receiptsDropdown').options)
+      .filter(option => option.selected)
+      .map(option => option.value);
+      params = {
+        only_user_reports: receiptsSelected.includes('My Reports'),
+      }
+      if (company) {
+        params['company'] = company;
+      }
+      if (country) {
+        params['country'] = country;
+      }
+      if (reportType) {
+        params['report_type'] = reportType;
+      }
+      let data = await unifiedSendRequest(GETREPORTSONEDRIVE + '?' + new URLSearchParams(params).toString(), {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+      console.log('data', data);
+      for (let report of data['data']) {
+        if (allReports.find(r => (r['report_id'] && r['report_id'] == report['report_id']) || (r['submission_id'] && r['submission_id'] == report['submission_id']))) {
+          console.log('report already loaded', report);
+          continue;
+        }
+        allReports.push(report);
+      }
+      return data['data'];
+  } catch (error) {
+      console.error(error.message);
+      showMessage("Failed to get reports", false);
+      document.getElementById('loadingSpinnerContainer').style.display = 'none';
+      TOKEN = false;
+  }
+}
+
+async function getReportsAll() {
+  {% comment %} try {
   let data = await unifiedSendRequest(GETREPORTSONEDRIVE, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
   allReports = data['data'];
   lastUpdated = data['last_updated'];
@@ -1428,7 +1445,7 @@ async function getReportsAll() {
   } catch (error) {
   console.error(error.message);
   TOKEN = false;
-  }
+  } {% endcomment %}
 }
 
 async function getReportUpdates() {
@@ -1439,7 +1456,6 @@ async function getReportUpdates() {
   if (data['data'].length > 0) {
     for (let report of data['data']) {
       {% comment %} showReportUpdateNew(report); {% endcomment %}
-
     }
   }
   } catch (error) {
@@ -1447,6 +1463,401 @@ async function getReportUpdates() {
   TOKEN = false;
   }
 }
+
+function createFolderStructureOverview(configDiv, data) {
+  configDiv.innerHTML = '';
+
+  const companies = Object.keys(data).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+  for (let company of companies) {
+    const companyDiv = document.createElement('div');
+    companyDiv.id = `companyDiv-${company}`;
+    companyDiv.classList.add('company-div');
+    fillFolderRow(companyDiv, company, 0);
+    configDiv.appendChild(companyDiv);
+    country_selected_div = null;
+    companyDiv.addEventListener('click', async () => {
+      const countries = Object.keys(data[company]);
+      toggleSubItems(
+        companyDiv,
+        countries,
+        `countryDiv-${company}`,
+        data[company],
+        1,
+        (countryDiv, country, depth) => {
+          fillFolderRow(countryDiv, country, depth);
+          country_selected_div = countryDiv;
+
+          // attach report toggle to each country row now
+          countryDiv.addEventListener('click', async (e) => {
+            e.stopPropagation(); // avoid bubbling
+            const reportTypes = Object.keys(data[company][country]);
+            reportType_selected = null;
+            if (reportTypes.length == 1) {
+              reportType_selected = reportTypes[0];
+            }
+            getReportsDetails(company, country, reportType_selected);
+            toggleSubItems(
+              countryDiv,
+              reportTypes,
+              `reportTypeDiv-${company}-${country}`,
+              data[company][country],
+              2,
+              (reportDiv, reportType, depth2) => {
+                fillFolderRow(reportDiv, reportType, depth2);
+                reportDiv.addEventListener('click', async (e) => {
+                  e.stopPropagation(); // avoid bubbling
+                  let reports = allReports.filter(r => r['company'] == company && r['country'] == country && r['report_type'] == reportType);
+                  if (reports.length == 0) {
+                    reports = await getReportsDetails(company, country, reportType);
+                  }
+                  createFolderStructureDetails(reportDiv, reports, company, country, reportType);
+                });
+              }
+            );
+          });
+        }
+      );
+      country_selected = null;
+      if (countries.length == 1) {
+        country_selected = countries[0];
+        country_selected_div.click();
+      }
+      getReportsDetails(company, country_selected, null);
+    });
+  }
+}
+
+
+function createFolderStructureDetails(reportDiv, reports, company, country, reportType) {
+  const years = [...new Set(reports.map(r => r['year']))].sort();
+
+  var year_selected_div = null;
+  toggleSubItems(
+    reportDiv,
+    years,
+    `yearDiv-${reportDiv.id}`,
+    groupBy(reports, 'year'),
+    3,
+    (yearDiv, year, depth) => {
+      fillFolderRow(yearDiv, year, depth);
+      year_selected_div = yearDiv;
+      yearDiv.addEventListener('click', (e) => {
+        const reportsInYear = groupBy(reports, 'year')[year];
+      
+        const withTimeframe = reportsInYear.filter(r => r['timeframe'] && r['timeframe'].trim() !== '');
+        const withoutTimeframe = reportsInYear.filter(r => !r['timeframe'] || r['timeframe'].trim() === '');
+      
+        const timeframes = [...new Set(withTimeframe.map(r => r['timeframe']))].sort();
+      
+        timeframe_selected_div = null;
+        // ✅ Create timeframe subfolders
+        toggleSubItems(
+          yearDiv,
+          timeframes,
+          `timeframeDiv-${reportDiv.id}-${year}`,
+          groupBy(withTimeframe, 'timeframe'),
+          depth + 1,
+          (timeframeDiv, timeframe, depth2) => {
+            fillFolderRow(timeframeDiv, timeframe, depth2);
+            timeframe_selected_div = timeframeDiv;
+            timeframeDiv.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const reportsInTimeframe = groupBy(withTimeframe, 'timeframe')[timeframe];
+              const filenames = [...new Set(reportsInTimeframe.map(r => r['filename']))].sort();
+      
+              toggleSubItems(
+                timeframeDiv,
+                filenames,
+                `fileDiv-${reportDiv.id}-${year}-${timeframe}`,
+                groupBy(reportsInTimeframe, 'filename'),
+                depth2 + 1,
+                (fileDiv, filename, depth3) => {
+                  fillFolderRow(fileDiv, filename, depth3);
+                  fileDiv.addEventListener('click', e => {
+                    e.stopPropagation();
+                    console.log('File clicked:', filename);
+                    const matchingReports = reports.filter(r => r['filename'] === filename);
+                    displayReportDetails(matchingReports, fileDiv, depth3, `${company}/${country}/${reportType}`);
+                  });
+                }
+              );
+            });
+          }
+        );
+      
+        // ✅ Also directly show filenames under the year (skipping timeframe) for empty timeframe
+        if (withoutTimeframe.length > 0) {
+          const filenames = [...new Set(withoutTimeframe.map(r => r['filename']))].sort();
+      
+          toggleSubItems(
+            yearDiv,
+            filenames,
+            `fileDiv-${reportDiv.id}-${year}-notimeframe`,
+            groupBy(withoutTimeframe, 'filename'),
+            depth + 1, // one level deeper than year
+            (fileDiv, filename, depth2) => {
+              fillFolderRow(fileDiv, filename, depth2);
+              fileDiv.addEventListener('click', e => {
+                e.stopPropagation();
+                console.log('File clicked:', filename);
+                const matchingReports = reports.filter(r => r['filename'] === filename);
+                displayReportDetails(matchingReports, fileDiv, depth2, `${company}/${country}/${reportType}`);
+              });
+            }
+          );
+        }
+        if (timeframes.length == 1) {
+          timeframe_selected_div.click();
+        }
+      });
+    }
+  );
+  if (years.length == 1) {
+    year_selected_div.click();
+  }
+}
+
+function groupBy(arr, key) {
+  return arr.reduce((acc, item) => {
+    const k = item[key];
+    if (!acc[k]) acc[k] = [];
+    acc[k].push(item);
+    return acc;
+  }, {});
+}
+
+
+function toggleSubItems(triggerDiv, keys, idPrefix, dataMap, level, renderFn) {
+  const parent = triggerDiv.parentNode;
+  const baseId = triggerDiv.id;
+  const markerId = `${baseId}-marker-${idPrefix}`;
+  const existingMarker = document.getElementById(markerId);
+
+  const arrow = triggerDiv.querySelector('.svg-arrow');
+  const isOpen = triggerDiv.classList.contains('open');
+
+  if (existingMarker) {
+    // Remove subitems
+    let next = triggerDiv.nextElementSibling;
+    while (next && next !== existingMarker) {
+      const toRemove = next;
+      next = next.nextElementSibling;
+      parent.removeChild(toRemove);
+    }
+    parent.removeChild(existingMarker);
+
+    // Collapse arrow and folder row state
+    arrow?.classList.add('collapsed');
+    triggerDiv.classList.remove('open');
+    return;
+  }
+
+  // Expand logic
+  const fragment = document.createDocumentFragment();
+  for (const key of keys) {
+    const div = document.createElement('div');
+    div.id = `${idPrefix}-${key}`;
+    div.classList.add(`${idPrefix}-div`);
+    renderFn(div, key, level);
+    fragment.appendChild(div);
+  }
+
+  const marker = document.createElement('div');
+  marker.id = markerId;
+  marker.style.display = 'none';
+  fragment.appendChild(marker);
+
+  // Insert before next top-level element (or end)
+  let nextSibling = triggerDiv.nextElementSibling;
+
+  parent.insertBefore(fragment, nextSibling);
+
+  // Update visual state
+  arrow?.classList.remove('collapsed');
+  triggerDiv.classList.add('open');
+}
+
+function fillFolderRow(folderRow, text, depth) {
+  folderRow.className = 'history-row folder-row'; // mark as collapsed initially
+  folderRow.style.paddingLeft = `${depth * 2}rem`;
+  folderRow.style.display = 'inline-flex';
+  folderRow.style.alignItems = 'center';
+
+  const svg = `<svg class="svg-arrow collapsed" style="margin-left: 2rem;margin-right: 1rem;" width="20.593" height="22.88" fill="2255ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 66.91">
+                <g><path fill="#2255ff" d="M11.68,1.95C8.95-0.7,4.6-0.64,1.95,2.08c-2.65,2.72-2.59,7.08,0.13,9.73l54.79,53.13l4.8-4.93l-4.8,4.95 c2.74,2.65,7.1,2.58,9.75-0.15c0.08-0.08,0.15-0.16,0.22-0.24l53.95-52.76c2.73-2.65,2.79-7.01,0.14-9.73 c-2.65-2.72-7.01-2.79-9.73-0.13L61.65,50.41L11.68,1.95L11.68,1.95z"/></g>
+              </svg>`;
+  folderRow.innerHTML = svg;
+
+  const folderName = document.createElement('div');
+  folderName.style.display = 'flex';
+  folderName.style.cssText = 'text-indent: 0 !important;';
+  const folderNameSpan = document.createElement('span');
+  folderNameSpan.innerHTML = text;
+
+  const tagsDiv = document.createElement('div');
+  tagsDiv.id = `tagsDiv-${folderRow.id}`;
+  tagsDiv.style.marginRight = '5rem';
+  tagsDiv.style.marginLeft = '1rem';
+
+  folderName.appendChild(folderNameSpan);
+  folderRow.appendChild(folderName);
+  folderRow.appendChild(tagsDiv);
+}
+
+function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
+  // Clear old entries
+  const markerId = `${containerDiv.id}-report-detail-marker`;
+  const parent = containerDiv.parentNode;
+  const existingMarker = document.getElementById(markerId);
+  const arrow = containerDiv.querySelector('.svg-arrow');
+  arrow?.classList.add('collapsed');
+
+  if (existingMarker) {
+    let next = containerDiv.nextElementSibling;
+    while (next && next !== existingMarker) {
+      const toRemove = next;
+      next = next.nextElementSibling;
+      parent.removeChild(toRemove);
+    }
+    parent.removeChild(existingMarker);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  for (const child of reports) {
+    let childPath = child.filename;
+    let childFileName = childPath.split('/').pop();
+    let isSubmission = false;
+    let reportId = child.report_id;
+
+    if (child.report_submission_name) {
+      childFileName = child.report_submission_name;
+      childPath = child.report_submission_name;
+      isSubmission = true;
+      reportId = child.submission_id;
+    }
+
+    const childRow = document.createElement('div');
+    childRow.className = 'history-row file-row';
+    childRow.id = `childRow-${path}/${childPath}`;
+    childRow.style.paddingLeft = `${(depth + 1) * 2}rem`;
+    childRow.style.justifyContent = 'space-between';
+    childRow.style.alignItems = 'center';
+    childRow.style.paddingRight = '5rem';
+
+    const fileNameDiv = document.createElement('div');
+    fileNameDiv.textContent = childFileName;
+
+    const tagsDiv = document.createElement('div');
+    tagsDiv.style.marginRight = '5rem';
+    tagsDiv.style.marginLeft = '1rem';
+    tagsDiv.style.textIndent = 0;
+
+    const statusMatch = statusMapping(child.status);
+    if (!isSubmission) {
+      const statusTag = createColReport('');
+      if (statusMatch.status === 'Deleted') {
+        childRow.style.textDecoration = 'line-through';
+      }
+
+      const dot = document.createElement('span');
+      dot.style.width = '0.8em';
+      dot.style.height = '0.8em';
+      dot.style.borderRadius = '50%';
+      dot.style.background = statusMatch.color;
+      dot.style.marginRight = '0.6rem';
+
+      const text = document.createElement('span');
+      text.textContent = `${statusMatch.status}`;
+
+      statusTag.appendChild(dot);
+      statusTag.appendChild(text);
+      statusTag.style.cursor = 'pointer';
+      statusTag.onclick = () => {
+        if (activeStatus === status[0]) {
+          filterReportHistory();
+          activeStatus = '';
+        } else {
+          filterReportHistory(status[0]);
+          activeStatus = status[0];
+        }
+      };
+
+      let title = statusMatch.description;
+      if (child.position != null) {
+        title += `\nPosition in queue: ${child.position}`;
+      }
+      title += `\nLast updated: ${new Date(child.updated_at).toLocaleString('DE')}`;
+      statusTag.title = title;
+
+      statusTag.style.padding = '0.4rem 1rem';
+      statusTag.style.justifyContent = 'center';
+      statusTag.style.display = 'flex';
+      statusTag.style.alignItems = 'center';
+      statusTag.style.borderRadius = '1rem';
+
+      tagsDiv.appendChild(statusTag);
+    }
+
+    const icons = document.createElement('div');
+    icons.style.display = 'flex';
+
+    if (statusMatch.position >= 3 && !isSubmission) {
+      icons.appendChild(addOpenIconExtracted(reportId));
+    }
+
+    icons.appendChild(addOpenIconReport(childFileName, childPath, isSubmission, reportId));
+    icons.appendChild(addDownloadIcon(childFileName, childPath, isSubmission, reportId));
+
+    if (window.userPermissions['sharereport'] === true) {
+      icons.appendChild(addShareCol(childFileName, childPath, isSubmission, reportId));
+    }
+
+    if (window.userPermissions['deletereport'] === true) {
+      icons.appendChild(child.can_delete ? addTrashIcon(childFileName, child) : emptyCol());
+    }
+
+    let icon;
+    if (child.can_submit) {
+      icon = sendReportIcon(childFileName, childPath, window.userPermissions['filereport'], child.no_submit_reason);
+      if (child.no_submit_reason) {
+        icon.title = child.no_submit_reason;
+        icon.style.opacity = '0.5';
+        icon.onclick = () => {
+          showMessage(child.no_submit_reason, false);
+        };
+      }
+    } else {
+      icon = emptyCol();
+    }
+
+    icons.appendChild(icon);
+
+    childRow.appendChild(fileNameDiv);
+    childRow.appendChild(tagsDiv);
+    childRow.appendChild(icons);
+
+    fragment.appendChild(childRow);
+  }
+  const marker = document.createElement('div');
+  marker.id = markerId;
+  marker.style.display = 'none';
+  fragment.appendChild(marker);
+
+  // then insert
+  parent.insertBefore(fragment, containerDiv.nextSibling);
+
+  // finally toggle arrow open
+  arrow?.classList.remove('collapsed');
+  containerDiv.classList.add('open');
+
+  // Always insert immediately after the clicked row:
+  parent.insertBefore(fragment, containerDiv.nextSibling);
+}
+
+
+
 
 function showReportUpdateNew(report) {
   folders = [report['company'], report['country'], report['report_type'], report['year']];
@@ -1498,29 +1909,19 @@ function countFileRowSiblings(element) {
 
 var activeStatus = '';
 
-function updateReportStatusOverview(data) {
+function updateReportStatusOverview(status_overview) {
   const reportStatusContainer = document.getElementById('reportStatusContainer');
   reportStatusContainer.style.display = 'flex';
   const reportStatus = document.getElementById('reportStatus');
   reportStatus.style.display = 'flex';
   reportStatus.innerHTML = '';
 
-  const statusCounts = {};
-  for (let report of data) {
-    if (report.receipt) {
-      continue;
-    }
-    if (report.status == 'deferred') {
-      continue;
-    }
-    if (statusCounts[report.status] == undefined) {
-      statusCounts[report.status] = 1;
-    } else {
-      statusCounts[report.status]++;
-    }
-  }
-  const statusCountsSorted = Object.entries(statusCounts).sort((a, b) => statusMapping(a[0]).position - statusMapping(b[0]).position);
+  const statusCountsSorted = Object.entries(status_overview).sort(
+        (a, b) => statusMapping(a[0]).position - statusMapping(b[0]).position);
   for (let status of statusCountsSorted) {
+    if (status[0] == 'deferred') {
+      continue;
+    }
     const col = document.createElement('div');
     const statusMatch = statusMapping(status[0]);
   
@@ -1564,30 +1965,26 @@ function updateReportStatusOverview(data) {
 
 function createOverview(data, init) {
     const configDiv = document.getElementById("reportshistory");
-    const {hierarchy, tags} = buildHierarchy(data);
-    console.log(hierarchy);
 
-    var possibleCompanies = new Set();
     var possibleCountries = new Set();
     var possibleReportTypes = new Set();
-    var possiblePeriods = new Set();
+    var possiblePeriods = new Set(); // TODO
     var possibleReceipts = new Set(['My Reports', 'New Reports', 'Receipts Only', 'Reports Only']);
-    if (data.length == 0) {
+    if (Object.keys(data).length == 0) {
       configDiv.innerHTML = 'No reports found';
       configDiv.classList.add('no-reports-found');
       return;
     } else {
       configDiv.classList.remove('no-reports-found');
     }
-    for (let file of data) {
-        possibleCompanies.add(file['company']);
-        possibleCountries.add(file['country']);
-        possibleReportTypes.add(file['report_type']);
-        if (file['timeframe'] != '') {
-            possiblePeriods.add(file['timeframe'] + ' ' + file['year']);
-        } else {
-            possiblePeriods.add(`${file['year']}`);
+    console.log(data);
+    for (let company of Object.keys(data)) {
+      for (let country of Object.keys(data[company])) {
+        possibleCountries.add(country);
+        for (let reportType of Object.keys(data[company][country])) {
+          possibleReportTypes.add(reportType);
         }
+      }
     }
     possibleCountries = Array.from(possibleCountries).sort();
     possibleReportTypes = Array.from(possibleReportTypes).sort();
@@ -1600,8 +1997,6 @@ function createOverview(data, init) {
       document.getElementById('receiptsDropdown').value = 'My Reports';
       $('.selectpicker').selectpicker('refresh');
     }
-
-    createFolderStructure(configDiv, hierarchy, tags);
 }
 
 function debounce(func, delay) {  // only update when user stops typing
@@ -1713,7 +2108,7 @@ function filterReportHistory(status = '', updateTree = true, init = false) {
   filteredData.sort((a, b) => {
     return a['company'].localeCompare(b['company']);
   });
-  updateReportStatusOverview(filteredData);
+  {% comment %} updateReportStatusOverview(filteredData); {% endcomment %}
   if (updateTree) {
     createOverview(filteredData, init);
   }
