@@ -1216,7 +1216,7 @@ async function getReportsDetails(company, country, reportType) { // gets only th
 
 function addReportsToAllReports(reports) {
   for (let report of reports) {
-    if (allReports.find(r => (r['report_id'] != undefined && r['report_id'] == report['report_id']) || (r['submission_id'] != undefined && r['submission_id'] == report['submission_id']))) {
+    if (allReports.find(r => (r['report_id'] != undefined && r['report_id'] == report['report_id']) || (r['submission_id'] != undefined && r['submission_id'] == report['submission_id'] && r['report_submission_name'] == report['report_submission_name']))) {
       continue;
     }
     allReports.push(report);

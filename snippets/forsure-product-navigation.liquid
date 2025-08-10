@@ -129,15 +129,48 @@
   background-color: #2255ff;
 }
 
-#gear-icon svg, #gear-iconMobile svg{
+#gear-iconMobile svg{
   fill: #17161c;
-  height: 45px;
-  width: 45px;
+  height: 45px!important;
+  width: 45px!important;
+}
+
+.iconbig svg {
+  fill: #17161c;
+  height: 45px!important;
+  width: 45px!important;
+}
+
+.iconbig #guideButton svg, .iconbig #agency-home-icon svg {
+  height: 38px!important;
+  width: 38px!important;
+}
+.iconbig #notificationBell svg {
+  height: 33px!important;
+  width: 33px!important;
 }
 
 #headerIcons .dropdown {
   width: 15rem!important;
   margin-left: 1rem!important;
+}
+
+#headerIcons #gear-icon svg{
+    fill: #17161c;
+    width: 28.5px;
+    height: 28.5px;
+}
+#agency-home-icon svg {
+  width: 26px;
+}
+
+#notification-badge-header {
+    top: 3px!important;
+    right: -4px!important;
+    font-size: 10px!important;
+    min-width: 14px!important;
+    height: 14px!important;
+    text-align: center;
 }
 {%- endstyle -%}
 
@@ -232,73 +265,15 @@
       {% assign currentLink = pathParts | last %}
       {% assign partsPathsLen = pathParts.size | minus: 1 %}
       {% assign currentPath = pathParts | slice: 0, partsPathsLen | join: '/' %}
-      <script>
-        async function getNavbarElements() {
-            try {
-                var data = await unifiedSendRequest(NAVBAR, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
-                window.userPermissions = data;
-                var available_url = null;
-                for (const [nav_element, show] of Object.entries(data)) {
-                    if (show === true) {
-                      // Add 'greyed_out' class to elements that should be hidden or disabled
-                      const element = document.getElementById(`a-${nav_element}`);
-                      const wrapper = document.getElementById(`list-element-${nav_element}`);
-                      if (element) {
-                          element.classList.remove('greyed_out');
-                          wrapper.classList.remove('greyed_out_wrapper');
-                          if (available_url === null) {
-                            available_url = nav_element;
-                          }
-                      }
-                    } else if (show === false) {
-                    } else {
-                      // Special case for 'forsure-statistics' if no orders received
-                      const tooltip = document.getElementById(`greyedout-tooltip-${nav_element}`);
-                      tooltip.innerText = show;
-                    }
-                }
-                if (data['{{ currentLink }}'] != true && data['{{ currentLink }}?logged_in'] != true) {
-                    if (available_url === null) {
-                      window.location.href = '/';
-                    } else {
-                      if (`{{ currentPath }}` === '') {
-                        window.location.href = `pages/${available_url}`;
-                      } else {
-                        window.location.href = `{{ currentPath }}/${available_url}`;
-                      }
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to get navigation:', error);
-                showMessage('Failed to get navigation: ' + error.message, false);
-            }
-        }
-        document.addEventListener('DOMContentLoaded', getNavbarElements);
-      </script>
-    {% if customer.tags contains 'dashboard' %}
+    {% comment %} {% if customer.tags contains 'dashboard' %} {% endcomment %}
         <style>
-            #headerIcons #gear-icon svg{
-                width: 28.5px;
-                height: 28.5px;
-            }
-            .badgeNotification {
-                top: 3px;
-                position: absolute;
-                right: -4px;
-                background-color: #a80000;
-                color: white;
-                border-radius: 50%;
-                font-size: 10px;
-                min-width: 14px;
-                height: 14px;
-                text-align: center;
-                align-items: center;
-                font-weight: bold;
-            }
+
         </style>
         <div style="display: flex;flex-direction: column;margin-bottom: 1.5rem;">
             <div id="headerIcons" style="display: flex;justify-content: space-evenly;">
-                <div style="width: 26px;cursor: pointer;align-items: center;display: flex;margin: auto 0;" onclick='window.location.href="https://for-sure.net/pages/forsure-agency-dashboard";'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="2255ff" d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/></svg></div>
+                <div style="cursor: not-allowed;align-items: center;display: flex;margin: auto 0;"
+                   id="agency-home-icon" style="pointer-events: none;" title="Only available for agency users"
+                   onclick='showAgencyDashboard()'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="2255ff" d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/></svg></div>
                 <div id="guideButton" aria-label="Guide" onclick="showGuideFromButton(this)"
                     style="color: black;margin: auto 0;display: flex">
                     <svg xmlns="http://www.w3.org/2000/svg" height="26px" version="1.0" viewBox="0 0 200 200" style="cursor: pointer" onclick="showGuide()">
@@ -315,35 +290,30 @@
                     <svg onclick="displayNotificationBox()" style="justify-content: center;align-self: center;cursor: pointer;margin-top: 0.5rem;" height="23" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                             <path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"/>
                         </svg>
-                        <div id="notification-badge" class="badgeNotification hidden">1</div>
+                        <div id="notification-badge-header" class="badgeNotification hidden">1</div>
                 </div>
             </div>
-            <div id="headerIcons">
-                <div style="display: flex;">
+            <div>
+                <div style="display: none;" id="companiesWrapper">
                     <div class="filter-group" style='justify-content: center;    align-self: center;'>
                     <!-- <div class="filter-group-heading">Companies</div> -->
                     <select
-                    id="companies"
+                    id="companiesDropdown"
                     class="selectpicker"
                     data-live-search="true">
                     <option value="DE">ForSURE Europe B.V.</option>
-                    <option value="DE">Aurora Innovations B.V.</option>
-                    <option value="DE">Blue Horizon Ventures B.V.</option>
-                    <option value="DE">Redstone Technologies B.V.</option>
-                    <option value="DE">OpalWave B.V.</option>
-                    <option value="DE">Quantum Leap B.V.</option>
-                    <option value="DE">Bright Future B.V.</option>
-                    <option value="DE">Silver Lake Ventures B.V.</option>
                     </select>
                 </div>
                 
-                <script>
+                {% comment %} <script>
                 if (typeof $('.selectpicker').selectpicker === 'function') {
                     $('.selectpicker').selectpicker('refresh');
-                }</script>
+                }</script> {% endcomment %}
             </div>
         </div>
+        </div>
 
+        {% comment %} 
     {% else %}
       <style>
         .slider-mobile-gutter {
@@ -376,11 +346,119 @@
           <div id="notification-badge" class="badgeNotification hidden" style="top: 0px">1</div>
       </div>
       {% else %}
-            
-      {% endif %}
+             {% endcomment %}
+      {% comment %} {% endif %} {% endcomment %}
     </slider-component>
     <!-- </nav> -->
   </div>
+  <script>
+    async function getNavbarElements() {
+        const flashMessage = sessionStorage.getItem('flashMessage');
+        if (flashMessage) {
+          showMessage(flashMessage, true);
+          sessionStorage.removeItem('flashMessage'); // clear so it only shows once
+        }
+        try {
+            var data = await unifiedSendRequest(NAVBAR, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+            window.userPermissions = data;
+            var available_url = null;
+            for (const [nav_element, show] of Object.entries(data)) {
+                if (show === true) {
+                  // Add 'greyed_out' class to elements that should be hidden or disabled
+                  const element = document.getElementById(`a-${nav_element}`);
+                  const wrapper = document.getElementById(`list-element-${nav_element}`);
+                  if (element) {
+                      element.classList.remove('greyed_out');
+                      wrapper.classList.remove('greyed_out_wrapper');
+                      if (available_url === null) {
+                        available_url = nav_element;
+                      }
+                  }
+                } else if (show === false) {
+                } else if (nav_element === 'companies') {
+                  selectedCompany = null;
+                  if (Object.keys(data['companies']).length > 1) {
+                    document.getElementById('companiesWrapper').style.display = 'flex';
+                    document.getElementById('companiesDropdown').innerHTML = '';
+                    for (const [company, select] of Object.entries(data['companies'])) {
+                      console.log(company);
+                      document.getElementById('companiesDropdown').innerHTML += `<option value="${company}">${company.replace('/', '')}</option>`;
+                      if (select === true) {
+                        selectedCompany = company;
+                      }
+                    }
+                    if (selectedCompany !== null) {
+                      console.log('Selected: ', selectedCompany);
+                      document.getElementById('companiesDropdown').value = selectedCompany;
+                    }
+                    $('#companiesDropdown').selectpicker('refresh');
+                  } else {
+                    document.getElementById('companiesWrapper').style.display = 'none';
+                    document.getElementById('headerIcons').classList.add('iconbig');
+                    document.getElementById('guideButton').style.margin = 'auto 1rem';
+                    document.getElementById('guideButton').style.marginTop = '11px';
+                    document.getElementById('gear-icon').style.margin = 'auto 1rem';
+                    document.getElementById('gear-icon').style.marginTop = '7px';
+                    document.getElementById('notificationBell').style.margin = 'auto 1rem';
+                    document.getElementById('notificationBell').style.marginTop = '1rem';
+                    document.getElementById('ul-submenu').style.marginTop = '0rem';
+                    document.getElementById('agency-home-icon').style.margin = 'auto 1rem';
+                    document.getElementById('notification-badge-header').style.top = '0px';
+                  }
+                  
+                } else {
+                  // Special case for 'forsure-statistics' if no orders received
+                  const tooltip = document.getElementById(`greyedout-tooltip-${nav_element}`);
+                  console.log(tooltip);
+                  console.log(nav_element);
+                  tooltip.innerText = show;
+                }
+            }
+            if (data['{{ currentLink }}'] != true && data['{{ currentLink }}?logged_in'] != true) {
+                if (available_url === null) {
+                  window.location.href = '/';
+                } else {
+                  if (`{{ currentPath }}` === '') {
+                    window.location.href = `pages/${available_url}`;
+                  } else {
+                    window.location.href = `{{ currentPath }}/${available_url}`;
+                  }
+                }
+            }
+          if (window.userPermissions['forsure-agency-dashboard']) {
+            document.getElementById('agency-home-icon').style.cursor = 'pointer';
+            document.getElementById('agency-home-icon').title = 'Agency Overview';
+          }
+        } catch (error) {
+            console.error('Failed to get navigation:', error);
+            showMessage('Failed to get navigation: ' + error.message, false);
+        }
+    }
+    function showAgencyDashboard() {
+      if (window.userPermissions['forsure-agency-dashboard'] === true) {
+        window.location.href="https://for-sure.net/pages/forsure-agency-dashboard";
+      }
+    }
+
+
+    document.getElementById('companiesDropdown').addEventListener('change', async function() {
+      console.log(document.getElementById('companiesDropdown').value);
+      try {
+        const formData = new FormData();
+        formData.append('company_name', document.getElementById('companiesDropdown').value);
+        var data = await unifiedSendRequest(ACCESS_SWITCH_COMPANY, {method: 'POST', formData: formData});
+        company = document.getElementById('companiesDropdown').value.replace('/', '');
+        const message = `Switched to company ${company}`;
+        sessionStorage.setItem('flashMessage', message); // store in session storage
+        window.location.reload();
+        {% comment %} window.location.href = `{{ routes.root_url }}`; {% endcomment %}
+      } catch (error) {
+        console.error('Failed to get navigation:', error);
+        showMessage('Failed to get navigation: ' + error.message, false);
+      }
+    });
+    document.addEventListener('DOMContentLoaded', getNavbarElements);
+  </script>
 {% elsif customer.id %}
     <script>
   window.location.href = '{{ routes.root_url }}';

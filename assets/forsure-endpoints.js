@@ -113,6 +113,7 @@ ACCESS_ROLES = 'access/roles'
 ACCESS_ADD_USER = 'access/add'
 ACCESS_ADD_API_TOKEN = 'access/add-api-token'
 ACCESS_DELETE_USER = 'access/delete'
+ACCESS_SWITCH_COMPANY = 'access/switch-company'
 
 CATEGORYLISTWEBSOCKET = 'categorylist/ws'
 CATEGORYLISTVERSION = 'categorylist/versions'

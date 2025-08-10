@@ -3506,7 +3506,7 @@ async function openZeroDeclarationModal() {
     proDropdown.innerHTML = '';
     timeframeDropdown.innerHTML = '';
     companyDropdown.innerHTML = '';
-    Object.keys(data).forEach(country => {
+    Object.keys(data).sort().forEach(country => {
       const option = new Option(country, country);
       countryDropdown.appendChild(option);
     });
@@ -3524,7 +3524,7 @@ async function openZeroDeclarationModal() {
       timeframeDropdown.innerHTML = "";
       companyDropdown.innerHTML = "";
 
-      reportTypes.forEach(reportType => {
+      reportTypes.sort().forEach(reportType => {
         const option = new Option(reportType, reportType);
         reporttypeDropdown.appendChild(option);
       });
@@ -3546,7 +3546,7 @@ async function openZeroDeclarationModal() {
       timeframeDropdown.innerHTML = "";
       companyDropdown.innerHTML = "";
 
-      Object.keys(pros).forEach((pro) => {
+      Object.keys(pros).sort().forEach((pro) => {
         const label = `${pro}`;
         const option = new Option(label, label);
         proDropdown.appendChild(option);
@@ -3566,7 +3566,7 @@ async function openZeroDeclarationModal() {
       timeframeDropdown.innerHTML = "";
       timeframeDropdown.value = "";
       companyDropdown.innerHTML = "";
-      timeframes.forEach((timeframe) => {
+      timeframes.sort().forEach((timeframe) => {
         const [timeframeMonth, year] = timeframe;
         if (timeframeMonth === '') {
           label = `${year}`;
@@ -3597,7 +3597,7 @@ async function openZeroDeclarationModal() {
       const companies = clients[country]?.[reportType]?.[pro] || [];
       companyDropdown.innerHTML = "";
       companyDropdown.value = "";
-      companies.forEach(company => {
+      companies.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).forEach(company => {
         const option = new Option(company, company);
         companyDropdown.appendChild(option);
       });
@@ -3605,7 +3605,6 @@ async function openZeroDeclarationModal() {
     });
 
     companyDropdown.addEventListener("change", function () {
-      console.log('Chose company', this.value);
       const country = countryDropdown.value;
       const reportType = reporttypeDropdown.value;
       const pro = proDropdown.value;
