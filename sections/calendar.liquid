@@ -1,577 +1,577 @@
-  {{ 'section-free-plan-form.css' | asset_url | stylesheet_tag }}
-  {{ 'customer.css' | asset_url | stylesheet_tag }}
-  {{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+{{ 'section-free-plan-form.css' | asset_url | stylesheet_tag }}
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
 
-  {%- style -%}
+{%- style -%}
 
-          input[type="checkbox"]:checked {
-              border-radius: 2px;
-              appearance: none;
-              -webkit-appearance: none;
-              -moz-appearance: none;
-              width: 17px;
-              height: 17px;
-              cursor: pointer;
-              position: relative;
-              top: 5px;
-              background: #2255ff url("data:image/gif;base64, R0lGODlhCwAKAIABAP/// / 3cnSH5BAEKAAEALAAAAAALAAoAAAIUjH+AC73WHIsw0UCjglraO20PNhYAOw==") 3px 3px no-repeat !important;
-          }
-          input[type="checkbox"] {
-              border-radius: 2px;
-              border: solid 0.1rem #17161c;
-              appearance: none;
-              -webkit-appearance: none;
-              -moz-appearance: none;
-              width: 17px;
-              height: 17px;
-              cursor: pointer;
-              position: relative;
-              top: 5px;
-          }
-          .leftSide {
-              width: 44rem;
-              min-width: 44rem;
-              padding-right: 5%;
-          }
-          .image-class {
-          width: 100%;
-          height: auto;
-          display: block;
-          margin: 0 auto;
-          border-radius:25px;
+        input[type="checkbox"]:checked {
+            border-radius: 2px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+            position: relative;
+            top: 5px;
+            background: #2255ff url("data:image/gif;base64, R0lGODlhCwAKAIABAP/// / 3cnSH5BAEKAAEALAAAAAALAAoAAAIUjH+AC73WHIsw0UCjglraO20PNhYAOw==") 3px 3px no-repeat !important;
         }
-        .contact-text {
-          padding: 5%;
-          text-align: left;
-          /* hyphens: auto;
-          -webkit-hyphens: auto; */
-          text-align-last: left;
-          /* -moz-hyphens: auto; */
+        input[type="checkbox"] {
+            border-radius: 2px;
+            border: solid 0.1rem #17161c;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+            position: relative;
+            top: 5px;
         }
-        .field__input {
-          height: 5.5rem;
+        .leftSide {
+            width: 44rem;
+            min-width: 44rem;
+            padding-right: 5%;
         }
-        .field {
-            margin: 1rem 0;
-        }
+        .image-class {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        border-radius:25px;
+      }
+      .contact-text {
+        padding: 5%;
+        text-align: left;
+        /* hyphens: auto;
+        -webkit-hyphens: auto; */
+        text-align-last: left;
+        /* -moz-hyphens: auto; */
+      }
+      .field__input {
+        height: 5.5rem;
+      }
+      .field {
+          margin: 1rem 0;
+      }
 
+      .left-column {
+        color:#FAFAFA;
+        margin-right:5%;
+        padding:1%;
+        margin-left:5%;
+      }
+
+      .button-center {
+        display: flex;
+      justify-content: center;
+      }
+      @media screen and (max-width: 1150px) {
+        .leftSide {
+            width: 100%;
+            padding-right: 0;
+        }
+      }
+
+      @media screen and (min-width: 750px) {
+        .section-{{ section.id }}-padding {
+          padding-top: {{ section.settings.padding_top }}px;
+          padding-bottom: {{ section.settings.padding_bottom }}px;
+        }
+      }
+      @media screen and (min-width: 1000px) {
         .left-column {
-          color:#FAFAFA;
-          margin-right:5%;
-          padding:1%;
-          margin-left:5%;
+          width:22%;
         }
-
+        .right-column {
+          width:30%;
+        }
+        .wrapper-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
         .button-center {
           display: flex;
-        justify-content: center;
+        justify-content: left;
         }
-        @media screen and (max-width: 1150px) {
-          .leftSide {
-              width: 100%;
-              padding-right: 0;
-          }
-        }
-
-        @media screen and (min-width: 750px) {
-          .section-{{ section.id }}-padding {
-            padding-top: {{ section.settings.padding_top }}px;
-            padding-bottom: {{ section.settings.padding_bottom }}px;
-          }
-        }
-        @media screen and (min-width: 1000px) {
-          .left-column {
-            width:22%;
-          }
-          .right-column {
-            width:30%;
-          }
-          .wrapper-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-          .button-center {
-            display: flex;
-          justify-content: left;
-          }
-        }
-
-
-      .image-container {
-        display: flex!important;
-        /* justify-content: space-between; */
-        /* align-items: center; */
-        /* background-color: #fafafa; */
-        border-radius: 1rem;
-        /* border: 0.2rem solid #17161c; */
-        width: 100%;
-      }
-      .image-wrapper {
-        width: 50%;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: auto;
-        margin-bottom: auto;
       }
 
-      #img1, #img2,#img3 {
-        border-radius: {{section.settings.imageWidth | divided_by: 2}}rem;
-        width: {{section.settings.imageWidth}}rem;
-        height: {{section.settings.imageHeight}}rem;
+
+    .image-container {
+      display: flex!important;
+      /* justify-content: space-between; */
+      /* align-items: center; */
+      /* background-color: #fafafa; */
+      border-radius: 1rem;
+      /* border: 0.2rem solid #17161c; */
+      width: 100%;
+    }
+    .image-wrapper {
+      width: 50%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+
+    #img1, #img2,#img3 {
+      border-radius: {{section.settings.imageWidth | divided_by: 2}}rem;
+      width: {{section.settings.imageWidth}}rem;
+      height: {{section.settings.imageHeight}}rem;
+      margin: auto;
+      display: block; /* changed from flex */
+      object-fit: cover; /* add this line */
+    }
+    #wrapper1, #wrapper2 {
+      margin-right: 1rem;
+    }
+    .image-with-text__media-item {
+      height: 40rem;
+    }
+    .img-title {
+      text-align: center;
+      color: #fafafa;
+    }
+      .contactGrey {
+        color: rgba(var(--color-foreground),.75);
+      }
+      .container {
+        height: fit-content;
+        width: 67vw;
+      }
+      #container {
+        background: #fafafa;
         margin: auto;
-        display: block; /* changed from flex */
-        object-fit: cover; /* add this line */
+        padding: 3rem 4rem;
+        display: flex;
+        position: relative;
       }
-      #wrapper1, #wrapper2 {
-        margin-right: 1rem;
+
+
+
+      /* Base table styles */
+      td, table {
+          border: none !important;
+          padding: 8px;
       }
-      .image-with-text__media-item {
-        height: 40rem;
+
+      .calendarTable {
+          table-layout: fixed;
+          width: 40rem;
+          max-width: 85vw;
+          border-collapse: collapse;
+          margin: 20px;
       }
-      .img-title {
-        text-align: center;
-        color: #fafafa;
+
+      .calendarTable th {
+          padding: 10px;
+          background-color: #f5f5f5;
+          font-weight: 600;
       }
-        .contactGrey {
-          color: rgba(var(--color-foreground),.75);
-        }
-        .container {
-          height: fit-content;
-          width: 67vw;
-        }
-        #container {
-          background: #fafafa;
-          margin: auto;
-          padding: 3rem 4rem;
+
+      .text-wrapper {
+          text-align: center;
+      }
+
+      /* Calendar day styles */
+      .possibletime {
+          border-radius: 100%;
+          width: 4rem;
+          height: 4rem;
+          text-align: center;
+          align-items: center;
+          display: grid;
+      }
+      .defaulttime {
+          cursor: default;
+      }
+
+      .clickable {
+          background-color: #839FFF;
+          color: #fafafa;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+      }
+
+      .clickable:hover {
+          background-color: #2255ff;
+          color: #fafafa;
+      }
+
+      .possibletime-clicked {
+          background-color: #2255ff;
+          color: #fafafa;
+      }
+
+      .another-month {
+          opacity: 0.3;
+      }
+
+      #date {
+          text-align: center;
+      }
+
+      /* Times container */
+      #times {
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 0 2rem;
+          height: 420px;
+          margin-top: 1rem;
+          width: 26rem;
+          scrollbar-width: thin;
+          scrollbar-color: #2255ff #fafafa;
+      }
+
+      /* Time slot styling */
+      .time-slot {
+          margin: 8px 0;
+          padding: 1rem 5rem;
+          width: 100%;
+          border: 1px solid #2255ff;
+          border-radius: 6px;
+          white-space: nowrap;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          background-color: #fff;
+          text-align: center;
+      }
+
+      .time-slot:hover {
+          background-color: rgba(34, 85, 255, 0.05);
+          transform: translateY(-1px);
+      }
+
+      .time-slot-clicked {
+          background-color: gray;
+          color: #fafafa;
+          cursor: default;
+          pointer-events: none;
+          padding: 1rem 1rem;
+          width: 50%;
+      }
+
+      .nextButtonTime {
+          cursor: pointer;
+          padding: 1rem 1rem;
+          background-color: #2255ff;
+          color: #fafafa;
+          width: 50%;
+          margin: 8px 0;
+          padding: 1rem 1rem;
+          border: 1px solid #2255ff;
+          border-radius: 6px;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+          text-align: center;
+      }
+
+      .time-slot-wrapper {
           display: flex;
-          position: relative;
-        }
-
-
-
-        /* Base table styles */
-        td, table {
-            border: none !important;
-            padding: 8px;
-        }
-
-        .calendarTable {
-            table-layout: fixed;
-            width: 40rem;
-            max-width: 85vw;
-            border-collapse: collapse;
-            margin: 20px;
-        }
-
-        .calendarTable th {
-            padding: 10px;
-            background-color: #f5f5f5;
-            font-weight: 600;
-        }
-
-        .text-wrapper {
-            text-align: center;
-        }
-
-        /* Calendar day styles */
-        .possibletime {
-            border-radius: 100%;
-            width: 4rem;
-            height: 4rem;
-            text-align: center;
-            align-items: center;
-            display: grid;
-        }
-        .defaulttime {
-            cursor: default;
-        }
-
-        .clickable {
-            background-color: #839FFF;
-            color: #fafafa;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .clickable:hover {
-            background-color: #2255ff;
-            color: #fafafa;
-        }
-
-        .possibletime-clicked {
-            background-color: #2255ff;
-            color: #fafafa;
-        }
-
-        .another-month {
-            opacity: 0.3;
-        }
-
-        #date {
-            text-align: center;
-        }
-
-        /* Times container */
-        #times {
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 0 2rem;
-            height: 420px;
-            margin-top: 1rem;
-            width: 26rem;
-            scrollbar-width: thin;
-            scrollbar-color: #2255ff #fafafa;
-        }
-
-        /* Time slot styling */
-        .time-slot {
-            margin: 8px 0;
-            padding: 1rem 5rem;
-            width: 100%;
-            border: 1px solid #2255ff;
-            border-radius: 6px;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background-color: #fff;
-            text-align: center;
-        }
-
-        .time-slot:hover {
-            background-color: rgba(34, 85, 255, 0.05);
-            transform: translateY(-1px);
-        }
-
-        .time-slot-clicked {
-            background-color: gray;
-            color: #fafafa;
-            cursor: default;
-            pointer-events: none;
-            padding: 1rem 1rem;
-            width: 50%;
-        }
-
-        .nextButtonTime {
-            cursor: pointer;
-            padding: 1rem 1rem;
-            background-color: #2255ff;
-            color: #fafafa;
-            width: 50%;
-            margin: 8px 0;
-            padding: 1rem 1rem;
-            border: 1px solid #2255ff;
-            border-radius: 6px;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-
-        .time-slot-wrapper {
-            display: flex;
-            gap: 1rem;
-        }
-
-        /* Loading spinner */
-        #loadingSpinnerCalendar {
-            border: 4px solid rgba(34, 85, 255, 0.1);
-            border-top: 4px solid #2255ff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: auto;
-            display: flex;
-        }
-        #loadingSpinnerCalendarContainer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #dateSelection {
-            min-height: 40vh;
-            display: flex;
-            /* border: 0.2rem solid #17161c; */
-            width: fit-content;
-            margin-bottom: 2rem;
-            margin-top: 5rem;
-            border-radius: 2rem;
-            box-shadow: 0 1px 8px 0 rgb(0 0 0 / 8%);
-        }
-
-        /* Disabled state */
-        .dateSelection-disabled {
-            position: relative;
-            /* background: rgba(0, 0, 0, 0.05); */
-            pointer-events: none;
-            /* opacity: 0.7; */
-            box-shadow: none!important;
-        }
-
-        #questionsContainer, #successContainer {
-            min-height: 40vh;
-            display: none;
-            width: fit-content;
-            margin-bottom: 2rem;
-            margin-top: 5rem;
-            border-radius: 2rem;
-            /* box-shadow: 0 1px 8px 0 rgb(0 0 0 / 8%); */
-        }
-
-        /* Month navigation */
-        #monthSelector {
-            margin: 2rem auto;
-            width: fit-content;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .calendarButton {
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
-            border-radius: 100%;
-        }
-
-        /* Questions styling */
-        .question-item {
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .question-item label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .question-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .question-input:focus {
-            outline: none;
-            border-color: #2255ff;
-            box-shadow: 0 0 0 2px rgba(34, 85, 255, 0.1);
-        }
-
-        .required {
-            color: #ff4444;
-        }
-
-        #questions {
-            margin: 3rem;
-            width: 40rem;
-        }
-
-        .containerLeft {
-            width: 40rem;
-            margin-right: 2rem;
-            border-right: 0.1rem solid #17161c;
-        }
-
-        .containerLeftSuccess {
-            width: 40rem;
-        }
-
-        #eventDetails, #eventDetailsQuestions, #eventDetailsSuccess {
-            margin-top: 5rem;
-            margin-bottom: 2rem;
-            box-shadow: none;
+          gap: 1rem;
       }
 
-      .invalid-input {
-        border-color: #ff0000 !important;
-        background-color: #fff0f0 !important;
-    }
-
-    .invalid-input:focus {
-        outline-color: #ff0000 !important;
-        box-shadow: 0 0 3px #ff0000 !important;
-    }
-    .error-message {
-        color: #ff0000;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        transition: all 0.2s ease;
-    }
-    /* #borderMiddle, #leftSide {
-        display: none;
-    } */
-    .svg-arrow {
-        cursor: pointer;
-    }
-    .arrow-disabled {
-        opacity: 0.3;
-        cursor: default;
-    }
-
-    #eventTimeQuestionsContainer {
-        display: none;
-    }
-    .emailButton {
-      padding: 2rem;
-      min-width: 0;
-      height: 100%;
-    }
-
-    .contact__fields {
-      grid-column-gap: 2rem;
-    }
-    .borderSpaces {
-      background: #fafafa;
-      display: block!important;
-      position: absolute;
-      top: 1rem;
-      width: 3rem;
-      height: 90%;
-      z-index: 2;
-    }
-
-    #pagewidthWrapper {
-      margin-top: 3rem!important;
-      margin-bottom: 3rem!important;
-      width:fit-content;
-    }
-    .transitionContainer {
-      transform: translateX(-21rem);
-      transition: transform 1s ease-in-out;
-    }
-    #timesContainer {
-        margin: 2rem 0;
-        transition: transform 0.4s ease-in-out;
-        /* margin-left: 3rem; */
-        transform: translateX(5rem);
-
-    }
-    @media (max-width: 1500px) {
-      #leftSide {
-        min-width: calc(44rem - (1500px - 100vw));
+      /* Loading spinner */
+      #loadingSpinnerCalendar {
+          border: 4px solid rgba(34, 85, 255, 0.1);
+          border-top: 4px solid #2255ff;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+          margin: auto;
+          display: flex;
       }
-    }
-    @media (max-width: 1200px) {
-        #container {
-          flex-direction: column;
-          transition: none!important;
-          transform: none!important;
-        }
-        #leftSide {
-          margin: auto;
-        }
-        #timesContainer {
-          margin: auto;
-          margin-top: 2rem;
-          transition: none!important;
-          transform: none!important;
-        }
-        .calendarTable {
-          margin: auto;
-        }
-        #borderMiddle {
-          display: none!important;
-        }
-        #timezoneContainer {
+      #loadingSpinnerCalendarContainer {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+      }
+
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+
+      #dateSelection {
+          min-height: 40vh;
+          display: flex;
+          /* border: 0.2rem solid #17161c; */
           width: fit-content;
-        }
-        #questionsContainer {
-          margin: auto;
-        }
-        .borderSpaces {
-          display: none!important;
-        }
-        #pagewidthWrapper {
-          margin: 2rem 0;
-        }
+          margin-bottom: 2rem;
+          margin-top: 5rem;
+          border-radius: 2rem;
+          box-shadow: 0 1px 8px 0 rgb(0 0 0 / 8%);
+      }
+
+      /* Disabled state */
+      .dateSelection-disabled {
+          position: relative;
+          /* background: rgba(0, 0, 0, 0.05); */
+          pointer-events: none;
+          /* opacity: 0.7; */
+          box-shadow: none!important;
+      }
+
+      #questionsContainer, #successContainer {
+          min-height: 40vh;
+          display: none;
+          width: fit-content;
+          margin-bottom: 2rem;
+          margin-top: 5rem;
+          border-radius: 2rem;
+          /* box-shadow: 0 1px 8px 0 rgb(0 0 0 / 8%); */
+      }
+
+      /* Month navigation */
+      #monthSelector {
+          margin: 2rem auto;
+          width: fit-content;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+      }
+
+      .calendarButton {
+          padding: 8px 16px;
+          border-radius: 4px;
+          transition: background-color 0.2s ease;
+          border-radius: 100%;
+      }
+
+      /* Questions styling */
+      .question-item {
+          margin-bottom: 2rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+      }
+
+      .question-item label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 500;
+      }
+
+      .question-input {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #e0e0e0;
+          border-radius: 4px;
+          font-size: 14px;
+      }
+
+      .question-input:focus {
+          outline: none;
+          border-color: #2255ff;
+          box-shadow: 0 0 0 2px rgba(34, 85, 255, 0.1);
+      }
+
+      .required {
+          color: #ff4444;
+      }
+
+      #questions {
+          margin: 3rem;
+          width: 40rem;
+      }
+
+      .containerLeft {
+          width: 40rem;
+          margin-right: 2rem;
+          border-right: 0.1rem solid #17161c;
+      }
+
+      .containerLeftSuccess {
+          width: 40rem;
+      }
+
+      #eventDetails, #eventDetailsQuestions, #eventDetailsSuccess {
+          margin-top: 5rem;
+          margin-bottom: 2rem;
+          box-shadow: none;
     }
-    @media (max-width: 950px) {
-        #dateSelection, #questionsContainer {
-            flex-direction: column;
-        }
-        .containerLeft {
-            border-right: none;
-            margin-right: 0;
-        }
+
+    .invalid-input {
+      border-color: #ff0000 !important;
+      background-color: #fff0f0 !important;
+  }
+
+  .invalid-input:focus {
+      outline-color: #ff0000 !important;
+      box-shadow: 0 0 3px #ff0000 !important;
+  }
+  .error-message {
+      color: #ff0000;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      transition: all 0.2s ease;
+  }
+  /* #borderMiddle, #leftSide {
+      display: none;
+  } */
+  .svg-arrow {
+      cursor: pointer;
+  }
+  .arrow-disabled {
+      opacity: 0.3;
+      cursor: default;
+  }
+
+  #eventTimeQuestionsContainer {
+      display: none;
+  }
+  .emailButton {
+    padding: 2rem;
+    min-width: 0;
+    height: 100%;
+  }
+
+  .contact__fields {
+    grid-column-gap: 2rem;
+  }
+  .borderSpaces {
+    background: #fafafa;
+    display: block!important;
+    position: absolute;
+    top: 1rem;
+    width: 3rem;
+    height: 90%;
+    z-index: 2;
+  }
+
+  #pagewidthWrapper {
+    margin-top: 3rem!important;
+    margin-bottom: 3rem!important;
+    width:fit-content;
+  }
+  .transitionContainer {
+    transform: translateX(-21rem);
+    transition: transform 1s ease-in-out;
+  }
+  #timesContainer {
+      margin: 2rem 0;
+      transition: transform 0.4s ease-in-out;
+      /* margin-left: 3rem; */
+      transform: translateX(5rem);
+
+  }
+  @media (max-width: 1500px) {
+    #leftSide {
+      min-width: calc(44rem - (1500px - 100vw));
     }
-    @media (max-width: 750px) {
+  }
+  @media (max-width: 1200px) {
       #container {
-        width: fit-content;
-      }
-      #pagewidthWrapper {
-        width: 80%;
-      }
-    }
-    @media (max-width: 700px) {
-      #container {
-        width: fit-content;
-      }
-      #pagewidthWrapper {
-        width: 99%;
-      }
-    }
-    @media (max-width: 550px) {
-      #container {
-        padding: 3rem 0;
-        min-width: 6rem;
-        margin: 0;
+        flex-direction: column;
+        transition: none!important;
+        transform: none!important;
       }
       #leftSide {
-        padding: 0 3rem;
-        min-width: 0;
+        margin: auto;
       }
-      #questionsContainer {
-        margin-left: auto;
-        margin-right: auto;
-        width: 85vw;
+      #timesContainer {
+        margin: auto;
+        margin-top: 2rem;
+        transition: none!important;
+        transform: none!important;
+      }
+      .calendarTable {
+        margin: auto;
+      }
+      #borderMiddle {
+        display: none!important;
       }
       #timezoneContainer {
         width: fit-content;
       }
-      #pagewidthWrapper {
-        width: 99%;
+      #questionsContainer {
+        margin: auto;
       }
+      .borderSpaces {
+        display: none!important;
+      }
+      #pagewidthWrapper {
+        margin: 2rem 0;
+      }
+  }
+  @media (max-width: 950px) {
+      #dateSelection, #questionsContainer {
+          flex-direction: column;
+      }
+      .containerLeft {
+          border-right: none;
+          margin-right: 0;
+      }
+  }
+  @media (max-width: 750px) {
+    #container {
+      width: fit-content;
     }
-  
+    #pagewidthWrapper {
+      width: 80%;
+    }
+  }
+  @media (max-width: 700px) {
+    #container {
+      width: fit-content;
+    }
+    #pagewidthWrapper {
+      width: 99%;
+    }
+  }
+  @media (max-width: 550px) {
+    #container {
+      padding: 3rem 0;
+      min-width: 6rem;
+      margin: 0;
+    }
+    #leftSide {
+      padding: 0 3rem;
+      min-width: 0;
+    }
+    #questionsContainer {
+      margin-left: auto;
+      margin-right: auto;
+      width: 85vw;
+    }
+    #timezoneContainer {
+      width: fit-content;
+    }
+    #pagewidthWrapper {
+      width: 99%;
+    }
+  }
+
 #timezoneContainer {
-  text-align: center;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
+text-align: center;
+margin: auto;
+display: flex;
+flex-direction: column;
 }
-    
+  
 .btn {
-    display: inline-block;
-    margin-bottom: 0;
-    font-weight: 400;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    -ms-touch-action: manipulation;
-    touch-action: manipulation;
-    cursor: pointer;
-    background-image: none;
-    border: 1px solid transparent;
-    padding: 6px 12px;
-    font-size: 14px;
-    line-height: 1.42857143;
-    border-radius: 4px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none
 }
 
 .btn.active.focus,
@@ -580,66 +580,66 @@
 .btn:active.focus,
 .btn:active:focus,
 .btn:focus {
-    outline: 5px auto -webkit-focus-ring-color;
-    outline-offset: -2px
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px
 }
 
 .btn.focus,
 .btn:focus,
 .btn:hover {
-    color: #333;
-    text-decoration: none
+  color: #333;
+  text-decoration: none
 }
 
 .btn.active,
 .btn:active {
-    background-image: none;
-    outline: 0;
-    -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125)
+  background-image: none;
+  outline: 0;
+  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125)
 }
 
 .btn.disabled,
 .btn[disabled],
 fieldset[disabled] .btn {
-    cursor: not-allowed;
-    filter: alpha(opacity=65);
-    opacity: .65;
-    -webkit-box-shadow: none;
-    box-shadow: none
+  cursor: not-allowed;
+  filter: alpha(opacity=65);
+  opacity: .65;
+  -webkit-box-shadow: none;
+  box-shadow: none
 }
 
 a.btn.disabled,
 fieldset[disabled] a.btn {
-    pointer-events: none
+  pointer-events: none
 }
 
 .btn-default {
-    color: #333;
-    background-color: #fff;
-    border-color: #ccc
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc
 }
 
 .btn-default.focus,
 .btn-default:focus {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #8c8c8c
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #8c8c8c
 }
 
 .btn-default:hover {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #adadad
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad
 }
 
 .btn-default.active,
 .btn-default:active,
 .open>.dropdown-toggle.btn-default {
-    color: #333;
-    background-color: #e6e6e6;
-    background-image: none;
-    border-color: #adadad
+  color: #333;
+  background-color: #e6e6e6;
+  background-image: none;
+  border-color: #adadad
 }
 
 .btn-default.active.focus,
@@ -651,9 +651,9 @@ fieldset[disabled] a.btn {
 .open>.dropdown-toggle.btn-default.focus,
 .open>.dropdown-toggle.btn-default:focus,
 .open>.dropdown-toggle.btn-default:hover {
-    color: #333;
-    background-color: #d4d4d4;
-    border-color: #8c8c8c
+  color: #333;
+  background-color: #d4d4d4;
+  border-color: #8c8c8c
 }
 
 .btn-default.disabled.focus,
@@ -665,1120 +665,1116 @@ fieldset[disabled] a.btn {
 fieldset[disabled] .btn-default.focus,
 fieldset[disabled] .btn-default:focus,
 fieldset[disabled] .btn-default:hover {
-    background-color: #fff;
-    border-color: #ccc
+  background-color: #fff;
+  border-color: #ccc
 }
 
 .btn-default .badge {
-    color: #fff;
-    background-color: #333
+  color: #fff;
+  background-color: #333
 }
 
 .reloadCalendar {
-    opacity: 0.5;
-    pointer-events: none;
+  opacity: 0.5;
+  pointer-events: none;
 }
 .hideBorder {
-  display: none!important;
+display: none!important;
 }
 .smallStart {
-  width: fit-content;
+width: fit-content;
 }
-  {%- endstyle -%}
-  <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
-  {% render 'forsure-simple-notification' %}
-  <div class="hero-gradient">
-    <div class="page-width" id="pagewidthWrapper">
-      <div style="border-radius: 2.5rem;    overflow: hidden;">
-        <div style="background: #fafafa;position:relative">
+{%- endstyle -%}
+<script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+{% render 'forsure-simple-notification' %}
+<div class="hero-gradient">
+  <div class="page-width" id="pagewidthWrapper">
+    <div style="border-radius: 2.5rem;    overflow: hidden;">
+      <div style="background: #fafafa;position:relative">
+        <div
+          onclick="backToInfo()"
+          id="backToInfo"
+          class="svg-arrow svg-arrow-padding collapsed"
+          style="display: none;width: 3rem;transform: rotate(90deg);position: absolute;top: 4rem;left: 2rem;z-index:3;"
+        >
+          {% render 'icon-arrow-rounded' %}
+        </div>
+        <div class="borderSpaces"></div>
+        <div class="borderSpaces" style="right: 0;"></div>
+        <div
+          id="container"
+          class="container sections smallStart"
+        >
           <div
-            onclick="backToInfo()"
-            id="backToInfo"
+            onclick="backToCalendar()"
+            id="backToCalendar"
             class="svg-arrow svg-arrow-padding collapsed"
-            style="display: none;width: 3rem;transform: rotate(90deg);position: absolute;top: 4rem;left: 2rem;z-index:3;"
+            style="display: none;width: 3rem;transform: rotate(90deg);position: absolute;top: 4rem;left: 3rem;"
           >
             {% render 'icon-arrow-rounded' %}
           </div>
-          <div class="borderSpaces"></div>
-          <div class="borderSpaces" style="right: 0;"></div>
-          <div
-            id="container"
-            class="container sections smallStart"
-          >
-            <div
-              onclick="backToCalendar()"
-              id="backToCalendar"
-              class="svg-arrow svg-arrow-padding collapsed"
-              style="display: none;width: 3rem;transform: rotate(90deg);position: absolute;top: 4rem;left: 3rem;"
-            >
-              {% render 'icon-arrow-rounded' %}
+          <div id="leftSide" class="leftSide section" >
+            <h1 id="eventTitle" class="h1" style="margin: 4rem 0 3rem 0;">{{ section.settings.eventTitle }}</h1>
+            <div style="display: flex">
+              {% comment %} <svg
+                style="margin: auto 0;"
+                version="1.1"
+                id="Layer_1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                x="0px"
+                y="0px"
+                width="20px"
+                height="20px"
+                viewBox="0 0 237.54 237.54"
+                style="enable-background:new 0 0 237.54 237.54"
+                xml:space="preserve"
+              >
+                <g><path fill="#17161c" d="M118.77,0c32.8,0,62.49,13.29,83.98,34.79c21.49,21.49,34.79,51.19,34.79,83.98s-13.29,62.49-34.79,83.98 c-21.49,21.49-51.19,34.79-83.98,34.79c-32.8,0-62.49-13.29-83.98-34.79C13.29,181.26,0,151.56,0,118.77s13.29-62.49,34.79-83.98 C56.28,13.29,85.97,0,118.77,0L118.77,0z M109.06,60.2c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v60l45.14,26.76 c3.08,1.82,4.11,5.8,2.29,8.89c-1.82,3.08-5.8,4.11-8.89,2.29l-47.99-28.45c-2.11-1.08-3.55-3.27-3.55-5.79V60.2L109.06,60.2z M193.56,43.98C174.42,24.84,147.98,13,118.77,13c-29.21,0-55.65,11.84-74.79,30.98C24.84,63.12,13,89.56,13,118.77 c0,29.21,11.84,55.65,30.98,74.79c19.14,19.14,45.58,30.98,74.79,30.98c29.21,0,55.65-11.84,74.79-30.98 c19.14-19.14,30.98-45.58,30.98-74.79C224.54,89.56,212.7,63.12,193.56,43.98L193.56,43.98z"/></g>
+              </svg> {% endcomment %}
+              <svg xmlns="http://www.w3.org/2000/svg" style="margin: auto 0;" width="20px" height="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#17161c" d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
+              </svg>
+              <div id="eventDuration" style="margin-left:1rem;font-weight: bold;font-size: 1.5rem;">{{ section.settings.eventDuration }}</div>
             </div>
-            <div id="leftSide" class="leftSide section" >
-              <h1 id="eventTitle" class="h1" style="margin: 4rem 0 3rem 0;">{{ section.settings.eventTitle }}</h1>
-              <div style="display: flex">
-                {% comment %} <svg
-                  style="margin: auto 0;"
-                  version="1.1"
-                  id="Layer_1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                  x="0px"
-                  y="0px"
-                  width="20px"
-                  height="20px"
-                  viewBox="0 0 237.54 237.54"
-                  style="enable-background:new 0 0 237.54 237.54"
-                  xml:space="preserve"
-                >
-                  <g><path fill="#17161c" d="M118.77,0c32.8,0,62.49,13.29,83.98,34.79c21.49,21.49,34.79,51.19,34.79,83.98s-13.29,62.49-34.79,83.98 c-21.49,21.49-51.19,34.79-83.98,34.79c-32.8,0-62.49-13.29-83.98-34.79C13.29,181.26,0,151.56,0,118.77s13.29-62.49,34.79-83.98 C56.28,13.29,85.97,0,118.77,0L118.77,0z M109.06,60.2c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v60l45.14,26.76 c3.08,1.82,4.11,5.8,2.29,8.89c-1.82,3.08-5.8,4.11-8.89,2.29l-47.99-28.45c-2.11-1.08-3.55-3.27-3.55-5.79V60.2L109.06,60.2z M193.56,43.98C174.42,24.84,147.98,13,118.77,13c-29.21,0-55.65,11.84-74.79,30.98C24.84,63.12,13,89.56,13,118.77 c0,29.21,11.84,55.65,30.98,74.79c19.14,19.14,45.58,30.98,74.79,30.98c29.21,0,55.65-11.84,74.79-30.98 c19.14-19.14,30.98-45.58,30.98-74.79C224.54,89.56,212.7,63.12,193.56,43.98L193.56,43.98z"/></g>
-                </svg> {% endcomment %}
-                <svg xmlns="http://www.w3.org/2000/svg" style="margin: auto 0;" width="20px" height="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#17161c" d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
-                </svg>
-                <div id="eventDuration" style="margin-left:1rem;font-weight: bold;font-size: 1.5rem;">{{ section.settings.eventDuration }}</div>
-              </div>
-              <div id="eventTimeQuestionsContainer">
-                {% comment %} <svg
-                  version="1.1"
-                  id="Layer_1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                  x="0px"
-                  y="0px"
-                  width="20px"
-                  height="20px"
-                  viewBox="0 0 122.88 120.06"
-                  style="enable-background:new 0 0 122.88 120.06"
-                  xml:space="preserve"
-                >
+            <div id="eventTimeQuestionsContainer">
+              {% comment %} <svg
+                version="1.1"
+                id="Layer_1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                x="0px"
+                y="0px"
+                width="20px"
+                height="20px"
+                viewBox="0 0 122.88 120.06"
+                style="enable-background:new 0 0 122.88 120.06"
+                xml:space="preserve"
+              >
 
-                  <g><path fill="#17161c" d="M69.66,4.05c0-2.23,2.2-4.05,4.94-4.05c2.74,0,4.94,1.81,4.94,4.05v17.72c0,2.23-2.2,4.05-4.94,4.05 c-2.74,0-4.94-1.81-4.94-4.05V4.05L69.66,4.05z M91.37,57.03c4.26,0,8.33,0.85,12.05,2.39c3.87,1.6,7.34,3.94,10.24,6.84 c2.9,2.9,5.24,6.38,6.84,10.23c1.54,3.72,2.39,7.79,2.39,12.05c0,4.26-0.85,8.33-2.39,12.05c-1.6,3.87-3.94,7.34-6.84,10.24 c-2.9,2.9-6.38,5.24-10.23,6.84c-3.72,1.54-7.79,2.39-12.05,2.39c-4.26,0-8.33-0.85-12.05-2.39c-3.87-1.6-7.34-3.94-10.24-6.84 c-2.9-2.9-5.24-6.38-6.84-10.24c-1.54-3.72-2.39-7.79-2.39-12.05c0-4.26,0.85-8.33,2.39-12.05c1.6-3.87,3.94-7.34,6.84-10.24 c2.9-2.9,6.38-5.24,10.23-6.84C83.04,57.88,87.1,57.03,91.37,57.03L91.37,57.03z M89.01,75.37c0-0.76,0.31-1.45,0.81-1.95l0,0l0,0 c0.5-0.5,1.19-0.81,1.96-0.81c0.77,0,1.46,0.31,1.96,0.81c0.5,0.5,0.81,1.19,0.81,1.96v14.74l11.02,6.54l0.09,0.06 c0.61,0.39,1.01,0.98,1.17,1.63c0.17,0.68,0.09,1.42-0.28,2.06l-0.02,0.03c-0.02,0.04-0.04,0.07-0.07,0.1 c-0.39,0.6-0.98,1-1.62,1.16c-0.68,0.17-1.42,0.09-2.06-0.28l-12.32-7.29c-0.43-0.23-0.79-0.58-1.05-0.99 c-0.26-0.42-0.41-0.91-0.41-1.43h0L89.01,75.37L89.01,75.37L89.01,75.37z M109.75,70.16c-2.4-2.4-5.26-4.33-8.43-5.64 c-3.06-1.27-6.42-1.96-9.95-1.96s-6.89,0.7-9.95,1.96c-3.17,1.31-6.03,3.24-8.43,5.64c-2.4,2.4-4.33,5.26-5.64,8.43 c-1.27,3.06-1.96,6.42-1.96,9.95c0,3.53,0.7,6.89,1.96,9.95c1.31,3.17,3.24,6.03,5.64,8.43c2.4,2.4,5.26,4.33,8.43,5.64 c3.06,1.27,6.42,1.96,9.95,1.96s6.89-0.7,9.95-1.96c3.17-1.31,6.03-3.24,8.43-5.64c4.71-4.71,7.61-11.2,7.61-18.38 c0-3.53-0.7-6.89-1.96-9.95C114.08,75.42,112.15,72.56,109.75,70.16L109.75,70.16z M13.45,57.36c-0.28,0-0.53-1.23-0.53-2.74 c0-1.51,0.22-2.73,0.53-2.73h13.48c0.28,0,0.53,1.23,0.53,2.73c0,1.51-0.22,2.74-0.53,2.74H13.45L13.45,57.36z M34.94,57.36 c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.73,0.53-2.73h13.48c0.28,0,0.53,1.23,0.53,2.73c0,1.51-0.22,2.74-0.53,2.74H34.94 L34.94,57.36z M56.43,57.36c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.73,0.53-2.73h13.48c0.28,0,0.53,1.22,0.53,2.72 c-1.35,0.84-2.65,1.76-3.89,2.75H56.43L56.43,57.36z M13.48,73.04c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.74,0.53-2.74h13.48 c0.28,0,0.53,1.23,0.53,2.74c0,1.51-0.22,2.74-0.53,2.74H13.48L13.48,73.04z M34.97,73.04c-0.28,0-0.53-1.23-0.53-2.74 c0-1.51,0.22-2.74,0.53-2.74h13.48c0.28,0,0.53,1.23,0.53,2.74c0,1.51-0.22,2.74-0.53,2.74H34.97L34.97,73.04z M13.51,88.73 c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.74,0.53-2.74h13.48c0.28,0,0.53,1.23,0.53,2.74c0,1.51-0.22,2.74-0.53,2.74H13.51 L13.51,88.73z M35,88.73c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.74,0.53-2.74h13.48c0.28,0,0.53,1.23,0.53,2.74 c0,1.51-0.22,2.74-0.53,2.74H35L35,88.73z M25.29,4.05c0-2.23,2.2-4.05,4.94-4.05c2.74,0,4.94,1.81,4.94,4.05v17.72 c0,2.23-2.21,4.05-4.94,4.05c-2.74,0-4.94-1.81-4.94-4.05V4.05L25.29,4.05z M5.44,38.74h94.08v-20.4c0-0.7-0.28-1.31-0.73-1.76 c-0.45-0.45-1.09-0.73-1.76-0.73h-9.02c-1.51,0-2.74-1.23-2.74-2.74c0-1.51,1.23-2.74,2.74-2.74h9.02c2.21,0,4.19,0.89,5.64,2.34 c1.45,1.45,2.34,3.43,2.34,5.64v32.39c-1.8-0.62-3.65-1.12-5.55-1.49v-5.06h0.06H5.44v52.83c0,0.7,0.28,1.31,0.73,1.76 c0.45,0.45,1.09,0.73,1.76,0.73h44.71c0.51,1.9,1.15,3.75,1.92,5.53H7.98c-2.2,0-4.19-0.89-5.64-2.34C0.89,101.26,0,99.28,0,97.07 V18.36c0-2.2,0.89-4.19,2.34-5.64c1.45-1.45,3.43-2.34,5.64-2.34h9.63c1.51,0,2.74,1.23,2.74,2.74c0,1.51-1.23,2.74-2.74,2.74H7.98 c-0.7,0-1.31,0.28-1.76,0.73c-0.45,0.45-0.73,1.09-0.73,1.76v20.4H5.44L5.44,38.74z M43.07,15.85c-1.51,0-2.74-1.23-2.74-2.74 c0-1.51,1.23-2.74,2.74-2.74h18.36c1.51,0,2.74,1.23,2.74,2.74c0,1.51-1.23,2.74-2.74,2.74H43.07L43.07,15.85z"/></g>
-                </svg> {% endcomment %}
-                <svg xmlns="http://www.w3.org/2000/svg" style="margin: auto 0;" width="20px" height="20px" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#17161c" d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L64 64C28.7 64 0 92.7 0 128l0 16 0 48L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-256 0-48 0-16c0-35.3-28.7-64-64-64l-40 0 0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L152 64l0-40zM48 192l352 0 0 256c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256z"/>
-                </svg>
-                <div id="eventTimeQuestions" style="margin-left:1rem;font-weight: bold;font-size: 1.5rem;"></div>
-              </div>
-              <div id="timezoneDisplayContainer" style="display: none">
-                <svg xmlns="http://www.w3.org/2000/svg" style="margin: auto 0;" width="20px" height="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#17161c" d="M266.3 48.3L232.5 73.6c-5.4 4-8.5 10.4-8.5 17.1l0 9.1c0 6.8 5.5 12.3 12.3 12.3c2.4 0 4.8-.7 6.8-2.1l41.8-27.9c2-1.3 4.4-2.1 6.8-2.1l1 0c6.2 0 11.3 5.1 11.3 11.3c0 3-1.2 5.9-3.3 8l-19.9 19.9c-5.8 5.8-12.9 10.2-20.7 12.8l-26.5 8.8c-5.8 1.9-9.6 7.3-9.6 13.4c0 3.7-1.5 7.3-4.1 10l-17.9 17.9c-6.4 6.4-9.9 15-9.9 24l0 4.3c0 16.4 13.6 29.7 29.9 29.7c11 0 21.2-6.2 26.1-16l4-8.1c2.4-4.8 7.4-7.9 12.8-7.9c4.5 0 8.7 2.1 11.4 5.7l16.3 21.7c2.1 2.9 5.5 4.5 9.1 4.5c8.4 0 13.9-8.9 10.1-16.4l-1.1-2.3c-3.5-7 0-15.5 7.5-18l21.2-7.1c7.6-2.5 12.7-9.6 12.7-17.6c0-10.3 8.3-18.6 18.6-18.6l29.4 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-20.7 0c-7.2 0-14.2 2.9-19.3 8l-4.7 4.7c-2.1 2.1-3.3 5-3.3 8c0 6.2 5.1 11.3 11.3 11.3l11.3 0c6 0 11.8 2.4 16 6.6l6.5 6.5c1.8 1.8 2.8 4.3 2.8 6.8s-1 5-2.8 6.8l-7.5 7.5C386 262 384 266.9 384 272s2 10 5.7 13.7L408 304c10.2 10.2 24.1 16 38.6 16l7.3 0c6.5-20.2 10-41.7 10-64c0-111.4-87.6-202.4-197.7-207.7zm172 307.9c-3.7-2.6-8.2-4.1-13-4.1c-6 0-11.8-2.4-16-6.6L396 332c-7.7-7.7-18-12-28.9-12c-9.7 0-19.2-3.5-26.6-9.8L314 287.4c-11.6-9.9-26.4-15.4-41.7-15.4l-20.9 0c-12.6 0-25 3.7-35.5 10.7L188.5 301c-17.8 11.9-28.5 31.9-28.5 53.3l0 3.2c0 17 6.7 33.3 18.7 45.3l16 16c8.5 8.5 20 13.3 32 13.3l21.3 0c13.3 0 24 10.7 24 24c0 2.5 .4 5 1.1 7.3c71.3-5.8 132.5-47.6 165.2-107.2zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM187.3 100.7c-6.2-6.2-16.4-6.2-22.6 0l-32 32c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0l32-32c6.2-6.2 6.2-16.4 0-22.6z"/></svg>
-                <div id="timezoneDisplay" style="margin-left:1rem;font-weight: bold;font-size: 1.5rem;">{{ section.settings.timezoneDisplay }}</div>
-              </div>
-              <p id="eventDescription">{{ section.settings.eventDescription }}</p>
-              <p>{{ section.settings.eventLink }}</p>
+                <g><path fill="#17161c" d="M69.66,4.05c0-2.23,2.2-4.05,4.94-4.05c2.74,0,4.94,1.81,4.94,4.05v17.72c0,2.23-2.2,4.05-4.94,4.05 c-2.74,0-4.94-1.81-4.94-4.05V4.05L69.66,4.05z M91.37,57.03c4.26,0,8.33,0.85,12.05,2.39c3.87,1.6,7.34,3.94,10.24,6.84 c2.9,2.9,5.24,6.38,6.84,10.23c1.54,3.72,2.39,7.79,2.39,12.05c0,4.26-0.85,8.33-2.39,12.05c-1.6,3.87-3.94,7.34-6.84,10.24 c-2.9,2.9-6.38,5.24-10.23,6.84c-3.72,1.54-7.79,2.39-12.05,2.39c-4.26,0-8.33-0.85-12.05-2.39c-3.87-1.6-7.34-3.94-10.24-6.84 c-2.9-2.9-5.24-6.38-6.84-10.24c-1.54-3.72-2.39-7.79-2.39-12.05c0-4.26,0.85-8.33,2.39-12.05c1.6-3.87,3.94-7.34,6.84-10.24 c2.9-2.9,6.38-5.24,10.23-6.84C83.04,57.88,87.1,57.03,91.37,57.03L91.37,57.03z M89.01,75.37c0-0.76,0.31-1.45,0.81-1.95l0,0l0,0 c0.5-0.5,1.19-0.81,1.96-0.81c0.77,0,1.46,0.31,1.96,0.81c0.5,0.5,0.81,1.19,0.81,1.96v14.74l11.02,6.54l0.09,0.06 c0.61,0.39,1.01,0.98,1.17,1.63c0.17,0.68,0.09,1.42-0.28,2.06l-0.02,0.03c-0.02,0.04-0.04,0.07-0.07,0.1 c-0.39,0.6-0.98,1-1.62,1.16c-0.68,0.17-1.42,0.09-2.06-0.28l-12.32-7.29c-0.43-0.23-0.79-0.58-1.05-0.99 c-0.26-0.42-0.41-0.91-0.41-1.43h0L89.01,75.37L89.01,75.37L89.01,75.37z M109.75,70.16c-2.4-2.4-5.26-4.33-8.43-5.64 c-3.06-1.27-6.42-1.96-9.95-1.96s-6.89,0.7-9.95,1.96c-3.17,1.31-6.03,3.24-8.43,5.64c-2.4,2.4-4.33,5.26-5.64,8.43 c-1.27,3.06-1.96,6.42-1.96,9.95c0,3.53,0.7,6.89,1.96,9.95c1.31,3.17,3.24,6.03,5.64,8.43c2.4,2.4,5.26,4.33,8.43,5.64 c3.06,1.27,6.42,1.96,9.95,1.96s6.89-0.7,9.95-1.96c3.17-1.31,6.03-3.24,8.43-5.64c4.71-4.71,7.61-11.2,7.61-18.38 c0-3.53-0.7-6.89-1.96-9.95C114.08,75.42,112.15,72.56,109.75,70.16L109.75,70.16z M13.45,57.36c-0.28,0-0.53-1.23-0.53-2.74 c0-1.51,0.22-2.73,0.53-2.73h13.48c0.28,0,0.53,1.23,0.53,2.73c0,1.51-0.22,2.74-0.53,2.74H13.45L13.45,57.36z M34.94,57.36 c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.73,0.53-2.73h13.48c0.28,0,0.53,1.23,0.53,2.73c0,1.51-0.22,2.74-0.53,2.74H34.94 L34.94,57.36z M56.43,57.36c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.73,0.53-2.73h13.48c0.28,0,0.53,1.22,0.53,2.72 c-1.35,0.84-2.65,1.76-3.89,2.75H56.43L56.43,57.36z M13.48,73.04c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.74,0.53-2.74h13.48 c0.28,0,0.53,1.23,0.53,2.74c0,1.51-0.22,2.74-0.53,2.74H13.48L13.48,73.04z M34.97,73.04c-0.28,0-0.53-1.23-0.53-2.74 c0-1.51,0.22-2.74,0.53-2.74h13.48c0.28,0,0.53,1.23,0.53,2.74c0,1.51-0.22,2.74-0.53,2.74H34.97L34.97,73.04z M13.51,88.73 c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.74,0.53-2.74h13.48c0.28,0,0.53,1.23,0.53,2.74c0,1.51-0.22,2.74-0.53,2.74H13.51 L13.51,88.73z M35,88.73c-0.28,0-0.53-1.23-0.53-2.74c0-1.51,0.22-2.74,0.53-2.74h13.48c0.28,0,0.53,1.23,0.53,2.74 c0,1.51-0.22,2.74-0.53,2.74H35L35,88.73z M25.29,4.05c0-2.23,2.2-4.05,4.94-4.05c2.74,0,4.94,1.81,4.94,4.05v17.72 c0,2.23-2.21,4.05-4.94,4.05c-2.74,0-4.94-1.81-4.94-4.05V4.05L25.29,4.05z M5.44,38.74h94.08v-20.4c0-0.7-0.28-1.31-0.73-1.76 c-0.45-0.45-1.09-0.73-1.76-0.73h-9.02c-1.51,0-2.74-1.23-2.74-2.74c0-1.51,1.23-2.74,2.74-2.74h9.02c2.21,0,4.19,0.89,5.64,2.34 c1.45,1.45,2.34,3.43,2.34,5.64v32.39c-1.8-0.62-3.65-1.12-5.55-1.49v-5.06h0.06H5.44v52.83c0,0.7,0.28,1.31,0.73,1.76 c0.45,0.45,1.09,0.73,1.76,0.73h44.71c0.51,1.9,1.15,3.75,1.92,5.53H7.98c-2.2,0-4.19-0.89-5.64-2.34C0.89,101.26,0,99.28,0,97.07 V18.36c0-2.2,0.89-4.19,2.34-5.64c1.45-1.45,3.43-2.34,5.64-2.34h9.63c1.51,0,2.74,1.23,2.74,2.74c0,1.51-1.23,2.74-2.74,2.74H7.98 c-0.7,0-1.31,0.28-1.76,0.73c-0.45,0.45-0.73,1.09-0.73,1.76v20.4H5.44L5.44,38.74z M43.07,15.85c-1.51,0-2.74-1.23-2.74-2.74 c0-1.51,1.23-2.74,2.74-2.74h18.36c1.51,0,2.74,1.23,2.74,2.74c0,1.51-1.23,2.74-2.74,2.74H43.07L43.07,15.85z"/></g>
+              </svg> {% endcomment %}
+              <svg xmlns="http://www.w3.org/2000/svg" style="margin: auto 0;" width="20px" height="20px" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#17161c" d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L64 64C28.7 64 0 92.7 0 128l0 16 0 48L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-256 0-48 0-16c0-35.3-28.7-64-64-64l-40 0 0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L152 64l0-40zM48 192l352 0 0 256c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256z"/>
+              </svg>
+              <div id="eventTimeQuestions" style="margin-left:1rem;font-weight: bold;font-size: 1.5rem;"></div>
             </div>
-            <div
-              id="borderMiddle" class="section"
-              style="border-left: 4px solid #17161c;padding-right: 5%;display: block"
-            ></div>
-            <div id="calendarContainerWrapper" style="position: relative" class="section">
-              <div id="loadingSpinnerCalendarContainer"><div id="loadingSpinnerCalendar"></div></div>
-              <div id="calendarContainer">
-                <div id="monthSelector" style="display: flex">
-                  <div
-                    onclick="changeMonth(-1);"
-                    id="prevMonth"
-                    class="calendarButton svg-arrow svg-arrow-padding collapsed"
-                    style="width: 7rem;transform: rotate(90deg);"
-                  >
-                    {% render 'icon-arrow-rounded' %}
-                  </div>
-                  <div id="month"></div>
-                  <div
-                    onclick="changeMonth(+1);"
-                    id="nextMonth"
-                    class="calendarButton svg-arrow svg-arrow-padding collapsed"
-                    style="width: 7rem;transform: rotate(-90deg);"
-                  >
-                    {% render 'icon-arrow-rounded' %}
-                  </div>
+            <div id="timezoneDisplayContainer" style="display: none">
+              <svg xmlns="http://www.w3.org/2000/svg" style="margin: auto 0;" width="20px" height="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#17161c" d="M266.3 48.3L232.5 73.6c-5.4 4-8.5 10.4-8.5 17.1l0 9.1c0 6.8 5.5 12.3 12.3 12.3c2.4 0 4.8-.7 6.8-2.1l41.8-27.9c2-1.3 4.4-2.1 6.8-2.1l1 0c6.2 0 11.3 5.1 11.3 11.3c0 3-1.2 5.9-3.3 8l-19.9 19.9c-5.8 5.8-12.9 10.2-20.7 12.8l-26.5 8.8c-5.8 1.9-9.6 7.3-9.6 13.4c0 3.7-1.5 7.3-4.1 10l-17.9 17.9c-6.4 6.4-9.9 15-9.9 24l0 4.3c0 16.4 13.6 29.7 29.9 29.7c11 0 21.2-6.2 26.1-16l4-8.1c2.4-4.8 7.4-7.9 12.8-7.9c4.5 0 8.7 2.1 11.4 5.7l16.3 21.7c2.1 2.9 5.5 4.5 9.1 4.5c8.4 0 13.9-8.9 10.1-16.4l-1.1-2.3c-3.5-7 0-15.5 7.5-18l21.2-7.1c7.6-2.5 12.7-9.6 12.7-17.6c0-10.3 8.3-18.6 18.6-18.6l29.4 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-20.7 0c-7.2 0-14.2 2.9-19.3 8l-4.7 4.7c-2.1 2.1-3.3 5-3.3 8c0 6.2 5.1 11.3 11.3 11.3l11.3 0c6 0 11.8 2.4 16 6.6l6.5 6.5c1.8 1.8 2.8 4.3 2.8 6.8s-1 5-2.8 6.8l-7.5 7.5C386 262 384 266.9 384 272s2 10 5.7 13.7L408 304c10.2 10.2 24.1 16 38.6 16l7.3 0c6.5-20.2 10-41.7 10-64c0-111.4-87.6-202.4-197.7-207.7zm172 307.9c-3.7-2.6-8.2-4.1-13-4.1c-6 0-11.8-2.4-16-6.6L396 332c-7.7-7.7-18-12-28.9-12c-9.7 0-19.2-3.5-26.6-9.8L314 287.4c-11.6-9.9-26.4-15.4-41.7-15.4l-20.9 0c-12.6 0-25 3.7-35.5 10.7L188.5 301c-17.8 11.9-28.5 31.9-28.5 53.3l0 3.2c0 17 6.7 33.3 18.7 45.3l16 16c8.5 8.5 20 13.3 32 13.3l21.3 0c13.3 0 24 10.7 24 24c0 2.5 .4 5 1.1 7.3c71.3-5.8 132.5-47.6 165.2-107.2zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM187.3 100.7c-6.2-6.2-16.4-6.2-22.6 0l-32 32c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0l32-32c6.2-6.2 6.2-16.4 0-22.6z"/></svg>
+              <div id="timezoneDisplay" style="margin-left:1rem;font-weight: bold;font-size: 1.5rem;">{{ section.settings.timezoneDisplay }}</div>
+            </div>
+            <p id="eventDescription">{{ section.settings.eventDescription }}</p>
+            <p>{{ section.settings.eventLink }}</p>
+          </div>
+          <div
+            id="borderMiddle" class="section"
+            style="border-left: 4px solid #17161c;padding-right: 5%;display: block"
+          ></div>
+          <div id="calendarContainerWrapper" style="position: relative" class="section">
+            <div id="loadingSpinnerCalendarContainer"><div id="loadingSpinnerCalendar"></div></div>
+            <div id="calendarContainer">
+              <div id="monthSelector" style="display: flex">
+                <div
+                  onclick="changeMonth(-1);"
+                  id="prevMonth"
+                  class="calendarButton svg-arrow svg-arrow-padding collapsed"
+                  style="width: 7rem;transform: rotate(90deg);"
+                >
+                  {% render 'icon-arrow-rounded' %}
                 </div>
-                <div id="calendar"></div>
-                <div id="timezoneContainer">
-                    <label for="timezone">{{ section.settings.timezoneDescription }}</label>
-                    <select id="timezone" class="btn btn-default" style="width: fit-content;margin: auto;"></select>
+                <div id="month"></div>
+                <div
+                  onclick="changeMonth(+1);"
+                  id="nextMonth"
+                  class="calendarButton svg-arrow svg-arrow-padding collapsed"
+                  style="width: 7rem;transform: rotate(-90deg);"
+                >
+                  {% render 'icon-arrow-rounded' %}
                 </div>
               </div>
+              <div id="calendar"></div>
+              <div id="timezoneContainer">
+                  <label for="timezone">{{ section.settings.timezoneDescription }}</label>
+                  <select id="timezone" class="btn btn-default" style="width: fit-content;margin: auto;"></select>
+              </div>
             </div>
-            <div id="timesContainer" style="display: block;width: fit-content;">
-              <div id="date"></div>
-              <div id="times"></div>
-            </div>
-            <div id="questionsContainer">
-              {%- form 'contact', id: 'ContactForm', class: 'isolate', onsubmit: "submitForm(event)" -%}
-                <div class="contact__fields" style="display:flex">
-                  <div class="field" style="width:25rem">
-                    <select id="ContactForm-gender" class="field__input contactGrey to_send" name="contact[gender]">
-                      <option value="" selected disabled>{{ 'templates.contact.form.select_gender' | t }}</option>
-                      <option value="male">{{ 'templates.contact.form.male' | t }}</option>
-                      <option value="female">{{ 'templates.contact.form.female' | t }}</option>
-                      <option value="nonbinary">{{ 'templates.contact.form.nonbinary' | t }}</option>
-                    </select>
-                    <label for="ContactForm-gender" class="field__label">{{ 'templates.contact.form.gender' | t }}</label>
-                  </div>
+          </div>
+          <div id="timesContainer" style="display: block;width: fit-content;">
+            <div id="date"></div>
+            <div id="times"></div>
+          </div>
+          <div id="questionsContainer">
+            {%- form 'contact', id: 'ContactForm', class: 'isolate', onsubmit: "submitForm(event)" -%}
+              <div class="contact__fields" style="display:flex">
+                <div class="field" style="width:25rem">
+                  <select id="ContactForm-gender" class="field__input contactGrey to_send" name="contact[gender]">
+                    <option value="" selected disabled>{{ 'templates.contact.form.select_gender' | t }}</option>
+                    <option value="male">{{ 'templates.contact.form.male' | t }}</option>
+                    <option value="female">{{ 'templates.contact.form.female' | t }}</option>
+                    <option value="nonbinary">{{ 'templates.contact.form.nonbinary' | t }}</option>
+                  </select>
+                  <label for="ContactForm-gender" class="field__label">{{ 'templates.contact.form.gender' | t }}</label>
+                </div>
+                <div class="field">
+                  <input
+                    class="field__input to_send"
+                    required
+                    autocomplete="name"
+                    type="text"
+                    id="ContactForm-name"
+                    name="contact[{{ 'templates.contact.form.name' | t }}]"
+                    value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+                    placeholder="{{ 'templates.contact.form.name' | t }}"
+                  >
+                  <label class="field__label" for="ContactForm-name">
+                    {{- 'templates.contact.form.name' | t }}
+                    <span aria-hidden="true">*</span></label
+                  >
+                </div>
+              </div>
+              <div class="contact__fields" style="display:flex">
+                <div class="field field--with-error">
+                    <input
+                    autocomplete="email"
+                    required
+                    type="email"
+                    id="ContactForm-email"
+                    class="field__input to_send"
+                    name="contact[email]"
+                    spellcheck="false"
+                    autocapitalize="off"
+                    value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+                    aria-required="true"
+                    placeholder="{{ 'templates.contact.form.email' | t }}"
+                    >
+                    <label class="field__label" for="ContactForm-email">
+                    {{- 'templates.contact.form.email' | t }}
+                    <span aria-hidden="true">*</span></label
+                    >
+                </div>
+                <button class="button emailButton" style="margin: 0 0 1rem 0;" onclick="addGuests()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="20px" fill="#fafafa"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"></path></svg>
+                </button>
+              </div>
+              <div class="contact__fields" style="display:flex" id="telContainer">
                   <div class="field">
                     <input
-                      class="field__input to_send"
+                      type="tel"
                       required
-                      autocomplete="name"
-                      type="text"
-                      id="ContactForm-name"
-                      name="contact[{{ 'templates.contact.form.name' | t }}]"
-                      value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
-                      placeholder="{{ 'templates.contact.form.name' | t }}"
-                    >
-                    <label class="field__label" for="ContactForm-name">
-                      {{- 'templates.contact.form.name' | t }}
-                      <span aria-hidden="true">*</span></label
-                    >
-                  </div>
-                </div>
-                <div class="contact__fields" style="display:flex">
-                  <div class="field field--with-error">
-                      <input
-                      autocomplete="email"
-                      required
-                      type="email"
-                      id="ContactForm-email"
+                      id="ContactForm-phone"
                       class="field__input to_send"
-                      name="contact[email]"
-                      spellcheck="false"
-                      autocapitalize="off"
-                      value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+                      autocomplete="tel"
+                      name="contact[{{ 'templates.contact.form.phone' | t }}]"
+                      pattern="\+?[0-9\-]*"
+                      value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
+                      placeholder="{{ 'templates.contact.form.phone' | t }}"
                       aria-required="true"
-                      placeholder="{{ 'templates.contact.form.email' | t }}"
-                      >
-                      <label class="field__label" for="ContactForm-email">
-                      {{- 'templates.contact.form.email' | t }}
+                    >
+                    <label class="field__label" for="ContactForm-phone">
+                      {{- 'templates.contact.form.phone' | t }}
                       <span aria-hidden="true">*</span></label
-                      >
-                  </div>
-                  <button class="button emailButton" style="margin: 0 0 1rem 0;" onclick="addGuests()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="20px" fill="#fafafa"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"></path></svg>
-                  </button>
-                </div>
-                <div class="contact__fields" style="display:flex" id="telContainer">
-                    <div class="field">
-                      <input
-                        type="tel"
-                        required
-                        id="ContactForm-phone"
-                        class="field__input to_send"
-                        autocomplete="tel"
-                        name="contact[{{ 'templates.contact.form.phone' | t }}]"
-                        pattern="\+?[0-9\-]*"
-                        value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
-                        placeholder="{{ 'templates.contact.form.phone' | t }}"
-                        aria-required="true"
-                      >
-                      <label class="field__label" for="ContactForm-phone">
-                        {{- 'templates.contact.form.phone' | t }}
-                        <span aria-hidden="true">*</span></label
-                      >
-                    </div>
-                    <input
-                      type="hidden"
-                      id="countrycode"
-                      class="field__input to_send"
-                      name="contact[country_code]"
-                      autocapitalize="off"
-                      value="{{ shop.locale }}"
                     >
-                    <div class="field">
-                      <input
-                        type="text"
-                        required
-                        id="ContactForm-company"
-                        class="field__input to_send"
-                        name="contact[company]"
-                        autocapitalize="off"
-                        value="{% if form.company %}{{ form.company }}{% endif %}"
-                        placeholder="{{ 'templates.contact.form.company' | t }}"
-                      >
-                      <label class="field__label" for="ContactForm-company">
-                        {{- 'templates.contact.form.company' | t }}
-                        <span aria-hidden="true">*</span></label
-                      >
-                    </div>
-                </div>
-                <div class="contact__fields" style="display:flex">
+                  </div>
                   <input
                     type="hidden"
-                    required
-                    id="source"
+                    id="countrycode"
                     class="field__input to_send"
-                    name="contact[source]"
+                    name="contact[country_code]"
                     autocapitalize="off"
+                    value="{{ shop.locale }}"
                   >
-                  <div class="field" id="partnerDisplay">
-                    <select
-                      id="sourceSelect"
+                  <div class="field">
+                    <input
+                      type="text"
                       required
-                      class="field__input contactGrey"
-                      onchange="handleSelection(this.value)"
+                      id="ContactForm-company"
+                      class="field__input to_send"
+                      name="contact[company]"
+                      autocapitalize="off"
+                      value="{% if form.company %}{{ form.company }}{% endif %}"
+                      placeholder="{{ 'templates.contact.form.company' | t }}"
                     >
-                      <option value="" selected disabled>{{ 'templates.contact.form.source_choice' | t }}</option>
-                      <option value="Partner">{{ 'templates.contact.form.source_partner' | t }}</option>
-                      <option value="Social Media">{{ 'templates.contact.form.source_social_media' | t }}</option>
-                      <option value="Search">{{ 'templates.contact.form.source_search' | t }}</option>
-                      <option value="Advertisement">Advertisement</option>
-                      <option value="Friend">{{ 'templates.contact.form.source_friend' | t }}</option>
-                      <option value="Other">{{ 'templates.contact.form.source_other' | t }}</option>
-                    </select>
-                    <label for="sourceSelect" class="field__label">
-                      {{- 'templates.contact.form.source_question' | t -}} <span aria-hidden="true">*</span>
-                    </label>
-                  </div>
-                  <div class="field" id="partnerSelect" style="display:none;">
-                    <select
-                      id="partnerDetails"
-                      class="field__input contactGrey"
-                      onchange="showCustomPartnerInput(this.value)"
+                    <label class="field__label" for="ContactForm-company">
+                      {{- 'templates.contact.form.company' | t }}
+                      <span aria-hidden="true">*</span></label
                     >
-                      <option value="" selected disabled>{{ 'templates.contact.form.source_partner_option' | t }}</option>
-                      {% render 'partner' %}
-                      <option value="Other">{{ 'templates.contact.form.source_partner_other' | t }}</option>
-                    </select>
-                    <label for="partnerDetails" class="field__label">
-                      {{- 'templates.contact.form.source_partner_selection' | t -}} <span aria-hidden="true">*</span>
-                    </label>
                   </div>
+              </div>
+              <div class="contact__fields" style="display:flex">
+                <input
+                  type="hidden"
+                  required
+                  id="source"
+                  class="field__input to_send"
+                  name="contact[source]"
+                  autocapitalize="off"
+                >
+                <div class="field" id="partnerDisplay">
+                  <select
+                    id="sourceSelect"
+                    required
+                    class="field__input contactGrey"
+                    onchange="handleSelection(this.value)"
+                  >
+                    <option value="" selected disabled>{{ 'templates.contact.form.source_choice' | t }}</option>
+                    <option value="Partner">{{ 'templates.contact.form.source_partner' | t }}</option>
+                    <option value="Social Media">{{ 'templates.contact.form.source_social_media' | t }}</option>
+                    <option value="Search">{{ 'templates.contact.form.source_search' | t }}</option>
+                    <option value="Advertisement">Advertisement</option>
+                    <option value="Friend">{{ 'templates.contact.form.source_friend' | t }}</option>
+                    <option value="Other">{{ 'templates.contact.form.source_other' | t }}</option>
+                  </select>
+                  <label for="sourceSelect" class="field__label">
+                    {{- 'templates.contact.form.source_question' | t -}} <span aria-hidden="true">*</span>
+                  </label>
                 </div>
-                <div class="field" id="customPartnerInput" style="display:none;">
-                  <input
-                    class="field__input to_send"
-                    type="text"
-                    name="contact[customPartner]"
-                    id="customPartner"
-                    placeholder="{{ 'templates.contact.form.source_partner_other_text' | t }}"
+                <div class="field" id="partnerSelect" style="display:none;">
+                  <select
+                    id="partnerDetails"
+                    class="field__input contactGrey"
+                    onchange="showCustomPartnerInput(this.value)"
                   >
-                  <label class="field__label" for="customPartner">
-                    {{- 'templates.contact.form.source_partner_other_text' | t }}
-                    <span aria-hidden="true">*</span></label
-                  >
+                    <option value="" selected disabled>{{ 'templates.contact.form.source_partner_option' | t }}</option>
+                    {% render 'partner' %}
+                    <option value="Other">{{ 'templates.contact.form.source_partner_other' | t }}</option>
+                  </select>
+                  <label for="partnerDetails" class="field__label">
+                    {{- 'templates.contact.form.source_partner_selection' | t -}} <span aria-hidden="true">*</span>
+                  </label>
                 </div>
-                <div class="field" id="otherInput" style="display:none;">
-                  <input
-                    class="field__input to_send"
-                    type="text"
-                    name="contact[otherSource]"
-                    id="otherDetails"
-                    placeholder="{{ 'templates.contact.form.source_other_text' | t }}"
-                  >
-                  <label class="field__label" for="otherDetails">
-                    {{- 'templates.contact.form.source_other_text' | t }}
-                    <span aria-hidden="true">*</span></label
-                  >
-                </div>
+              </div>
+              <div class="field" id="customPartnerInput" style="display:none;">
+                <input
+                  class="field__input to_send"
+                  type="text"
+                  name="contact[customPartner]"
+                  id="customPartner"
+                  placeholder="{{ 'templates.contact.form.source_partner_other_text' | t }}"
+                >
+                <label class="field__label" for="customPartner">
+                  {{- 'templates.contact.form.source_partner_other_text' | t }}
+                  <span aria-hidden="true">*</span></label
+                >
+              </div>
+              <div class="field" id="otherInput" style="display:none;">
+                <input
+                  class="field__input to_send"
+                  type="text"
+                  name="contact[otherSource]"
+                  id="otherDetails"
+                  placeholder="{{ 'templates.contact.form.source_other_text' | t }}"
+                >
+                <label class="field__label" for="otherDetails">
+                  {{- 'templates.contact.form.source_other_text' | t }}
+                  <span aria-hidden="true">*</span></label
+                >
+              </div>
 
+              <input
+                class="field__input to_send"
+                type="hidden"
+                id="cookies"
+                name="contact[questionnaire_answers]"
+                placeholder=""
+              >
                 <input
                   class="field__input to_send"
                   type="hidden"
-                  id="cookies"
-                  name="contact[questionnaire_answers]"
+                  id="cookiesPreviousPages"
+                  name="contact[previous_pages]"
                   placeholder=""
                 >
-                  <input
-                    class="field__input to_send"
-                    type="hidden"
-                    id="cookiesPreviousPages"
-                    name="contact[previous_pages]"
-                    placeholder=""
-                  >
-                <input
-                  class="field__input to_send"
-                  type="hidden"
-                  id="event_link"
-                  name="contact[event_link]"
-                  placeholder=""
-                >
+              <input
+                class="field__input to_send"
+                type="hidden"
+                id="event_link"
+                name="contact[event_link]"
+                placeholder=""
+              >
 
-                <div class="field" id="commentContainer">
-                  <textarea
-                    rows="10"
-                    id="ContactForm-body"
-                    class="text-area field__input to_send"
-                    name="contact[{{ 'templates.contact.form.comment' | t }}]"
-                    placeholder="{{ 'templates.contact.form.comment' | t }}"
-                    aria-required="true"
-                  >
-                  {{- form.body -}}
-                </textarea>
-                  <label class="form__label field__label" for="ContactForm-body">
-                Share any relevant info for our meeting.</label>
-                </div>
-                {%- if form.posted_successfully? -%}
-                  <script>
-                setTimeout(function() {
-                    window.location.replace('/');
-                }, 50);
-                // function fillSuccessContainer() {
-                //       document.getElementById('successContainerDetails').style.display = 'block';
-                //       document.getElementById('borderMiddle').style.display = 'none';
-                //       document.getElementById('eventTitleSuccess').innerText = 'Event created!';
-                //       document.getElementById('eventDescriptionSuccess').innerText = 'Thank you for your interest in ForSURE! You should receive an email with the details of your event in the next 10 minutes.';
-                //       document.getElementById('successContainerDetails').scrollIntoView({ behavior: 'smooth' });
-                //       gtag_report_conversion();
-                //   }
-                //   document.addEventListener('DOMContentLoaded', fillSuccessContainer);
-                  </script>
-                {%- endif -%}
-                <div class="contact__button button-center" style="margin-top: 2rem;">
-                  <button type="submit" class="button" id="submitButton">Submit</button>
-                </div>
-              {%- endform -%}
-            </div>
-            <div id="successContainerDetails" class="containerLeftSuccess" style="display: none;">
-              <div class="h1" id="eventTitleSuccess" class="h1" style="margin: 4rem 0 3rem 0;"></div>
-              <p id="eventDescriptionSuccess"></p>
-              <div style="width: fit-content;margin: auto;">
-                  <a class="button" href="/" style="margin: auto;margin-bottom: 2rem;">Home</a>
+              <div class="field" id="commentContainer">
+                <textarea
+                  rows="10"
+                  id="ContactForm-body"
+                  class="text-area field__input to_send"
+                  name="contact[{{ 'templates.contact.form.comment' | t }}]"
+                  placeholder="{{ 'templates.contact.form.comment' | t }}"
+                  aria-required="true"
+                >
+                {{- form.body -}}
+              </textarea>
+                <label class="form__label field__label" for="ContactForm-body">
+              Share any relevant info for our meeting.</label>
               </div>
+              {%- if form.posted_successfully? -%}
+                <script>
+              setTimeout(function() {
+                  window.location.replace('/');
+              }, 50);
+              // function fillSuccessContainer() {
+              //       document.getElementById('successContainerDetails').style.display = 'block';
+              //       document.getElementById('borderMiddle').style.display = 'none';
+              //       document.getElementById('eventTitleSuccess').innerText = 'Event created!';
+              //       document.getElementById('eventDescriptionSuccess').innerText = 'Thank you for your interest in ForSURE! You should receive an email with the details of your event in the next 10 minutes.';
+              //       document.getElementById('successContainerDetails').scrollIntoView({ behavior: 'smooth' });
+              //       gtag_report_conversion();
+              //   }
+              //   document.addEventListener('DOMContentLoaded', fillSuccessContainer);
+                </script>
+              {%- endif -%}
+              <div class="contact__button button-center" style="margin-top: 2rem;">
+                <button type="submit" class="button" id="submitButton">Submit</button>
               </div>
+            {%- endform -%}
           </div>
+          <div id="successContainerDetails" class="containerLeftSuccess" style="display: none;">
+            <div class="h1" id="eventTitleSuccess" class="h1" style="margin: 4rem 0 3rem 0;"></div>
+            <p id="eventDescriptionSuccess"></p>
+            <div style="width: fit-content;margin: auto;">
+                <a class="button" href="/" style="margin: auto;margin-bottom: 2rem;">Home</a>
+            </div>
+            </div>
         </div>
       </div>
     </div>
   </div>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TN3P2D6506"></script>
-  <script>
-    //Google tag (gtag.js)
-    window.dataLayer = window.dataLayer || [];
- window.dataLayer.push({
-   'event_name': 'demo_booked',
- });
-    function gtag() {
-      dataLayer.push(arguments);
-    }
+</div>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TN3P2D6506"></script>
+<script>
+  //Google tag (gtag.js)
+  window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({
+ 'event_name': 'demo_booked',
+});
+  function gtag() {
+    dataLayer.push(arguments);
+  }
 
-    
-    // var calendar_url = "https://saas.for-sure.net/";
+  
+  // var calendar_url = "https://saas.for-sure.net/";
 {% comment %} var calendar_url = 'https://automations.for-sure.net:4191/'; {% endcomment %}
-    var calendar_url = 'http://server.for-sure.net/meet/';
-    var today = new Date();
-    var currentMonth = today.getMonth(); // JavaScript months are 0-indexed
-    var currentYear = today.getFullYear();
-    var event_link = 'demo';
-    var event_details = null;
-    var availability = null;
-    var timezone = 'Europe/Amsterdam';
+  var calendar_url = 'http://server.for-sure.net/meet/';
+  var today = new Date();
+  var currentMonth = today.getMonth(); // JavaScript months are 0-indexed
+  var currentYear = today.getFullYear();
+  var event_link = 'demo';
+  var event_details = null;
+  var availability = null;
+  var timezone = 'Europe/Amsterdam';
 
-    generateCalendar(currentMonth, currentYear);
-    
-    async function request(endpoint, options = {}) {
-      const { formData = false, method = 'POST', headerArgs = false } = options;
-      let response;
-      for (let i = 0; i < 3; i++) {
-        const header = {};
-        if (headerArgs) {
-          for (arg in headerArgs) {
-            header[arg] = headerArgs[arg];
-          }
-        }
-        if (formData) {
-          response = await fetch(calendar_url + endpoint, {
-            method: method,
-            headers: header,
-            body: formData,
-          });
-        } else {
-          response = await fetch(calendar_url + endpoint, {
-            method: method,
-            headers: header,
-          });
-        }
-        console.log(response.status);
-        if (response.status != 401) {
-          break;
+  generateCalendar(currentMonth, currentYear);
+  
+  async function request(endpoint, options = {}) {
+    const { formData = false, method = 'POST', headerArgs = false } = options;
+    let response;
+    for (let i = 0; i < 3; i++) {
+      const header = {};
+      if (headerArgs) {
+        for (arg in headerArgs) {
+          header[arg] = headerArgs[arg];
         }
       }
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          // Handle JSON response
-          return await response.json();
-        }
+      if (formData) {
+        response = await fetch(calendar_url + endpoint, {
+          method: method,
+          headers: header,
+          body: formData,
+        });
       } else {
-        const errorMessage = await response.json();
-        console.error(errorMessage);
-        const errorDetails = errorMessage['detail'];
-        if (errorDetails === '') {
-          errorDetails = await response.text();
-        }
-        throw new Error(errorDetails);
+        response = await fetch(calendar_url + endpoint, {
+          method: method,
+          headers: header,
+        });
+      }
+      console.log(response.status);
+      if (response.status != 401) {
+        break;
       }
     }
+    if (response.ok) {
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        // Handle JSON response
+        return await response.json();
+      }
+    } else {
+      const errorMessage = await response.json();
+      console.error(errorMessage);
+      const errorDetails = errorMessage['detail'];
+      if (errorDetails === '') {
+        errorDetails = await response.text();
+      }
+      throw new Error(errorDetails);
+    }
+  }
 function gtag_report_conversion() {
-  gtag('event', 'conversion', {
-      'send_to': 'AW-11083318606/bowiCM3PzZgaEM6K-KQp',
-      'value': 1.0,
-      'currency': 'EUR'
-  });
+gtag('event', 'conversion', {
+    'send_to': 'AW-11083318606/bowiCM3PzZgaEM6K-KQp',
+    'value': 1.0,
+    'currency': 'EUR'
+});
 }
 
-    async function generateCalendar(jsMonth, year, init=false) {
-      if (new Date(year, jsMonth + 1) < new Date()) {
-        // +1 to check the end of the month
-        return;
-      }
-
-      // TODO what if clicking right too often and end in 2025?
-      currentMonth = jsMonth;
-      currentYear = year;
-      const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; // Weekdays starting from Monday
-      const dt = new Date(year, jsMonth, 1); // Sets to the first day of the given month and year
-      const table = document.createElement('table');
-      table.className = 'calendarTable';
-      const thead = document.createElement('thead');
-      const tbody = document.createElement('tbody');
-
-      // Create header row
-      const row = document.createElement('tr');
-      daysOfWeek.forEach((day) => {
-        const th = document.createElement('th');
-        th.textContent = day;
-        row.appendChild(th);
-      });
-      thead.appendChild(row);
-      var availableFound = false;
-      // Add days of the week to the table body
-      let isRunning = true;
-      let dayCount = 0 - (dt.getDay() === 0 ? 5 : dt.getDay() - 2); // Adjust start day to be Monday
-      while (isRunning) {
-        const weekRow = document.createElement('tr');
-        for (let i = 0; i < 7; i++, dayCount++) {
-          const day = new Date(year, jsMonth, dayCount);
-          const dayStr = `${day.getFullYear()}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${day
-            .getDate()
-            .toString()
-            .padStart(2, '0')}`;
-          const dayCellWrapper = document.createElement('td');
-          const dayCell = document.createElement('div');
-          const divWrapper = document.createElement('div');
-          divWrapper.className = 'text-wrapper';
-          if (availability && availability[dayStr]) {
-            availableFound = true;
-            dayCell.classList.add('possibletime');
-            dayCell.classList.add('clickable');
-            dayCell.onclick = () => {
-              displayTimes(day, dayStr, availability[dayStr]);
-              document.querySelectorAll('.possibletime-clicked').forEach((element) => {
-                element.classList.remove('possibletime-clicked');
-              });
-              dayCell.classList.add('possibletime-clicked');
-            };
-          } else {
-            dayCell.classList.add('defaulttime');
-          }
-          const span = document.createElement('span');
-          span.textContent = day.getDate();
-          divWrapper.appendChild(span);
-          dayCell.appendChild(divWrapper);
-
-          if (day.getMonth() !== dt.getMonth()) {
-            dayCell.classList.add('another-month');
-          }
-          dayCellWrapper.appendChild(dayCell);
-          weekRow.appendChild(dayCellWrapper);
-
-          // Stop the loop if we've filled the last row and it's the next month
-          if (day.getMonth() !== dt.getMonth() && day.getDate() === 1) {
-            isRunning = false;
-          }
-        }
-        tbody.appendChild(weekRow);
-        if (!isRunning && weekRow.querySelectorAll('.another-month').length === 7) {
-          // Remove last row if all days belong to another month
-          tbody.removeChild(weekRow);
-        }
-      }
-
-      table.appendChild(thead);
-      table.appendChild(tbody);
-      const cal = document.getElementById('calendar');
-      cal.innerHTML = '';
-      const monthName = document.getElementById('month');
-      monthName.innerText = formatDate(dt, false);
-      cal.appendChild(table);
-      if (init && !availableFound) {
-        changeMonth(1);
-      }
+  async function generateCalendar(jsMonth, year, init=false) {
+    if (new Date(year, jsMonth + 1) < new Date()) {
+      // +1 to check the end of the month
+      return;
     }
 
-    function changeMonth(difference) {
-      var newDate = new Date(currentYear, currentMonth);
-      newDate.setMonth(newDate.getMonth() + difference);
-      generateCalendar(newDate.getMonth(), newDate.getFullYear());
-      canChangeMonths();
-    }
+    // TODO what if clicking right too often and end in 2025?
+    currentMonth = jsMonth;
+    currentYear = year;
+    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; // Weekdays starting from Monday
+    const dt = new Date(year, jsMonth, 1); // Sets to the first day of the given month and year
+    const table = document.createElement('table');
+    table.className = 'calendarTable';
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
 
-    function canChangeMonths() {
-      newDate = new Date(currentYear, currentMonth);
-      newDate.setMonth(newDate.getMonth()) - 1;
-      if (newDate > new Date()) {
-        document.getElementById('prevMonth').classList.remove('arrow-disabled');
-      } else {
-        document.getElementById('prevMonth').classList.add('arrow-disabled');
-      }
-    }
-
-
-    function displayTimes(date, datestr, availableTimes) {
-      // document.getElementById('leftSide').style.display = 'none';
-      // document.getElementById('borderMiddle').style.display = 'none';
-      const container = document.getElementById('times');
-      document.getElementById('leftSide').style.minWidth = document.getElementById('leftSide').innerwidth;
-      document.getElementById('timesContainer').style.display = 'block';
-      setTimeout(() => {
-        // document.getElementById('container').style.transform = 'translateX(-25rem)';
-        document.getElementById('container').classList.add('transitionContainer');
-        if (window.innerWidth <= 1590 && window.innerWidth >= 1500) {
-          const baseWidth = 1590;
-          const baseRem = -21;
-          const remChangePer10px = 1; // Since 10px decrease results in -1rem more
-
-          let translateX = baseRem - ((baseWidth - window.innerWidth) / 15) * remChangePer10px;
-          document.getElementById('container').style.transform = `translateX(${translateX}rem)`;
-        }
-        if (window.innerWidth <= 1490 && window.innerWidth > 1150) {
-            const baseWidth = 1490;      // Start width
-            const baseRem = -26;         // Start value at baseWidth
-            const totalPixelRange = 1490 - 1150;  // 340px
-            const totalRemChange = -14 - (-26);
-            const remPerPixel = totalRemChange / totalPixelRange; // 7 / 340 ≈ 0.0206
-
-            let translateX = baseRem + (baseWidth - window.innerWidth) * remPerPixel;
-            document.getElementById('container').style.transform = `translateX(${translateX}rem)`;
-        }
-        document.getElementById('timesContainer').style.transform = 'translateX(1rem)';
-      }, 50); // Small delay to allow DOM update
-      // document.getElementById('timesContainer').style.transform = 'translateX(-150px)';
-      document.getElementById('date').innerText = formatDate(date);
-      container.innerHTML = '';
-      for (const time of availableTimes) {
+    // Create header row
+    const row = document.createElement('tr');
+    daysOfWeek.forEach((day) => {
+      const th = document.createElement('th');
+      th.textContent = day;
+      row.appendChild(th);
+    });
+    thead.appendChild(row);
+    var availableFound = false;
+    // Add days of the week to the table body
+    let isRunning = true;
+    let dayCount = 0 - (dt.getDay() === 0 ? 5 : dt.getDay() - 2); // Adjust start day to be Monday
+    while (isRunning) {
+      const weekRow = document.createElement('tr');
+      for (let i = 0; i < 7; i++, dayCount++) {
+        const day = new Date(year, jsMonth, dayCount);
+        const dayStr = `${day.getFullYear()}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${day
+          .getDate()
+          .toString()
+          .padStart(2, '0')}`;
+        const dayCellWrapper = document.createElement('td');
+        const dayCell = document.createElement('div');
         const divWrapper = document.createElement('div');
-        divWrapper.className = 'time-slot-wrapper';
-        const div = document.createElement('div');
-        div.className = 'time-slot';
-        div.textContent = time.slice(0, -3); // Removes seconds from time
-        div.onclick = () => {
-          validateTime(divWrapper, div, date, datestr, time);
-        };
-        divWrapper.appendChild(div);
-        container.appendChild(divWrapper);
-      }
+        divWrapper.className = 'text-wrapper';
+        if (availability && availability[dayStr]) {
+          availableFound = true;
+          dayCell.classList.add('possibletime');
+          dayCell.classList.add('clickable');
+          dayCell.onclick = () => {
+            displayTimes(day, dayStr, availability[dayStr]);
+            document.querySelectorAll('.possibletime-clicked').forEach((element) => {
+              element.classList.remove('possibletime-clicked');
+            });
+            dayCell.classList.add('possibletime-clicked');
+          };
+        } else {
+          dayCell.classList.add('defaulttime');
+        }
+        const span = document.createElement('span');
+        span.textContent = day.getDate();
+        divWrapper.appendChild(span);
+        dayCell.appendChild(divWrapper);
 
-      document.getElementById('backToInfo').style.display = 'flex';
+        if (day.getMonth() !== dt.getMonth()) {
+          dayCell.classList.add('another-month');
+        }
+        dayCellWrapper.appendChild(dayCell);
+        weekRow.appendChild(dayCellWrapper);
+
+        // Stop the loop if we've filled the last row and it's the next month
+        if (day.getMonth() !== dt.getMonth() && day.getDate() === 1) {
+          isRunning = false;
+        }
+      }
+      tbody.appendChild(weekRow);
+      if (!isRunning && weekRow.querySelectorAll('.another-month').length === 7) {
+        // Remove last row if all days belong to another month
+        tbody.removeChild(weekRow);
+      }
     }
 
-    var chosenDate = null;
-    var chosenTime = null;
-    var chosenDatestr = null;
-    function validateTime(divWrapper, div, date, datestr, time) {
-      chosenDate = date;
-      chosenTime = time;
-      chosenDatestr = datestr;
-      removeNextButton();
-      div.classList.add('time-slot-clicked');
-      var nextButton = document.createElement('div');
-      nextButton.className = 'nextButtonTime';
-      nextButton.textContent = 'Next';
-      nextButton.onclick = () => {
-        displayQuestions(date, datestr, time);
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    const cal = document.getElementById('calendar');
+    cal.innerHTML = '';
+    const monthName = document.getElementById('month');
+    monthName.innerText = formatDate(dt, false);
+    cal.appendChild(table);
+    if (init && !availableFound) {
+      changeMonth(1);
+    }
+  }
+
+  function changeMonth(difference) {
+    var newDate = new Date(currentYear, currentMonth);
+    newDate.setMonth(newDate.getMonth() + difference);
+    generateCalendar(newDate.getMonth(), newDate.getFullYear());
+    canChangeMonths();
+  }
+
+  function canChangeMonths() {
+    newDate = new Date(currentYear, currentMonth);
+    newDate.setMonth(newDate.getMonth()) - 1;
+    if (newDate > new Date()) {
+      document.getElementById('prevMonth').classList.remove('arrow-disabled');
+    } else {
+      document.getElementById('prevMonth').classList.add('arrow-disabled');
+    }
+  }
+
+
+  function displayTimes(date, datestr, availableTimes) {
+    // document.getElementById('leftSide').style.display = 'none';
+    // document.getElementById('borderMiddle').style.display = 'none';
+    const container = document.getElementById('times');
+    document.getElementById('leftSide').style.minWidth = document.getElementById('leftSide').innerwidth;
+    document.getElementById('timesContainer').style.display = 'block';
+    setTimeout(() => {
+      // document.getElementById('container').style.transform = 'translateX(-25rem)';
+      document.getElementById('container').classList.add('transitionContainer');
+      if (window.innerWidth <= 1590 && window.innerWidth >= 1500) {
+        const baseWidth = 1590;
+        const baseRem = -21;
+        const remChangePer10px = 1; // Since 10px decrease results in -1rem more
+
+        let translateX = baseRem - ((baseWidth - window.innerWidth) / 15) * remChangePer10px;
+        document.getElementById('container').style.transform = `translateX(${translateX}rem)`;
+      }
+      if (window.innerWidth <= 1490 && window.innerWidth > 1150) {
+          const baseWidth = 1490;      // Start width
+          const baseRem = -26;         // Start value at baseWidth
+          const totalPixelRange = 1490 - 1150;  // 340px
+          const totalRemChange = -14 - (-26);
+          const remPerPixel = totalRemChange / totalPixelRange; // 7 / 340 ≈ 0.0206
+
+          let translateX = baseRem + (baseWidth - window.innerWidth) * remPerPixel;
+          document.getElementById('container').style.transform = `translateX(${translateX}rem)`;
+      }
+      document.getElementById('timesContainer').style.transform = 'translateX(1rem)';
+    }, 50); // Small delay to allow DOM update
+    // document.getElementById('timesContainer').style.transform = 'translateX(-150px)';
+    document.getElementById('date').innerText = formatDate(date);
+    container.innerHTML = '';
+    for (const time of availableTimes) {
+      const divWrapper = document.createElement('div');
+      divWrapper.className = 'time-slot-wrapper';
+      const div = document.createElement('div');
+      div.className = 'time-slot';
+      div.textContent = time.slice(0, -3); // Removes seconds from time
+      div.onclick = () => {
+        validateTime(divWrapper, div, date, datestr, time);
       };
-      divWrapper.appendChild(nextButton);
+      divWrapper.appendChild(div);
+      container.appendChild(divWrapper);
     }
 
-    function removeNextButton() {
-      document.querySelectorAll('.nextButtonTime').forEach((element) => {
-        element.remove();
-      });
-      document.querySelectorAll('.time-slot-clicked').forEach((element) => {
-        element.classList.remove('time-slot-clicked');
-      });
+    document.getElementById('backToInfo').style.display = 'flex';
+  }
+
+  var chosenDate = null;
+  var chosenTime = null;
+  var chosenDatestr = null;
+  function validateTime(divWrapper, div, date, datestr, time) {
+    chosenDate = date;
+    chosenTime = time;
+    chosenDatestr = datestr;
+    removeNextButton();
+    div.classList.add('time-slot-clicked');
+    var nextButton = document.createElement('div');
+    nextButton.className = 'nextButtonTime';
+    nextButton.textContent = 'Next';
+    nextButton.onclick = () => {
+      displayQuestions(date, datestr, time);
+    };
+    divWrapper.appendChild(nextButton);
+  }
+
+  function removeNextButton() {
+    document.querySelectorAll('.nextButtonTime').forEach((element) => {
+      element.remove();
+    });
+    document.querySelectorAll('.time-slot-clicked').forEach((element) => {
+      element.classList.remove('time-slot-clicked');
+    });
+  }
+
+  function displayQuestions(date, datestr, time) {
+    // document.getElementById('leftSide').style.display = 'block';
+    // document.getElementById('borderMiddle').style.display = 'block';
+    document.getElementById('backToInfo').style.display = 'none';
+    document.getElementById('calendarContainer').style.display = 'none';
+    document.getElementById('calendarContainerWrapper').style.display = 'none';
+    document.getElementById('container').classList.remove('transitionContainer');
+    document.getElementById('container').style.transform = '';
+    document.getElementById('timesContainer').style.display = 'none';
+    const questionContainer = document.getElementById('questionsContainer');
+    questionContainer.style.display = 'flex';
+    fillEventInfoQuestions(date, time);
+    fillQuestions(date, datestr, time);
+  }
+
+  function formatDate(d, includeday = true) {
+    // Array of month names
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Array of weekday names
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    // Get the day of the week, month, day of the month, and year
+    const weekday = weekdays[d.getDay()];
+    const month = months[d.getMonth()];
+    const day = d.getDate();
+
+    // Function to add ordinal suffix to day
+    function getOrdinal(n) {
+      const s = ['th', 'st', 'nd', 'rd'];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
     }
-
-    function displayQuestions(date, datestr, time) {
-      // document.getElementById('leftSide').style.display = 'block';
-      // document.getElementById('borderMiddle').style.display = 'block';
-      document.getElementById('backToInfo').style.display = 'none';
-      document.getElementById('calendarContainer').style.display = 'none';
-      document.getElementById('calendarContainerWrapper').style.display = 'none';
-      document.getElementById('container').classList.remove('transitionContainer');
-      document.getElementById('container').style.transform = '';
-      document.getElementById('timesContainer').style.display = 'none';
-      const questionContainer = document.getElementById('questionsContainer');
-      questionContainer.style.display = 'flex';
-      fillEventInfoQuestions(date, time);
-      fillQuestions(date, datestr, time);
+    if (includeday) {
+      return `${weekday}, ${day} ${month} ${d.getFullYear()}`;
     }
+    // Combine them into a formatted string
+    return `${month} ${d.getFullYear()}`;
+  }
 
-    function formatDate(d, includeday = true) {
-      // Array of month names
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function populateTimezones() {
+    const timezones = Intl.supportedValuesOf('timeZone'); // Get all supported timezones
+    const select = document.getElementById("timezone");
 
-      // Array of weekday names
-      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    // Object to group timezones by their standard timezone abbreviation
+    const timezonesGrouped = {};
 
-      // Get the day of the week, month, day of the month, and year
-      const weekday = weekdays[d.getDay()];
-      const month = months[d.getMonth()];
-      const day = d.getDate();
+    timezones.forEach(tz => {
+        const now = new Date();
+        
+        // Get the short timezone abbreviation (e.g., CET, EST, PST)
+        // const timeZoneName = new Intl.DateTimeFormat('en-US', { 
+        //     timeZone: tz, 
+        //     timeZoneName: 'short' 
+        // }).formatToParts(now).find(part => part.type === 'timeZoneName').value;
+        var region_name = tz.split('/')[0];
 
-      // Function to add ordinal suffix to day
-      function getOrdinal(n) {
-        const s = ['th', 'st', 'nd', 'rd'];
-        const v = n % 100;
-        return n + (s[(v - 20) % 10] || s[v] || s[0]);
-      }
-      if (includeday) {
-        return `${weekday}, ${day} ${month} ${d.getFullYear()}`;
-      }
-      // Combine them into a formatted string
-      return `${month} ${d.getFullYear()}`;
-    }
-
-    function populateTimezones() {
-      const timezones = Intl.supportedValuesOf('timeZone'); // Get all supported timezones
-      const select = document.getElementById("timezone");
-
-      // Object to group timezones by their standard timezone abbreviation
-      const timezonesGrouped = {};
-
-      timezones.forEach(tz => {
-          const now = new Date();
-          
-          // Get the short timezone abbreviation (e.g., CET, EST, PST)
-          // const timeZoneName = new Intl.DateTimeFormat('en-US', { 
-          //     timeZone: tz, 
-          //     timeZoneName: 'short' 
-          // }).formatToParts(now).find(part => part.type === 'timeZoneName').value;
-          var region_name = tz.split('/')[0];
-
-          if (!timezonesGrouped[region_name]) {
-              timezonesGrouped[region_name] = [];
-          }
-          timezonesGrouped[region_name].push(tz);
-      });
-
-      // Populate the dropdown with grouped timezones
-      Object.entries(timezonesGrouped).forEach(([abbreviation, tzs]) => {
-          // Add standard timezone abbreviation as a header
-          const optionHeader = document.createElement("option");
-          optionHeader.textContent = `--- ${abbreviation} ---`;
-          optionHeader.disabled = true;
-          select.appendChild(optionHeader);
-
-          // Add timezones under the abbreviation
-          tzs.forEach(tz => {
-              const option = document.createElement("option");
-              option.value = tz; // Keep long form (e.g., "Europe/Amsterdam")
-              
-              // Get current time in the timezone
-              const now = new Date();
-              const timeString = now.toLocaleTimeString('en-US', { 
-                  timeZone: tz, 
-                  hour: '2-digit', 
-                  minute: '2-digit', 
-                  hour12: false 
-              });
-
-              // Display format: "City Name (HH:MM)"
-              option.textContent = `${tz.replace('_', ' ').padEnd(25, ' ')} ${timeString}`;
-              select.appendChild(option);
-          });
-      });
-
-
-
-          // Set the default timezone based on the user's browser
-          const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          select.value = userTimezone;
-
-          // Display selected timezone
-          timezone = userTimezone;
-          document.getElementById('timezoneDisplay').innerText = timezone;
-      }
-
-   document.getElementById("timezone").addEventListener("change", function() {
-          timezone = this.value;
-          document.getElementById('timesContainer').style.display = 'none';
-          getEvent("loadingSpinnerCalendarContainer");
-          document.getElementById('timezoneDisplay').innerText = timezone;
-      });
-
-    async function fillEventInfo() {
-      document.getElementById('eventTitle').innerText = event_details['name'];
-      document.getElementById('leftSide').style.display = 'block';
-      document.getElementById('borderMiddle').style.display = 'block';
-      document.getElementById('calendarContainer').style.display = 'block';
-      document.getElementById('eventDescription').innerText = event_details['description'];
-      document.getElementById('eventDuration').innerText = event_details['duration'] + ' min';
-    }
-
-    async function fillEventInfoQuestions(date, time) {
-      var timeSplit = time.split(':');
-      var endDate = new Date(date);
-      endDate.setHours(timeSplit[0], timeSplit[1], timeSplit[2]);
-      endDate.setMinutes(endDate.getMinutes() + event_details['duration']);
-      document.getElementById('eventTimeQuestionsContainer').style.display = 'flex';
-      if (event_details['hide_partners']) {
-        document.getElementById('partnerDisplay').style.display = 'none';
-        document.getElementById("source").removeAttribute("required");
-        document.getElementById("sourceSelect").removeAttribute("required");
-      }
-      eventTimeQuestions = document.getElementById('eventTimeQuestions');
-      eventTimeQuestions.innerText =
-        time.slice(0, -3) +
-        // ' ' +
-        // timezone +
-      //   ' - ' +
-      //   endDate.getHours() +
-      //   ':' +
-      //   endDate.getMinutes().toString().padStart(2, '0') +
-        ', ' +
-        formatDate(date);
-      document.getElementById('backToCalendar').style.display = 'block';
-      document.getElementById('timezoneDisplayContainer').style.display = 'flex';
-    }
-
-    function backToCalendar() {
-      // document.getElementById('leftSide').style.display = 'block';
-      // document.getElementById('borderMiddle').style.display = 'block';
-      document.getElementById('calendarContainer').style.display = 'block';
-      document.getElementById('calendarContainerWrapper').style.display = 'block';
-      document.getElementById('questionsContainer').style.display = 'none';
-      document.getElementById('timezoneDisplayContainer').style.display = 'none';
-      document.getElementById('eventTimeQuestionsContainer').style.display = 'none';
-      document.getElementById('backToCalendar').style.display = 'none';
-    }
-
-    function backToInfo() {
-      document.getElementById('backToInfo').style.display = 'none';
-      document.getElementById('calendarContainer').style.display = 'none';
-      document.getElementById('calendarContainerWrapper').style.display = 'none';
-      document.getElementById('container').classList.remove('transitionContainer');
-      document.getElementById('container').style.transform = '';
-      document.getElementById('timesContainer').style.display = 'none';
-      backToCalendar();
-    }
-
-    function fillQuestions(date, datestr, time) {
-      const questionsContainer = document.getElementById('ContactForm');
-      var alreadyAddedQuestions = document.querySelectorAll('.additional-question');
-      alreadyAddedQuestions.forEach(element => {
-          element.remove();
-      });
-
-      event_details.questions.forEach((question) => {
-        const questionDiv = document.createElement('div');
-        questionDiv.className = 'field';
-        questionDiv.classList.add('additional-question');
-        // Create label
-        const label = document.createElement('label');
-        label.className = 'field__label';
-        label.classList.add('form__label');
-        label.textContent = question.text;
-        label.for = `question_${question.label}`;
-        if (question.required) {
-          label.innerHTML += ' <span aria-hidden="true">*</span>';
+        if (!timezonesGrouped[region_name]) {
+            timezonesGrouped[region_name] = [];
         }
-        // Create input based on response_type
-        let input;
-        switch (question.response_type) {
-          case 'textarea':
-            input = document.createElement('textarea');
-            input.classList.add('text-area');
-            input.rows = 3;
-            break;
-          default:
-            input = document.createElement('input');
-            input.type = 'text';
-        }
-
-        // Add common attributes
-        input.id = `question_${question.label}`;
-        input.classList.add('field__input');
-        input.required = question.required;
-        input.name = `contact[${question.label}]`;
-        input.placeholder = question.text;
-        // Append elements
-        questionDiv.appendChild(input);
-        questionDiv.appendChild(label);
-      //   if (question.response_type === 'email') {
-      //     var addGuestsBtn = document.createElement('button');
-      //     addGuestsBtn.className = 'button';
-      //     addGuestsBtn.id = `add_guests_btn`;
-      //     addGuestsBtn.style.width = 'fit-content';
-      //     addGuestsBtn.textContent = 'Add Guests';
-      //     addGuestsBtn.onclick = () => {
-      //       addGuests(questionDiv.id);
-      //     };
-      //     questionDiv.appendChild(addGuestsBtn);
-      //   }
-
-        previousChild = questionsContainer.querySelector('#commentContainer');
-        questionsContainer.insertBefore(questionDiv, previousChild);
-      });
-      sendCookies();
-    }
-
-    function addGuests() {
-      var guestEmailWrapper = document.createElement('div');
-      guestEmailWrapper.className = 'contact__fields';
-      guestEmailWrapper.classList.add('guest-email-wrapper');
-      guestEmailWrapper.style.display = 'flex';
-      guestEmails = document.querySelectorAll('.guest-email-wrapper').length;
-      guestEmailWrapper.id = `guest_email_wrapper_${guestEmails}`;
-      var guestEmailField = document.createElement('div');
-      guestEmailField.className = 'field field--with-error';
-
-      var guestEmail = document.createElement('input');
-      guestEmail.type = 'email';
-      guestEmail.className = 'field__input';
-      guestEmail.classList.add('additional-guest-email');
-      guestEmail.classList.add('to_send');
-      guestEmail.placeholder = 'Guest Email';
-      guestEmail.name = `contact[guest_email_${guestEmails}]`;
-      guestEmail.id = `guest_email_${guestEmails}`;
-      guestEmail.spellcheck = false;
-      guestEmail.autocapitalize = 'off';
-      guestEmailField.appendChild(guestEmail);
-
-      var guestEmailLabel = document.createElement('label');
-      guestEmailLabel.className = 'field__label';
-      guestEmailLabel.classList.add('additional-guest-email-label');
-      guestEmailLabel.textContent = `Guest Email ${guestEmails + 1}`;
-      guestEmailLabel.for = `guest_email_${guestEmails}`;
-      guestEmailField.appendChild(guestEmailLabel);
-      guestEmailWrapper.appendChild(guestEmailField);
-      var removeGuestButton = document.createElement('button');
-      removeGuestButton.className = 'button emailButton';
-      removeGuestButton.innerHTML = '<svg style="transform: rotate(45deg);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="20px" fill="#fafafa"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"></path></svg>';
-      removeGuestButton.style.backgroundColor = '#17161c';
-      removeGuestButton.onclick = () => {
-        removeGuest(guestEmailWrapper);
-      };
-      guestEmailWrapper.appendChild(removeGuestButton);
-      document.getElementById('ContactForm').insertBefore(guestEmailWrapper, document.getElementById('telContainer'));
-      }
-
-    function removeGuest(guestEmailWrapper) {
-      guestEmailWrapper.remove();
-      guestEmails = document.querySelectorAll('.guest-email-wrapper').length;
-      document.getElementById('ContactForm').querySelectorAll('.additional-guest-email').forEach((element, idx) => {
-          element.id = `guest_email_${idx}`;
-          element.name = `contact[guest_email_${idx}]`;
-      });
-      document.getElementById('ContactForm').querySelectorAll('.additional-guest-email-label').forEach((element, idx) => {
-          element.textContent = `Guest Email ${idx + 1}`;
-          element.for = `guest_email_${idx}`;
-      });
-    }
-
-    function showLoading(elementId) {
-      document.getElementById(elementId).style.display = 'flex';
-      if (elementId === "loadingSpinnerCalendarContainer") {
-        document.getElementById('calendarContainer').classList.add('reloadCalendar');
-      } else {
-        Array.from(document.getElementsByClassName('borderSpaces')).forEach(border => {
-            border.classList.add('hideBorder');
-        });
-        document.getElementById('container').classList.add('dateSelection-disabled');
-      }
-    }
-
-    function hideLoading(elementId) {
-      document.getElementById(elementId).style.display = 'none';
-      if (elementId === "loadingSpinnerCalendarContainer") {
-        document.getElementById('calendarContainer').classList.remove('reloadCalendar');
-      } else {
-        document.getElementById('container').classList.remove('dateSelection-disabled');
-        document.getElementById('container').classList.remove('smallStart');
-        Array.from(document.getElementsByClassName('borderSpaces')).forEach(border => {
-            border.classList.remove('hideBorder');
-        });
-      }
-    }
-
-    async function getEvent(elementId) {
-      // if (!window.location.search.includes('url=')) {
-      //     return;
-      // }
-      showLoading(elementId);
-      // sleep(5000);
-      try {
-          event_link = window.location.search.split('url=')[1].split('&')[0];
-        } catch (error) {
-          // use default event
-        }
-      try {
-        event_details = await request(`event?event_link=${event_link}`, { method: 'GET' });
-        availability = await request(`check/avail?event_link=${event_link}&month=${currentMonth + 1}&timezone=${timezone}`, { method: 'GET' });
-        await fillEventInfo();
-        canChangeMonths();
-        await generateCalendar(currentMonth, currentYear, true);
-      } catch (error) {
-        console.error('Error fetching event:', error);
-      } finally {
-        hideLoading(elementId);
-      }
-    }
-
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async function submitForm(event) {
-      event.preventDefault();
-      document.getElementById('submitButton').disabled = true;
-      document.getElementById('submitButton').innerText = 'Submitting...';
-      document.body.style.cursor = 'wait';
-      const questions = document.querySelectorAll('.to_send');
-      formDataDict = {};
-      for (const question of questions) {
-          if (question.name) {
-              formDataDict[question.name.split('[')[1].split(']')[0]] = question.value;
-          }
-      }
-      dataToSend = { questions: formDataDict };
-      dataToSend['event_link'] = event_link;
-      dataToSend['date'] = chosenDatestr;
-      dataToSend['time'] = chosenTime;
-      dataToSend['timezone'] = timezone;
-      try {
-        await request(`create`, {
-            method: 'POST',
-            formData: JSON.stringify(dataToSend),
-            headerArgs: { 'Content-Type': 'application/json' },
-          });
-        gtag('js', new Date());
-        gtag('config', 'G-TN3P2D6506');
-        gtag_report_conversion();
-        window.lintrk('track', { conversion_id: 19886530 });
-        showMessage("You are scheduled. A calendar invitation has been sent to your email address.", true);
-        document.getElementById('submitButton').disabled = false;
-        document.getElementById('submitButton').innerText = 'Submit';
-        document.body.style.cursor = 'default';
-      } catch (error) {
-        console.error('Error submitting questions:', error);
-        showMessage('Failed to submit questions. Please try again.', false);
-        return;
-      }
-    }
-
-    function updateSourceValue(value) {
-      document.getElementById('source').value = value; // Update the source input field's value
-    }
-
-    function sendCookies() {
-      var cookies = [];
-      for (var idx = 1; idx <= 4; idx++) {
-        var cookie = readCookie('questionnaire-answer-' + idx);
-        if (cookie) {
-          cookies.push(cookie);
-        }
-      }
-      document.getElementById('cookies').value = cookies.join(',');
-
-      var previousPages = readCookie('previousPages');
-      if (previousPages) {
-        document.getElementById('cookiesPreviousPages').value = previousPages;
-      }
-    }
-
-    function handleSelection(value) {
-      var partnerSelect = document.getElementById('partnerSelect');
-      var otherInput = document.getElementById('otherInput');
-
-      // Hide both fields initially
-      partnerSelect.style.display = 'none';
-      otherInput.style.display = 'none';
-
-      // Reset partner dropdown in case it was changed to custom input before
-      document.getElementById('customPartnerInput').style.display = 'none';
-      document.getElementById('partnerDetails').value = '';
-      document.getElementById('partnerDetails').removeAttribute('required');
-      document.getElementById('otherDetails').removeAttribute('required');
-
-      // Display the appropriate field based on selection
-      if (value === 'Partner') {
-        partnerSelect.style.display = 'block';
-        document.getElementById('partnerDetails').setAttribute('required');
-      } else if (value === 'Other') {
-        otherInput.style.display = 'block';
-        document.getElementById('otherDetails').setAttribute('required');
-      }
-      updateSourceValue(value);
-    }
-
-    function showCustomPartnerInput(value) {
-      var customInput = document.getElementById('customPartnerInput');
-      customInput.style.display = value === 'Other' ? 'block' : 'none';
-      document.getElementById('customPartner').removeAttribute('required');
-      if (value !== 'Other') {
-        updateSourceValue(value);
-      } else {
-        document.getElementById('customPartner').setAttribute('required');
-      }
-    }
-    document.getElementById('customPartner').addEventListener('input', function () {
-      updateSourceValue(this.value); // Update the source input with the custom partner input
+        timezonesGrouped[region_name].push(tz);
     });
 
-    document.getElementById('otherDetails').addEventListener('input', function () {
-      updateSourceValue(this.value); // Update the source input with the other details input
+    // Populate the dropdown with grouped timezones
+    Object.entries(timezonesGrouped).forEach(([abbreviation, tzs]) => {
+        // Add standard timezone abbreviation as a header
+        const optionHeader = document.createElement("option");
+        optionHeader.textContent = `--- ${abbreviation} ---`;
+        optionHeader.disabled = true;
+        select.appendChild(optionHeader);
+
+        // Add timezones under the abbreviation
+        tzs.forEach(tz => {
+            const option = document.createElement("option");
+            option.value = tz; // Keep long form (e.g., "Europe/Amsterdam")
+            
+            // Get current time in the timezone
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                timeZone: tz, 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false 
+            });
+
+            // Display format: "City Name (HH:MM)"
+            option.textContent = `${tz.replace('_', ' ').padEnd(25, ' ')} ${timeString}`;
+            select.appendChild(option);
+        });
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
+
+
+        // Set the default timezone based on the user's browser
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        select.value = userTimezone;
+
+        // Display selected timezone
+        timezone = userTimezone;
+        document.getElementById('timezoneDisplay').innerText = timezone;
+    }
+
+ document.getElementById("timezone").addEventListener("change", function() {
+        timezone = this.value;
+        document.getElementById('timesContainer').style.display = 'none';
         getEvent("loadingSpinnerCalendarContainer");
+        document.getElementById('timezoneDisplay').innerText = timezone;
     });
-            // Initialize the timezone list on page load
-  populateTimezones();
+
+  async function fillEventInfo() {
+    document.getElementById('eventTitle').innerText = event_details['name'];
+    document.getElementById('leftSide').style.display = 'block';
+    document.getElementById('borderMiddle').style.display = 'block';
+    document.getElementById('calendarContainer').style.display = 'block';
+    document.getElementById('eventDescription').innerText = event_details['description'];
+    document.getElementById('eventDuration').innerText = event_details['duration'] + ' min';
+  }
+
+  async function fillEventInfoQuestions(date, time) {
+    var timeSplit = time.split(':');
+    var endDate = new Date(date);
+    endDate.setHours(timeSplit[0], timeSplit[1], timeSplit[2]);
+    endDate.setMinutes(endDate.getMinutes() + event_details['duration']);
+    document.getElementById('eventTimeQuestionsContainer').style.display = 'flex';
+    if (event_details['hide_partners']) {
+      document.getElementById('partnerDisplay').style.display = 'none';
+      document.getElementById("source").removeAttribute("required");
+      document.getElementById("sourceSelect").removeAttribute("required");
+    }
+    eventTimeQuestions = document.getElementById('eventTimeQuestions');
+    eventTimeQuestions.innerText =
+      time.slice(0, -3) +
+      // ' ' +
+      // timezone +
+    //   ' - ' +
+    //   endDate.getHours() +
+    //   ':' +
+    //   endDate.getMinutes().toString().padStart(2, '0') +
+      ', ' +
+      formatDate(date);
+    document.getElementById('backToCalendar').style.display = 'block';
+    document.getElementById('timezoneDisplayContainer').style.display = 'flex';
+  }
+
+  function backToCalendar() {
+    // document.getElementById('leftSide').style.display = 'block';
+    // document.getElementById('borderMiddle').style.display = 'block';
+    document.getElementById('calendarContainer').style.display = 'block';
+    document.getElementById('calendarContainerWrapper').style.display = 'block';
+    document.getElementById('questionsContainer').style.display = 'none';
+    document.getElementById('timezoneDisplayContainer').style.display = 'none';
+    document.getElementById('eventTimeQuestionsContainer').style.display = 'none';
+    document.getElementById('backToCalendar').style.display = 'none';
+  }
+
+  function backToInfo() {
+    document.getElementById('backToInfo').style.display = 'none';
+    document.getElementById('calendarContainer').style.display = 'none';
+    document.getElementById('calendarContainerWrapper').style.display = 'none';
+    document.getElementById('container').classList.remove('transitionContainer');
+    document.getElementById('container').style.transform = '';
+    document.getElementById('timesContainer').style.display = 'none';
+    backToCalendar();
+  }
+
+  function fillQuestions(date, datestr, time) {
+    const questionsContainer = document.getElementById('ContactForm');
+    var alreadyAddedQuestions = document.querySelectorAll('.additional-question');
+    alreadyAddedQuestions.forEach(element => {
+        element.remove();
+    });
+
+    event_details.questions.forEach((question) => {
+      const questionDiv = document.createElement('div');
+      questionDiv.className = 'field';
+      questionDiv.classList.add('additional-question');
+      // Create label
+      const label = document.createElement('label');
+      label.className = 'field__label';
+      label.classList.add('form__label');
+      label.textContent = question.text;
+      label.for = `question_${question.label}`;
+      if (question.required) {
+        label.innerHTML += ' <span aria-hidden="true">*</span>';
+      }
+      // Create input based on response_type
+      let input;
+      switch (question.response_type) {
+        case 'textarea':
+          input = document.createElement('textarea');
+          input.classList.add('text-area');
+          input.rows = 3;
+          break;
+        default:
+          input = document.createElement('input');
+          input.type = 'text';
+      }
+
+      // Add common attributes
+      input.id = `question_${question.label}`;
+      input.classList.add('field__input');
+      input.required = question.required;
+      input.name = `contact[${question.label}]`;
+      input.placeholder = question.text;
+      // Append elements
+      questionDiv.appendChild(input);
+      questionDiv.appendChild(label);
+    //   if (question.response_type === 'email') {
+    //     var addGuestsBtn = document.createElement('button');
+    //     addGuestsBtn.className = 'button';
+    //     addGuestsBtn.id = `add_guests_btn`;
+    //     addGuestsBtn.style.width = 'fit-content';
+    //     addGuestsBtn.textContent = 'Add Guests';
+    //     addGuestsBtn.onclick = () => {
+    //       addGuests(questionDiv.id);
+    //     };
+    //     questionDiv.appendChild(addGuestsBtn);
+    //   }
+
+      previousChild = questionsContainer.querySelector('#commentContainer');
+      questionsContainer.insertBefore(questionDiv, previousChild);
+    });
+    sendCookies();
+  }
+
+  function addGuests() {
+    var guestEmailWrapper = document.createElement('div');
+    guestEmailWrapper.className = 'contact__fields';
+    guestEmailWrapper.classList.add('guest-email-wrapper');
+    guestEmailWrapper.style.display = 'flex';
+    guestEmails = document.querySelectorAll('.guest-email-wrapper').length;
+    guestEmailWrapper.id = `guest_email_wrapper_${guestEmails}`;
+    var guestEmailField = document.createElement('div');
+    guestEmailField.className = 'field field--with-error';
+
+    var guestEmail = document.createElement('input');
+    guestEmail.type = 'email';
+    guestEmail.className = 'field__input';
+    guestEmail.classList.add('additional-guest-email');
+    guestEmail.classList.add('to_send');
+    guestEmail.placeholder = 'Guest Email';
+    guestEmail.name = `contact[guest_email_${guestEmails}]`;
+    guestEmail.id = `guest_email_${guestEmails}`;
+    guestEmail.spellcheck = false;
+    guestEmail.autocapitalize = 'off';
+    guestEmailField.appendChild(guestEmail);
+
+    var guestEmailLabel = document.createElement('label');
+    guestEmailLabel.className = 'field__label';
+    guestEmailLabel.classList.add('additional-guest-email-label');
+    guestEmailLabel.textContent = `Guest Email ${guestEmails + 1}`;
+    guestEmailLabel.for = `guest_email_${guestEmails}`;
+    guestEmailField.appendChild(guestEmailLabel);
+    guestEmailWrapper.appendChild(guestEmailField);
+    var removeGuestButton = document.createElement('button');
+    removeGuestButton.className = 'button emailButton';
+    removeGuestButton.innerHTML = '<svg style="transform: rotate(45deg);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="20px" fill="#fafafa"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"></path></svg>';
+    removeGuestButton.style.backgroundColor = '#17161c';
+    removeGuestButton.onclick = () => {
+      removeGuest(guestEmailWrapper);
+    };
+    guestEmailWrapper.appendChild(removeGuestButton);
+    document.getElementById('ContactForm').insertBefore(guestEmailWrapper, document.getElementById('telContainer'));
+    }
+
+  function removeGuest(guestEmailWrapper) {
+    guestEmailWrapper.remove();
+    guestEmails = document.querySelectorAll('.guest-email-wrapper').length;
+    document.getElementById('ContactForm').querySelectorAll('.additional-guest-email').forEach((element, idx) => {
+        element.id = `guest_email_${idx}`;
+        element.name = `contact[guest_email_${idx}]`;
+    });
+    document.getElementById('ContactForm').querySelectorAll('.additional-guest-email-label').forEach((element, idx) => {
+        element.textContent = `Guest Email ${idx + 1}`;
+        element.for = `guest_email_${idx}`;
+    });
+  }
+
+  function showLoading(elementId) {
+    document.getElementById(elementId).style.display = 'flex';
+    if (elementId === "loadingSpinnerCalendarContainer") {
+      document.getElementById('calendarContainer').classList.add('reloadCalendar');
+    } else {
+      Array.from(document.getElementsByClassName('borderSpaces')).forEach(border => {
+          border.classList.add('hideBorder');
+      });
+      document.getElementById('container').classList.add('dateSelection-disabled');
+    }
+  }
+
+  function hideLoading(elementId) {
+    document.getElementById(elementId).style.display = 'none';
+    if (elementId === "loadingSpinnerCalendarContainer") {
+      document.getElementById('calendarContainer').classList.remove('reloadCalendar');
+    } else {
+      document.getElementById('container').classList.remove('dateSelection-disabled');
+      document.getElementById('container').classList.remove('smallStart');
+      Array.from(document.getElementsByClassName('borderSpaces')).forEach(border => {
+          border.classList.remove('hideBorder');
+      });
+    }
+  }
+
+  async function getEvent(elementId) {
+    // if (!window.location.search.includes('url=')) {
+    //     return;
+    // }
+    showLoading(elementId);
+    // sleep(5000);
+    try {
+        event_link = window.location.search.split('url=')[1].split('&')[0];
+      } catch (error) {
+        // use default event
+      }
+    try {
+      event_details = await request(`event?event_link=${event_link}`, { method: 'GET' });
+      availability = await request(`check/avail?event_link=${event_link}&month=${currentMonth + 1}&timezone=${timezone}`, { method: 'GET' });
+      await fillEventInfo();
+      canChangeMonths();
+      await generateCalendar(currentMonth, currentYear, true);
+    } catch (error) {
+      console.error('Error fetching event:', error);
+    } finally {
+      hideLoading(elementId);
+    }
+  }
+
+  async function submitForm(event) {
+    event.preventDefault();
+    document.getElementById('submitButton').disabled = true;
+    document.getElementById('submitButton').innerText = 'Submitting...';
+    document.body.style.cursor = 'wait';
+    const questions = document.querySelectorAll('.to_send');
+    formDataDict = {};
+    for (const question of questions) {
+        if (question.name) {
+            formDataDict[question.name.split('[')[1].split(']')[0]] = question.value;
+        }
+    }
+    dataToSend = { questions: formDataDict };
+    dataToSend['event_link'] = event_link;
+    dataToSend['date'] = chosenDatestr;
+    dataToSend['time'] = chosenTime;
+    dataToSend['timezone'] = timezone;
+    try {
+      await request(`create`, {
+          method: 'POST',
+          formData: JSON.stringify(dataToSend),
+          headerArgs: { 'Content-Type': 'application/json' },
+        });
+      gtag('js', new Date());
+      gtag('config', 'G-TN3P2D6506');
+      gtag_report_conversion();
+      window.lintrk('track', { conversion_id: 19886530 });
+      showMessage("You are scheduled. A calendar invitation has been sent to your email address.", true);
+      document.getElementById('submitButton').disabled = false;
+      document.getElementById('submitButton').innerText = 'Submit';
+      document.body.style.cursor = 'default';
+    } catch (error) {
+      console.error('Error submitting questions:', error);
+      showMessage('Failed to submit questions. Please try again.', false);
+      return;
+    }
+  }
+
+  function updateSourceValue(value) {
+    document.getElementById('source').value = value; // Update the source input field's value
+  }
+
+  function sendCookies() {
+    var cookies = [];
+    for (var idx = 1; idx <= 4; idx++) {
+      var cookie = readCookie('questionnaire-answer-' + idx);
+      if (cookie) {
+        cookies.push(cookie);
+      }
+    }
+    document.getElementById('cookies').value = cookies.join(',');
+
+    var previousPages = readCookie('previousPages');
+    if (previousPages) {
+      document.getElementById('cookiesPreviousPages').value = previousPages;
+    }
+  }
+
+  function handleSelection(value) {
+    var partnerSelect = document.getElementById('partnerSelect');
+    var otherInput = document.getElementById('otherInput');
+
+    // Hide both fields initially
+    partnerSelect.style.display = 'none';
+    otherInput.style.display = 'none';
+
+    // Reset partner dropdown in case it was changed to custom input before
+    document.getElementById('customPartnerInput').style.display = 'none';
+    document.getElementById('partnerDetails').value = '';
+    document.getElementById('partnerDetails').removeAttribute('required');
+    document.getElementById('otherDetails').removeAttribute('required');
+
+    // Display the appropriate field based on selection
+    if (value === 'Partner') {
+      partnerSelect.style.display = 'block';
+      document.getElementById('partnerDetails').setAttribute('required');
+    } else if (value === 'Other') {
+      otherInput.style.display = 'block';
+      document.getElementById('otherDetails').setAttribute('required');
+    }
+    updateSourceValue(value);
+  }
+
+  function showCustomPartnerInput(value) {
+    var customInput = document.getElementById('customPartnerInput');
+    customInput.style.display = value === 'Other' ? 'block' : 'none';
+    document.getElementById('customPartner').removeAttribute('required');
+    if (value !== 'Other') {
+      updateSourceValue(value);
+    } else {
+      document.getElementById('customPartner').setAttribute('required');
+    }
+  }
+  document.getElementById('customPartner').addEventListener('input', function () {
+    updateSourceValue(this.value); // Update the source input with the custom partner input
+  });
+
+  document.getElementById('otherDetails').addEventListener('input', function () {
+    updateSourceValue(this.value); // Update the source input with the other details input
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+      getEvent("loadingSpinnerCalendarContainer");
+  });
+          // Initialize the timezone list on page load
+populateTimezones();
 </script>
 {% schema %}
 {
-  "name": "t:sections.calendar.name",
-  "tag": "section",
-  "class": "section",
-  "settings": [
-    {
-      "type": "text",
-      "id": "eventTitle",
-      "default": "Efficient EPR Reporting",
-      "label": "Event Title"
-    },
-    {
-      "type": "text",
-      "id": "eventDescription",
-      "default": "In this meeting, we’ll explore your EPR compliance needs and discuss how ForSURE can provide the right solutions to support your goals.",
-      "label": "Event Description"
-    },
-    {
-      "type": "text",
-      "id": "eventDuration",
-      "default": "30 min",
-      "label": "Event Duration"
-    },
-    {
-      "type": "text",
-      "id": "timezoneDisplay",
-      "default": "Europe/Amsterdam",
-      "label": "Timezone"
-    },
-    {
-      "type": "text",
-      "id": "eventLink",
-      "default": "You'll receive the link after booking.",
-      "label": "Event Link"
-    },
-    {
-      "type": "text",
-      "id": "timezoneDescription",
-      "default": "Select Your Timezone:",
-      "label": "Timezone Description"
-    }
-  ],
-  "presets": [
-    {
-      "name": "t:sections.calendar.presets.name",
-    }
-  ]
+"name": "t:sections.calendar.name",
+"tag": "section",
+"class": "section",
+"settings": [
+  {
+    "type": "text",
+    "id": "eventTitle",
+    "default": "Efficient EPR Reporting",
+    "label": "Event Title"
+  },
+  {
+    "type": "text",
+    "id": "eventDescription",
+    "default": "In this meeting, we’ll explore your EPR compliance needs and discuss how ForSURE can provide the right solutions to support your goals.",
+    "label": "Event Description"
+  },
+  {
+    "type": "text",
+    "id": "eventDuration",
+    "default": "30 min",
+    "label": "Event Duration"
+  },
+  {
+    "type": "text",
+    "id": "timezoneDisplay",
+    "default": "Europe/Amsterdam",
+    "label": "Timezone"
+  },
+  {
+    "type": "text",
+    "id": "eventLink",
+    "default": "You'll receive the link after booking.",
+    "label": "Event Link"
+  },
+  {
+    "type": "text",
+    "id": "timezoneDescription",
+    "default": "Select Your Timezone:",
+    "label": "Timezone Description"
+  }
+],
+"presets": [
+  {
+    "name": "t:sections.calendar.presets.name",
+  }
+]
 }
 {% endschema %}

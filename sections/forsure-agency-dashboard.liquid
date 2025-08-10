@@ -154,8 +154,8 @@
             font-weight: bold; /* Highlight the active tab */
             border-bottom: 2px solid #17161c; /* Add a bottom border to the active tab */
         }
-        .active {
-            background-color: #2255ff44;
+        .active-report {
+            background-color: #2255ff44!important;
         }
         .deadline {
             margin-bottom: 1rem;
@@ -631,11 +631,11 @@ function fillReports(key) {
     // Unset the active key
     var elements = document.querySelectorAll('.title-text-reports');
     elements.forEach(function(element) {
-        if (element.classList.contains('active')) {
-            element.classList.remove('active');
+        if (element.classList.contains('active-report')) {
+            element.classList.remove('active-report');
         }
     });
-    document.getElementById(key).classList.add('active');
+    document.getElementById(key).classList.add('active-report');
 
     var reportEntry = document.getElementById('reports-entry');
     reportEntry.innerHTML = '';

@@ -164,7 +164,7 @@
   width: 26px;
 }
 
-#notification-badge-header {
+.iconsmall #notification-badge-header {
     top: 3px!important;
     right: -4px!important;
     font-size: 10px!important;
@@ -295,7 +295,7 @@
             </div>
             <div>
                 <div style="display: none;" id="companiesWrapper">
-                    <div class="filter-group" style='justify-content: center;    align-self: center;'>
+                    <div style='justify-content: center;align-self: center;'>
                     <!-- <div class="filter-group-heading">Companies</div> -->
                     <select
                     id="companiesDropdown"
@@ -378,6 +378,7 @@
                 } else if (nav_element === 'companies') {
                   selectedCompany = null;
                   if (Object.keys(data['companies']).length > 1) {
+                    document.getElementById('headerIcons').classList.add('iconsmall');
                     document.getElementById('companiesWrapper').style.display = 'flex';
                     document.getElementById('companiesDropdown').innerHTML = '';
                     for (const [company, select] of Object.entries(data['companies'])) {
@@ -388,7 +389,6 @@
                       }
                     }
                     if (selectedCompany !== null) {
-                      console.log('Selected: ', selectedCompany);
                       document.getElementById('companiesDropdown').value = selectedCompany;
                     }
                     $('#companiesDropdown').selectpicker('refresh');
@@ -402,7 +402,7 @@
                     document.getElementById('notificationBell').style.margin = 'auto 1rem';
                     document.getElementById('notificationBell').style.marginTop = '1rem';
                     document.getElementById('ul-submenu').style.marginTop = '0rem';
-                    document.getElementById('agency-home-icon').style.margin = 'auto 1rem';
+                    document.getElementById('agency-home-icon').style.display = 'none';
                     document.getElementById('notification-badge-header').style.top = '0px';
                   }
                   
