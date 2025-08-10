@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
 transform: rotate(0deg);
 }
 .extended {
-    transform: rotate(90deg)!important;
+    transform: rotate(0deg)!important;
 }
 .overlay-guide {
     display: none;
@@ -87,9 +87,9 @@ transform: rotate(0deg);
         <hr style="margin:1rem 0 0 0; border-top: 1px solid #cccccc">
         <div style="display: flex;padding-bottom: 1rem;">
           <div style="display: flex;margin-top: auto;">
-            <span id="currentGuideNumber" style="padding: 1rem 0;padding-right:1rem;font-size: large;"></span>
-            <div id="guideOverview" onclick="showGuideGroups()" style="padding-top: 1rem;">
-                <svg id="overviewArrow" style="cursor:pointer" class="svg-arrow" width="20.593" height="22.88" viewBox="0 0 80.593 122.88"><polygon style="fill:#17161c;" points="0,0 30.82,0 80.593,61.44 30.82,122.88 0,122.88 49.772,61.44 0,0"></polygon></svg>
+            <span id="currentGuideNumber" onclick="showGuideGroups()" style="padding: 1rem 0;padding-right:1rem;font-size: large;cursor:pointer;"></span>
+            <div id="guideOverview" onclick="showGuideGroups()" style="width: 2rem;height: 2rem;margin: auto;transform: rotate(-90deg);cursor:pointer;">
+                {%  render 'icon-arrow-rounded' %}
             </div>
           </div>
           <div style="margin-left: auto;width: fit-content;display:flex">
@@ -247,7 +247,7 @@ function startGuide(steps) {
 
 function showGuideGroups() {
     updateGuideGroups();
-    document.getElementById('overviewArrow').classList.toggle('extended');
+    document.getElementById('guideOverview').classList.toggle('extended');
   // Toggle the visibility of the guideOverviewContainer
   if (guideOverviewContainer.style.display === 'none' || guideOverviewContainer.style.display === '') {
     guideOverviewContainer.style.display = 'block';

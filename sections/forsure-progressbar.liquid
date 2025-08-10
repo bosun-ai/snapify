@@ -65,6 +65,9 @@
     function repeatAction() {
         unifiedSendRequest(GETREPORTPROGRESS, {method: 'GET'})
             .then(data => {
+              if (data === null) {
+                return;
+              }
               if (data['progress'] === 100) {
                 document.getElementById('loading-icon').style.display = 'none';
                 document.getElementById('report-message').style.display = 'none';

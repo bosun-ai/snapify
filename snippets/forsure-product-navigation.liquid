@@ -129,7 +129,7 @@
   background-color: #2255ff;
 }
 
-#gear-icon svg{
+#gear-icon svg, #gear-iconMobile svg{
   fill: #17161c;
   height: 45px;
   width: 45px;
@@ -191,7 +191,7 @@
             id="list-element-{{ page_name }}"
             class="list-element-active grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
             style="width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
-            <div class="greyedout-tooltip">Please upgrade to the full version to access this</div>
+            <div id="greyedout-tooltip-{{ page_name }}" class="greyedout-tooltip">Please upgrade to the full version to access this</div>
             <a
               href="{{ link.url }}"
               id="a-{{ page_name }}"
@@ -261,7 +261,11 @@
                     if (available_url === null) {
                       window.location.href = '/';
                     } else {
-                      window.location.href = `{{ currentPath }}/${available_url}`;
+                      if (`{{ currentPath }}` === '') {
+                        window.location.href = `pages/${available_url}`;
+                      } else {
+                        window.location.href = `{{ currentPath }}/${available_url}`;
+                      }
                     }
                 }
             } catch (error) {

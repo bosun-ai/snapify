@@ -23,10 +23,34 @@ Usage:
   .tabulator-page.active {
     color: #2255FF!important;
   }
+
+    /* Loading spinner */
+.loadingSpinner {
+  border: 4px solid rgba(34, 85, 255, 0.1);
+  border-top: 4px solid #2255ff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+  display: flex;
+}
+.loadingSpinnerContainer{
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 </style>
 <div id="overlay"></div>
 <div id="report-table" class="losensitive" style="display: none">
-  <div style="display:flex">
+  <div style="display:flex;width: fit-content;margin:auto">
     <div id="widgetPopupWrapper">
       <canvas id="widgetPopup"></canvas>
     </div>
@@ -40,7 +64,12 @@ Usage:
     </div>
   </div>
   <br>
-  <div id="chartInfo"></div>
+  <div style="position: relative">
+    <div id="loadingSpinnerContainerBigChart" class="loadingSpinnerContainer" style="display: none;">
+      <div class="loadingSpinner" style="display: block!important;"></div>
+    </div>
+    <div id="chartInfo"></div>
+</div>
 </div>
 <script>
   let excludedColumns = new Set();
@@ -77,7 +106,10 @@ Usage:
     drawChart(params, 'widgetPopup', chartBig, true);
     let tableContainer = document.getElementById('chartInfo');
     tableContainer.innerHTML = '';
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainerBigChart');
+    loadingSpinnerContainer.style.display = 'block';
     await generateTable(params);
+    loadingSpinnerContainer.style.display = 'none';
   }
 
   var tableTabulator;

@@ -1875,7 +1875,7 @@ async function addNewColumn() {
 async function deleteColumn() {
       // Delete the column
       // closePopup();
-      const columnName = currentTh.textContent;
+      const columnName = currentTh.textContent.replace(/\u00A0/g, ' ').replace(/\u2011/g, '-');
       if(confirm(`Are you sure you want to delete ${columnName}?`)){
         var oldMapping = categorylistLabels[columnName];
         if (oldMapping) {

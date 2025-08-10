@@ -80,7 +80,7 @@ function selectCustomDateRange () {
 
         // highlight the Custom button and write the text
         setActive(document.getElementById('customDateRange'), range);
-        if (filterData !== undefined) {
+        if (typeof filterData !== 'undefined') {
             filterData['start_time'] = picker.startDate.format('YYYY-MM-DD');
             filterData['end_time'] = picker.endDate.format('YYYY-MM-DD');
             updateCharts();
@@ -132,7 +132,7 @@ function formatRange(year, firstMonthIdx, lastMonthIdx) {
         d.getFullYear() + '-' +
         String(d.getMonth()+1).padStart(2,'0') + '-' +
         String(d.getDate()).padStart(2,'0');
-    if (filterData !== undefined) {
+    if (typeof filterData !== 'undefined') {
         filterData['start_time'] = toYYYYMMDD(start);
         filterData['end_time'] = toYYYYMMDD(end);
         updateCharts();
@@ -141,7 +141,7 @@ function formatRange(year, firstMonthIdx, lastMonthIdx) {
 }
 
 function resetDateRange() {
-  if (filterData !== undefined) {
+  if (typeof filterData !== 'undefined') {
     filterData['start_time'] = '';
     filterData['end_time'] = '';
     updateCharts();

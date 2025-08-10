@@ -113,8 +113,9 @@
     
         const label = document.createElement('div');
         label.className = 'progress-label';
-        var remaining = (total - used).toLocaleString();
-        if (remaining < 0) remaining = 'None';
+        var remaining = (total - used);
+        if (remaining <= 0) remaining = 'None';
+        else remaining = remaining.toLocaleString();
         label.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (${remaining} left)`;
     
         const dataContainer = document.createElement('div');
@@ -164,8 +165,25 @@
       refreshUsageData();
     }
 
+
+    
+  
+  function showGuide() {
+        startGuide([
+            { element: "#usage-bars", group: "{{ 'software.guide.usage.welcome.group' | t }}", title: "{{ 'software.guide.usage.welcome.title' | t }}", text: "{{ 'software.guide.usage.welcome.text' | t }}", where: 'middle' },
+        ]);
+        setCookie('showedGuideUsage', 'true', 300);
+    }
+    
+    function showGuideFromButton(element) {
+      showGuide();
+    }
+
     waitForPermission(function() {
       updateUsageBars();
+      if(readCookie('showedGuideUsage') === null) {
+        setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+      }
     });
 
   </script>

@@ -544,7 +544,7 @@ content: "\2713"
     position: absolute;
     right: 1.5rem;
   }
-  .closeError {
+  .closeError, .closePreview {
     color: #aaa;
     float: right;
     font-size: 28px;
@@ -552,7 +552,7 @@ content: "\2713"
     top: 0.5rem;
   }
   .close:hover,
-  .close:focus, .closeError:hover, .closeError:focus {
+  .close:focus, .closeError:hover, .closeError:focus, .closePreview:hover, .closePreview:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
@@ -668,7 +668,7 @@ content: "\2713"
              <div id="uploadExistingReportsWrapper" style="position: relative">
               <div class="greyedout-tooltip-feature">Please upgrade to the full version to access this</div>
                 <div id="uploadExistingReports" class="option-card greyed_out" style="position: relative;background-color: #fafafa;" onclick="selectOption('upload')">
-                    <h3>Submit Reports</h3>
+                    <h3>Upload Reports</h3>
                     <p>Upload one or more completed<br>reports for submission.</p>
                     <div style="height: 50%;margin-top: 5rem">
                       {% render 'icon-auto-epr-report' %}
@@ -681,7 +681,7 @@ content: "\2713"
         <h2 class="heading">Upload Existing Reports</h2>
         <div style="margin-bottom: 2rem;margin: auto;position: relative;background: rgb(250, 250, 250);padding: 1px 1rem;border-radius: 1rem;">
           <div style="display: flex; justify-content: space-evenly;gap: 2rem;">
-          <div id="clientsUploadSection" style="margin: 0 2rem 2rem 2rem;position: relative;background:#fafafa">
+          <div id="clientsUploadSection" style="margin: 0 2rem 2rem 2rem;position: relative;background:#fafafa;padding: 1rem;">
             <h3 style="margin-bottom: 1rem;text-align: center;">Client Credentials</h3>
             <button class="button button--secondary" onclick="openClientsModal()">Manage Login Details</button>
               {% comment %} <div id="clientsFileContainer" style="display: flex; align-items: center; padding: 0.5rem 0;border: 0.2rem solid #17161c;background-color: #fff;border-color: #ccc;margin-bottom: 1.5rem;">
@@ -778,7 +778,7 @@ content: "\2713"
                     id="companyDropdown"
                     class="selectpicker"
                     multiple
-                    data-live-search="true"></select>
+                    data-live-search="true" data-live-search-placeholder="Choose multiple companies…"></select>
                 </div>
               </div>
             </div>
@@ -943,7 +943,12 @@ content: "\2713"
             </div>
             <div class="col-md-6">
               <label for="groupByFields" class="form-label">Group Results By</label>
-              <select id="groupByFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
+              <div style="display: flex;width: 220px;">
+                <select id="groupByFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
+                <div onclick="previewReport()" style="cursor:pointer;margin: auto;margin-left: 1rem;width: 3rem;" title="Preview Output">
+                  {% render 'icon-inspect' %}
+                </div>  
+              </div>
             </div>
           </div>
 
@@ -972,10 +977,15 @@ content: "\2713"
               <input type="checkbox" class="form-check-input me-2" id="useReturns">
               <label class="form-check-label" for="useReturns">Include Returns</label>
             </div>
+            <div class="col-md-6 d-flex align-items-center" style="display: flex;align-items: baseline;">
+              <input type="checkbox" class="form-check-input me-2" id="useBoughtFromSameCountry">
+              <label class="form-check-label" for="useBoughtFromSameCountry">Include Bought From Same Country</label>
+            </div>
           </div>
 
           <div class="text-center mt-4">
             <button class="prevButton button button--secondary" onclick="prevStep(2)">Back</button>
+            <button class="button" style="background-color: #17161c;" onclick="saveReportOpenModal()">Save Template</button>
             <button class="nextButton button button" onclick="nextStep(4)">Next</button>
           </div>
       </div>
@@ -1096,6 +1106,66 @@ content: "\2713"
   <input id="orders" type="hidden" style="display:none;">
 </div>
 <div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
+</div>
+<div id="previewContainerModal"  style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:fit-content; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+  <div id="previewContainerModalContent" style="width: 95%;margin: auto;margin-bottom: 3rem;">
+    <div style="display:flex;gap:1rem;margin: auto;margin-right: 1rem;height: fit-content;justify-content: space-between;">
+      <h2 id="preview-modal-title">Preview</h2>
+      <span class="closePreview" onclick="closePreviewModal()">&times;</span>
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <p>Example output format of the report. The data is only a sample and not the actual data.</p>
+    </div>
+    <div id="previewContainer" class="losensitive">
+    </div>
+  </div>
+</div>
+<div id="modalOverlayPreview" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
+</div>
+<div id="saveReportModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); height:fit-content; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+  <div id="previewContainerModalContent" style="margin: auto; margin: 3rem; max-width: 800px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 id="save-modal-title" style="margin: 0;">Save Report</h2>
+      <span class="closeSave closePreview" onclick="closeSaveModal()" aria-label="Close">&times;</span>
+    </div>
+  
+    <form onsubmit="saveReport(); return false;">
+      <div style="margin-bottom: 1rem;">
+        <label for="saveReportName" style="display: block; width: 100%;margin-bottom: 1rem;">Please enter a name for the report:</label>
+        <input type="text" id="saveReportName" placeholder="Report Name" style="padding: 0.5rem;width: 100%;margin-bottom: 1rem;">
+      </div>
+  
+      <div style="flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+        <div style="flex: 1; min-width: 180px;">
+          <label for="recurrence" style="display: block; width: 100%;margin-bottom: 1rem;">Recurrence:</label>
+          <select id="recurrence" class="selectpicker form-control wide-select" style="width: 100%; padding: 0.5rem;width: 100%;margin-bottom: 1rem;">
+            <option value="none">None</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="halfyearly">Half Yearly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+  
+        <div style="flex: 1; min-width: 180px;">
+          <label for="saveReportDate" style="display: block; width: 100%;margin-top: 1rem;margin-bottom: 1rem;">Report Deadline:</label>
+          <input type="date" id="saveReportDate" style="padding: 0.5rem;width: 100%;margin-bottom: 1rem;">
+        </div>
+  
+        <div id="overwriteReportCheckboxContainer" style="flex: 1; min-width: 180px; display: none; align-items: center; gap: 0.5rem; margin-top: 1.5rem;width: 100%;margin-bottom: 1rem;">
+          <input type="checkbox" id="overwriteReportCheckbox" name="overwriteReportCheckbox" value="true">
+          <label for="overwriteReportCheckbox" style="margin: 0;">Overwrite Existing</label>
+        </div>
+      </div>
+  
+      <div style="text-align: right;">
+        <button id="saveReportButton" class="button" type="submit" style="padding: 0.6rem 1.2rem;">Save</button>
+      </div>
+    </form>
+  </div>
+  
+</div>
+<div id="modalOverlaySave" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
 </div>
 
 <script>
@@ -2859,6 +2929,7 @@ async function getTimesAndCountry() {
     }); {% endcomment %}
 
     var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS + '?flat=true', { method: 'GET' });
+    document.getElementById('previewContainer').innerHTML = '';
     fillColumnSelectors(availableColumns);
     await populateTemplateSelector();
     if (!window.userPermissions['reporttemplate']) {
@@ -2885,24 +2956,34 @@ function fillColumnSelectors(columns) {
   Object.keys(columns).forEach(groupName => {
     const fieldsOptGroup = document.createElement('optgroup');
     fieldsOptGroup.label = groupName;
+    fieldsOptions = [];
 
     const groupOptGroup = document.createElement('optgroup');
     groupOptGroup.label = groupName;
+    groupOptions = [];
 
     columns[groupName].forEach(column => {
       const fieldOption = document.createElement('option');
-      fieldOption.value = column;
-      fieldOption.textContent = convertStringFormat(column);
-      fieldsOptGroup.appendChild(fieldOption);
+      fieldOption.value = column['name'];
+      fieldOption.textContent = convertStringFormat(column['name']);
+      if (column['number'] == true) {
+        fieldsOptGroup.appendChild(fieldOption);
+        fieldsOptions.push(column['name']);
+      }
 
       const groupOption = document.createElement('option');
-      groupOption.value = column;
-      groupOption.textContent = convertStringFormat(column);
+      groupOption.value = column['name'];
+      groupOption.textContent = convertStringFormat(column['name']);
       groupOptGroup.appendChild(groupOption);
-    });
+      groupOptions.push(column['name']);
 
+    });
+    if (fieldsOptions.length > 0) {
     fieldsDropdown.appendChild(fieldsOptGroup);
-    groupByDropdown.appendChild(groupOptGroup);
+    }
+    if (groupOptions.length > 0) {
+      groupByDropdown.appendChild(groupOptGroup);
+    }
   });
 
   // Refresh Bootstrap selectpicker
@@ -2956,7 +3037,7 @@ async function populateTemplateSelector() {
 
   $('#templateSelect').on('changed.bs.select', function () {
     const selectedTemplate = $(this).val();
-    const template = allTemplates.find(t => `${t.country}-${t.year}-${t.report_type}-${t.pro}` === selectedTemplate);
+    const template = allTemplates.find(t => `${t.country}-${t.year}-${t.report_type}-${t.pro}` === selectedTemplate || t.id === selectedTemplate);
     if (!template || selectedTemplate === "default") {
       document.getElementById('customFields').disabled = false;
       $('#customFields').selectpicker('refresh');
@@ -3085,18 +3166,28 @@ function updateTemplateOptions(refreshPRO=true) {
     const matchCategory = !selectedCategory || template.report_type === selectedCategory;
     const matchPro = !selectedPro || template.pro === selectedPro;
 
-    if (matchCountry && matchCategory && refreshPRO) {
+    if (matchCountry && matchCategory && refreshPRO && template.pro) {
       const option = document.createElement('option');
       option.value = template.pro;
       option.textContent = template.pro;
       proDropdown.appendChild(option);
     }
+    
     if (matchCountry && matchCategory && matchPro) {
-      const option = document.createElement('option');
-      option.value = `${template.country}-${template.year}-${template.report_type}-${template.pro}`;
-      lastTemplate = option.value;
-      option.textContent = `${template.country} ${template.year} ${template.report_type} ${template.pro}`;
-      templateSelect.appendChild(option);
+      if (template.id !== undefined) {
+        const option = document.createElement('option');
+        option.value = template.id;
+        lastTemplate = option.value;
+        option.textContent = template.report_name;
+        templateSelect.appendChild(option);
+      }
+      else {
+        const option = document.createElement('option');
+        option.value = `${template.country}-${template.year}-${template.report_type}-${template.pro}`;
+        lastTemplate = option.value;
+        option.textContent = `${template.country} ${template.year} ${template.report_type} ${template.pro}`;
+        templateSelect.appendChild(option);
+      }
     }
   });
   if (refreshPRO == false) {
@@ -3224,6 +3315,7 @@ async function createReport() {
         }
         countryData.append("template_id", selectedTemplate);
         countryData.append("use_returns", document.getElementById('useReturns').checked);
+        countryData.append("use_bought_from_same_country", document.getElementById('useBoughtFromSameCountry').checked);
         const selectedFields = $('#customFields').val() || [];
         countryData.append("output_fields", selectedFields.join(','));
         const selectedGroupBy = $('#groupByFields').val() || [];
@@ -3239,12 +3331,161 @@ async function createReport() {
         document.getElementById('reportInProgress').style.display = 'none';
         document.getElementById('showReport').style.display = 'none';
         document.getElementById('reportFailed').style.display = 'block';
-        showMessage('Failed to create report ' + error.message, false);
+        showMessage('Failed to create report: ' + error.message, false);
     }
     uploadStepsElem.removeChild(overlay);
     document.getElementById('uploadSteps').style.cursor = 'default';
     document.querySelectorAll('.nextButton').forEach(node => {node.disabled = false;})
     document.querySelectorAll('.prevButton').forEach(node => {node.disabled = false;})
+}
+
+async function previewReport() {
+  try {
+      const countryData = new FormData();
+      countryData.append("country_id", document.getElementById('country').value || '');
+      countryData.append("category", document.getElementById('category').value || '');
+      if (document.getElementById('monthPicker').value) {
+        const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
+        countryData.append("start_date", convertToISO(selectedStartDateValue));
+        countryData.append("end_date", convertToISO(selectedEndDateValue));
+      }
+      countryData.append("preview", true);
+      countryData.append("use_returns", document.getElementById('useReturns').checked || false);
+      countryData.append("use_bought_from_same_country", document.getElementById('useBoughtFromSameCountry').checked || false);
+      const selectedFields = $('#customFields').val() || [];
+      if (selectedFields.length == 0) {
+        showMessage('Please select at least one report field', false);
+        return;
+      }
+      countryData.append("output_fields", selectedFields.join(','));
+      const selectedGroupBy = $('#groupByFields').val() || [];
+      if (selectedGroupBy.length == 0) {
+        showMessage('Please select at least one group by field', false);
+        return;
+      }
+      countryData.append("groupby_fields", selectedGroupBy.join(','));
+      const selectedRules = $('#ruleSelect').val() || [];
+      countryData.append("rules", selectedRules.join(','));
+      data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});        // Handle file response
+      document.getElementById('previewContainerModal').style.display = 'block';
+      document.getElementById('modalOverlayPreview').style.display = 'block';
+      document.getElementById('previewContainer').innerHTML = '';
+      viewPreview(data);
+  } catch (error) {
+      console.error(error.message);
+      TOKEN = false;
+      showMessage(error.message, false);
+  }
+}
+
+function closePreviewModal() {
+  document.getElementById('previewContainerModal').style.display = 'none';
+  document.getElementById('modalOverlayPreview').style.display = 'none';
+}
+
+document.getElementById('modalOverlayPreview').addEventListener('click', function(event) {
+  if (event.target === this) {
+    closePreviewModal();
+  }
+});
+
+function viewPreview(data) {
+    // Step 1: Get all column names
+    const columnNames = Object.keys(data);
+
+    // Step 2: Get the row count from the first column
+    const rowCount = Object.keys(data[columnNames[0]]).length;
+
+    // Step 3: Create the table
+    const table = document.createElement("table");
+    table.border = "1";
+    table.style.width = '100%';
+    table.style.margin = 'auto';
+
+    // Step 4: Add header row
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    columnNames.forEach(col => {
+      const th = document.createElement("th");
+      th.textContent = col.replaceAll('/', ' / ');
+      th.style.overflow = 'clip';
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Step 5: Add data rows
+    const tbody = document.createElement("tbody");
+    for (let i = 0; i < rowCount; i++) {
+      const tr = document.createElement("tr");
+      columnNames.forEach(col => {
+        const td = document.createElement("td");
+        td.textContent = data[col][i] ?? '';
+        td.style.overflow = 'clip';
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+
+  
+  // Step 5: Add table to the document
+  document.getElementById('previewContainer').appendChild(table);
+}  
+
+function saveReportOpenModal() {
+  if (!document.getElementById('monthPicker').value) {
+    showMessage('Please select a timeframe', false);
+    return;
+  }
+  document.getElementById('saveReportModal').style.display = 'block';
+  document.getElementById('modalOverlaySave').style.display = 'block';
+  if ($('#templateSelect').val() && $('#templateSelect').val().includes('custom-')) {
+    templateName = allTemplates.filter(template => template.id === $('#templateSelect').val())[0].report_name;
+    document.getElementById('saveReportName').value = templateName;
+    document.getElementById('overwriteReportCheckboxContainer').style.display = 'flex';
+    document.getElementById('overwriteReportCheckbox').checked = true;
+    
+  }
+  document.getElementById('saveReportDate').value = moment().format('YYYY-MM-DD');
+}
+
+function closeSaveModal() {
+  document.getElementById('saveReportModal').style.display = 'none';
+  document.getElementById('modalOverlaySave').style.display = 'none';
+}
+
+
+async function saveReport() {
+  try {
+    const reportName = document.getElementById('saveReportName').value;
+    console.log(reportName);
+    const reportData = new FormData();
+    reportData.append("report_name", reportName);
+    reportData.append("report_type", document.getElementById('category').value);
+    reportData.append("country", document.getElementById('country').value);
+    reportData.append("pro", document.getElementById('proSelect').value);
+    reportData.append('overwrite', document.getElementById('overwriteReportCheckbox').checked || false);
+    reportData.append('recurrence', document.getElementById('recurrence').value);
+    reportData.append('report_date', document.getElementById('saveReportDate').value);
+    reportData.append('template_id', $('#templateSelect').val());
+    const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
+    reportData.append("start_date", convertToISO(selectedStartDateValue));
+    reportData.append("end_date", convertToISO(selectedEndDateValue));
+    reportData.append("output_fields", $('#customFields').val().join(','));
+    reportData.append("groupby_fields", $('#groupByFields').val().join(','));
+    reportData.append("rules", $('#ruleSelect').val().join(','));
+    reportData.append("use_returns", document.getElementById('useReturns').checked || false);
+    reportData.append("use_bought_from_same_country", document.getElementById('useBoughtFromSameCountry').checked || false);
+    data = await unifiedSendRequest(SAVE_REPORT, {formData: reportData});
+    showMessage('Report saved successfully', true);
+    await populateTemplateSelector();
+    closeSaveModal();
+  } catch (error) {
+    console.error(error.message);
+    TOKEN = false;
+    showMessage('Failed to save report template', false);
+  }
 }
 
 

@@ -299,6 +299,7 @@ Usage:
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: #fafafa;
 }
 
 #loadingSpinner, #loadingSpinnerCalendar {
@@ -330,7 +331,7 @@ Usage:
   <div id="chartSelectionContainer" class="losensitive" style="margin: auto;width:fit-content"></div>
   <div style="display:flex;position:relative">
     <div>
-      <input type="text" id="search-columns" placeholder="Search columns" class="btn dropdown-toggle bs-placeholder btn-default" style="cursor: text;" onkeyup="searchColumn()">
+      <input type="text" id="search-columns" placeholder="Search columns" class="btn dropdown-toggle bs-placeholder btn-default" style="cursor: text;position: relative;background-color: #fafafa;" onkeyup="searchColumn()">
       <div id="columnsLeft" style="width: fit-content;overflow: auto;height: 60vh;position: relative;
               margin-right: 11rem;overflow-y: auto;overflow-x: clip;min-width:300px">
           <!-- <img width="20px" src="{{ trashcan | image_url }}" alt="{{ trashcan.alt | escape }}" loading="lazy"> TODO replace svg with image above once possible -->
@@ -344,7 +345,7 @@ Usage:
     {% comment %} <ul id="chosenY" class="dragYContainer dragContainer chosenYContainerPlaceholder"><p id="chosenYPlaceholder">Drop items here</p></ul> {% endcomment %}
     <div style="width: 75%;position:relative">
       <div id='tooltip' class="tooltipSave"></div>
-      <div id="widgetContainerCustom" style="">
+      <div id="widgetContainerCustom" style="background-color: #fafafa;position: relative;">
         <div id="loadingSpinnerContainer" style="display: none;">
           <div id="loadingSpinner"></div>
         </div>

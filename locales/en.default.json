@@ -508,10 +508,15 @@
     },
     "software": {
         "guide": {
-            "statistics": {
+            "menu": {
                 "welcome": {
                     "title": "Welcome",
-                    "text": "Welcome to ForSURE, your EPR Reporting tool. To introduce you to the platform, we’ll start by taking you on a tour across it’s pages and functions. The onboarding will take about 10 minutes, and afterwards you’ll know what steps to take to generate and submit your EPR reports efficiently.",
+                    "text": "Welcome to ForSURE, your EPR Reporting tool. \\n\\nTo introduce you to the platform, we’ll start by taking you on a tour across it’s pages and functions. The onboarding will take about 10 minutes, and afterwards you’ll know what steps to take to generate and submit your EPR reports efficiently.",
+                    "group": "Introduction"
+                },
+                "guide": {
+                    "title": "Guide",
+                    "text": "You can navigate through this guide using the Next button or by using the arrow keys on your keyboard to go to the next or previous item.\\n\\nOn the bottom left you can see which step of the guide you are on. Clicking on the arrow next to it, you can skip to a different section of the guide if you want to revisit something quickly.",
                     "group": "Introduction"
                 },
                 "help": {
@@ -521,11 +526,11 @@
                 },
                 "overview": {
                     "title": "Overview",
-                    "text": "This to your Overview page. This space provides a snapshot of your data through various statistics, offering insights at a glance. There’s also a table with upcoming EPR deadlines.",
+                    "text": "This to your Overview page. This space provides an overview of your compliance, offering insights at a glance. There’s also a table with upcoming EPR deadlines.",
                     "group": "Navigation Bar"
                 },
                 "categorylist": {
-                    "title": "Categorylist",
+                    "title": "Category List",
                     "text": "Utilize this page to upload and modify your category list. Your category list contains your product information. It serves as the foundation for all reports and charts, so ensuring its accuracy and currency is crucial.",
                     "group": "Navigation Bar"
                 },
@@ -539,24 +544,69 @@
                     "text": "This page houses a comprehensive history of all your reports, enabling you to delve deep into the data for detailed analysis of each report.",
                     "group": "Navigation Bar"
                 },
+                "statistics": {
+                    "title": "Statistics",
+                    "text": "This page allows you to create charts from your data. You can choose the data you want to visualize and the way you want to visualize it.",
+                    "group": "Navigation Bar"
+                },
                 "settings": {
                     "title": "Settings",
                     "text": "On this page, you can configure your ForSURE account. This includes managing the access of the different users and setting country specific settings.",
                     "group": "Navigation Bar"
                 },
-                "account": {
-                    "title": "Account",
-                    "text": "Finally, this is the account section. Visit this section to review your account information and subscription details.",
+                "notifications": {
+                    "title": "Notifications",
+                    "text": "If any error occurs, the error will be shown here. If configured, you can also receive an email with the error message.",
                     "group": "Navigation Bar"
                 },
                 "overviewReportEnd": {
                     "title": "Overview Report End",
                     "text": "Now that we’ve shown you all the pages, let’s dive a little deeper into how to use the functionalities.",
                     "group": "Navigation Bar"
+                }
+            },
+            "dashboard": {
+                "map": {
+                    "title": "Map",
+                    "text": "This is the compliance map. Here you can see for each country what the status of your compliance is.\\n\\nHovering over a country shows you the status for each waste stream. The colors are as following: \\nRed: Information missing\\nYellow: Audit upcoming or threshold reached\\nBlue: Report coming up, but handled automatically\\nGreen: Nothing to do",
+                    "group": "Map"
                 },
+                "mapIcons": {
+                    "title": "Map Icons",
+                    "text": "With the plus icon you can add a new PRO to the map and with the settings icon you can edit the details of the PRO, such as credentials and extra information needed.",
+                    "group": "Map"
+                },
+                "deadlineWidget": {
+                    "title": "Deadline Widget",
+                    "text": "This is the deadline widget. Here you can see the upcoming deadlines for EPR reports once you have selected a country.\\n\\nIf the deadline field appears in blue, it indicates that our software has already generated the report, which can be found under the History section. If not, the report has yet to be completed.",
+                    "group": "Deadlines"
+                },
+                "informationWidget": {
+                    "title": "Information Widget",
+                    "text": "This is the information widget. Here you can see important updates and missing information for the different countries. Clicking on the information will show you the details of the information.",
+                    "group": "Information"
+                },
+                "informationExpand": {
+                    "title": "Information Details Widget",
+                    "text": "Click here to expand the information widget.",
+                    "group": "Information"
+                },
+                "informationSettings": {
+                    "title": "Information Settings",
+                    "text": "Click here to edit the notification settings, such as your preferred way to receive notifications and which notifications you want to receive.",
+                    "group": "Information"
+                }
+
+            },
+            "statistics": {
                 "createChart": {
                     "title": "Create Chart",
                     "text": "In the overview page you’ll be able to see various statistics gathered from your data. This can give you concrete overviews related to your waste metrics. There are various ways you can view this using our interactive graph.",
+                    "group": "Create Chart"
+                },
+                "selectColumns": {
+                    "title": "Select Columns",
+                    "text": "Here you can select any column from your orders or category list that you want to use for the chart. You can search for the columns by typing in the search bar or you can expand the categories to see all the columns.",
                     "group": "Create Chart"
                 },
                 "yAxis": {
@@ -571,7 +621,7 @@
                 },
                 "showChart": {
                     "title": "Show Chart",
-                    "text": "Upon completing these steps, the resulting chart will be instantly displayed.",
+                    "text": "Upon completing these steps, the resulting chart will be displayed.",
                     "group": "Create Chart"
                 },
                 "chartOptions": {
@@ -642,13 +692,13 @@
                     "group": "Create"
                 },
                 "orderListDropZone": {
-                    "title": "Order List Drop Zone",
+                    "title": "Order List",
                     "text": "If you want to manually upload orders, you can drag and drop them here. The uploading process can take a few minutes depending on the size of the dataset. Once you have uploaded the orders, you have to map the data to the labels you want to use for the data. You can select different variables in the dropdown, which should correspond with the dataset.",
                     "group": "Create"
                 },
                 "next": {
                     "title": "Next",
-                    "text": "In the next step you can add return data to the report. If you have chosen live data, the returns received from it will be used automatically, but you can also upload additionalreturns manually.\\n\\nIn the third step, you can select the country, report type and timeframe that you want to create the report for. Finally, you will see an overview of the report details and allow you to create the report you chose. The report will be shown in the history as soon as it is available.",
+                    "text": "In the next step you can add return data to the report. If you have chosen live data, the returns received from it will be used automatically, but you can also upload additional returns manually.\\n\\nIn the third step, you can select the country, report type and timeframe that you want to create the report for. Finally, you will see an overview of the report details and allow you to create the report you chose. The report will be shown in the history as soon as it is available.",
                     "group": "Create"
                 }
             },
@@ -781,77 +831,40 @@
                     "text": "Welcome to the general settings page. Here you can configure the settings for your ForSURE account. This includes managing the access of the different users and setting country specific settings.",
                     "group": "Introduction"
                 },
+                "configuration": {
+                    "title": "Configuration",
+                    "text": "Here you can configure your general settings such as the yearly growth rate of your company. We will warn you if reports exceed this threshold.",
+                    "group": "Configuration"
+                },
+                "bug": {
+                    "title": "Report Bugs",
+                    "text": "If you encounter any issues, please report them here. We will investigate the issue and fix it as soon as possible.",
+                    "group": "Configuration"
+                },
+                "userAccount": {
+                    "title": "User Account",
+                    "text": "Here you can configure your user account. You can see the orders you have made and the usage limits of your account.",
+                    "group": "Configuration"
+                },
                 "users": {
                     "title": "Users",
-                    "text": "Here you can manage the access of the different users. You can add new users, edit their roles for the different parts of the software and delete users. You can also define API tokens that can be used for interacting with the software via API.",
+                    "text": "Here you can manage the access of the different users. You can add new users, edit their roles for the different parts of the software and remove them from your organization.",
                     "group": "Users"
                 },
                 "addUser": {
                     "title": "Add User",
-                    "text": "Adding a user is done by clicking this button and entering the email address of the user you want to add. They will receive an email with a link to create a password and log in to the software.",
+                    "text": "Adding a user is done by entering the email address of the user you want to add. They will receive an email with a link to create a password and log in to the software.",
                     "group": "Users"
+                },
+                "addAPI": {
+                    "title": "API Integrations Overview",
+                    "text": "Here you can manage the API integrations that you have configured. You can see the status of each integration, edit them and remove them. ",
+                    "group": "API"
                 },
                 "addAPIToken": {
-                    "title": "Add API Token",
-                    "text": "Adding an API token is done by clicking this button. You can then copy the token to your clipboard by clicking the copy button. Note that the token is only shown once, so make sure to save it in a secure location.",
-                    "group": "Users"
-                },
-                "configuration": {
-                    "title": "Configuration",
-                    "text": "Here you can configure the settings for your ForSURE account. This includes notifications for thresholds and country specific settings required for submitting reports to the different schemes.",
-                    "group": "Configuration"
-                },
-                "countryTabs": {
-                    "title": "Country Tabs",
-                    "text": "Please add all countries that you are selling to. You can then configure the settings for each country, such as the PRO you are using and enter the required information for the different schemes.",
-                    "group": "Configuration"
-                },
-                "saveChanges": {
-                    "title": "Save Changes",
-                    "text": "After you have made all the changes you want to make, you can save the changes by clicking the save button.",
-                    "group": "Configuration"
-                }
-            },
-            "settings": {
-                "welcome": {
-                    "title": "Welcome",
-                    "text": "On this settings page, you have the ability to define the labels for your order and category list, including specific details for each country. Additionally, you can set up a live connector to streamline your processes if desired.",
-                    "group": "Introduction"
-                },
-                "profile": {
-                    "title": "Profile",
-                    "text": "This dropdown menu allows you to select an existing profile or create a new one.\\n\\nIt's recommended to have one profile for each source of your data. For instance, you might have one profile for Shopify and another for WooCommerce, ensuring your data is organized by its origin.\\n\\nTo rename or delete a profile, simply click the pencil icon.",
-                    "group": "General"
-                },
-                "liveData": {
-                    "title": "Live Data",
-                    "text": "This slider enables the use of live data. By turning it on, you can establish a direct connection to your Shopify store, ensuring real-time data synchronization.",
-                    "group": "Live Data"
-                },
-                "connectorConfig": {
-                    "title": "Connector",
-                    "text": "In this section, you can input the URL of your Shopify store as well as the API token required for integration. For guidance on how to obtain these details, please refer to the following guide: <a href='https:\/\/help.shopify.com\/en\/manual\/apps\/app-types\/custom-apps'>Shopify Help Center - Custom Apps<\/a>.",
-                    "group": "Live Data"
-                },
-                "orderlistConfig": {
-                    "title": "Orderlist",
-                    "text": "In this area, you have the option to specify the column names for your order list, which is necessary if you're not using live data. It's important to enter the column name exactly as it appears in the uploaded file, paying close attention to the use of lower\/uppercase letters, to ensure it corresponds correctly to the data row.",
-                    "group": "Orderlist"
-                },
-                "returnlistConfig": {
-                    "title": "Returnlist",
-                    "text": "This section allows you to define the column names for your return list, applicable if you are not using live data. Similar to order list setup, it's crucial to pay attention to the casing of the letters in the column names to ensure they match precisely with those in your uploaded file.",
-                    "group": "Returnlist"
-                },
-                "categorylistConfig": {
-                    "title": "Categorylist",
-                    "text": "This area is designated for defining the labels for your category list. The category list can be uploaded in the categorylist tab and is the same for all profiles.\\n\\nOnly activate the Packaging, Batteries, and Electro if you need them.",
-                    "group": "Categorylist"
-                },
-                "categorylistCountryConfig": {
-                    "title": "Categorylist",
-                    "text": "For each country, there might be specific columns required in the category list to meet local regulations or reporting standards. In this section, you're encouraged to add the countries relevant to your operations and input the necessary labels for those columns. If certain elements, like Glass for example, do not apply to your sold products, you have the option to leave those columns empty, ensuring your category list is both accurate and compliant.",
-                    "group": "Categorylist"
+                    "title": "Add API Integration",
+                    "text": "Adding an API integration is done by clicking this button. For third party integrations, configure the integration by entering the name, store URL and API key. For custom integrations, you can request an API token, which you can use to send us data. You can copy the token to your clipboard by clicking the copy button. Note that the token is only shown once, so make sure to save it in a secure location.",
+                    "group": "API"
                 }
             },
             "categorylist": {
@@ -904,6 +917,13 @@
                     "title": "Dropdown",
                     "text": "When you edit a cell, you can use the dropdown to select the correct value. Hovering over the options shows the description of the value. If the value is not in the dropdown, you can just type it in.",
                     "group": "Dropdown"
+                }
+            },
+            "usage": {
+                "welcome": {
+                    "title": "Welcome",
+                    "text": "This page shows you the usage of your account. You can see the usage of the orders and category list elements you have uploaded.",
+                    "group": "Introduction"
                 }
             }
         }

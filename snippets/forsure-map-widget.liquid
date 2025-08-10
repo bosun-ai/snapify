@@ -1,12 +1,12 @@
 {% style %}
     #mapContainer {
         position: relative;
-        z-index: 2;
+        /* z-index: 1; */
     }
     #eprMap {
         height: calc(100% - 40px);
         width: 100%;
-        z-index: 2;
+        z-index: 1;
     }
 
     #eprMapAdd {
@@ -1243,7 +1243,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
         proContainer.appendChild(proDiv);
       }
       const proDiv2 = document.createElement('div');
-      proDiv2.innerHTML = `{% render 'icon-add' %}`;
+      proDiv2.innerHTML = `{% render 'icon-add-black' %}`;
       proDiv2.querySelector('svg').style.width = '2rem';
       proDiv2.querySelector('svg').style.height = '2rem';
       proDiv2.querySelector('svg').style.fill = '#17161c';
@@ -1554,9 +1554,7 @@ waitForPermission(function() {
           updateCountryData(data);
         });
     });
-    loadCenters().then(centers => {
-      console.log('centers', centers);
-    });
+    loadCenters();
 
     setInterval(() => {
       getCountryStatus().then(data => {

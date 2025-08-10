@@ -109,7 +109,50 @@
 </div>
 
 <script>
+  function showGuide() {
+    startGuide([
+          { element: "main", group: "{{ 'software.guide.menu.welcome.group' | t }}", title: "{{ 'software.guide.menu.welcome.title' | t }}", text: "{{ 'software.guide.menu.welcome.text' | t }}", where: 'middle' },
+          { element: "main", group: "{{ 'software.guide.menu.guide.group' | t }}", title: "{{ 'software.guide.menu.guide.title' | t }}", text: "{{ 'software.guide.menu.guide.text' | t }}", where: 'middle' },
+          { element: "#guideButton", group: "{{ 'software.guide.menu.help.group' | t }}", title: "{{ 'software.guide.menu.help.title' | t }}", text: "{{ 'software.guide.menu.help.text' | t }}", where: 'below' },
+          { element: "#list-element-forsure-dashboard", group: "{{ 'software.guide.menu.overview.group' | t }}", title: "{{ 'software.guide.menu.overview.title' | t }}", text: "{{ 'software.guide.menu.overview.text' | t }}", where: 'below' },
+          { element: "#list-element-forsure-categorylist-editor", group: "{{ 'software.guide.menu.categorylist.group' | t }}", title: "{{ 'software.guide.menu.categorylist.title' | t }}", text: "{{ 'software.guide.menu.categorylist.text' | t }}", where: 'below' },
+          { element: "#list-element-forsure-report", group: "{{ 'software.guide.menu.report.group' | t }}", title: "{{ 'software.guide.menu.report.title' | t }}", text: "{{ 'software.guide.menu.report.text' | t }}", where: 'below' },
+          { element: "#list-element-forsure-downloads", group: "{{ 'software.guide.menu.history.group' | t }}", title: "{{ 'software.guide.menu.history.title' | t }}", text: "{{ 'software.guide.menu.history.text' | t }}", where: 'below' },
+          { element: "#list-element-forsure-statistics", group: "{{ 'software.guide.menu.statistics.group' | t }}", title: "{{ 'software.guide.menu.statistics.title' | t }}", text: "{{ 'software.guide.menu.statistics.text' | t }}", where: 'below' },
+          { element: "#gear-icon", group: "{{ 'software.guide.menu.settings.group' | t }}", title: "{{ 'software.guide.menu.settings.title' | t }}", text: "{{ 'software.guide.menu.settings.text' | t }}", where: 'below' },
+          { element: "#notificationBell", group: "{{ 'software.guide.menu.notifications.group' | t }}", title: "{{ 'software.guide.menu.notifications.title' | t }}", text: "{{ 'software.guide.menu.notifications.text' | t }}", where: 'below' },
+          { element: "main", group: "{{ 'software.guide.menu.overviewReportEnd.group' | t }}", title: "{{ 'software.guide.menu.overviewReportEnd.title' | t }}", text: "{{ 'software.guide.menu.overviewReportEnd.text' | t }}", where: 'middle' },
+          
+          
+          { element: "#mapContainer", group: "{{ 'software.guide.dashboard.map.group' | t }}", title: "{{ 'software.guide.dashboard.map.title' | t }}", text: "{{ 'software.guide.dashboard.map.text' | t }}", where: 'left' },
+          { element: "#mapTitle .icon-container", group: "{{ 'software.guide.dashboard.mapIcons.group' | t }}", title: "{{ 'software.guide.dashboard.mapIcons.title' | t }}", text: "{{ 'software.guide.dashboard.mapIcons.text' | t }}", where: 'below', secondElement: "#mapTitle" },
+          
+          { element: "#deadlineContainer", group: "{{ 'software.guide.dashboard.deadlineWidget.group' | t }}", title: "{{ 'software.guide.dashboard.deadlineWidget.title' | t }}", text: "{{ 'software.guide.dashboard.deadlineWidget.text' | t }}", where: 'right' },
+          
+          { element: "#informationContainer", group: "{{ 'software.guide.dashboard.informationWidget.group' | t }}", title: "{{ 'software.guide.dashboard.informationWidget.title' | t }}", text: "{{ 'software.guide.dashboard.informationWidget.text' | t }}", where: 'right' },
+          { element: "#expandInformation", group: "{{ 'software.guide.dashboard.informationExpand.group' | t }}", title: "{{ 'software.guide.dashboard.informationExpand.title' | t }}", text: "{{ 'software.guide.dashboard.informationExpand.text' | t }}", where: 'below' , secondElement: "#informationTitle"},
+          { element: "#informationSettingsIcon", group: "{{ 'software.guide.dashboard.informationSettings.group' | t }}", title: "{{ 'software.guide.dashboard.informationSettings.title' | t }}", text: "{{ 'software.guide.dashboard.informationSettings.text' | t }}", where: 'below' , secondElement: "#informationTitle"},
 
+        ]);
+        setCookie('showedGuideDashboard', 'true', 300);
+  }
+
+function showGuideFromButton(element) {
+showGuide();
+}
+
+waitForPermission(function() {
+if (window.userPermissions['forsure-dashboard']) {
+  if(readCookie('showedGuideDashboard') === null) {
+    setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+  } else {
+    if (window.userPermissions['no-pros-chosen'] !== undefined) {
+      // don't open popup if user sees guide
+      openMapAdd();
+    }
+  }
+}
+});
 </script>
 {% endif %}
 

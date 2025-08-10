@@ -354,10 +354,17 @@
   {% render 'forsure-simple-notification' %}
   <div class="section-{{ section.id }}-padding">
     <div style="padding-bottom: 5rem;display: none;" id="generalSettingsContainer">
-      <div class="configbox page-width border" style="padding: 0;border-radius:1rem;padding:3px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem;">
+      <div class="configbox page-width border" id="generalSettingsBox" style="padding: 0;border-radius:1rem;padding:3px;background-color: #fafafa;position:relative;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem;background-color: #fafafa;position:relative;" id="generalSettingsTitle">
           <h2>Configure General Settings</h2>
           <div style="display: flex; align-items: center;">
+            <div
+              id="bug-icon"
+              style="cursor: pointer; background: #fafafa; padding-top: 5px; margin-right: 1rem;"
+            >
+              {% render 'icon-bug' %}
+            </div>
+            
             <div id="user-icon"  style="cursor: pointer;background: #fafafa;padding-top: 5px;margin-right: 1rem;" onclick="window.location.href='/account?logged_in'">
               {% render 'icon-user' %}
             </div>
@@ -1105,12 +1112,15 @@ function renderSchemeDropdown(country, wastestream) {
   function showGuide() {
     startGuide([
         { element: "main", group: "{{ 'software.guide.general.welcome.group' | t }}", title: "{{ 'software.guide.general.welcome.title' | t }}", text: "{{ 'software.guide.general.welcome.text' | t }}", where: 'middle' },
+        { element: "#generalSettingsTitle", group: "{{ 'software.guide.general.configuration.group' | t }}", title: "{{ 'software.guide.general.configuration.title' | t }}", text: "{{ 'software.guide.general.configuration.text' | t }}", where: 'below' },
+        { element: "#bug-icon", group: "{{ 'software.guide.general.bug.group' | t }}", title: "{{ 'software.guide.general.bug.title' | t }}", text: "{{ 'software.guide.general.bug.text' | t }}", where: 'below' },
+        { element: "#user-icon", group: "{{ 'software.guide.general.userAccount.group' | t }}", title: "{{ 'software.guide.general.userAccount.title' | t }}", text: "{{ 'software.guide.general.userAccount.text' | t }}", where: 'below' },
         { element: "#accessManagement", group: "{{ 'software.guide.general.users.group' | t }}", title: "{{ 'software.guide.general.users.title' | t }}", text: "{{ 'software.guide.general.users.text' | t }}", where: 'below' },
-        { element: "#addUserButton", group: "{{ 'software.guide.general.addUser.group' | t }}", title: "{{ 'software.guide.general.addUser.title' | t }}", text: "{{ 'software.guide.general.addUser.text' | t }}", where: 'right' },
-        { element: "#addApiTokenButton", group: "{{ 'software.guide.general.addAPIToken.group' | t }}", title: "{{ 'software.guide.general.addAPIToken.title' | t }}", text: "{{ 'software.guide.general.addAPIToken.text' | t }}", where: 'left' },
-        { element: "#configurationGeneral", group: "{{ 'software.guide.general.configuration.group' | t }}", title: "{{ 'software.guide.general.configuration.title' | t }}", text: "{{ 'software.guide.general.configuration.text' | t }}", where: 'below' },
-        { element: "#countryTabs", group: "{{ 'software.guide.general.countryTabs.group' | t }}", title: "{{ 'software.guide.general.countryTabs.title' | t }}", text: "{{ 'software.guide.general.countryTabs.text' | t }}", where: 'left' },
-        { element: "#submitChanges", group: "{{ 'software.guide.general.saveChanges.group' | t }}", title: "{{ 'software.guide.general.saveChanges.title' | t }}", text: "{{ 'software.guide.general.saveChanges.text' | t }}", where: 'left' },
+        { element: "#addUserInput", group: "{{ 'software.guide.general.addUser.group' | t }}", title: "{{ 'software.guide.general.addUser.title' | t }}", text: "{{ 'software.guide.general.addUser.text' | t }}", where: 'left' },
+
+
+        { element: "#apiIntegrations", group: "{{ 'software.guide.general.addAPI.group' | t }}", title: "{{ 'software.guide.general.addAPI.title' | t }}", text: "{{ 'software.guide.general.addAPI.text' | t }}", where: 'below' },
+        { element: "#addApiTokenButton", group: "{{ 'software.guide.general.addAPIToken.group' | t }}", title: "{{ 'software.guide.general.addAPIToken.title' | t }}", text: "{{ 'software.guide.general.addAPIToken.text' | t }}", where: 'below' },
     ]);
     setCookie('showedGuideGeneral', 'true', 300);
 }

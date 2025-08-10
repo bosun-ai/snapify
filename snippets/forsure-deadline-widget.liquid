@@ -105,6 +105,48 @@
   width: 50%;
   font-weight: bold;
 }
+
+
+.deadline-row {
+  display: flex;
+  align-items: center;
+}
+
+/* 1. left label grows to fill 1/2 remaining space */
+.deadline-row .country {
+  flex: 1;
+  margin-left: 3rem;
+  font-size: large;
+  font-weight: bold;
+  text-align: left;
+}
+
+/* 2. reserve exactly 24px (or whatever your SVG’s width is) */
+/*    flex: 0 0 fixes width, so even if empty it still takes up 24px */
+.deadline-row .forecast-icon {
+  flex: 0 0 24px;
+  text-align: center;
+  font-size: large;
+  margin-right: 1rem;
+  display: flex !important;
+  /* font-weight:bold if you want the same styling */
+}
+
+/* 3. middle grows to fill the other 1/2 */
+.deadline-row .typeDescription {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin-right: 3rem;
+}
+
+/* 4. deadline also flex:1, but since forecast-icon is fixed, its start-point is now stable */
+.deadline-row .rounded-deadline {
+  flex: 1;
+  text-align: right;
+  font-size: large;
+  font-weight: bold;
+}
 {% endstyle %}
 
 <div id="deadlineContainer" class="widget grid-item widget-left">
@@ -147,6 +189,11 @@
 
     let pastDeadlines = [];
     let displayedDeadlines = [];
+    console.log('results', results);
+    if (results.length === 0) {
+      deadlineList.innerHTML = '<div id="no-deadlines">No deadlines</div>';
+      return;
+    }
 
     results.forEach(deadline => {
       const listItem = document.createElement('li');
@@ -180,12 +227,25 @@
       } else {
         catImg = ''; // Default empty if unknown category
       }
+      var forecastImg = '';
+      if (deadline.forecast === true) {
+        forecastImg = `{% render 'icon-forecast' %}`;
+      }
+
 
       listItem.innerHTML = `
-        <div style="display: flex; align-items: center;">
-            <div style="flex: 1; font-size: large;font-weight: bold; text-align: left;margin-left:3rem">${deadline.country}</div>
-            <div class="typeDescription"><div style="display: flex">${catImg}<div class="reportDeadlineName">${deadline.type}</div></div></div>
-            <div class="${className} rounded-deadline" style="flex: 1; text-align: right; font-size: large;font-weight: bold;">${deadline.deadline}</div>
+        <div class="deadline-row">
+          <div class="country">${deadline.country}</div>
+          <div class="forecast-icon">${forecastImg}</div>
+          <div class="typeDescription">
+            <div style="display:flex">
+              ${catImg}
+              <div class="reportDeadlineName">${deadline.type}</div>
+            </div>
+          </div>
+          <div class="${className} rounded-deadline">
+            ${deadline.deadline}
+          </div>
         </div>
       `;
 
@@ -200,6 +260,7 @@
 
       // Take the next batch of past deadlines to display
       let nextBatch = pastDeadlines.splice(-5); // Show the next 5 past deadlines
+      nextBatch.reverse();
       console.log(nextBatch);
 
       nextBatch.forEach(item => {

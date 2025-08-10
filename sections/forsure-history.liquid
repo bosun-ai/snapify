@@ -290,6 +290,18 @@ tr {
         transform: translate(-50%, -50%);
     }
 
+    .loadingSpinnerReport {
+      border: 3px solid rgba(34, 85, 255, 0.1);
+      border-top: 3px solid #2255ff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+      display: block !important;
+      margin-left: 1rem;
+    }
+
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
@@ -481,252 +493,6 @@ function extractBaseFilename(filename) {
   return base;
 }
 
-function createFolderStructure(configDiv, data) {
-  configDiv.innerHTML = ''; // Clear existing content
-
-  // Recursive function to create the structure
-  function renderLevel(level, parentElement, path, depth = 0) {
-    Object.keys(level).forEach(key => {
-      if (key === 'files') {
-        // Render files
-        renderFileLevel(level, parentElement, path, depth, key);
-      } else {
-        tag_key_wanted = `${path}/${key}`.slice(1);  // Remove first /
-
-        relevantTags = [];
-        Object.entries(tags).forEach(([tag_key, tag_value]) => {
-          if (tag_key.includes(tag_key_wanted)) {
-            relevantTags = tag_value;
-          }
-        });
-        // Render folder
-        const folderRow = document.createElement('div');
-        folderRow.className = 'history-row folder-row'; // Add CSS class for consistent styling
-        folderRow.id = `folderRow-${path}/${key}`;
-        folderRow.style.paddingLeft = `${depth * 2}rem`; // Offset text for hierarchy
-        folderRow.style.display = 'inline-flex';
-        folderRow.style.alignItems = 'center';
-
-        // Add the SVG arrow
-        const svg = `<svg class="svg-arrow collapsed" style="margin-left: 2rem;margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" version="1.1" fill="2255ff" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 66.91" style="margin: auto;height: 100%;display: flex;width: 100%;" xml:space="preserve">
-                        <g><path fill="#2255ff" d="M11.68,1.95C8.95-0.7,4.6-0.64,1.95,2.08c-2.65,2.72-2.59,7.08,0.13,9.73l54.79,53.13l4.8-4.93l-4.8,4.95 c2.74,2.65,7.1,2.58,9.75-0.15c0.08-0.08,0.15-0.16,0.22-0.24l53.95-52.76c2.73-2.65,2.79-7.01,0.14-9.73 c-2.65-2.72-7.01-2.79-9.73-0.13L61.65,50.41L11.68,1.95L11.68,1.95z"/></g>
-                    </svg>`;
-        folderRow.innerHTML = `${svg}`;
-        const folderName = document.createElement('div');
-        folderName.style.cssText = 'text-indent: 0 !important;';
-        folderName.style.display = 'flex';
-
-        const folderNameSpan = document.createElement('span');
-        folderNameSpan.innerHTML = key;
-
-        const tagsDiv = document.createElement('div');
-        tagsDiv.id = `tagsDiv-${path}/${key}`;
-        tagsDiv.style.marginRight = '5rem';
-        tagsDiv.style.marginLeft = '1rem';
-        tagsDiv.style.textIndent = 0;
-        if (relevantTags.includes('new') && (Object.keys(level).length !== 1 || path === '')) {
-            // Only show new tag if it's the root folder or if there are multiple subfolders
-            tagsDiv.appendChild(addNewTag());
-        }
-        folderName.appendChild(folderNameSpan);
-        folderRow.appendChild(folderName);
-        folderRow.appendChild(tagsDiv);
-        const folderContent = document.createElement('div');
-        folderContent.style.display = 'none'; // Initially hidden
-
-        // Add click event to toggle visibility and arrow direction
-        folderRow.addEventListener('click', () => {
-          folderContent.style.display = folderContent.style.display === 'none' ? 'block' : 'none';
-          const arrow = folderRow.querySelector('.svg-arrow');
-          arrow.classList.toggle('collapsed');
-        });
-        if (Object.keys(level).length === 1) {
-            folderRow.click();
-        }
-
-        parentElement.appendChild(folderRow);
-        parentElement.appendChild(folderContent);
-
-        // Recurse into the next level
-        renderLevel(level[key], folderContent, `${path}/${key}`, depth + 1);
-      }
-    });
-  }
-
-  renderLevel(hierarchy, configDiv, '', 0);
-}
-
-function renderFileLevel(level, parentElement, path, depth, key) {
-  level[key].forEach(file => {
-    if (file.type === 'group' && file.children.length > 0) {
-      // Grouped file rendering
-      const fileRow = document.createElement('div');
-      fileRow.className = 'history-row folder-row';
-      fileRow.id = `fileRow-${path}/${file.part}`;
-      fileRow.style.paddingLeft = `${(depth + 1) * 2}rem`;
-      fileRow.style.display = 'inline-flex';
-      fileRow.style.alignItems = 'center';
-
-      const arrowSvg = `<svg class="svg-arrow collapsed" style="margin-right: 1rem; vertical-align: middle;" width="20.593" height="22.88" version="1.1" fill="2255ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 66.91"><g><path fill="#2255ff" d="M11.68,1.95C8.95-0.7,4.6-0.64,1.95,2.08c-2.65,2.72-2.59,7.08,0.13,9.73l54.79,53.13l4.8-4.93l-4.8,4.95 c2.74,2.65,7.1,2.58,9.75-0.15c0.08-0.08,0.15-0.16,0.22-0.24l53.95-52.76c2.73-2.65,2.79-7.01,0.14-9.73 c-2.65-2.72-7.01-2.79-9.73-0.13L61.65,50.41L11.68,1.95L11.68,1.95z"/></g></svg>`;
-      fileRow.innerHTML = `${arrowSvg}`;
-      fileRow.style.cursor = 'pointer';
-
-      const fileName = document.createElement('div');
-      fileName.style.cssText = 'text-indent: 0 !important;';
-      fileName.className = 'report-group';
-
-      const fileNameSpan = document.createElement('span');
-      fileNameSpan.innerHTML = file.part;
-      fileName.appendChild(fileNameSpan);
-
-      const tagsDiv = document.createElement('div');
-      tagsDiv.id = `tagsDiv-${path}/${file.part}`;
-      tagsDiv.style.marginRight = '5rem';
-      tagsDiv.style.marginLeft = '1rem';
-      tagsDiv.style.textIndent = 0;
-
-      // Optional: tag style wrapper
-      if (file.part.toLowerCase().includes('inprogress')) {
-        const inprogressTag = createColReport(`<svg height="12px" fill="#fafafa" title="In Progress" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M32 0C14.3 0 0 14.3 0 32S14.3 64 32 64l0 11c0 42.4 16.9 83.1 46.9 113.1L146.7 256 78.9 323.9C48.9 353.9 32 394.6 32 437l0 11c-17.7 0-32 14.3-32 32s14.3 32 32 32l32 0 256 0 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-11c0-42.4-16.9-83.1-46.9-113.1L237.3 256l67.9-67.9c30-30 46.9-70.7 46.9-113.1l0-11c17.7 0 32-14.3 32-32s-14.3-32-32-32L320 0 64 0 32 0zM96 75l0-11 192 0 0 11c0 19-5.6 37.4-16 53L112 128c-10.3-15.6-16-34-16-53zm16 309c3.5-5.3 7.6-10.3 12.1-14.9L192 301.3l67.9 67.9c4.6 4.6 8.6 9.6 12.1 14.9L112 384z"/></svg>`);
-        inprogressTag.style.background = '#2255ff';
-        inprogressTag.style.margin = 0;
-        inprogressTag.style.padding = '0.4rem 1rem';
-        inprogressTag.style.justifyContent = 'center';
-        inprogressTag.style.display = 'flex';
-        inprogressTag.style.borderRadius = '1rem';
-        inprogressTag.title = 'Inprogress';
-        tagsDiv.appendChild(inprogressTag);
-      }
-      if (file.tags.includes('new')) {
-        // Only show new tag if it's the root folder or if there are multiple subfolders
-        tagsDiv.appendChild(addNewTag());
-    }
-
-      fileRow.appendChild(fileName); // ← Filename block
-      fileRow.appendChild(tagsDiv);     // ← Tag rendered next to it, not inside
-
-
-      const groupContainer = document.createElement('div');
-      groupContainer.style.display = 'none';
-
-      fileRow.addEventListener('click', () => {
-        groupContainer.style.display = groupContainer.style.display === 'none' ? 'block' : 'none';
-        groupContainer.classList.add('history-group-container');
-        fileRow.querySelector('.svg-arrow').classList.toggle('collapsed');
-      });
-
-      file.children.forEach(child => {
-        let childPath = child.filename;
-        let childFileName = childPath.split('/').pop();
-        let isSubmission = false;
-        let reportId = child.report_id;
-        if (child.report_submission_name) {
-          childFileName = child.report_submission_name;
-          childPath = child.report_submission_name;
-          isSubmission = true;
-          reportId = child.submission_id;
-        }
-        const childRow = document.createElement('div');
-        childRow.className = 'history-row file-row';
-        childRow.id = `childRow-${path}/${childPath}`;
-        childRow.style.paddingLeft = `${(depth + 1) * 2}rem`;
-        {% comment %} padding-left: 12rem;justify-content: space-between;align-items: center;padding-right: 5rem; {% endcomment %}
-        childRow.style.justifyContent = 'space-between';
-        childRow.style.alignItems = 'center';
-        childRow.style.paddingRight = '5rem';
-
-        const fileNameDiv = document.createElement('div');
-        fileNameDiv.textContent = childFileName;
-
-        const tagsDiv = document.createElement('div');
-        tagsDiv.style.marginRight = '5rem';
-        tagsDiv.style.marginLeft = '1rem';
-        tagsDiv.style.textIndent = 0;
-        var statusMatch = statusMapping(child.status);
-        if (!isSubmission) {
-            const statusTag = createColReport('');
-            if (statusMatch.status == 'Deleted') {
-              childRow.style.textDecoration = 'line-through';
-            }
-            // Create the dot
-            const dot = document.createElement('span');
-            dot.style.width = '0.8em';
-            dot.style.height = '0.8em';
-            dot.style.borderRadius = '50%';
-            dot.style.background = statusMatch.color;
-            dot.style.marginRight = '0.6rem';
-          
-            // Create the text span
-            const text = document.createElement('span');
-            text.textContent = `${statusMatch.status}`;
-            
-            // Compose the full container
-            statusTag.appendChild(dot);
-            statusTag.appendChild(text);
-          
-            statusTag.style.cursor = 'pointer';
-            statusTag.onclick = function () {
-              if (activeStatus === status[0]) {
-                filterReportHistory();
-                activeStatus = '';
-              } else {
-                filterReportHistory(status[0]);
-                activeStatus = status[0];
-              }
-            };
-            title = statusMatch.description;
-            if (child.position != null) {
-              title += `\nPosition in queue: ${child.position}`;
-            }
-            title += `\nLast updated: ${new Date(child.updated_at).toLocaleString('DE')}`;  // TODO: change to user's timezone
-            statusTag.title = title;
-          
-            statusTag.style.padding = '0.4rem 1rem';
-            statusTag.style.justifyContent = 'center';
-            statusTag.style.display = 'flex';
-            statusTag.style.alignItems = 'center';
-            statusTag.style.borderRadius = '1rem';
-            tagsDiv.appendChild(statusTag);
-        }
-        const icons = document.createElement('div');
-        icons.style.display = 'flex';
-        if (statusMatch.position >= 3 && !isSubmission) {  // data was extracted
-          icons.appendChild(addOpenIconExtracted(reportId));
-        }
-        icons.appendChild(addOpenIconReport(childFileName, childPath, isSubmission, reportId));
-        icons.appendChild(addDownloadIcon(childFileName, childPath, isSubmission, reportId));
-        if (window.userPermissions['sharereport'] === true) {
-          icons.appendChild(addShareCol(childFileName, childPath, isSubmission, reportId));
-        }
-        if (window.userPermissions['deletereport'] === true) {
-          icons.appendChild(child.can_delete ? addTrashIcon(childFileName, child) : emptyCol());
-        }
-        if (child.can_submit) {
-          icon = sendReportIcon(childFileName, childPath, window.userPermissions['filereport'], child.no_submit_reason);
-          if (child.no_submit_reason) {
-            icon.title = child.no_submit_reason;
-            icon.style.opacity = '0.5';
-            icon.onclick = () => {
-              showMessage(child.no_submit_reason, false);
-            };
-          }
-        } else {
-          icon = emptyCol();
-        }
-        icons.appendChild(icon);
-
-        childRow.appendChild(fileNameDiv);
-        childRow.appendChild(tagsDiv);
-        childRow.appendChild(icons);
-        groupContainer.appendChild(childRow);
-      });
-
-      parentElement.appendChild(fileRow);
-      parentElement.appendChild(groupContainer);
-    }
-  });
-}
-
 function addNewTag() {
   const newTag = createColReport(`New`);
   newTag.classList.add('newTag');
@@ -744,7 +510,7 @@ function addNewTag() {
 function statusMapping(status) {
   switch (status) {
     case 'error':
-      return {'status': 'Error', 'color': '#E63C6B', 'description': 'Report had an error, please check the notifications.', 'position': -2};
+      return {'status': 'Error', 'color': '#E63C6B', 'description': 'Report submission had an error, we are working on it.', 'position': -2};
     case 'waiting':
       return {'status': 'Input Required', 'color': '#E6B83C', 'description': 'Report is waiting for user input, please check the notifications.', 'position': -1};
     case 'created':
@@ -755,14 +521,16 @@ function statusMapping(status) {
       return {'status': 'Sorted', 'color': '#2255ff', 'description': 'Report was sorted, data will now be extracted', 'position': 2};
     case 'data_extracted':
       return {'status': 'Data Extracted', 'color': '#2255ff', 'description': 'Data was extracted, will now be submitted', 'position': 3};
+    case 'wait_confirmation':
+      return {'status': 'Created', 'color': '#2255ff', 'description': 'Report was created', 'position': 4};
     case 'submitted':
-      return {'status': 'Submitted', 'color': '#2255ff', 'description': 'Report was submitted, will now be validated', 'position': 4};
+      return {'status': 'Submitted', 'color': '#2255ff', 'description': 'Report was submitted, will now be validated', 'position': 5};
     case 'validated':
-      return {'status': 'Validated', 'color': '#21FF3D', 'description': 'Report was validated', 'position': 5};
-    case 'done':
-      return {'status': 'Completed', 'color': '#21FF3D', 'description': 'Report is completed', 'position': 6};
+      return {'status': 'Validated', 'color': '#21FF3D', 'description': 'Report was validated', 'position': 6};
+    case 'done': 
+      return {'status': 'Completed', 'color': '#21FF3D', 'description': 'Report is completed', 'position': 7};
     case 'deferred':
-      return {'status': 'Deleted', 'color': '#4E5366', 'description': 'Report was deleted', 'position': 7};
+      return {'status': 'Deleted', 'color': '#4E5366', 'description': 'Report was deleted', 'position': 8};
     default:
       return {'status': 'Unknown', 'color': '#4E5366', 'description': 'Status is unknown', 'position': -3};
   }
@@ -781,19 +549,18 @@ function emptyCol() {
   return col;
 }
 
-function addOpenIconExtracted(report_id) {
+function addOpenIconExtracted(report_id, has_extracted_data) {
   const openCol = createColReport(
       `<i class="open">{% render "icon-extracted" %}</i>`,
       'Show extracted data'
   );
-  // TODO: remove this
-  if (true) {
+  if (!has_extracted_data) {
     openCol.style.opacity = '0.5';
     openCol.title = 'Extracted data is not yet available.';
     openCol.querySelector('i').style.cursor = 'not-allowed';
     return openCol;
   }      
-  openCol.addEventListener('click', async function() {
+  openCol.querySelector('i').addEventListener('click', async function() {
     try {
       document.body.style.cursor = 'wait';
         // Apply the 'wait' cursor to each element
@@ -804,7 +571,6 @@ function addOpenIconExtracted(report_id) {
         formData.append('report_id', report_id);
 
         const data = await unifiedSendRequest(GETREPORTDETAILSEXTRACTED, {method: 'POST', formData: formData});
-        console.log(data);
         displayExcelReport(data, false, report_id, 'extracted', {'Extracted Data': 'Zero Declaration found, no data to show'});
     } catch (error) {
         console.error(error.message);
@@ -820,12 +586,19 @@ function addOpenIconExtracted(report_id) {
 }
 
 
-function addOpenIconReport(fileName, fullPath, isSubmission, report_id) {
+function addOpenIconReport(fileName, fullPath, isSubmission, report_id, has_report_content) {
+  
     const openCol = createColReport(
         '<i class="open"><img width="20px" src="{{ section.settings.open | image_url }}" alt="{{ section.settings.open.alt | escape }}" loading="lazy"></i>',
         'Open report'
     );
-    openCol.addEventListener('click', async function() {
+    if (!isSubmission && !has_report_content) {
+      openCol.style.opacity = '0.5';
+      openCol.title = 'Report has no content';
+      openCol.querySelector('i').style.cursor = 'not-allowed';
+      return openCol;
+    }
+    openCol.querySelector('i').addEventListener('click', async function() {
 
       await displayReport(fileName, fullPath, false, isSubmission, report_id);
     });
@@ -884,12 +657,18 @@ async function displayReport(fileName, fullPath, submit, isSubmission, report_id
 }
 
 // Download Icon
-function addDownloadIcon(fileName, fullPath, isSubmission, report_id=null) {
+function addDownloadIcon(fileName, fullPath, isSubmission, report_id=null, has_report_content) {
     const downloadCol = createColReport(
         '<i class="download"><img width="20px" src="{{ section.settings.download | image_url }}" alt="{{ section.settings.download | image_url }}" loading="lazy"></i>',
         'Download report'
     );
-    downloadCol.addEventListener('click', async () => {
+    if (!isSubmission && !has_report_content) {
+      downloadCol.style.opacity = '0.5';
+      downloadCol.title = 'Report has no content';
+      downloadCol.querySelector('i').style.cursor = 'not-allowed';
+      return downloadCol;
+    }
+    downloadCol.querySelector('i').addEventListener('click', async () => {
         try {
             const formData = new FormData();
             formData.append('filepath', fullPath);
@@ -920,7 +699,7 @@ function sendReportIcon(fileName, fullPath, submit, no_submit_reason) {
   const openCol = createColReport('<i class="send"><img width="20px" src="{{ section.settings.send_report | image_url }} " alt="{{ section.settings.send_report.alt | escape }}" loading="lazy"></i>', "Send report"); // Placeholder icon
   if (submit) {
     if (!no_submit_reason) {
-      openCol.addEventListener('click', async function() {
+      openCol.querySelector('i').addEventListener('click', async function() {
         await displayReport(fileName, fullPath, true, false);
       });
     }
@@ -934,10 +713,10 @@ function sendReportIcon(fileName, fullPath, submit, no_submit_reason) {
     tooltip.style.transform = 'translateX(20%)';
     tooltip.classList.add('greyedout-tooltip');
     openCol.appendChild(tooltip);
-    openCol.addEventListener('mouseover', async function() {
+    openCol.querySelector('i').addEventListener('mouseover', async function() {
       tooltip.style.display = 'block';
     });
-    openCol.addEventListener('mouseout', async function() {
+    openCol.querySelector('i').addEventListener('mouseout', async function() {
       tooltip.style.display = 'none';
     });
   }
@@ -953,7 +732,7 @@ function addShareCol(fileName, fullPath, isSubmission, report_id) {
     shareCol.querySelector('i').style.cursor = 'not-allowed';
     return shareCol;
   }
-  shareCol.addEventListener('click', async function() {
+  shareCol.querySelector('i').addEventListener('click', async function() {
           try {
             const reportData = new FormData();
             reportData.append("file_name", fileName);
@@ -980,13 +759,19 @@ function addShareCol(fileName, fullPath, isSubmission, report_id) {
 function addTrashIcon(fileName, child) {
   const trashcanCol = createColReport('<i class="trashcan"><img width="20px" src="{{ section.settings.trashcan | image_url }} " alt="{{ section.settings.trashcan.alt | escape }}" loading="lazy"></i>', "Delete report"); // Placeholder icon
   statusMapped = statusMapping(child.status);
-  if (statusMapped.position >= 4) {
+  if (statusMapped.status == 'Deleted') {
+    trashcanCol.style.opacity = '0.5';
+    trashcanCol.title = 'Report is already deleted';
+    trashcanCol.querySelector('i').style.cursor = 'not-allowed';
+    return trashcanCol;
+  }
+  if (statusMapped.position >= 5) {
     trashcanCol.style.opacity = '0.5';
     trashcanCol.title = 'Report is already submitted, cannot be deleted';
     trashcanCol.querySelector('i').style.cursor = 'not-allowed';
     return trashcanCol;
   }      
-  trashcanCol.addEventListener('click', async function() {
+  trashcanCol.querySelector('i').addEventListener('click', async function() {
           try {
             const reportData = new FormData();
             reportData.append("file_name", fileName)
@@ -1082,7 +867,6 @@ function displayExcelReport(data, submit, fileName, fullPath, emptyData=null) {
         sheets.forEach((sheetName) => {
             const rows = data[sheetName];
             if (!rows || rows.length === 0) {
-              console.log('empty data', emptyData);
               groups['Empty Data'] = [{...emptyData, 'Category': sheetName}];
               groupLabels['Empty Data'] = [sheetName];
               return;
@@ -1349,7 +1133,9 @@ function displayPdfInModal(pdfBlob) {
 
 
 var allReports = [];
-var lastUpdated = null;
+var allReportsNoValidation = [];
+var allReportsCreated = [];
+var lastUpdated = 0;
 async function getReports(init=true) { // gets only the reports for that user to reduce load time
     try {
         const configDiv = document.getElementById("reportshistory");
@@ -1363,9 +1149,8 @@ async function getReports(init=true) { // gets only the reports for that user to
         let data = await unifiedSendRequest(GETREPORTSOVERVIEW + '?only_user_reports=true', {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
         lastUpdated = data['last_updated'];
         console.log(data);
-        updateReportStatusOverview(data['status_overview']);
-        createFolderStructureOverview(configDiv, data['reports']);
-        createOverview(data['reports'], true);
+        createFolderStructureOverview(configDiv, data['reports'], allReports);
+        updateDropdownsInit(data['reports']);
     } catch (error) {
         console.error(error.message);
         showMessage("Failed to get reports", false);
@@ -1419,13 +1204,7 @@ async function getReportsDetails(company, country, reportType) { // gets only th
       }
       let data = await unifiedSendRequest(GETREPORTSONEDRIVE + '?' + new URLSearchParams(params).toString(), {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
       console.log('data', data);
-      for (let report of data['data']) {
-        if (allReports.find(r => (r['report_id'] && r['report_id'] == report['report_id']) || (r['submission_id'] && r['submission_id'] == report['submission_id']))) {
-          console.log('report already loaded', report);
-          continue;
-        }
-        allReports.push(report);
-      }
+      addReportsToAllReports(data['data']);
       return data['data'];
   } catch (error) {
       console.error(error.message);
@@ -1435,17 +1214,52 @@ async function getReportsDetails(company, country, reportType) { // gets only th
   }
 }
 
-async function getReportsAll() {
-  {% comment %} try {
-  let data = await unifiedSendRequest(GETREPORTSONEDRIVE, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
-  allReports = data['data'];
-  lastUpdated = data['last_updated'];
-  filterReportHistory('', false);
-  {% comment %} document.getElementById('loadingAllReports').style.display = 'none'; {% endcomment %}
+function addReportsToAllReports(reports) {
+  for (let report of reports) {
+    if (allReports.find(r => (r['report_id'] != undefined && r['report_id'] == report['report_id']) || (r['submission_id'] != undefined && r['submission_id'] == report['submission_id']))) {
+      continue;
+    }
+    allReports.push(report);
+  }
+}
+
+
+async function getReportsNoValidation() {
+  try {
+    // build the URL for the first endpoint
+    const params = { with_submission: false };
+    const urlNoValidation = GETREPORTSONEDRIVE
+      + '?'
+      + new URLSearchParams(params).toString();
+
+    // start both requests in parallel
+    const noValidationRes = await unifiedSendRequest(urlNoValidation, {
+        method: 'GET',
+        headerArgs: { 'Content-Type': 'application/json' }
+      });
+
+    allReportsNoValidation = noValidationRes.data;
+
+    updateDropdownsReports(allReportsNoValidation);
+    filterReportHistory();
+
   } catch (error) {
-  console.error(error.message);
-  TOKEN = false;
-  } {% endcomment %}
+    console.error('Error fetching reports:', error);
+    TOKEN = false;
+  }
+}
+
+
+async function getReportsAll() {
+  try {
+      let data = await unifiedSendRequest(GETREPORTSONEDRIVE, {method: 'GET', headerArgs: {'Content-Type': 'application/json'}});
+      addReportsToAllReports(data['data']);
+      lastUpdated = data['last_updated'];
+      updateDropdownsReports(allReports);
+  } catch (error) {
+      console.error(error.message);
+      TOKEN = false;
+  }
 }
 
 async function getReportUpdates() {
@@ -1464,14 +1278,19 @@ async function getReportUpdates() {
   }
 }
 
-function createFolderStructureOverview(configDiv, data) {
+function normalizeIds(id) {
+  return id.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function createFolderStructureOverview(configDiv, data, reportsFound) {
   configDiv.innerHTML = '';
-
   const companies = Object.keys(data).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-
+  reportsFound = reportsFound.filter(r => r['report_id'] != null && allReports.some(r2 => r2['report_id'] == r['report_id']) || r['submission_id'] != null && allReports.some(r2 => r2['submission_id'] == r['submission_id']));
+  var company_selected_div = null;
   for (let company of companies) {
     const companyDiv = document.createElement('div');
-    companyDiv.id = `companyDiv-${company}`;
+    company_selected_div = companyDiv;
+    companyDiv.id = normalizeIds(`companyDiv-${company}`);
     companyDiv.classList.add('company-div');
     fillFolderRow(companyDiv, company, 0);
     configDiv.appendChild(companyDiv);
@@ -1481,7 +1300,7 @@ function createFolderStructureOverview(configDiv, data) {
       toggleSubItems(
         companyDiv,
         countries,
-        `countryDiv-${company}`,
+        normalizeIds(`countryDiv-${company}`),
         data[company],
         1,
         (countryDiv, country, depth) => {
@@ -1490,31 +1309,40 @@ function createFolderStructureOverview(configDiv, data) {
 
           // attach report toggle to each country row now
           countryDiv.addEventListener('click', async (e) => {
-            e.stopPropagation(); // avoid bubbling
             const reportTypes = Object.keys(data[company][country]);
             reportType_selected = null;
-            if (reportTypes.length == 1) {
-              reportType_selected = reportTypes[0];
-            }
-            getReportsDetails(company, country, reportType_selected);
             toggleSubItems(
               countryDiv,
               reportTypes,
-              `reportTypeDiv-${company}-${country}`,
+              normalizeIds(`reportTypeDiv-${company}-${country}`),
               data[company][country],
               2,
               (reportDiv, reportType, depth2) => {
+                e.stopPropagation();
+                reportType_selected_div = reportDiv;
                 fillFolderRow(reportDiv, reportType, depth2);
                 reportDiv.addEventListener('click', async (e) => {
-                  e.stopPropagation(); // avoid bubbling
-                  let reports = allReports.filter(r => r['company'] == company && r['country'] == country && r['report_type'] == reportType);
+                  let reports = reportsFound.filter(r => r['company'] == company && r['country'] == country && r['report_type'] == reportType);
                   if (reports.length == 0) {
+                    if (!document.getElementById(normalizeIds(`loadingSpinner-${reportDiv.id}`))) {
+                      var loadingSpinner = document.createElement('div');
+                      loadingSpinner.id = normalizeIds(`loadingSpinner-${reportDiv.id}`);
+                      loadingSpinner.classList.add('loadingSpinnerReport');
+                      reportDiv.appendChild(loadingSpinner);
+                    }
                     reports = await getReportsDetails(company, country, reportType);
+                    document.getElementById(normalizeIds(`loadingSpinner-${reportDiv.id}`)).remove();
                   }
                   createFolderStructureDetails(reportDiv, reports, company, country, reportType);
                 });
               }
             );
+            if (reportTypes.length == 1) {
+              reportType_selected = reportTypes[0];
+              reportType_selected_div.click();
+            } else { // fetch the entire country if there are multiple report types
+              getReportsDetails(company, country, reportType_selected);
+            }
           });
         }
       );
@@ -1526,6 +1354,9 @@ function createFolderStructureOverview(configDiv, data) {
       getReportsDetails(company, country_selected, null);
     });
   }
+  if (companies.length == 1) {
+    company_selected_div.click();
+  }
 }
 
 
@@ -1536,7 +1367,7 @@ function createFolderStructureDetails(reportDiv, reports, company, country, repo
   toggleSubItems(
     reportDiv,
     years,
-    `yearDiv-${reportDiv.id}`,
+    normalizeIds(`yearDiv-${reportDiv.id}`),
     groupBy(reports, 'year'),
     3,
     (yearDiv, year, depth) => {
@@ -1555,7 +1386,7 @@ function createFolderStructureDetails(reportDiv, reports, company, country, repo
         toggleSubItems(
           yearDiv,
           timeframes,
-          `timeframeDiv-${reportDiv.id}-${year}`,
+          normalizeIds(`timeframeDiv-${reportDiv.id}-${year}`),
           groupBy(withTimeframe, 'timeframe'),
           depth + 1,
           (timeframeDiv, timeframe, depth2) => {
@@ -1569,14 +1400,13 @@ function createFolderStructureDetails(reportDiv, reports, company, country, repo
               toggleSubItems(
                 timeframeDiv,
                 filenames,
-                `fileDiv-${reportDiv.id}-${year}-${timeframe}`,
+                normalizeIds(`fileDiv-${reportDiv.id}-${year}-${timeframe}`),
                 groupBy(reportsInTimeframe, 'filename'),
                 depth2 + 1,
                 (fileDiv, filename, depth3) => {
                   fillFolderRow(fileDiv, filename, depth3);
                   fileDiv.addEventListener('click', e => {
                     e.stopPropagation();
-                    console.log('File clicked:', filename);
                     const matchingReports = reports.filter(r => r['filename'] === filename);
                     displayReportDetails(matchingReports, fileDiv, depth3, `${company}/${country}/${reportType}`);
                   });
@@ -1593,14 +1423,13 @@ function createFolderStructureDetails(reportDiv, reports, company, country, repo
           toggleSubItems(
             yearDiv,
             filenames,
-            `fileDiv-${reportDiv.id}-${year}-notimeframe`,
+            normalizeIds(`fileDiv-${reportDiv.id}-${year}-notimeframe`),
             groupBy(withoutTimeframe, 'filename'),
             depth + 1, // one level deeper than year
             (fileDiv, filename, depth2) => {
               fillFolderRow(fileDiv, filename, depth2);
               fileDiv.addEventListener('click', e => {
                 e.stopPropagation();
-                console.log('File clicked:', filename);
                 const matchingReports = reports.filter(r => r['filename'] === filename);
                 displayReportDetails(matchingReports, fileDiv, depth2, `${company}/${country}/${reportType}`);
               });
@@ -1631,7 +1460,7 @@ function groupBy(arr, key) {
 function toggleSubItems(triggerDiv, keys, idPrefix, dataMap, level, renderFn) {
   const parent = triggerDiv.parentNode;
   const baseId = triggerDiv.id;
-  const markerId = `${baseId}-marker-${idPrefix}`;
+  const markerId = normalizeIds(`${baseId}-marker-${idPrefix}`);
   const existingMarker = document.getElementById(markerId);
 
   const arrow = triggerDiv.querySelector('.svg-arrow');
@@ -1657,7 +1486,7 @@ function toggleSubItems(triggerDiv, keys, idPrefix, dataMap, level, renderFn) {
   const fragment = document.createDocumentFragment();
   for (const key of keys) {
     const div = document.createElement('div');
-    div.id = `${idPrefix}-${key}`;
+    div.id = normalizeIds(`${idPrefix}-${key}`);
     div.classList.add(`${idPrefix}-div`);
     renderFn(div, key, level);
     fragment.appendChild(div);
@@ -1696,7 +1525,7 @@ function fillFolderRow(folderRow, text, depth) {
   folderNameSpan.innerHTML = text;
 
   const tagsDiv = document.createElement('div');
-  tagsDiv.id = `tagsDiv-${folderRow.id}`;
+  tagsDiv.id = normalizeIds(`tagsDiv-${folderRow.id}`);
   tagsDiv.style.marginRight = '5rem';
   tagsDiv.style.marginLeft = '1rem';
 
@@ -1707,7 +1536,7 @@ function fillFolderRow(folderRow, text, depth) {
 
 function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
   // Clear old entries
-  const markerId = `${containerDiv.id}-report-detail-marker`;
+  const markerId = normalizeIds(`${containerDiv.id}-report-detail-marker`);
   const parent = containerDiv.parentNode;
   const existingMarker = document.getElementById(markerId);
   const arrow = containerDiv.querySelector('.svg-arrow');
@@ -1730,6 +1559,7 @@ function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
     let childFileName = childPath.split('/').pop();
     let isSubmission = false;
     let reportId = child.report_id;
+    let isCreated = false;
 
     if (child.report_submission_name) {
       childFileName = child.report_submission_name;
@@ -1737,10 +1567,15 @@ function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
       isSubmission = true;
       reportId = child.submission_id;
     }
+    else if (child.forsure_created) {
+      childFileName = child.extra_filename || child.filename;
+      childPath = child.extra_filename || child.filename;
+      isCreated = true;
+    }
 
     const childRow = document.createElement('div');
     childRow.className = 'history-row file-row';
-    childRow.id = `childRow-${path}/${childPath}`;
+    childRow.id = normalizeIds(`childRow-${path}/${childPath}`);
     childRow.style.paddingLeft = `${(depth + 1) * 2}rem`;
     childRow.style.justifyContent = 'space-between';
     childRow.style.alignItems = 'center';
@@ -1773,16 +1608,6 @@ function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
 
       statusTag.appendChild(dot);
       statusTag.appendChild(text);
-      statusTag.style.cursor = 'pointer';
-      statusTag.onclick = () => {
-        if (activeStatus === status[0]) {
-          filterReportHistory();
-          activeStatus = '';
-        } else {
-          filterReportHistory(status[0]);
-          activeStatus = status[0];
-        }
-      };
 
       let title = statusMatch.description;
       if (child.position != null) {
@@ -1803,19 +1628,19 @@ function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
     const icons = document.createElement('div');
     icons.style.display = 'flex';
 
-    if (statusMatch.position >= 3 && !isSubmission) {
-      icons.appendChild(addOpenIconExtracted(reportId));
+    if (statusMatch.position >= 3 && !isSubmission ) {
+      icons.appendChild(addOpenIconExtracted(reportId, child.has_extracted_data));
     }
 
-    icons.appendChild(addOpenIconReport(childFileName, childPath, isSubmission, reportId));
-    icons.appendChild(addDownloadIcon(childFileName, childPath, isSubmission, reportId));
+    icons.appendChild(addOpenIconReport(childFileName, childPath, isSubmission, reportId, child.has_report_content));
+    icons.appendChild(addDownloadIcon(childFileName, childPath, isSubmission, reportId, child.has_report_content));
 
     if (window.userPermissions['sharereport'] === true) {
-      icons.appendChild(addShareCol(childFileName, childPath, isSubmission, reportId));
+      icons.appendChild(addShareCol(childFileName, childPath, isSubmission, reportId, isCreated));
     }
 
     if (window.userPermissions['deletereport'] === true) {
-      icons.appendChild(child.can_delete ? addTrashIcon(childFileName, child) : emptyCol());
+      icons.appendChild(child.can_delete ? addTrashIcon(childFileName, child, isCreated) : emptyCol());
     }
 
     let icon;
@@ -1855,8 +1680,6 @@ function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
   // Always insert immediately after the clicked row:
   parent.insertBefore(fragment, containerDiv.nextSibling);
 }
-
-
 
 
 function showReportUpdateNew(report) {
@@ -1909,7 +1732,18 @@ function countFileRowSiblings(element) {
 
 var activeStatus = '';
 
-function updateReportStatusOverview(status_overview) {
+function updateReportStatusOverview(filteredData, statusSelected='') {
+  status_overview = {};
+  for (let report of filteredData) {
+    if (!report['report_id']) {
+      continue;
+    }
+    if (report['status'] in status_overview) {
+      status_overview[report['status']]++;
+    } else {
+      status_overview[report['status']] = 1;
+    }
+  }
   const reportStatusContainer = document.getElementById('reportStatusContainer');
   reportStatusContainer.style.display = 'flex';
   const reportStatus = document.getElementById('reportStatus');
@@ -1958,30 +1792,31 @@ function updateReportStatusOverview(status_overview) {
     col.style.display = 'flex';
     col.style.alignItems = 'center';
     col.style.borderRadius = '1rem';
+    if (statusSelected != '' && status[0] != statusSelected) {
+      col.style.opacity = '0.5';
+    }
   
     reportStatus.appendChild(col);
   }
 }
 
-function createOverview(data, init) {
+function updateDropdownsInit(data_dict) {
     const configDiv = document.getElementById("reportshistory");
-
     var possibleCountries = new Set();
     var possibleReportTypes = new Set();
     var possiblePeriods = new Set(); // TODO
     var possibleReceipts = new Set(['My Reports', 'New Reports', 'Receipts Only', 'Reports Only']);
-    if (Object.keys(data).length == 0) {
-      configDiv.innerHTML = 'No reports found';
-      configDiv.classList.add('no-reports-found');
+    if (Object.keys(data_dict).length == 0) {
+      //configDiv.innerHTML = 'No reports found';
+      //configDiv.classList.add('no-reports-found');
       return;
     } else {
       configDiv.classList.remove('no-reports-found');
     }
-    console.log(data);
-    for (let company of Object.keys(data)) {
-      for (let country of Object.keys(data[company])) {
+    for (let company of Object.keys(data_dict)) {
+      for (let country of Object.keys(data_dict[company])) {
         possibleCountries.add(country);
-        for (let reportType of Object.keys(data[company][country])) {
+        for (let reportType of Object.keys(data_dict[company][country])) {
           possibleReportTypes.add(reportType);
         }
       }
@@ -1993,10 +1828,75 @@ function createOverview(data, init) {
     fillDropdowns('reporttypeDropdown', possibleReportTypes, 'report_types');
     fillDropdowns('periodDropdown', possiblePeriods, 'reporting_periods');
     fillDropdowns('receiptsDropdown', possibleReceipts, 'receipt_only');
-    if (init) {
-      document.getElementById('receiptsDropdown').value = 'My Reports';
-      $('.selectpicker').selectpicker('refresh');
+    document.getElementById('receiptsDropdown').value = 'My Reports';
+    $('.selectpicker').selectpicker('refresh');
+}
+
+
+function updateDropdownsReports(reports) {
+  var possibleCountries = new Set();
+  var possibleReportTypes = new Set();
+  var possiblePeriods = new Set(); // TODO
+  var possibleReceipts = new Set(['My Reports', 'New Reports', 'Receipts Only', 'Reports Only']);
+
+  for (let report of reports) {
+    if (!report['report_id']) {
+      continue;
     }
+    if (report['country'] && report['report_type']) {
+      possibleCountries.add(report['country']);
+      possibleReportTypes.add(report['report_type']);
+    }
+    if (report['timeframe'] && report['year']) {
+      possiblePeriods.add(`${report['timeframe']} ${report['year']}`);
+    } else if (report['year']) {
+      possiblePeriods.add(`${report['year']}`);
+    }
+  }
+
+  var currentCountry = document.getElementById('countryDropdown').value;
+  var currentReportType = document.getElementById('reporttypeDropdown').value;
+  var currentPeriod = document.getElementById('periodDropdown').value;
+  var currentReceipts = document.getElementById('receiptsDropdown').value;
+  possibleCountries = Array.from(possibleCountries).sort();
+  possibleReportTypes = Array.from(possibleReportTypes).sort();
+  possiblePeriods = sortTimeframeYear(Array.from(possiblePeriods));
+  fillDropdowns('countryDropdown', possibleCountries, 'countries');
+  fillDropdowns('reporttypeDropdown', possibleReportTypes, 'report_types');
+  fillDropdowns('periodDropdown', possiblePeriods, 'reporting_periods');
+  fillDropdowns('receiptsDropdown', possibleReceipts, 'receipt_only');
+  document.getElementById('receiptsDropdown').value = currentReceipts;
+  document.getElementById('countryDropdown').value = currentCountry;
+  document.getElementById('reporttypeDropdown').value = currentReportType;
+  document.getElementById('periodDropdown').value = currentPeriod;
+  $('.selectpicker').selectpicker('refresh');
+}
+
+function sortTimeframeYear(periods) {
+  periods.sort((a, b) => {
+    function toDate(p) {
+      let [timeframe, yearStr] = p.includes(' ')
+        ? p.split(' ')      // e.g. ["06-June","2025"]
+        : [null, p];        // e.g. [null,"2025"]
+      const year  = parseInt(yearStr, 10);
+      let monthIdx = 0;      // default → January (0)
+  
+      if (timeframe) {
+        // if you have "06-June", split off the numeric prefix
+        const num = parseInt(timeframe.split('-')[0], 10);
+        if (!isNaN(num)) {
+          monthIdx = num - 1;
+        }
+        // —or— if you wanted to parse the month name:
+        // const name = timeframe.split('-')[1];
+        // monthIdx = new Date(`${name} 1, 2000`).getMonth();
+      }
+      return new Date(year, monthIdx, 1);
+    }
+  
+    return toDate(b) - toDate(a);
+  });
+  return periods;
 }
 
 function debounce(func, delay) {  // only update when user stops typing
@@ -2008,7 +1908,6 @@ function debounce(func, delay) {  // only update when user stops typing
 }
 
 function runFilter() {
-  filterReportHistory();
   filterReportHistory();
 }
 
@@ -2022,8 +1921,19 @@ function normalizeString(str) {
   return str.toLowerCase().trim().replaceAll('_', ' ').replaceAll('.', ' ').replaceAll(',', ' ').replaceAll('/', ' ');
 }
 
+function combineReports(reports1, reports2) {
+  reps = [...reports1];
+  for (let report of reports2) {
+    if (report['report_id'] && !reps.some(r => r['report_id'] == report['report_id'])) {
+      reps.push(report);
+    }
+  }
+  return reps;
+}
+
 var filteredData = [];
-function filterReportHistory(status = '', updateTree = true, init = false) {
+function filterReportHistory(status = '') {
+  allReportsFiltered = combineReports(allReports, allReportsNoValidation);
   const searchQuery = document.getElementById("companySearch").value;
   const searchQueryNormalized = normalizeString(searchQuery);
   const countriesSelected = Array
@@ -2042,7 +1952,8 @@ function filterReportHistory(status = '', updateTree = true, init = false) {
         .from(document.getElementById('receiptsDropdown').options)
         .filter(option => option.selected)
         .map(option => option.value);
-  filteredData = allReports.filter(file => {
+
+  filteredData = allReportsFiltered.filter(file => {
     if (countriesSelected.length > 0 && !countriesSelected.includes(file['country'])) {
       console.log('country not selected', file['country']);
       return false;
@@ -2054,10 +1965,6 @@ function filterReportHistory(status = '', updateTree = true, init = false) {
     timeframeYear = file['timeframe'] != '' ? `${file['timeframe']} ${file['year']}` : `${file['year']}`;
     if (periodsSelected.length > 0 && !periodsSelected.includes(timeframeYear)) {
       console.log('period not selected', timeframeYear);
-      return false;
-    }
-    if (status != '' && file['status'] != status) {
-      console.log('status not selected', file['status']);
       return false;
     }
     if (receiptsSelected.length > 0) {
@@ -2105,13 +2012,29 @@ function filterReportHistory(status = '', updateTree = true, init = false) {
     }
     return false;
   });
+  var filteredDataAllStatus = filteredData.slice();
+
+  if (status != '') {
+    filteredData = filteredData.filter(file => file['status'] == status);
+  }
+
   filteredData.sort((a, b) => {
     return a['company'].localeCompare(b['company']);
   });
-  {% comment %} updateReportStatusOverview(filteredData); {% endcomment %}
-  if (updateTree) {
-    createOverview(filteredData, init);
+
+  updateReportStatusOverview(filteredDataAllStatus, status);
+  filteredDataDict = {};
+  for (let report of filteredData) {
+    if (!filteredDataDict[report['company']]) {
+      filteredDataDict[report['company']] = {};
+    }
+    if (!filteredDataDict[report['company']][report['country']]) {
+      filteredDataDict[report['company']][report['country']] = {};
+    }
+    filteredDataDict[report['company']][report['country']][report['report_type']] = true;
   }
+  var configDiv = document.getElementById("reportshistory");
+  createFolderStructureOverview(configDiv, filteredDataDict, filteredData);
 }
 
 function formatDate(date) {
@@ -2195,7 +2118,7 @@ function fillDropdowns(dropdownId, entries, key) {
         .map(option => option.value);
     dropdown.innerHTML = "";
 
-    [...entries].sort().forEach(entry => {
+    [...entries].forEach(entry => {
         const option = document.createElement("option");
         option.value = entry;
         option.textContent = entry;
@@ -2216,22 +2139,18 @@ function fillDropdowns(dropdownId, entries, key) {
     $(`#${dropdownId}`).closest('.filter-group').find('.filter-option-inner-inner').text(displayText);
 }
 document.getElementById('countryDropdown').addEventListener('change', function() {
-  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
   filterReportHistory();
 });
 
 document.getElementById('reporttypeDropdown').addEventListener('change', function() {
-  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
   filterReportHistory();
 });
 
 document.getElementById('periodDropdown').addEventListener('change', function() {
-  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
   filterReportHistory();
 });
 
 document.getElementById('receiptsDropdown').addEventListener('change', function() {
-  filterReportHistory(); // do it twice, first we reset the filters, then we apply them
   filterReportHistory();
 });
 
@@ -2320,9 +2239,13 @@ async function startPage() {
   if (window.userPermissions['forsure-downloads'] === true) {
     document.getElementById('reportcontainer').style.display = 'block';
     checkHistoryVersion();
-    await getReports();
-    getReportsAll();  // dont wait for it, it will update the tree when user selects a different filter
-    setInterval(getReportUpdates, 10000); // check for updates every 10 seconds
+    await getReports().then(() => {
+      setInterval(getReportUpdates, 10000); // check for updates every 10 seconds
+    });
+    getReportsNoValidation().then(() => {
+      getReportsAll();  // dont wait for it, it will update the tree when user selects a different filter
+    });
+    
 
     if(readCookie('showedGuideHistory') === null) {
         setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
