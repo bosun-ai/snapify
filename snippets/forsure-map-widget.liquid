@@ -496,6 +496,11 @@
                 <label for="password-input">Password</label>
                 <input type="password" id="password-input" placeholder="Password" title="Password for the PRO">
               </div>
+
+              <div id="agency_email">
+                <label for="agency_email-input">Agency Email</label>
+                <input type="text" id="agency_email-input" placeholder="Email of Agency if we should send the report to them" title="Email of Agency if we should send the report to them">
+              </div>
         
               <div id="email-responsible">
                 <label for="email-responsible-input">Email Responsible</label>
@@ -567,6 +572,7 @@
         "WARNING": "#E6B83C",       // Yellow
         "ERROR": "#E63C6B",          // Red
         "UNKNOWN": "#4E5366",
+        "UNAVAILABLE": "#ffffff",  // white
       };
 
       let map = null;
@@ -578,14 +584,23 @@
       let dbPromise = null;
 
       function createTableFromDescription(descObj) {
+        const order = ["WEEE", "Batteries", "Packaging"];
+      
+        // Sort entries by the predefined order
+        const sortedEntries = Object.entries(descObj).sort((a, b) => {
+          const indexA = order.indexOf(a[0]);
+          const indexB = order.indexOf(b[0]);
+          return indexA - indexB;
+        });
+
+        // Build table
         let table = `<table class="tooltip-table">`;
-        for (const key in descObj) {
-          if (descObj.hasOwnProperty(key)) {
-            const text = descObj[key].trim();
-            table += `<tr class="tooltip-table-row"><td class="tooltip-table-key"><strong>${key}</strong></td><td class="tooltip-table-value">${text}</td></tr>`;
-          }
+        for (const [key, value] of sortedEntries) {
+          const text = value.trim();
+          table += `<tr class="tooltip-table-row"><td class="tooltip-table-key"><strong>${key}</strong></td><td class="tooltip-table-value">${text}</td></tr>`;
         }
         table += `</table>`;
+      
         return table;
       }
 
@@ -724,8 +739,6 @@ async function getCountries() {
 }
 
 
-
-
 var countries = null;
 var availableCountries = [];
 async function openMapAdd() {
@@ -806,7 +819,7 @@ function updateCountryList(countriesFiltered, updateMap=false) {
       container.appendChild(lockElement);
     } {% endcomment %}
     countryList.appendChild(container);
-    if (country.data && updateMap) {
+    if (country.data) {
       const selectedList = {};
       for (const [category, pros] of Object.entries(country.data)) {
           for (const [proName, status] of Object.entries(pros)) {
@@ -818,8 +831,10 @@ function updateCountryList(countriesFiltered, updateMap=false) {
       if (Object.keys(selectedList).length > 0) {
         checkbox.checked = true;
         checkbox.disabled = true;
-        tableHTML = createTableFromDescription(selectedList);
-        addCountryMap(alpha_code, "#28a745", tableHTML, true);
+        if (updateMap) {
+          tableHTML = createTableFromDescription(selectedList);
+          addCountryMap(alpha_code, "#28a745", tableHTML, true);
+        }
       }
     }
   }
@@ -1041,7 +1056,7 @@ async function selectPROs(add_pro=false) {
       }
     }
   }
-  console.log('selected_countries', selected_countries);
+  await postSelectedCountries(countriesSelected, selectedCategories);
   createMapSettings(selected_countries, add_pro);
 
   document.getElementById('mapAddSelectCategories').style.display = 'none';
@@ -1071,6 +1086,7 @@ async function getPROsSelected() {
 }
 
 async function openMapSettings() {
+  countries = await getCountries();
   var selected_countries = await getPROData();
   selectedCategories.clear();
   if (selected_countries.length == 0) {
@@ -1086,6 +1102,9 @@ async function getPROData() {
   for (const item of data) {
     if (!selected_countries[item.country]) {
       selected_countries[item.country] = {};
+    }
+    if (item.pro == null) {
+      continue;
     }
     if (!selected_countries[item.country][item.report_type]) {
       selected_countries[item.country][item.report_type] = {};
@@ -1109,6 +1128,20 @@ async function createMapSettings(selected_countries, add_pro=false) {
   document.getElementById('mapAddSelectCategories').style.display = 'none';
   document.getElementById('mapAddSelectPROs').style.display = 'block';
   document.getElementById('mapAddOverlay').style.display = 'block';
+}
+
+async function postSelectedCountries(countriesSelected) {
+  try {
+    countriesSelectedList = Array.from(countriesSelected).map(country => country.id);
+    selectedCategoriesList = Array.from(selectedCategories);
+    console.log('countriesSelected', countriesSelectedList);
+    console.log('selectedCategories', selectedCategoriesList);
+    let data = await unifiedSendRequest(COUNTRIES_CHOSEN, { method: 'POST', formData: JSON.stringify({countries: countriesSelectedList, categories: selectedCategoriesList}), headerArgs: {'Content-Type': 'application/json'}});
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save countries ' + error.message, false);
+  }
 }
 
 function filterPROs() {
@@ -1177,10 +1210,13 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
   first_country = null;
   first_report_type = null;
   first_pro = null;
-  for (const country of Object.keys(selected_countries)) {
+  console.log('selected_countries', selected_countries);
+  for (const country of Object.keys(selected_countries).sort()) {
     const { wrapper: countryDiv, label: countryLabel, childrenContainer: reportTypeContainer } = createCollapsibleItem(country, 0);
     countryLabel.id = `label-${country}`;
     countryLabel.classList.add('country-label');
+    countryName = countries[country].info.name || country;
+    countryLabel.title = countryName;
     countryLabel.style.width = 'fit-content';
     countryLabel.style.cursor = 'pointer';
     countryLabel.addEventListener('click', () => {
@@ -1200,7 +1236,26 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
     if (!first_country) {
       first_country = countryLabel;
     }
-    for (const reportType of Object.keys(selected_countries[country])) {
+    if (Object.keys(selected_countries[country]).length == 0) {
+      const reportTypeLabel = document.createElement('div');
+      const reportTypeDiv = document.createElement('div');
+      reportTypeDiv.style.margin = '2rem 0';
+      reportTypeDiv.style.marginLeft = '5rem';
+      reportTypeDiv.style.width = 'fit-content';
+      reportTypeDiv.style.display = 'block';
+      reportTypeLabel.textContent = 'Not yet supported, we will inform you when it is available';
+      reportTypeLabel.style.width = 'fit-content';
+      reportTypeLabel.style.display = 'block';
+      reportTypeDiv.appendChild(reportTypeLabel);
+      reportTypeContainer.appendChild(reportTypeDiv);
+      container.appendChild(countryDiv);
+      reportTypeDiv.addEventListener('click', () => {
+        document.getElementById(`pro-name`).style.display = 'none';
+        document.getElementById(`pro-details`).style.display = 'none';
+      });
+      continue;
+    }
+    for (const reportType of Object.keys(selected_countries[country]).sort()) {
       const { wrapper: reportTypeDiv, label: reportTypeLabel, childrenContainer: proContainer } = createCollapsibleItem(reportType, 1);
       reportTypeLabel.id = `label-${country}-${reportType}`;
       reportTypeLabel.classList.add('report-type-label');
@@ -1221,7 +1276,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
       if (!first_report_type) {
         first_report_type = reportTypeLabel;
       }
-      for (const pro of Object.keys(selected_countries[country][reportType])) {
+      for (const pro of Object.keys(selected_countries[country][reportType]).sort()) {
         const proDiv = document.createElement('div');
         if (!first_pro) {
           first_pro = proDiv;
@@ -1239,6 +1294,8 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
           proDiv.classList.add('pro-active');
           proDiv.scrollIntoView({behavior: 'smooth', block: 'center'});
           await getProDetails(country, reportType, pro);
+          document.getElementById(`pro-details`).style.display = 'grid';
+          document.getElementById(`pro-name`).style.display = 'block';
         }
         proContainer.appendChild(proDiv);
       }
@@ -1319,7 +1376,7 @@ async function getProDetails(country, reportType, pro) {
   await savePRO(); // save previous values
   proValues = await getPROData();
   console.log('proValues', proValues);
-  proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': '', 'extra_info': '', 'general_settings': {}, 'id': ''};
+  proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': '', 'extra_info': '', 'general_settings': {}, 'id': '', 'agency_email': ''};
   console.log('proValues', proValues);
   const proDetails = (
     availableCountriesSettings?.[country]?.[reportType]?.[pro]
@@ -1361,6 +1418,7 @@ async function getProDetails(country, reportType, pro) {
   document.getElementById('login-name-input').value = proValues.login;
   document.getElementById('password-input').value = proValues.password;
   document.getElementById('extra-info-input').value = proValues.extra_info;
+  document.getElementById('agency_email-input').value = proValues.agency_email;
   document.getElementById('questions').innerHTML = '';
   for (const [question, value] of Object.entries(proDetails)) {
     console.log('question', question, 'value', value);
@@ -1448,8 +1506,10 @@ function updatePROStatus() {
   );
 
   if (!document.getElementById('login-name-input').value || !document.getElementById('password-input').value) {
-    status = "Log in info missing";
-    error = true;
+    if (!document.getElementById('agency_email-input').value) {
+      status = "Log in info missing";
+      error = true;
+    }
   } else if (!document.getElementById('email-responsible-input').value) {
     status = "Email of responsible missing";
     error = true;
@@ -1477,7 +1537,8 @@ function updatePROStatus() {
 
 ['login-name-input',
   'password-input',
-  'email-responsible-input'
+  'email-responsible-input',
+  'agency_email-input'
  ].forEach(id =>
    document.getElementById(id).addEventListener('keyup', updatePROStatus)
  );
@@ -1502,6 +1563,7 @@ async function savePRO() {
     login: document.getElementById('login-name-input').value,
     password: document.getElementById('password-input').value,
     extra_info: document.getElementById('extra-info-input').value,
+    agency_email: document.getElementById('agency_email-input').value,
   }
   questions = document.getElementById('questions').querySelectorAll('input, select');
   general_settings = {};
@@ -1522,6 +1584,7 @@ async function savePRO() {
       general_settings: general_settings,
       login: proValues.login,
       password: proValues.password,
+      agency_email: proValues.agency_email,
       email_responsible: proValues.email_responsible,
       extra_info: proValues.extra_info,
     }

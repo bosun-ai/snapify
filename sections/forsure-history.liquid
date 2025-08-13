@@ -695,12 +695,30 @@ function addDownloadIcon(fileName, fullPath, isSubmission, report_id=null, has_r
 }
 
 
-function sendReportIcon(fileName, fullPath, submit, no_submit_reason) {
+function sendReportIcon(fileName, fullPath, submit, no_submit_reason, report_id, has_report_content) {
   const openCol = createColReport('<i class="send"><img width="20px" src="{{ section.settings.send_report | image_url }} " alt="{{ section.settings.send_report.alt | escape }}" loading="lazy"></i>', "Send report"); // Placeholder icon
   if (submit) {
     if (!no_submit_reason) {
       openCol.querySelector('i').addEventListener('click', async function() {
-        await displayReport(fileName, fullPath, true, false);
+        try {
+          document.body.style.cursor = 'wait';
+            // Apply the 'wait' cursor to each element
+            document.querySelectorAll('.folder-row').forEach(row => {
+                row.style.cursor = 'wait';
+            });
+            const formData = new FormData();
+            formData.append('report_id', report_id);
+            const data = await unifiedSendRequest(GETREPORTDETAILSEXTRACTED, {method: 'POST', formData: formData});
+            displayExcelReport(data, true, report_id, 'extracted', {'Extracted Data': 'Zero Declaration found, no data to show'});
+        } catch (error) {
+            console.error(error.message);
+            showMessage('Failed to open report ' + error.message, false);
+        }
+        document.body.style.cursor = 'default';
+        // Apply the 'wait' cursor to each element
+        document.querySelectorAll('.folder-row').forEach(row => {
+            row.style.cursor = 'pointer';
+        });
       });
     }
   } else {
@@ -1645,7 +1663,7 @@ function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
 
     let icon;
     if (child.can_submit) {
-      icon = sendReportIcon(childFileName, childPath, window.userPermissions['filereport'], child.no_submit_reason);
+      icon = sendReportIcon(childFileName, childPath, window.userPermissions['filereport'], child.no_submit_reason, reportId, child.has_report_content);
       if (child.no_submit_reason) {
         icon.title = child.no_submit_reason;
         icon.style.opacity = '0.5';

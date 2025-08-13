@@ -164,6 +164,16 @@
   width: 26px;
 }
 
+.iconbig {
+  justify-content: space-evenly;
+}
+
+.iconsmall {
+  justify-content: space-between;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
 .iconsmall #notification-badge-header {
     top: 3px!important;
     right: -4px!important;
@@ -171,6 +181,11 @@
     min-width: 14px!important;
     height: 14px!important;
     text-align: center;
+}
+
+#companiesWrapper .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {
+  width: 175px;
+
 }
 {%- endstyle -%}
 
@@ -270,7 +285,7 @@
 
         </style>
         <div style="display: flex;flex-direction: column;margin-bottom: 1.5rem;">
-            <div id="headerIcons" style="display: flex;justify-content: space-evenly;">
+            <div id="headerIcons" style="display: flex;">
                 <div style="cursor: not-allowed;align-items: center;display: flex;margin: auto 0;"
                    id="agency-home-icon" style="pointer-events: none;" title="Only available for agency users"
                    onclick='showAgencyDashboard()'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="2255ff" d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/></svg></div>
@@ -310,9 +325,20 @@
                     $('.selectpicker').selectpicker('refresh');
                 }</script> {% endcomment %}
             </div>
-        </div>
-        </div>
-
+          </div>
+    </div>
+    <a href="{{ routes.account_logout_url }}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" style="align-self: center;">
+      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="88.363px" height="3rem" viewBox="0 0 89.149 122.88" enable-background="new 0 0 89.149 122.88" xml:space="preserve"><g><path fill="#17161c" d="M79.128,64.598H40.069c-1.726,0-3.125-1.414-3.125-3.157c0-1.744,1.399-3.158,3.125-3.158h39.057L66.422,43.733 c-1.14-1.301-1.019-3.289,0.269-4.439c1.288-1.151,3.257-1.03,4.396,0.271l17.281,19.792c1.061,1.211,1.029,3.019-0.02,4.19 l-17.262,19.77c-1.14,1.302-3.108,1.423-4.396,0.271c-1.287-1.151-1.408-3.139-0.269-4.44L79.128,64.598L79.128,64.598z M42.396,116.674c1.689,0.409,2.727,2.11,2.318,3.799c-0.409,1.689-2.109,2.728-3.799,2.318c-3.801-0.922-7.582-1.671-11.052-2.358 C10.426,116.583,0,114.519,0,86.871V34.188C0,7.96,11.08,5.889,29.431,2.46c3.572-0.667,7.448-1.391,11.484-2.371 c1.689-0.409,3.39,0.629,3.799,2.319c0.408,1.689-0.629,3.39-2.318,3.799c-4.291,1.041-8.201,1.771-11.805,2.445 C15.454,11.48,6.315,13.188,6.315,34.188v52.683c0,22.467,8.643,24.179,24.756,27.37C34.453,114.911,38.138,115.642,42.396,116.674 L42.396,116.674z"/></g></svg>
+    <span class="visually-hidden">
+      {%- liquid
+        if customer
+          echo 'customer.account_fallback' | t
+        else
+          echo 'customer.log_in' | t
+        endif
+      -%}
+    </span>
+  </a>
         {% comment %} 
     {% else %}
       <style>

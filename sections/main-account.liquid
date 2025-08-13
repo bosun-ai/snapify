@@ -15,7 +15,11 @@
 {%- endstyle -%}
 <script type="text/javascript">
     if (window.location.search.indexOf('logged_in') === -1) {
+      {% if customer.tags contains 'agency-reporting' %}
+        window.location.href = "{{ pages['forsure-report'].url }}";
+      {% else %}
         window.location.href = "{{ pages['forsure-dashboard'].url }}";
+      {% endif %}
     }
 </script>
 {% if customer.tags contains 'member' %}

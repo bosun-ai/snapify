@@ -362,8 +362,8 @@
     async function getInformationSettings() {
         try {
             var data = await unifiedSendRequest(INFORMATION_SETTINGS, {method: 'GET'});
-            selectedNotificationMethod = data.notification_method;
-            selectedInformationTypes = new Set(data.informationTypes.split(','));
+            selectedNotificationMethod = data.notification_method || null;
+            selectedInformationTypes = new Set(data.informationTypes.trim() ? data.informationTypes.split(',') : []);
             updateButtonStates();
         } catch (error) {
             console.error(error);

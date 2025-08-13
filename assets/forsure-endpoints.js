@@ -131,6 +131,7 @@ GETINTEGRATIONBYID = 'live/config/id'
 
 COUNTRIES = 'dashboard/country-pros'
 COUNTRIES_SELECTED = 'dashboard/country-pros/selected'
+COUNTRIES_CHOSEN = 'dashboard/country/selected'
 INFORMATION_SETTINGS = 'dashboard/information-settings'
 COUNTRY_STATUS = 'dashboard/country-status'
 INFORMATION = 'dashboard/information'

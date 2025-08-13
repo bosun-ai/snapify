@@ -3675,6 +3675,7 @@ async function submitZeroDeclaration() {
       return;
     }
     showMessage('Zero declaration uploaded successfully', true);
+    zeroDeclarationRows = {};
     closeZeroDeclarationModal();
   } catch (error) {
     console.error(error.message);

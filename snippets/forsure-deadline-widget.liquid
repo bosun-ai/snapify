@@ -149,7 +149,7 @@
 }
 {% endstyle %}
 
-<div id="deadlineContainer" class="widget grid-item widget-left">
+<div id="deadlineContainer" class="widget{% if gridItem %} grid-item{% else %}{% endif %} widget-left">
     <div id="deadlineTitle" class="grid-title">
       <div>Deadlines</div>
       <div class="icon-container">
@@ -240,7 +240,9 @@
           <div class="typeDescription">
             <div style="display:flex">
               ${catImg}
-              <div class="reportDeadlineName">${deadline.type}</div>
+              {% if showName %}
+                <div class="reportDeadlineName">${deadline.type}</div>
+              {% endif %}
             </div>
           </div>
           <div class="${className} rounded-deadline">
