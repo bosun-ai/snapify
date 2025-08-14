@@ -742,7 +742,6 @@ async function getCountries() {
 var countries = null;
 var availableCountries = [];
 async function openMapAdd() {
-  console.log('openMapAdd');
   const modal = document.getElementById('mapAddModal');
   modal.style.display = 'block';
   const overlay = document.getElementById('mapAddOverlay');
@@ -757,7 +756,6 @@ async function openMapAdd() {
       availableCountries.push(country);
     }
   }
-  console.log('availableCountries', availableCountries);
   loadGeoJSON().then(data => {
     if (mapAdd == null) {
       countryLayersAdd = {};
@@ -773,7 +771,6 @@ async function openMapAdd() {
 
 function searchCountry() {
   var search = document.getElementById('search-country').value;
-  console.log(`search: ${search}`);
   if (search == '') {
     updateCountryList(countries);
     return;
@@ -903,7 +900,6 @@ function removeCountryMap(alpha2, available=true) {
 }
 
 function selectCountryDashboard(alpha2, available=true) {
-  console.log(alpha2);
   const checkbox = document.getElementById(alpha2);
   if (checkbox.checked) {
     addCountryMap(alpha2, "#2255ff", 'Selected', available);
@@ -922,7 +918,6 @@ function closeModalAdd() {
 function selectReportCategories() {
   var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
   {% comment %} countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled); {% endcomment %}
-  console.log(countriesSelected);
   if (countriesSelected.length == 0) {
     showMessage('Please select at least one new country', false);
     return;
@@ -943,7 +938,6 @@ function selectReportCategories() {
       }
     }
   }
-  console.log(categories);
   selectedCategories.clear();
   categories.sort(customSort);
   for (const category of categories) {
@@ -1033,14 +1027,18 @@ function removeCategory(category) {
 }
 
 async function selectPROs(add_pro=false) {
-  console.log('selectPROs', add_pro);
   await getAvailableCountriesSettings();
+  var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
   if (selectedCategories.size == 0) {
+    if (document.querySelectorAll('.category-item').length == 0) {
+      await postSelectedCountries(countriesSelected, ['']);
+      showMessage('Country added to roadmap', true);
+      closeModalAdd();
+      return;
+    }
     showMessage('Please select at least one category', false);
     return;
   }
-  console.log('selectPROs');
-  var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
   {% comment %} countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled); {% endcomment %}
   selected_countries = {};
   for (const country of countriesSelected) {
@@ -1064,7 +1062,6 @@ async function selectPROs(add_pro=false) {
 }
 
 function addPRO(category) {
-  console.log('addPRO', category);
   var proSelect = document.getElementById('proSelect');
   proSelect.innerHTML = '';
   for (const pro of pros) {
@@ -1115,7 +1112,6 @@ async function getPROData() {
 }
 
 async function createMapSettings(selected_countries, add_pro=false) {
-  console.log(selected_countries);
   getAvailableCountriesSettings();
   renderMapSettingsHierarchy('left-side-pro-country-list', selected_countries);
   if (!add_pro) {
@@ -1130,12 +1126,10 @@ async function createMapSettings(selected_countries, add_pro=false) {
   document.getElementById('mapAddOverlay').style.display = 'block';
 }
 
-async function postSelectedCountries(countriesSelected) {
+async function postSelectedCountries(countriesSelected, selectedCategories) {
   try {
     countriesSelectedList = Array.from(countriesSelected).map(country => country.id);
     selectedCategoriesList = Array.from(selectedCategories);
-    console.log('countriesSelected', countriesSelectedList);
-    console.log('selectedCategories', selectedCategoriesList);
     let data = await unifiedSendRequest(COUNTRIES_CHOSEN, { method: 'POST', formData: JSON.stringify({countries: countriesSelectedList, categories: selectedCategoriesList}), headerArgs: {'Content-Type': 'application/json'}});
     return data;
   } catch (error) {
@@ -1154,12 +1148,6 @@ function filterPROs() {
       for (const reportType of Object.keys(selected_countries[country])) {
         for (const pro of Object.keys(selected_countries[country][reportType])) {
           pro_details = selected_countries[country][reportType][pro];
-          console.log('pro_details', pro_details);
-          console.log('pro', pro);
-          console.log('search', search);
-          console.log('pro.toLowerCase().includes(search)', pro.toLowerCase().includes(search));
-          console.log('pro_details.report_type.toLowerCase().includes(search)', pro_details.report_type.toLowerCase().includes(search));
-          console.log('pro_details.country.toLowerCase().includes(search)', pro_details.country.toLowerCase().includes(search));
           if (pro.toLowerCase().includes(search) || pro_details.report_type.toLowerCase().includes(search) || 
           pro_details.country.toLowerCase().includes(search)) {
             if (!filtered_countries[country]) {
@@ -1175,7 +1163,6 @@ function filterPROs() {
     }
   }
   activePro = document.querySelector('.pro-active')?.id;
-  console.log('filtered_countries', filtered_countries);
   renderMapSettingsHierarchy('left-side-pro-country-list', filtered_countries, activePro);
 }
 
@@ -1210,7 +1197,6 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
   first_country = null;
   first_report_type = null;
   first_pro = null;
-  console.log('selected_countries', selected_countries);
   for (const country of Object.keys(selected_countries).sort()) {
     const { wrapper: countryDiv, label: countryLabel, childrenContainer: reportTypeContainer } = createCollapsibleItem(country, 0);
     countryLabel.id = `label-${country}`;
@@ -1220,7 +1206,6 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
     countryLabel.style.width = 'fit-content';
     countryLabel.style.cursor = 'pointer';
     countryLabel.addEventListener('click', () => {
-      console.log('countryLabel clicked', countryLabel.id);
       document.querySelectorAll('.country-label').forEach(label => {
         if (label.id != countryLabel.id) {
           label.querySelector('svg').classList.add('collapsed');
@@ -1230,7 +1215,6 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
       reportTypeContainer.style.display = reportTypeContainer.style.display === 'none' ? 'block' : 'none';
       countryLabel.querySelector('svg').classList.toggle('collapsed');
       // click first element inside reportTypeContainer
-      console.log('reportTypeContainer', reportTypeContainer.querySelector('div:first-child').querySelector('div:first-child'));
       reportTypeContainer.querySelector('div:first-child').querySelector('div:first-child').click();
     });
     if (!first_country) {
@@ -1295,7 +1279,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
           proDiv.scrollIntoView({behavior: 'smooth', block: 'center'});
           await getProDetails(country, reportType, pro);
           document.getElementById(`pro-details`).style.display = 'grid';
-          document.getElementById(`pro-name`).style.display = 'block';
+          document.getElementById(`pro-name`).style.display = 'flex';
         }
         proContainer.appendChild(proDiv);
       }
@@ -1327,15 +1311,12 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
     }
     container.appendChild(countryDiv);
   }
-  console.log(first_country, first_report_type, first_pro);
   if (activePro) {
     country = activePro.split('-')[1];
     reportType = activePro.split('-')[2];
     pro = activePro.split('-')[3];
     document.getElementById(`label-${country}`).click();
     content = document.getElementById(`label-${country}`).nextElementSibling.querySelector('.report-type-label').textContent;
-    console.log('content', content);
-    console.log('reportType', reportType);
     if (reportType != content) {
       document.getElementById(`label-${country}-${reportType}`).click();
     }
@@ -1375,16 +1356,13 @@ async function getProDetails(country, reportType, pro) {
   currentPro = pro;
   await savePRO(); // save previous values
   proValues = await getPROData();
-  console.log('proValues', proValues);
   proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': '', 'extra_info': '', 'general_settings': {}, 'id': '', 'agency_email': ''};
-  console.log('proValues', proValues);
   const proDetails = (
     availableCountriesSettings?.[country]?.[reportType]?.[pro]
   ) || {};
 
   document.getElementById('pro-name-select').innerHTML = '';
   pros = availableCountriesSettings?.[country]?.[reportType] || {};
-  console.log('pros', pros);
   var proOptions = [];
   for (const proOption of Object.keys(pros)) {
     var option = document.createElement('option');
@@ -1421,7 +1399,6 @@ async function getProDetails(country, reportType, pro) {
   document.getElementById('agency_email-input').value = proValues.agency_email;
   document.getElementById('questions').innerHTML = '';
   for (const [question, value] of Object.entries(proDetails)) {
-    console.log('question', question, 'value', value);
     var questionDiv = document.createElement('div');
     questionDiv.id = `question-${question}-input`;
     var questionLabel = document.createElement('label');
@@ -1455,7 +1432,6 @@ async function getProDetails(country, reportType, pro) {
       questionInput.type = 'checkbox';
       questionInput.classList.add('questions-answer');
       questionInput.id = `question-${question}-input`;
-      console.log('question', question, 'proValues', proValues['general_settings'][question]);
       questionInput.checked = proValues['general_settings'][question] || false;
       questionDiv.appendChild(questionLabel);
       questionDiv.appendChild(questionInput);
@@ -1574,7 +1550,6 @@ async function savePRO() {
       general_settings[question.id.replace('question-', '').replace('-input', '')] = question.value;
     }
   }
-  console.log(country, reportType, pro, proValues);
   try {
     var body = {
       id: document.getElementById('pro-id').value,
@@ -1607,6 +1582,32 @@ async function getCountryStatus() {
     showMessage(error.message, false);
   }
 }
+
+const loginNameInput = document.getElementById("login-name-input");
+const passwordInput = document.getElementById("password-input");
+const agencyEmailInput = document.getElementById("agency_email-input");
+
+function handleAgencyEmailInput() {
+  if (agencyEmailInput.value.trim() !== "") {
+    loginNameInput.disabled = true;
+    passwordInput.disabled = true;
+  } else {
+    loginNameInput.disabled = false;
+    passwordInput.disabled = false;
+  }
+}
+
+function handleLoginOrPasswordInput() {
+  if (loginNameInput.value.trim() !== "" || passwordInput.value.trim() !== "") {
+    agencyEmailInput.disabled = true;
+  } else {
+    agencyEmailInput.disabled = false;
+  }
+}
+
+agencyEmailInput.addEventListener("input", handleAgencyEmailInput);
+loginNameInput.addEventListener("input", handleLoginOrPasswordInput);
+passwordInput.addEventListener("input", handleLoginOrPasswordInput);
 
 waitForPermission(function() {
   if (window.userPermissions['forsure-dashboard']) {
