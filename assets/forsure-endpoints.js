@@ -91,6 +91,11 @@ CATEGORYLISTADDCOLUMN = 'categorylist/add-column'
 CATEGORYLISTDELETECOLUMN = 'categorylist/delete-column'
 USESAMPLECATEGORYLIST = 'categorylist/use-sample'
 
+// Feature endpoints
+CATEGORYLISTFEATURES = 'categorylist/features'
+CATEGORYLISTFEATURESSEARCH = 'categorylist/features/search'
+CATEGORYLISTFEATURESSTATS = 'categorylist/features/stats'
+
 GETREPORTTIMES = 'reports/create/country_times'
 GETDATEOPTIONS = 'reports/create/date-options'
 GETREPORTPROGRESS = 'reports/template/progress'
