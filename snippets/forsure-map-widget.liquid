@@ -1055,6 +1055,7 @@ async function selectPROs(add_pro=false) {
     }
   }
   await postSelectedCountries(countriesSelected, selectedCategories);
+  openMapSettingsBool = false;
   createMapSettings(selected_countries, add_pro);
 
   document.getElementById('mapAddSelectCategories').style.display = 'none';
@@ -1081,7 +1082,7 @@ async function getPROsSelected() {
     showMessage(error.message, false);
   }
 }
-
+var openMapSettingsBool = false;
 async function openMapSettings() {
   countries = await getCountries();
   var selected_countries = await getPROData();
@@ -1090,6 +1091,7 @@ async function openMapSettings() {
     showMessage('Please add PROs first', false);
     return;
   }
+  openMapSettingsBool = true;
   createMapSettings(selected_countries, false);
 }
 
@@ -1260,7 +1262,22 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
       if (!first_report_type) {
         first_report_type = reportTypeLabel;
       }
-      for (const pro of Object.keys(selected_countries[country][reportType]).sort()) {
+      var pros_names = Object.keys(selected_countries[country][reportType]).sort();
+      pros_new = pros_names;
+      if (!openMapSettingsBool) {
+        pros_new = [];
+        if (pros_names.length > 0) {
+          if (pros_names.includes('Lucid')) {
+            pros_new = ['Lucid'];
+            pros_names.splice(pros_names.indexOf('Lucid'), 1);
+          }
+          pros_new.push(pros_names[0]);
+        } else {
+          pros_new = [];
+        }
+      }
+      console.log('pros_new', pros_new);
+      for (const pro of pros_new) {
         const proDiv = document.createElement('div');
         if (!first_pro) {
           first_pro = proDiv;
