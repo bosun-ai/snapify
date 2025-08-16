@@ -88,6 +88,8 @@
 
 .mega-menu .mega-menu__list--condensed {
   display: block;
+  padding-inline-start: 0px;
+  padding: 0 4rem;
 }
 
 .mega-menu__list--condensed .mega-menu__link {

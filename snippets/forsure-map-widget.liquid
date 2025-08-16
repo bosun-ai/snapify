@@ -390,6 +390,9 @@
   width: 50%;
   margin-right: 1rem;
 }
+.glyphicon-ok:before {
+    content: "\2713"
+}
 {% endstyle %}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -501,10 +504,20 @@
                 <label for="agency_email-input">Agency Email</label>
                 <input type="text" id="agency_email-input" placeholder="Email of Agency if we should send the report to them" title="Email of Agency if we should send the report to them">
               </div>
+
+              <div id="registration_number">
+                <label for="registration_number-input">Registration Number</label>
+                <input type="text" id="registration_number-input" placeholder="Registration Number" title="Registration Number for the PRO">
+              </div>
         
               <div id="email-responsible">
                 <label for="email-responsible-input">Email Responsible</label>
-                <input type="text" id="email-responsible-input" placeholder="Email Responsible" title="Person in company responsible for the PRO">
+                <select id="email-responsible-input" title="Person(s) in company responsible for the PRO" onchange="updatePROStatus()"
+                  class="selectpicker"
+                  multiple
+                  data-live-search="true">
+                  <option value="">Not set</option>
+                </select>
               </div>
         
               <div id="extra-info">
@@ -532,39 +545,6 @@
 
 <script>
 
-    const countryStatusMap = {
-        "DE": { status: "Done", 
-          description: {
-            'WEEE': "Nothing to do.", 
-            'Batteries': "Nothing to do.",
-            'Packaging': "Nothing to do.", 
-          }
-       },
-        "NL": {
-          status: "In Progress",
-          description: {
-            'WEEE': "Report coming up.", 
-            'Batteries': "Report coming up.",
-            'Packaging': "Report coming up.", 
-          }
-        },
-        "FR": { status: "Warning", 
-          description: {
-            'WEEE': "Nothing to do.", 
-            'Batteries': "Nothing to do.",
-            'Packaging': "Upcoming audit.", 
-          }
-        },
-        "IT": { status: "Error", 
-          description: {
-            'WEEE': "Nothing to do.", 
-            'Batteries': "Nothing to do.",
-            'Packaging': "Report not submitted.", 
-          }
-        }
-      };
-
-      
       // Color mapping based on status
       const statusColors = {
         "DONE": "#21FF3D",          // Green
@@ -573,6 +553,7 @@
         "ERROR": "#E63C6B",          // Red
         "UNKNOWN": "#4E5366",
         "UNAVAILABLE": "#ffffff",  // white
+        "UNACCOUNTED_ORDERS": "#17161c", // black
       };
 
       let map = null;
@@ -597,7 +578,11 @@
         let table = `<table class="tooltip-table">`;
         for (const [key, value] of sortedEntries) {
           const text = value.trim();
-          table += `<tr class="tooltip-table-row"><td class="tooltip-table-key"><strong>${key}</strong></td><td class="tooltip-table-value">${text}</td></tr>`;
+          if (key == '') {
+            table += text;
+          } else {
+            table += `<tr class="tooltip-table-row"><td class="tooltip-table-key"><strong>${key}</strong></td><td class="tooltip-table-value">${text}</td></tr>`;
+          }
         }
         table += `</table>`;
       
@@ -707,6 +692,14 @@
         return newMap;
       }
 
+      function toTitleCase(str) {
+        return str
+          .toLowerCase()
+          .split(/[\s_]+/)
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+
       function updateCountryData(newStatusMap) {
         for (const alpha2 in newStatusMap) {
           const info = newStatusMap[alpha2];
@@ -716,9 +709,12 @@
           layer.setStyle({
             fillColor: statusColors[info.status] || '#4E5366'
           });
-      
-          const tableHTML = createTableFromDescription(info.description);
-          const tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>${tableHTML}</div>`;
+          if (info.status == 'UNACCOUNTED_ORDERS') {
+            tableHTML = Object.values(info.description)[0];
+          } else {
+            tableHTML = createTableFromDescription(info.description);
+          }
+          tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name} - ${toTitleCase(info.status)}</strong><br>${tableHTML}</div>`;
           layer.unbindTooltip();
           layer.bindTooltip(tooltipHTML, {
             direction: 'top',
@@ -1276,7 +1272,6 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
           pros_new = [];
         }
       }
-      console.log('pros_new', pros_new);
       for (const pro of pros_new) {
         const proDiv = document.createElement('div');
         if (!first_pro) {
@@ -1373,7 +1368,7 @@ async function getProDetails(country, reportType, pro) {
   currentPro = pro;
   await savePRO(); // save previous values
   proValues = await getPROData();
-  proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': '', 'extra_info': '', 'general_settings': {}, 'id': '', 'agency_email': ''};
+  proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': [], 'extra_info': '', 'general_settings': {}, 'id': '', 'agency_email': '', 'registration_number': '', 'email_responsible_options': []};
   const proDetails = (
     availableCountriesSettings?.[country]?.[reportType]?.[pro]
   ) || {};
@@ -1399,6 +1394,23 @@ async function getProDetails(country, reportType, pro) {
     option.textContent = pro;
     document.getElementById('pro-name-select').appendChild(option);
   }
+  document.getElementById('email-responsible-input').innerHTML = '';
+  for (const email of proValues.email_responsible_options) {
+    var option = document.createElement('option');
+    option.value = email;
+    option.textContent = email;
+    console.log(`proValues.email_responsible: ${proValues.email_responsible}`);
+    console.log(`email: ${email}`);
+    console.log(`proValues.email_responsible.split(',').includes(email): ${proValues.email_responsible.split(',').includes(email)}`);
+    if (proValues.email_responsible.split(',').includes(email)) {
+      option.selected = true;
+    }
+    document.getElementById('email-responsible-input').appendChild(option);
+  }
+  $('#email-responsible-input').selectpicker({
+    dropupAuto: true,
+    size: 3
+  });
 
   document.getElementById('pro-name-select').value = pro;
   document.getElementById('pro-name-input').value = pro;
@@ -1409,11 +1421,11 @@ async function getProDetails(country, reportType, pro) {
   document.getElementById('reportType').value = reportType;
   document.getElementById('pro-id').value = proValues.id;
 
-  document.getElementById('email-responsible-input').value = proValues.email_responsible;
   document.getElementById('login-name-input').value = proValues.login;
   document.getElementById('password-input').value = proValues.password;
   document.getElementById('extra-info-input').value = proValues.extra_info;
   document.getElementById('agency_email-input').value = proValues.agency_email;
+  document.getElementById('registration_number-input').value = proValues.registration_number;
   document.getElementById('questions').innerHTML = '';
   for (const [question, value] of Object.entries(proDetails)) {
     var questionDiv = document.createElement('div');
@@ -1503,11 +1515,8 @@ function updatePROStatus() {
       status = "Log in info missing";
       error = true;
     }
-  } else if (!document.getElementById('email-responsible-input').value) {
+  } else if (document.getElementById('email-responsible-input').value.length == 0) {
     status = "Email of responsible missing";
-    error = true;
-  } else if (!document.getElementById('email-responsible-input').value.includes('@')) {
-    status = "Email of responsible is not valid";
     error = true;
   } else if (!allAnswered) {
     status = "Not All Questions Answered";
@@ -1530,8 +1539,8 @@ function updatePROStatus() {
 
 ['login-name-input',
   'password-input',
-  'email-responsible-input',
-  'agency_email-input'
+  'agency_email-input',
+  'registration_number-input'
  ].forEach(id =>
    document.getElementById(id).addEventListener('keyup', updatePROStatus)
  );
@@ -1549,14 +1558,15 @@ async function savePRO() {
   var reportType = document.getElementById('reportType').value;
   var pro = document.getElementById('pro-name-select').value;
   if (!country || !reportType || !pro) {
-    return false;
+    return true;
   }
   var proValues = {
-    email_responsible: document.getElementById('email-responsible-input').value,
+    email_responsible: Array.from(document.getElementById('email-responsible-input').selectedOptions).map(option => option.value).join(','),
     login: document.getElementById('login-name-input').value,
     password: document.getElementById('password-input').value,
     extra_info: document.getElementById('extra-info-input').value,
     agency_email: document.getElementById('agency_email-input').value,
+    registration_number: document.getElementById('registration_number-input').value,
   }
   questions = document.getElementById('questions').querySelectorAll('input, select');
   general_settings = {};
@@ -1577,6 +1587,7 @@ async function savePRO() {
       login: proValues.login,
       password: proValues.password,
       agency_email: proValues.agency_email,
+      registration_number: proValues.registration_number,
       email_responsible: proValues.email_responsible,
       extra_info: proValues.extra_info,
     }
