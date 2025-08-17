@@ -408,7 +408,6 @@
                     document.getElementById('companiesWrapper').style.display = 'flex';
                     document.getElementById('companiesDropdown').innerHTML = '';
                     for (const [company, select] of Object.entries(data['companies'])) {
-                      console.log(company);
                       document.getElementById('companiesDropdown').innerHTML += `<option value="${company}">${company.replace('/', '')}</option>`;
                       if (select === true) {
                         selectedCompany = company;
@@ -435,8 +434,6 @@
                 } else {
                   // Special case for 'forsure-statistics' if no orders received
                   const tooltip = document.getElementById(`greyedout-tooltip-${nav_element}`);
-                  console.log(tooltip);
-                  console.log(nav_element);
                   tooltip.innerText = show;
                 }
             }

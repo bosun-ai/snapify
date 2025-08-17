@@ -917,6 +917,8 @@ async function confirmOverwrite() {
     await uploadCategoryList();
     closeConfirmOverwriteModal();
     closeMappingModal();
+    $('#editableTable').DataTable().clear().destroy();
+    await fillVersionDropdown();
     {% comment %} showMessage('Mapping saved successfully', true); {% endcomment %}
   } catch (error) {
     console.error(error.message);

@@ -16,8 +16,8 @@
       background-color: #f0f0f0;
       border-radius: 6px;
       overflow: hidden;
-      width: 70vw;
       display: flex;
+      width: calc(0.8 * var(--page-width));
     }
   
     .bar-fill {
@@ -101,28 +101,37 @@
       container.innerHTML = '';
     
       Object.entries(usageData).forEach(([key, { used, total, last_month }]) => {
-        const percentUsed = (used / total) * 100;
-        const percentLastMonth = last_month !== undefined ? (last_month / total) * 100 : null;
-        var percentUsedLastMonth = percentUsed;
-        if (percentLastMonth !== null) {
-          var percentUsedLastMonth = percentUsed-percentLastMonth;
+        if (total == 'Unlimited') {
+          percentUsed = 0;
+          remaining = 'Unlimited';
+          percentUsedLastMonth = 0;
+          percentLastMonth = null;
+        } else {
+          percentUsed = (used / total) * 100;
+          percentLastMonth = last_month !== undefined ? (last_month / total) * 100 : null;
+          var percentUsedLastMonth = percentUsed;
+          if (percentLastMonth !== null) {
+            var percentUsedLastMonth = percentUsed-percentLastMonth;
+          }
+          if (percentUsed > 100) percentUsed = 100;
+          var remaining = (total - used);
+          if (remaining <= 0) remaining = 'None';
+            else remaining = remaining.toLocaleString();
         }
-    
+
+        console.log('percentUsedLastMonth', percentUsedLastMonth, 'percentUsed', percentUsed, 'percentLastMonth', percentLastMonth, 'key', key, 'remaining', remaining,
+        'used', used, 'total', total, 'last_month', last_month);
         const wrapper = document.createElement('div');
         wrapper.className = 'progress-container';
-    
         const label = document.createElement('div');
         label.className = 'progress-label';
-        var remaining = (total - used);
-        if (remaining <= 0) remaining = 'None';
-        else remaining = remaining.toLocaleString();
         label.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (${remaining} left)`;
     
         const dataContainer = document.createElement('div');
         dataContainer.className = 'data-container';
         const barWrapper = document.createElement('div');
         barWrapper.className = 'bar-wrapper';
-        barWrapper.title = `${(total-used).toLocaleString()} ${key} left over this year`;
+        barWrapper.title = `${remaining} ${key} left over this year`;
     
         const barFill = document.createElement('div');
         barFill.className = 'bar-fill';
@@ -140,8 +149,10 @@
           marker.className = 'bar-marker';
           marker.title = `${(last_month).toLocaleString()} ${key} received last month`;
           marker.style.width = `0%`;
+          var percentLastMonthTmp = `${percentLastMonth}%`;
           setTimeout(() => {
-            marker.style.width = `${percentLastMonth}%`;
+            console.log('percentLastMonth', percentLastMonthTmp);
+            marker.style.width = percentLastMonthTmp;
           }, 50);
           barWrapper.appendChild(marker);
         }
