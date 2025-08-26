@@ -255,7 +255,7 @@ tr {
 
     #report-table-data-excel {
         border: 1px solid #ddd;
-        margin-top: 3rem;
+        margin-top: 1rem;
         border-radius: 8px;
         overflow: hidden;
     }
@@ -329,6 +329,9 @@ tr {
   font-weight: bold;
   padding: 2rem;
   border-top: 0.2rem solid #17161c;
+}
+#excelModalHeader {
+  font-weight: bold;
 }
 
 #filterContainer .dropdown-toggle:not(.bs-placeholder) .filter-option-inner-inner {
@@ -429,6 +432,7 @@ tr {
   <div id="modalOverlayImage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;"></div>
 
   <div id="excelModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height: fit-content;max-height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+      <div id="excelModalHeader"></div>
       <div id="tabs-container" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid #ddd;"></div>
       <div id="report-table-data-excel"></div>
       <span id="closeExcelModal" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px;transform: translateX(-50%);">&times;</span>
@@ -552,7 +556,7 @@ function emptyCol() {
   return col;
 }
 
-function addOpenIconExtracted(report_id, has_extracted_data) {
+function addOpenIconExtracted(report_id, has_extracted_data, fullPath) {
   const openCol = createColReport(
       `<i class="open">{% render "icon-extracted" %}</i>`,
       'Show extracted data'
@@ -574,7 +578,7 @@ function addOpenIconExtracted(report_id, has_extracted_data) {
         formData.append('report_id', report_id);
 
         const data = await unifiedSendRequest(GETREPORTDETAILSEXTRACTED, {method: 'POST', formData: formData});
-        displayExcelReport(data, false, report_id, 'extracted', {'Extracted Data': 'Zero Declaration found, no data to show'});
+        displayExcelReport(data, false, report_id, fullPath, {'Extracted Data': 'Zero Declaration found, no data to show'});
     } catch (error) {
         console.error(error.message);
         showMessage('Failed to open report ' + error.message, false);
@@ -712,7 +716,7 @@ function sendReportIcon(fileName, fullPath, submit, no_submit_reason, report_id,
             const formData = new FormData();
             formData.append('report_id', report_id);
             const data = await unifiedSendRequest(GETREPORTDETAILSEXTRACTED, {method: 'POST', formData: formData});
-            displayExcelReport(data, true, report_id, 'extracted', {'Extracted Data': 'Zero Declaration found, no data to show'});
+            displayExcelReport(data, true, report_id, fullPath, {'Extracted Data': 'Zero Declaration found, no data to show'});
         } catch (error) {
             console.error(error.message);
             showMessage('Failed to open report ' + error.message, false);
@@ -882,6 +886,8 @@ function displayExcelReport(data, submit, fileName, fullPath, emptyData=null) {
     let groupedSheets = {};
     const groupLabels = {};
     var use_tabs = false;
+    const header = document.getElementById('excelModalHeader');
+    header.innerHTML = fullPath.split('.')[0];
 
     if (!use_tabs) {
         const groups = {};
@@ -957,11 +963,8 @@ function displayExcelReport(data, submit, fileName, fullPath, emptyData=null) {
 
     // Function to render a single sheet
     function renderSheet(sheetData) {
-      console.log('sheetData', sheetData);
         const columns = Object.keys(sheetData[0]).map((key, idx) => {
-          console.log('key', key);
             const key_text = key in renames ? renames[key] : key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-            console.log('key_text', key_text);
             display_col = true;
             if (key == 'Category') {
               display_col = false;
@@ -1010,7 +1013,7 @@ function displayExcelReport(data, submit, fileName, fullPath, emptyData=null) {
           columns: columns,
       };
       // Only add groupBy when not using tabs
-      if (!use_tabs) {
+      if (!use_tabs && groupLabels.length > 1) {
           tableOptions.groupBy = "Category";
           tableOptions.groupHeader = function (value, count, data, group) {
               return value;
@@ -1650,7 +1653,7 @@ function displayReportDetails(reports, containerDiv, depth = 4, path = '') {
     icons.style.display = 'flex';
 
     if (statusMatch.position >= 3 && !isSubmission ) {
-      icons.appendChild(addOpenIconExtracted(reportId, child.has_extracted_data));
+      icons.appendChild(addOpenIconExtracted(reportId, child.has_extracted_data, childFileName));
     }
 
     icons.appendChild(addOpenIconReport(childFileName, childPath, isSubmission, reportId, child.has_report_content));

@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>EPR Research Paper Viewer</title>
-      <style>
+{% style %}
         .reader-container {
           display: flex;
           justify-content: center;
@@ -122,13 +116,19 @@
 
         .icon-arrow-left {
             transform: rotate(90deg);
+            width: 1.5rem!important;
         }
         .icon-arrow-right {
             transform: rotate(-90deg);
+            width: 1.5rem!important;
+        }
+        .icon-arrow svg {
+          width: 1.5rem!important;
         }
 
         #prev-btn {
             display: none;
+            font-size: calc(0.45vw + 0.7vh);
         }
 
 
@@ -152,10 +152,7 @@
             display: block;
           }
         }
-
-      </style>
-    </head>
-    <body>
+{% endstyle %}
       <div class="reader-container">
         <div class="book">
     
@@ -226,10 +223,6 @@
                 Furthermore, earlier steps of the supply chain for creating PCB are important for a circular economy as well. Having an effective circular supply chain starts with the suppliers and Original Equipment Manufacturers (OEM) of the machines used to create PCBs. These machines should provide the manufacturers with meaningful data insights to enhance energy efficiency and reduce the usage of harmful resources 
                 [<span class="citation-tooltip" title='Rachel Brown Bain & Company: Sustainable Circular Manufacturing'>7</span>].
               </div>
-              <div class="paper-text text-size inline-text">
-                In this paper, we propose a new AI-powered automation model designed as a transformative solution to address the challenges businesses, particularly small and medium enterprises (SMEs), face in complying with EPR regulations. Beyond ensuring compliance, this AI model offers tailored insights for optimizing product concept, design, and production stages, enabling SMEs to enhance their circularity within the PCB community while minimizing costs.
-                <br><br>
-              </div>
               <div class="text-size footnote">
                 [6] Chakraborty et al. <i>Electronic waste reduction through devices and printed circuit boards designed for circularity</i>, IEEE Journal on Flexible Electronics, 2022<br>
                 [7] <a href="https://sustainabilitymag.com/articles/bain-company-report-manufacturings-circular-future" target="_blank" class="citation-tooltip" title='Accessed: December 29, 2024'>Rachel Brown <i>Bain & Company: Sustainable Circular Manufacturing</i></a><br>
@@ -237,6 +230,8 @@
             </div>
             <div class="page">
               <div class="paper-text text-size">
+                In this paper, we propose a new AI-powered automation model designed as a transformative solution to address the challenges businesses, particularly small and medium enterprises (SMEs), face in complying with EPR regulations. Beyond ensuring compliance, this AI model offers tailored insights for optimizing product concept, design, and production stages, enabling SMEs to enhance their circularity within the PCB community while minimizing costs.
+                <br><br>
                 In the next section, we will explain these challenges further. In section 3, we will summarize the knowledge needed for the AI-powered automation model. Afterward, section 4 and 5 focus on presenting the details of a model that can be applied to the current challenges of a company. In section 6, we outline the steps that can be taken to start using technology to support circular practices within a company, from initial actions to adopting a full-fledged solution for automating compliance, tailored to the company’s current market presence. Finally, in section 7, we discuss the benefits and downsides of the model proposed in this paper and show potential future improvements.
               </div>
             </div>
@@ -398,9 +393,9 @@
               <div class="paper-text text-size inline-text">
                 These tools bridge the gap between regulatory compliance and environmental goals. Using a compliance product as outlined in the figure below, the companies can simplify their regulatory reporting while staying up-to-date with the newest regulations. Additionally, by integrating technologies like chatbots within the system, companies can decide easily which changes not only make sense but also are easy to implement to improve the sustainability of their products.
               </div>
-              <div class="paper-text text-size" style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+              <div class="paper-text text-size" style="text-align: center;margin-bottom: 20px;">
                 <img style="border-radius: 10%; object-fit: cover; object-position: 65% center;"
-                    width="60%"
+                    width="80%"
                     src="{{ section.settings.llm-system-diagram | image_url }}"
                     alt="{{ section.settings.llm-system-diagram.alt | escape }}"
                     loading="lazy">
@@ -538,8 +533,8 @@
 
 
           <div class="navigation" id="navigation">
-            <button id="prev-btn" class="nav-btn text-size" onclick="navigate(-1)"><div style="display: flex; align-items: center;"><span class="icon-arrow-left icon-arrow">{% render 'icon-arrow-down' %}</span><span> Prev</span></div></button>
-            <button id="next-btn" class="nav-btn text-size" onclick="navigate(1)"><div style="display: flex; align-items: center;"><span> Next</span><span class="icon-arrow-right icon-arrow">{% render 'icon-arrow-down' %}</span></div></button>
+            <button id="prev-btn" class="nav-btn text-size" onclick="navigate(-1)"><div style="display: flex; align-items: center;gap: 0.2rem;"><span class="icon-arrow-left icon-arrow">{% render 'icon-arrow-down' %}</span><span> Prev</span></div></button>
+            <button id="next-btn" class="nav-btn text-size" onclick="navigate(1)"><div style="font-size: calc(0.45vw + 0.7vh);display: flex; align-items: center;gap: 0.2rem;"><span> Next</span><span class="icon-arrow-right icon-arrow">{% render 'icon-arrow-down' %}</span></div></button>
           </div>
         </div>
       </div>
@@ -647,8 +642,7 @@
         window.addEventListener('resize', updateView);
         window.addEventListener('DOMContentLoaded', updateView);
       </script>
-    </body>
-    </html>
+
     
 {% schema %}
 {

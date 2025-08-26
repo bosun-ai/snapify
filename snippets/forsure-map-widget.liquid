@@ -434,7 +434,7 @@
     <div id="mapAddSelectCategories">
       <h2 class="modal-title"> Select Report Categories
         <div>
-          <button class="button button--secondary" onclick="openMapAdd()">Back</button>
+          <button class="button button--secondary" onclick="backToAddCountries()">Back</button>
           <button class="button" onclick="selectPROs(true)">Next</button>
         </div>
       </h2>
@@ -448,6 +448,7 @@
           
         </div>
         <div id="category-list-container">
+          <div id="category-list-header" style="display: none; text-align: center; margin-bottom: 1rem;"></div>
           <div id="category-list">
             <!-- list of all categories with a checkbox -->
           </div>
@@ -563,16 +564,27 @@
       let geojsonLayer = null;
 
       let dbPromise = null;
+      const categoryOrder = ['WEEE', 'Batteries', 'Packaging'];
 
+      function customSort(a, b) {
+        const order = categoryOrder;
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+        // unknown entries should be at the end
+        if (indexA === -1 && indexB === -1) {
+          // Both not in the fixed order → sort alphabetically
+          return a.localeCompare(b);
+        }
+        if (indexA == -1) return 1;  // a goes after anything in order
+        if (indexB == -1) return -1; // b goes after anything in order
+        return indexA - indexB;
+      }
+      
       function createTableFromDescription(descObj) {
         const order = ["WEEE", "Batteries", "Packaging"];
       
         // Sort entries by the predefined order
-        const sortedEntries = Object.entries(descObj).sort((a, b) => {
-          const indexA = order.indexOf(a[0]);
-          const indexB = order.indexOf(b[0]);
-          return indexA - indexB;
-        });
+        const sortedEntries = Object.entries(descObj).sort((a, b) => customSort(a[0], b[0]));
 
         // Build table
         let table = `<table class="tooltip-table">`;
@@ -599,14 +611,14 @@
 
       async function loadGeoJSON() {
         const db = await dbPromise;
-        const cached = await db.get('geojson', 'countries');
+        const cached = await db.get('geojson', 'countries_nld');
       
         if (cached) return cached;
       
-        const res = await fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
+        const res = await fetch('https://raw.githubusercontent.com/nadbot/Countries_ALPHA2_MAP/main/ne_10m_admin_0_countries_nld.geojson');
         const json = await res.json();
       
-        await db.put('geojson', json, 'countries');
+        await db.put('geojson', json, 'countries_nld');
         return json;
       }
 
@@ -637,12 +649,15 @@
             fillColor: '#4E5366'
           },
           onEachFeature: (feature, layer) => {
-            const name = feature.properties.name;
-            let id = feature.properties['ISO3166-1-Alpha-2'];
-            if (id == '-99' && name == 'France') {
-              id = 'FR';
+            const name = feature.properties.COUNTRY_NAME;
+            let id = feature.properties['ISO_A2_EH'];
+            if (id == '-99') {
+               return; // skip id -99 name Bir Tawil, Guantanamo Bay USNB, Dhekelia, Spratly Is., Akrotiri, Scarborough Reef
             }
-            countrylayer[id] = layer;
+            if (!countrylayer[id]) {
+              countrylayer[id] = [];
+            }
+            countrylayer[id].push(layer);
             if (tooltips) {
               layer.bindTooltip(`<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>No data available</div>`, {
                 direction: 'top',
@@ -650,79 +665,46 @@
                 className: 'custom-tooltip'
               });
             }
-            {% comment %} // Add lock icon for countries not in availableCountries
-            if (availableCountries.length > 0 && !availableCountries.includes(id)) {
-              let center = null;
-              if (countryCenters[id]) {
-                center = { lat: countryCenters[id].lat, lng: countryCenters[id].lon }; // note: Leaflet uses `lng` not `lon`
-              } else {
-                center = layer.getBounds().getCenter();
-              }
-
-              const lockIcon = L.divIcon({
-                html: `<div class="lock-icon">{% render 'icon-lock' %}</div>`,
-                className: 'country-lock-icon',
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-              });
-
-              const marker = L.marker(center, { icon: lockIcon }).addTo(newMap);
-
-              // Add tooltip
-              marker.bindTooltip(
-                `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>Country not yet available.</div>`,
-                {
-                  direction: 'top',
-                  className: 'custom-tooltip',
-                  sticky: true
-                }
-              );
-              layer.bindTooltip(
-                `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>Country not yet available.</div>`,
-                {
-                  direction: 'top',
-                  className: 'custom-tooltip',
-                  sticky: true
-                }
-              );
-            } {% endcomment %}
           }
         }).addTo(newMap);
 
         return newMap;
       }
 
-      function toTitleCase(str) {
-        return str
-          .toLowerCase()
-          .split(/[\s_]+/)
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-      }
+function toTitleCase(str) {
+  return str
+    .toLowerCase()
+    .split(/[\s_]+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
-      function updateCountryData(newStatusMap) {
-        for (const alpha2 in newStatusMap) {
-          const info = newStatusMap[alpha2];
-          const layer = countryLayers[alpha2];
-          if (!layer) continue;
-          const name = layer.feature.properties.name;
-          layer.setStyle({
-            fillColor: statusColors[info.status] || '#4E5366'
-          });
-          if (info.status == 'UNACCOUNTED_ORDERS') {
-            tableHTML = Object.values(info.description)[0];
-          } else {
-            tableHTML = createTableFromDescription(info.description);
-          }
-          tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name} - ${toTitleCase(info.status)}</strong><br>${tableHTML}</div>`;
-          layer.unbindTooltip();
-          layer.bindTooltip(tooltipHTML, {
-            direction: 'top',
-            sticky: true,
-            className: 'custom-tooltip'
-          });
-        }
+function updateCountryData(newStatusMap) {
+  for (const alpha2 in newStatusMap) {
+    const info = newStatusMap[alpha2];
+    const layerList = countryLayers[alpha2];
+
+    if (!layerList) continue;
+    for (const layer of layerList) {
+      const name = layer.feature.properties.COUNTRY_NAME;
+      layer.setStyle({
+        fillColor: statusColors[info.status] || '#4E5366'
+      });
+      if (info.status == 'UNACCOUNTED_ORDERS') {
+        tableHTML = Object.values(info.description)[0];
+      } else {
+        tableHTML = createTableFromDescription(info.description);
       }
+      tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name} - ${toTitleCase(info.status)}</strong><br>${tableHTML}</div>`;
+      layer.unbindTooltip();
+      layer.bindTooltip(tooltipHTML, {
+        direction: 'top',
+        sticky: true,
+        className: 'custom-tooltip'
+      });
+    }
+  }
+}
 
 async function getCountries() {
     try {
@@ -737,7 +719,11 @@ async function getCountries() {
 
 var countries = null;
 var availableCountries = [];
+
 async function openMapAdd() {
+  // only reset the checked countries if the modal is opened, not when going back
+  checkedCountries.clear();
+  checkedCountriesExisting.clear();
   const modal = document.getElementById('mapAddModal');
   modal.style.display = 'block';
   const overlay = document.getElementById('mapAddOverlay');
@@ -761,146 +747,219 @@ async function openMapAdd() {
         removeCountryMap(alpha2);
       }
     }
-    updateCountryList(countries, true);
+    updateCountryList(countryLayersAdd, true);
   });
+}
+
+async function backToAddCountries() {
+  const modal = document.getElementById('mapAddModal');
+  modal.style.display = 'block';
+  const overlay = document.getElementById('mapAddOverlay');
+  overlay.style.display = 'block';
+  document.getElementById('mapAddSelectCategories').style.display = 'none';
+  document.getElementById('mapAddSelectPROs').style.display = 'none';
+  document.getElementById('mapAddCountrySelect').style.display = 'block';
 }
 
 function searchCountry() {
   var search = document.getElementById('search-country').value;
   if (search == '') {
-    updateCountryList(countries);
+    updateCountryList(countryLayersAdd);
     return;
   }
-  const countriesFiltered = Object.entries(countries)
-  .filter(([key, country]) => {
-    const name = country?.info?.name?.toLowerCase() || '';
-    const alpha2 = key?.toLowerCase() || '';
-    return name.includes(search.toLowerCase()) || alpha2.includes(search.toLowerCase());
-  })
-  .reduce((obj, [key, value]) => {
-    obj[key] = value;
-    return obj;
-  }, {});
+  var countriesFiltered = {};
+  for (const alpha2 in countryLayersAdd) {
+    foundMatch = false;
+    for (const layer of countryLayersAdd[alpha2]) {
+      const name = layer.feature.properties.COUNTRY_NAME;
+      if (name.toLowerCase().includes(search.toLowerCase())) {
+        foundMatch = true;
+      }
+    }
+    if (foundMatch) {
+      countriesFiltered[alpha2] = countryLayersAdd[alpha2];
+    }
+  }
   updateCountryList(countriesFiltered);
 }
 
+function sortCountries(alpha2A, alpha2B) {
+  // sort countries by selected, then availability, then alphabetically
+  if (checkedCountries.has(alpha2A) && !checkedCountries.has(alpha2B)) {
+    return -1;
+  }
+  if (!checkedCountries.has(alpha2A) && checkedCountries.has(alpha2B)) {
+    return 1;
+  }
+  if (availableCountries.includes(alpha2A) && !availableCountries.includes(alpha2B)) {
+    return -1;
+  }
+  if (!availableCountries.includes(alpha2A) && availableCountries.includes(alpha2B)) {
+    return 1;
+  }
+  return alpha2A.localeCompare(alpha2B);
+}
+
+function handleCountrySelect(alpha2, countriesMap, availableCountries) {
+  console.log(`handleCountrySelect: ${alpha2}`);
+  selectCountryDashboard(alpha2, availableCountries.includes(alpha2));
+  updateCountryList(countriesMap);
+  if (Object.keys(countriesMap).length === 1) {
+    setTimeout(() => {
+      const el = document.getElementById('search-country');
+      if (el) { el.value = ''; searchCountry(); }
+    }, 100);
+  }
+}
+
+var checkedCountries = new Set();
+var checkedCountriesExisting = new Set();
 function updateCountryList(countriesFiltered, updateMap=false) {
   var countryList = document.getElementById('countryList');
   countryList.innerHTML = '';
 
-  for (let alpha_code in countriesFiltered) {
-    let container = document.createElement('div');
-    container.className = 'country-item';
-    let country = countriesFiltered[alpha_code];
-    let checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = alpha_code;
-    checkbox.name = country.info.name;
-    checkbox.onclick = () => selectCountryDashboard(alpha_code, availableCountries.includes(alpha_code));
-    let label = document.createElement('label');
-    label.htmlFor = alpha_code;
-    label.textContent = country.info.name;
-    {% comment %} if (!availableCountries.includes(alpha_code)) {
-      var lockElement = document.createElement('div');
-      lockElement.className = 'lock-icon';
-      lockElement.innerHTML = `<div class="lock-icon">{% render 'icon-lock' %}</div>`;
-    } {% endcomment %}
-
-    container.appendChild(checkbox);
-    container.appendChild(label);
-    {% comment %} if (!availableCountries.includes(alpha_code)) {
-      container.appendChild(lockElement);
-    } {% endcomment %}
-    countryList.appendChild(container);
-    if (country.data) {
-      const selectedList = {};
-      for (const [category, pros] of Object.entries(country.data)) {
-          for (const [proName, status] of Object.entries(pros)) {
-              if (status === 'selected') {
-                  selectedList[category] = proName;
-              }
-          }
+  for (let alpha2 of Object.keys(countriesFiltered).sort(sortCountries)) {
+    for (const countryLayer of countriesFiltered[alpha2]) {
+      if (!countryLayer._selectHandler) {
+        countryLayer._selectHandler = () => {
+          const box = document.getElementById(alpha2);
+          if (box) box.click();
+          else handleCountrySelect(alpha2, countriesFiltered, availableCountries);
+        };
+        countryLayer.on('click', countryLayer._selectHandler);
       }
-      if (Object.keys(selectedList).length > 0) {
+      if (!countryLayer.feature.properties.biggest) {
+        continue; // only show biggest country
+      }
+      let container = document.createElement('div');
+      container.className = 'country-item';
+      let checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = alpha2;
+      checkbox.name = countryLayer.feature.properties.COUNTRY_NAME;
+      checkbox.onclick = () => handleCountrySelect(alpha2, countriesFiltered, availableCountries);
+      let label = document.createElement('label');
+      label.htmlFor = alpha2;
+      label.textContent = countryLayer.feature.properties.COUNTRY_NAME;
+
+      container.appendChild(checkbox);
+      container.appendChild(label);
+      if (checkedCountries.has(alpha2)) {
         checkbox.checked = true;
-        checkbox.disabled = true;
-        if (updateMap) {
-          tableHTML = createTableFromDescription(selectedList);
-          addCountryMap(alpha_code, "#28a745", tableHTML, true);
+      }
+      countryList.appendChild(container);
+      if (countries[alpha2]?.data) {
+        const selectedList = {};
+        for (const [category, pros] of Object.entries(countries[alpha2].data)) {
+            for (const [proName, status] of Object.entries(pros)) {
+                if (status === 'selected' || status === 'unavailable') {
+                    if (!selectedList[category]) {
+                      if (proName == 'null') {
+                        selectedList[category] = 'No PROs available';
+                      } else {
+                        selectedList[category] = proName;
+                      }
+                    } else {
+                      selectedList[category] += ', ' + proName;
+                    }
+                }
+            }
+        }
+        if (Object.keys(selectedList).length > 0) {
+          checkbox.checked = true;
+          checkbox.disabled = true;
+          checkedCountriesExisting.add(alpha2);
+          if (updateMap) {
+            tableHTML = createTableFromDescription(selectedList);
+            addCountryMap(alpha2, "#28a745", tableHTML, true, false);
+          }
         }
       }
     }
   }
 }
 
-function addCountryMap(alpha2, color, data, available=true) {
-    const layer = countryLayersAdd[alpha2];
-    if (!layer) return;
-    const name = layer.feature.properties.name;
-    layer.setStyle({
-      fillColor: color
-    });
-    if (!available) {
-      let center = null;
-      if (countryCenters[alpha2]) {
-        center = { lat: countryCenters[alpha2].lat, lng: countryCenters[alpha2].lon }; // note: Leaflet uses `lng` not `lon`
-      } else {
-        center = layer.getBounds().getCenter();
-      }
-
-      const lockIcon = L.divIcon({
-        html: `<div class="lock-icon">{% render 'icon-lock' %}</div>`,
-        className: 'country-lock-icon',
-        iconSize: [20, 20],
-        iconAnchor: [10, 10]
+function addCountryMap(alpha2, color, data, available=true, zoom=true) {
+    const layerList = countryLayersAdd[alpha2];
+    if (!layerList) return;
+    for (const layer of layerList) {
+      const name = layer.feature.properties.COUNTRY_NAME;
+      layer.setStyle({
+        fillColor: color
       });
-
-      const marker = L.marker(center, { icon: lockIcon }).addTo(mapAdd);
-      layer._lockMarker = marker;
-      layer.unbindTooltip();
-      // Add tooltip
-      marker.bindTooltip(
-        `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>Country not yet available.</div>`,
-        {
-          direction: 'top',
-          className: 'custom-tooltip',
-          sticky: true
+      if (!available) {
+        let center = null;
+        if (countryCenters[alpha2]) {
+          center = { lat: countryCenters[alpha2].lat, lng: countryCenters[alpha2].lon }; // note: Leaflet uses `lng` not `lon`
+        } else {
+          center = layer.getBounds().getCenter();
         }
-      );
-    } else {
-      const tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>${data}</div>`;
-      layer.unbindTooltip();
-      layer.bindTooltip(tooltipHTML, {
-        direction: 'top',
-        sticky: true,
-        className: 'custom-tooltip'
-      });
+
+        const lockIcon = L.divIcon({
+          html: `<div class="lock-icon">{% render 'icon-lock' %}</div>`,
+          className: 'country-lock-icon',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+        layer._lockMarker = L.marker(center, { icon: lockIcon }).addTo(mapAdd);
+        if (layer._selectHandler) {
+          layer._lockMarker.on('click', layer._selectHandler);
+        }
+        layer.unbindTooltip();
+        // Add tooltip
+        layer.bindTooltip(
+          `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>Country not yet available.</div>`,
+          {
+            direction: 'top',
+            className: 'custom-tooltip',
+            sticky: true
+          }
+        );
+      } else {
+        const tooltipHTML = `<div class="tooltip-inner tooltip-wide"><strong>${name}</strong><br>${data}</div>`;
+        layer.unbindTooltip();
+        layer.bindTooltip(tooltipHTML, {
+          direction: 'top',
+          sticky: true,
+          className: 'custom-tooltip'
+        });
+      }
+      if (layer.feature.properties.biggest && zoom) {
+        const bounds = layer.getBounds();
+        mapAdd.fitBounds(bounds, {
+            padding: [20, 20],   // Optional: padding around the feature
+            maxZoom: 6           // Optional: prevent zooming in too far
+        });
+      }
     }
-    const bounds = layer.getBounds();
-    mapAdd.fitBounds(bounds, {
-        padding: [20, 20],   // Optional: padding around the feature
-        maxZoom: 6           // Optional: prevent zooming in too far
-    });
 }
 
 function removeCountryMap(alpha2, available=true) {
-  const layer = countryLayersAdd[alpha2];
-  if (!layer) return;
-  layer.setStyle({
-    fillColor: '#4E5366'
-  });
-  layer.unbindTooltip();
-  if (!available) {
-    mapAdd.removeLayer(layer._lockMarker);
+  const layerList = countryLayersAdd[alpha2];
+  if (!layerList) return;
+  for (const layer of layerList) {
+    layer.setStyle({
+      fillColor: '#4E5366'
+    });
+    layer.unbindTooltip();
+    if (!available) {
+      mapAdd.removeLayer(layer._lockMarker);
+    }
   }
 }
 
 function selectCountryDashboard(alpha2, available=true) {
   const checkbox = document.getElementById(alpha2);
   if (checkbox.checked) {
-    addCountryMap(alpha2, "#2255ff", 'Selected', available);
+    color = "#2255ff";
+    if (!available) {
+      color = "#ffffff";
+    }
+    checkedCountries.add(alpha2);
+    addCountryMap(alpha2, color, 'Selected', available);
   } else {
     removeCountryMap(alpha2, available);
+    checkedCountries.delete(alpha2);
   }
 }
 
@@ -912,22 +971,18 @@ function closeModalAdd() {
 }
 
 function selectReportCategories() {
-  var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
+  countriesChecked = Array.from(checkedCountries).concat(Array.from(checkedCountriesExisting));
   {% comment %} countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled); {% endcomment %}
-  if (countriesSelected.length == 0) {
-    showMessage('Please select at least one new country', false);
+  if (countriesChecked.length == 0) {
+    showMessage('Please select at least one country', false);
     return;
   }
-  {% comment %} if (countriesSelectedNew.length == 0) {
-    showMessage('To update existing countries, please use the gear icon', false);
-    return;
-  } {% endcomment %}
   var categoryList = document.getElementById('category-list');
   categoryList.innerHTML = '';
   var categories = [];
-  for (const country of countriesSelected) {
-    if (countries[country.id].data) {
-      for (const category of Object.keys(countries[country.id].data)) {
+  for (const alpha2 of countriesChecked) {
+    if (countries[alpha2]?.data) {
+      for (const category of Object.keys(countries[alpha2].data)) {
         if (!categories.includes(category)) {
           categories.push(category);
         }
@@ -935,6 +990,13 @@ function selectReportCategories() {
     }
   }
   selectedCategories.clear();
+  if (categories.length == 0) {
+    document.getElementById('category-list-header').style.display = 'block';
+    document.getElementById('category-list-header').innerHTML = 'Country not yet available, choose the categories you want to stay informed about.';
+    categories = categoryOrder;
+  } else {
+    document.getElementById('category-list-header').style.display = 'none';
+  }
   categories.sort(customSort);
   for (const category of categories) {
     button = createCategoryButton(category);
@@ -943,20 +1005,6 @@ function selectReportCategories() {
   document.getElementById('mapAddCountrySelect').style.display = 'none';
   document.getElementById('mapAddSelectCategories').style.display = 'block';
   document.getElementById('mapAddSelectPROs').style.display = 'none';
-}
-
-function customSort(a, b) {
-  const order = ['WEEE', 'Batteries', 'Packaging'];
-  const indexA = order.indexOf(a);
-  const indexB = order.indexOf(b);
-  // unknown entries should be at the end
-  if (indexA == -1) {
-    return 1;
-  }
-  if (indexB == -1) {
-    return -1;
-  }
-  return indexA - indexB;
 }
 
 function addCategory() {
@@ -1024,29 +1072,26 @@ function removeCategory(category) {
 
 async function selectPROs(add_pro=false) {
   await getAvailableCountriesSettings();
-  var countriesSelected = document.getElementById('countryList').querySelectorAll('input:checked');
+  var countriesSelected = Array.from(checkedCountries).concat(Array.from(checkedCountriesExisting));
   if (selectedCategories.size == 0) {
-    if (document.querySelectorAll('.category-item').length == 0) {
-      await postSelectedCountries(countriesSelected, ['']);
-      showMessage('Country added to roadmap', true);
-      closeModalAdd();
-      return;
-    }
     showMessage('Please select at least one category', false);
     return;
   }
   {% comment %} countriesSelectedNew = Array.from(countriesSelected).filter(input => !input.disabled); {% endcomment %}
   selected_countries = {};
-  for (const country of countriesSelected) {
-    if (!selected_countries[country.id]) {
-      selected_countries[country.id] = {};
+  for (const country_code of countriesSelected) {
+    if (!selected_countries[country_code]) {
+      selected_countries[country_code] = {};
     }
     for (const category of selectedCategories) {
-      const countryCfg = availableCountriesSettings?.[country.id]?.[category];
-      if (!countryCfg) continue;
-      selected_countries[country.id][category] = {};
+      const countryCfg = availableCountriesSettings?.[country_code]?.[category];
+      if (!countryCfg) {
+        selected_countries[country_code][category] = {'Default': 'No PROs available'};
+        continue;
+      }
+      selected_countries[country_code][category] = {};
       for (const proName of Object.keys(countryCfg)) {
-        selected_countries[country.id][category][proName] = proName;
+        selected_countries[country_code][category][proName] = proName;
       }
     }
   }
@@ -1092,25 +1137,35 @@ async function openMapSettings() {
 }
 
 async function getPROData() {
+  await getAvailableCountriesSettings();
   var data = await getPROsSelected();
   selected_countries = {};
   for (const item of data) {
     if (!selected_countries[item.country]) {
       selected_countries[item.country] = {};
     }
-    if (item.pro == null) {
-      continue;
-    }
     if (!selected_countries[item.country][item.report_type]) {
       selected_countries[item.country][item.report_type] = {};
     }
-    selected_countries[item.country][item.report_type][item.pro] = item;
+    pros_available = availableCountriesSettings?.[item.country]?.[item.report_type];
+    if (item.pro == null) {
+      selected_countries[item.country][item.report_type]['Default'] = null;
+    } else if (item.pro == 'Default') {
+      if (pros_available) {
+        selected_countries[item.country][item.report_type]['Select PRO'] = null;
+      } else {
+        selected_countries[item.country][item.report_type]['Default'] = null;
+      }
+    } else {
+      selected_countries[item.country][item.report_type][item.pro] = item;
+    }
+    
   }
+  console.log(`selected_countries: ${JSON.stringify(selected_countries)}`);
   return selected_countries;
 }
 
 async function createMapSettings(selected_countries, add_pro=false) {
-  getAvailableCountriesSettings();
   renderMapSettingsHierarchy('left-side-pro-country-list', selected_countries);
   if (!add_pro) {
     document.getElementById('back-button-pro').style.display = 'none';
@@ -1126,7 +1181,7 @@ async function createMapSettings(selected_countries, add_pro=false) {
 
 async function postSelectedCountries(countriesSelected, selectedCategories) {
   try {
-    countriesSelectedList = Array.from(countriesSelected).map(country => country.id);
+    countriesSelectedList = Array.from(countriesSelected);
     selectedCategoriesList = Array.from(selectedCategories);
     let data = await unifiedSendRequest(COUNTRIES_CHOSEN, { method: 'POST', formData: JSON.stringify({countries: countriesSelectedList, categories: selectedCategoriesList}), headerArgs: {'Content-Type': 'application/json'}});
     return data;
@@ -1146,8 +1201,20 @@ function filterPROs() {
       for (const reportType of Object.keys(selected_countries[country])) {
         for (const pro of Object.keys(selected_countries[country][reportType])) {
           pro_details = selected_countries[country][reportType][pro];
-          if (pro.toLowerCase().includes(search) || pro_details.report_type.toLowerCase().includes(search) || 
-          pro_details.country.toLowerCase().includes(search)) {
+          found = false;
+          if (pro.toLowerCase().includes(search) || reportType.toLowerCase().includes(search) || 
+              country.toLowerCase().includes(search)) {
+            found = true;
+          }
+          if (!found) {
+            for (const layer of countryLayers[country]) {
+              if (layer.feature.properties.COUNTRY_NAME.toLowerCase().includes(search)) {
+                found = true;
+                break;
+              }
+            }
+          }
+          if (found) {
             if (!filtered_countries[country]) {
               filtered_countries[country] = {};
             }
@@ -1195,11 +1262,11 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
   first_country = null;
   first_report_type = null;
   first_pro = null;
-  for (const country of Object.keys(selected_countries).sort()) {
-    const { wrapper: countryDiv, label: countryLabel, childrenContainer: reportTypeContainer } = createCollapsibleItem(country, 0);
-    countryLabel.id = `label-${country}`;
+  for (const alpha2 of Object.keys(selected_countries).sort()) {
+    const { wrapper: countryDiv, label: countryLabel, childrenContainer: reportTypeContainer } = createCollapsibleItem(alpha2, 0);
+    countryLabel.id = `label-${alpha2}`;
     countryLabel.classList.add('country-label');
-    countryName = countries[country].info.name || country;
+    countryName = countryLayers[alpha2][0].feature.properties.COUNTRY_NAME;
     countryLabel.title = countryName;
     countryLabel.style.width = 'fit-content';
     countryLabel.style.cursor = 'pointer';
@@ -1218,26 +1285,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
     if (!first_country) {
       first_country = countryLabel;
     }
-    if (Object.keys(selected_countries[country]).length == 0) {
-      const reportTypeLabel = document.createElement('div');
-      const reportTypeDiv = document.createElement('div');
-      reportTypeDiv.style.margin = '2rem 0';
-      reportTypeDiv.style.marginLeft = '5rem';
-      reportTypeDiv.style.width = 'fit-content';
-      reportTypeDiv.style.display = 'block';
-      reportTypeLabel.textContent = 'Not yet supported, we will inform you when it is available';
-      reportTypeLabel.style.width = 'fit-content';
-      reportTypeLabel.style.display = 'block';
-      reportTypeDiv.appendChild(reportTypeLabel);
-      reportTypeContainer.appendChild(reportTypeDiv);
-      container.appendChild(countryDiv);
-      reportTypeDiv.addEventListener('click', () => {
-        document.getElementById(`pro-name`).style.display = 'none';
-        document.getElementById(`pro-details`).style.display = 'none';
-      });
-      continue;
-    }
-    for (const reportType of Object.keys(selected_countries[country]).sort()) {
+    for (const reportType of Object.keys(selected_countries[alpha2]).sort()) {
       const { wrapper: reportTypeDiv, label: reportTypeLabel, childrenContainer: proContainer } = createCollapsibleItem(reportType, 1);
       reportTypeLabel.id = `label-${country}-${reportType}`;
       reportTypeLabel.classList.add('report-type-label');
@@ -1258,8 +1306,10 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
       if (!first_report_type) {
         first_report_type = reportTypeLabel;
       }
-      var pros_names = Object.keys(selected_countries[country][reportType]).sort();
+      var pros_names = Object.keys(selected_countries[alpha2][reportType]).sort();
       pros_new = pros_names;
+      console.log(`pros_names: ${pros_names}`);
+      console.log(`openMapSettingsBool: ${openMapSettingsBool}`);
       if (!openMapSettingsBool) {
         pros_new = [];
         if (pros_names.length > 0) {
@@ -1278,7 +1328,8 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
           first_pro = proDiv;
         }
         proDiv.textContent = pro;
-        proDiv.id = `pro-${country}-${reportType}-${pro}`;
+        proDiv.title = pro.replace('Default', 'No PROs available');
+        proDiv.id = `pro-${alpha2}-${reportType}-${pro}`;
         proDiv.style.margin = '2rem 0';
         proDiv.style.marginLeft = '5rem';
         proDiv.style.cursor = 'pointer';
@@ -1289,7 +1340,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
           });
           proDiv.classList.add('pro-active');
           proDiv.scrollIntoView({behavior: 'smooth', block: 'center'});
-          await getProDetails(country, reportType, pro);
+          await getProDetails(alpha2, reportType, pro);
           document.getElementById(`pro-details`).style.display = 'grid';
           document.getElementById(`pro-name`).style.display = 'flex';
         }
@@ -1301,7 +1352,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
       proDiv2.querySelector('svg').style.height = '2rem';
       proDiv2.querySelector('svg').style.fill = '#17161c';
       proDiv2.style.margin = '2rem 0';
-      proDiv2.id = `pro-${country}-${reportType}-Not Set`;
+      proDiv2.id = `pro-${alpha2}-${reportType}-Not Set`;
       proDiv2.style.marginLeft = '5rem';
       proDiv2.style.cursor = 'pointer';
       proDiv2.style.width = 'fit-content';
@@ -1316,7 +1367,7 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
         document.getElementById('pro-status').textContent = 'Not Set';
         proDiv2.textContent = 'Not Set';
         proDiv2.scrollIntoView({behavior: 'smooth', block: 'center'});
-        await getProDetails(country, reportType, 'Not Set');
+        await getProDetails(alpha2, reportType, 'Not Set');
       }
       proContainer.appendChild(proDiv2);
       reportTypeContainer.appendChild(reportTypeDiv);
@@ -1341,6 +1392,9 @@ function renderMapSettingsHierarchy(containerId, selected_countries, activePro=n
 var availableCountriesSettings = [];
 async function getAvailableCountriesSettings() {
   try {
+    if (availableCountriesSettings.length > 0) {
+      return;
+    }
     let data = await unifiedSendRequest(GETGENERALCONFIGCOUNTRY, { method: 'GET' });
     availableCountriesSettings = data;
   } catch (error) {
@@ -1368,7 +1422,7 @@ async function getProDetails(country, reportType, pro) {
   currentPro = pro;
   await savePRO(); // save previous values
   proValues = await getPROData();
-  proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': [], 'extra_info': '', 'general_settings': {}, 'id': '', 'agency_email': '', 'registration_number': '', 'email_responsible_options': []};
+  proValues = proValues[country]?.[reportType]?.[pro] || {'login': '', 'password': '', 'email_responsible': [], 'extra_info': '', 'general_settings': {}, 'id': '', 'agency_email': '', 'registration_number': '', 'email_responsible_options': [], 'email_responsible': ''};
   const proDetails = (
     availableCountriesSettings?.[country]?.[reportType]?.[pro]
   ) || {};
@@ -1376,7 +1430,11 @@ async function getProDetails(country, reportType, pro) {
   document.getElementById('pro-name-select').innerHTML = '';
   pros = availableCountriesSettings?.[country]?.[reportType] || {};
   var proOptions = [];
-  for (const proOption of Object.keys(pros)) {
+  var proOptionsKeys = Object.keys(pros);
+  if (proOptionsKeys.length == 0) {
+    proOptionsKeys = ['Default'];
+  }
+  for (const proOption of proOptionsKeys) {
     var option = document.createElement('option');
     option.value = proOption;
     option.textContent = proOption;
@@ -1399,9 +1457,6 @@ async function getProDetails(country, reportType, pro) {
     var option = document.createElement('option');
     option.value = email;
     option.textContent = email;
-    console.log(`proValues.email_responsible: ${proValues.email_responsible}`);
-    console.log(`email: ${email}`);
-    console.log(`proValues.email_responsible.split(',').includes(email): ${proValues.email_responsible.split(',').includes(email)}`);
     if (proValues.email_responsible.split(',').includes(email)) {
       option.selected = true;
     }

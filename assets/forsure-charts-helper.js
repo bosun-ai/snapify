@@ -41,19 +41,6 @@ async function drawCharts(charts, containerId, hard) {
       }
 }
 
-// async function createPlaceholder(widgetDivId, containerId) {
-//     // Create placeholders for each widget
-//     const existingWidgetDiv = document.getElementById(widgetDivId);
-//     if (!existingWidgetDiv) {
-//         // If the element doesnt exists, create a placeholder for it
-//         const placeholder = document.createElement('div');
-//         placeholder.id = `placeholder-${widgetDivId}`;
-//         placeholder.className = 'widget-placeholder'; // A CSS class to style the placeholder if needed
-//         document.getElementById(containerId).appendChild(placeholder);
-//     }
-// }
-
-
 function createCanvasElement(widgetDivId, idprefix=false) {
     // Function to generate a new canvas element with a specified id
     var existingWidgetDiv = document.getElementById(widgetDivId);
@@ -101,9 +88,21 @@ function createCanvasElement(widgetDivId, idprefix=false) {
             </div>`;
     // }
     iconContainer.innerHTML += `
-    <div class="icon">
+    <div>
           <svg onclick="togglePin(this, '${widgetDivId}')" class="pinnedSVG" xmlns="http://www.w3.org/2000/svg" height="2rem" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#fafafa" d="M32 32C32 14.3 46.3 0 64 0H320c17.7 0 32 14.3 32 32s-14.3 32-32 32H290.5l11.4 148.2c36.7 19.9 65.7 53.2 79.5 94.7l1 3c3.3 9.8 1.6 20.5-4.4 28.8s-15.7 13.3-26 13.3H32c-10.3 0-19.9-4.9-26-13.3s-7.7-19.1-4.4-28.8l1-3c13.8-41.5 42.8-74.8 79.5-94.7L93.5 64H64C46.3 64 32 49.7 32 32zM160 384h64v96c0 17.7-14.3 32-32 32s-32-14.3-32-32V384z"/></svg>
         </div>`
+    iconContainer.innerHTML += `
+    <div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+            onclick="downloadCanvasImage('${widgetDivId}')"
+            style="cursor: pointer;"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <path d="m7 10 5 5 5-5"/>
+            <path d="M12 3v12"/>
+        </svg>
+    </div>`
     // iconContainer.innerHTML += `
     //       <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 122.879 122.867" enable-background="new 0 0 122.879 122.867" xml:space="preserve"><g>
     //         <path onclick="togglePin(this, '${widgetDivId}')" class="pin ${widgetPinned}" fill-rule="evenodd" clip-rule="evenodd" d="M83.88,0.451L122.427,39c0.603,0.601,0.603,1.585,0,2.188l-13.128,13.125 c-0.602,0.604-1.586,0.604-2.187,0l-3.732-3.73l-17.303,17.3c3.882,14.621,0.095,30.857-11.37,42.32 c-0.266,0.268-0.535,0.529-0.808,0.787c-1.004,0.955-0.843,0.949-1.813-0.021L47.597,86.48L0,122.867l36.399-47.584L11.874,50.76 c-0.978-0.98-0.896-0.826,0.066-1.837c0.24-0.251,0.485-0.503,0.734-0.753C24.137,36.707,40.376,32.917,54.996,36.8l17.301-17.3 l-3.733-3.732c-0.601-0.601-0.601-1.585,0-2.188L81.691,0.451C82.295-0.15,83.279-0.15,83.88,0.451L83.88,0.451z"/></g></svg>`;
@@ -234,21 +233,10 @@ async function fillPlaceholder(result) {
 
 function drawComponentWrapper(result) {
     if (result.data && (Object.keys(result.data).length > 0 || data.length > 0)) {
-        // if (requestData.nocanvas) {
-        //     return result.chartType(data);
-        // } else {
         widgetChartParams[result.widgetDivId] = result;
-            // if(requestData.chartType === populateNextReports){
-            //     const div = document.createElement('div');
-            //     div.id = `${idprefix}chart${widgetId}`;
-            //     document.getElementById(`${idprefix}widget${widgetId}`).replaceChild(div, document.getElementById(`${idprefix}chart${widgetId}`));
-            //     return populateNextReports(`${idprefix}chart${widgetId}`, data);
-            // }
         drawChart(result, `title${result.widgetDivId}`);
         document.getElementById(`titleWrapper${result.widgetDivId}`).style.display = 'block';
         return true;
-        // return drawComponent(result.data, `chart${result.widgetDivId}`, result.chartType, columnNames, chartTitle);
-        // }
     }
     return false;
 }
@@ -261,397 +249,6 @@ async function drawChart(result, titleId, useChartCanvas=false, bigmode=false) {
     updateChartNew(result.data, chartCanvas, titleId, bigmode, result.chart.title);
     chartTypesNew[result.chart.chart_type](chartCanvas);
 }
-
-
-async function getReportsDue(widgetDivId) {
-    try {
-        var data = await unifiedSendRequest(NEXTREPORTS, {method: 'GET'});
-        return data;
-    } catch(error){
-        console.error(`Failed to get data, received error ${error}`);
-        return errorMessage(widgetDivId, error.message);
-    }
-}
-
-function createReportsDueWidget(results) {
-    // 1. Create the main div
-    const mainDiv = document.createElement('div');
-    mainDiv.id = 'widgetAlwaysFirst';
-    mainDiv.className = 'widget';
-    mainDiv.style.fontWeight = 'bold';
-    mainDiv.textContent = 'Reports due';
-
-    // 2. Create and append the inner div
-    const innerDiv = document.createElement('div');
-    innerDiv.className = 'chart';
-    innerDiv.id = 'nextReportsChart';
-    mainDiv.appendChild(innerDiv);
-    
-    var chartTag = 'widgetReportsDue';
-    var container = document.getElementById(chartTag);
-    // Insert the table into the chart div
-    container.innerHTML = ""; // empty the container
-    
-    const titleWrapper = document.createElement('div');
-    titleWrapper.className = 'grid-title';
-    titleWrapper.style.display = 'block';
-    const title = document.createElement('div');
-    title.id = `titlewidgetReportsDue`;
-    title.innerText = 'Deadlines';
-    titleWrapper.appendChild(title);
-    container.appendChild(titleWrapper);
-
-    container.style.overflowY = 'auto';
-    const div = document.createElement('div');
-    div.style.height = '100%';
-    div.style.position = 'relative';
-
-    const topTrigger = document.createElement('div');
-    topTrigger.className = 'top-trigger';
-    topTrigger.style.height = '1px';
-    div.appendChild(topTrigger);
-
-    // const deadlinesContainer = document.createElement('div');
-    // deadlinesContainer.className = 'deadlines-widget';
-
-    // // 4. Create a list for deadlines
-    const deadlinesList = document.createElement('ul');
-    deadlinesList.style.listStyle = 'none';
-    deadlinesList.style.padding = '1rem 1rem 0 1rem';
-    deadlinesList.style.textAlign = 'left';
-
-    let pastDeadlines = [];
-    let displayedDeadlines = [];
-
-    // // 5. Iterate over the results (deadlines data)
-    results.forEach(deadline => {
-        const listItem = document.createElement('li');
-        listItem.id = `${deadline.country}-${deadline.type}-${deadline.deadline}`;
-        listItem.title = deadline.description;
-        listItem.className = 'deadline';
-        const deadlineDate = new Date(deadline.deadline_timestamp);
-        const currentDate = new Date();
-        var className = '';
-        if (deadline.done === true) {
-            // listItem.classList.add('done-deadline');
-            className = 'done-deadline';
-        }
-        else if (deadlineDate < currentDate) {
-            // listItem.classList.add('past-deadline');
-            className = 'past-deadline';
-        }
-        if (deadlineDate < currentDate) {
-            listItem.style.display = 'none';
-            pastDeadlines.push(listItem);
-        } else {
-            displayedDeadlines.push(listItem);
-        }
-        // listItem.style.padding = '0.5rem 0';
-        // listItem.onclick = () => selectDeadline(listItem);
-
-        // Determine category icon
-        let catImg;
-        if (deadline.type === 'WEEE') {
-            catImg = getWEEESVG();
-        } else if (deadline.type === 'Batteries') {
-            catImg = getBatteriesSVG();
-        } else if (deadline.type === 'Packaging') {
-            catImg = getPackagingSVG();
-        } else {
-            catImg = ''; // Default empty if unknown category
-        }
-
-        // Create the row layout
-        listItem.innerHTML = `
-            <div style="display: flex; align-items: center;">
-                <div style="flex: 1; font-size: large;font-weight: bold; text-align: left;margin-left:3rem">${deadline.country}</div>
-                <div class="typeDescription"><div style="display: flex">${catImg}<div class="reportDeadlineName">${deadline.type}</div></div></div>
-                <div class="${className} rounded-deadline" style="flex: 1; text-align: right; font-size: large;font-weight: bold;">${deadline.deadline}</div>
-            </div>
-        `;
-        deadlinesList.appendChild(listItem);
-    });
-    div.appendChild(deadlinesList);
-    // let pastToShow = 5;
-    // Detect scrolling and reveal past deadlines when scrolling up
-    // container.addEventListener('scroll', function () {
-    //     if (container.scrollTop === 0) {
-    //         // Show past deadlines when scrolled to the top
-    //         let remainingPast = pastDeadlines.filter(item => item.style.display === 'none');
-    //         let nextBatch = remainingPast.slice(-pastToShow); // Show the next 5
-
-    //         nextBatch.forEach(item => {
-    //             item.style.display = 'block';
-    //         });
-    //     }
-    // });
-    function loadOlderDeadlines() {
-        if (pastDeadlines.length === 0) return;
-
-        const scrollYBeforeAdding = container.scrollHeight - container.scrollTop;
-
-        // Take the next batch of past deadlines to display
-        let nextBatch = pastDeadlines.splice(-5); // Show the next 5 past deadlines
-
-        nextBatch.forEach(item => {
-            item.style.display = 'block';
-            deadlinesList.insertBefore(item, deadlinesList.firstChild);
-        });
-
-        // Maintain scroll position
-        container.scrollTop = container.scrollHeight - scrollYBeforeAdding;
-    }
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-            loadOlderDeadlines();
-        }
-    }, { root: container, threshold: 0.1 });
-
-    observer.observe(topTrigger);
-
-    container.appendChild(div);
-
-    return mainDiv;
-}
-
-
-
-function getWEEESVG() {
-    return `
-    <svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-    viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
-    <style type="text/css">
-    .st0{display:none;}
-    .st1{display:inline;}
-    .st2{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-    .st3{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-miterlimit:10;}
-    .st4{fill:#2255FF;}
-    .st5{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-    .st6{fill:none;}
-    .st7{fill:none;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-    .st8{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-    .st9{stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
-    </style>
-    <g id="Calque_14" class="st0">
-    </g>
-    <g id="data-analytics-icon">
-    </g>
-    <g id="data-analytics-icon_-_copie" class="st0">
-    </g>
-    <g id="flats-residential-apartment-ic">
-    </g>
-    <g id="goods-contents-icon">
-    </g>
-    <g id="government_building_icon">
-    </g>
-    <g id="partner-handshake-icon">
-    </g>
-    <g id="partner-handshake-icon_-_copie">
-    </g>
-    <g id="Send_icon">
-    </g>
-    <g id="Calque_9">
-    </g>
-    <g id="Packaging">
-    </g>
-    <g id="Batterie">
-    </g>
-    <g id="Electronics">
-    <g>
-    <path class="st2" d="M146.1,291v-97.83h207.8V291c0,49.51-40.14,89.64-89.64,89.64h-28.51C186.24,380.64,146.1,340.51,146.1,291z"
-    />
-    <g>
-    <path class="st2" d="M187.67,154.27V18.49c0-6.02,4.88-10.9,10.9-10.9h3.47c6.02,0,10.9,4.88,10.9,10.9v135.78H187.67z"/>
-    <path class="st2" d="M287.06,153.14V18.49c0-6.02,4.88-10.9,10.9-10.9h3.47c6.02,0,10.9,4.88,10.9,10.9v134.65H287.06z"/>
-    </g>
-    <path class="st5" d="M115.04,176.12v-5.27c0-9.15,7.42-16.56,16.56-16.56h236.78c9.15,0,16.56,7.42,16.56,16.56v5.27
-    c0,9.15-7.42,16.56-16.56,16.56H131.61C122.46,192.68,115.04,185.27,115.04,176.12z"/>
-    <line class="st2" x1="238.95" y1="494.11" x2="239.08" y2="383.94"/>
-    <line class="st2" x1="271.94" y1="494.11" x2="272.07" y2="383.94"/>
-    </g>
-    <polygon class="st2" points="282.39,275.45 248.85,275.59 280.03,215.42 225.39,290.48 258.93,290.34 235.83,350.84 "/>
-    </g>
-    <g id="Electronics_-_copie">
-    </g>
-    <g id="Textile">
-    </g>
-    <g id="Packaging2">
-    </g>
-    <g id="Batterie2">
-    </g>
-    <g id="Textile2">
-    </g>
-    <g id="Electronics_-_copie_2" class="st0">
-    </g>
-    <g id="Electronics_-_copie_3">
-    </g>
-    <g id="Calque_19">
-    </g>
-    <g id="Calque_21-test">
-    </g>
-    <g id="Calque_22">
-    </g>
-    </svg>`;
-}
-
-function getBatteriesSVG() {
-    return `<svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-        viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
-        <style type="text/css">
-        .st0{display:none;}
-        .st1{display:inline;}
-        .st2{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-        .st3{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-miterlimit:10;}
-        .st4{display:inline;fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-        .st5{fill:#2255FF;}
-        .st6{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-
-        .st7{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:22,25,22,25,22,25;}
-        .st8{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-        .st9{stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
-        </style>
-        <g id="Calque_14" class="st0">
-        </g>
-        <g id="data-analytics-icon">
-        </g>
-        <g id="data-analytics-icon_-_copie" class="st0">
-        </g>
-        <g id="flats-residential-apartment-ic">
-        </g>
-        <g id="goods-contents-icon">
-        </g>
-        <g id="government_building_icon">
-        </g>
-        <g id="partner-handshake-icon" class="st0">
-        </g>
-        <g id="partner-handshake-icon_-_copie">
-        </g>
-        <g id="Send_icon">
-        </g>
-        <g id="Calque_9">
-        </g>
-        <g id="Packaging">
-        </g>
-        <g id="Batterie">
-        <path class="st5" d="M203.89,51.98c-2.21-4.28,0.25,97.41,0.25,97.41s42.27,29.92,122.68,29.93
-        c94.48,0.01,119.49-35.82,119.49-35.82l-0.49-93.23c0,0-22.93,35.9-114.83,36.31S203.89,51.98,203.89,51.98z"/>
-        <path class="st5" d="M246.1,469.14c-6.69-27.84-3.99-39,3.54-59.36c7.53-20.36,27.4-36.29,27.4-36.29l72.18,21.06
-        c0,0-16.51,13.14-26.11,34.88c-9.6,21.74-1.54,61.43-1.54,61.43L246.1,469.14z"/>
-        <g>
-        <path class="st2" d="M202.76,340.43c0-90.59,0-292.84,0-292.84"/>
-        <path class="st2" d="M446.02,47.02c0,0,0,313.45,0,335.21c0,16.32-30.63,30.32-74.29,36.31"/>
-        <path class="st2" d="M368.3,49.3c0,6.83-19.17,12.37-42.81,12.37c-23.64,0-42.81-5.54-42.81-12.37"/>
-        <path class="st2" d="M445.93,140.06c0,21.76-54.44,39.4-121.59,39.4s-121.59-17.64-121.59-39.4"/>
-        <ellipse class="st2" cx="324.34" cy="46.45" rx="121.59" ry="39.4"/>
-        <ellipse class="st2" cx="325.48" cy="28.18" rx="42.81" ry="12.37"/>
-        <line class="st2" x1="282.62" y1="28.18" x2="282.73" y2="49.87"/>
-        <line class="st2" x1="368.24" y1="27.74" x2="368.35" y2="49.43"/>
-        </g>
-        <g>
-        <path class="st2" d="M252.82,469.19c-11.57-3.69-14.14-28.03-5.74-54.37c8.4-26.34,24.59-44.7,36.15-41.01"/>
-
-        <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -186.2469 634.8038)" class="st2" cx="341.22" cy="444.84" rx="50.06" ry="22.6"/>
-
-        <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -186.1162 635.1949)" class="st2" cx="341.56" cy="444.94" rx="17.63" ry="4.28"/>
-
-        <ellipse transform="matrix(0.3038 -0.9527 0.9527 0.3038 -180.9776 651.7137)" class="st2" cx="355.43" cy="449.69" rx="17.63" ry="4.28"/>
-        <path class="st2" d="M327.51,493.05c0,0-251.63-80.23-269.1-85.8s-24.82-31.45-16.42-57.8c8.4-26.35,29.38-43.2,46.84-37.63
-        s268.64,85.66,268.64,85.66"/>
-        <line class="st2" x1="359.13" y1="432.04" x2="348.08" y2="428.52"/>
-        <line class="st2" x1="348.44" y1="465.63" x2="337.38" y2="462.11"/>
-        </g>
-        </g>
-        <g id="Electronics">
-        </g>
-        <g id="Textile">
-        </g>
-        <g id="Packaging2">
-        </g>
-        <g id="Batterie2">
-        </g>
-        <g id="Textile2">
-        </g>
-        <g id="Electronic2">
-        </g>
-        <g id="Calque_19">
-        </g>
-        <g id="Calque_21-test">
-        </g>
-        <g id="Calque_22">
-        </g>
-        </svg>`;
-}
-
-function getPackagingSVG() {
-return `<svg width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-        viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
-        <style type="text/css">
-        .st0{display:none;}
-        .st1{display:inline;}
-        .st2{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-        .st3{fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-miterlimit:10;}
-        .st4{display:inline;fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-        .st5{fill:#2255FF;}
-        .st6{fill:#2255FF;stroke:#000000;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-
-        .st7{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:22,25,22,25,22,25;}
-        .st8{fill:none;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-        .st9{stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
-        </style>
-        <g id="Calque_14" class="st0">
-        </g>
-        <g id="data-analytics-icon">
-        </g>
-        <g id="data-analytics-icon_-_copie" class="st0">
-        </g>
-        <g id="flats-residential-apartment-ic">
-        </g>
-        <g id="goods-contents-icon">
-        </g>
-        <g id="government_building_icon">
-        </g>
-        <g id="partner-handshake-icon" class="st0">
-        </g>
-        <g id="partner-handshake-icon_-_copie">
-        </g>
-        <g id="Send_icon">
-        </g>
-        <g id="Calque_9">
-        </g>
-        <g id="Packaging">
-        <polygon class="st5" points="87.49,201.21 252.31,109.68 420.36,208 248.74,293.81 "/>
-        <polyline class="st2" points="227.5,282.17 249.62,266.08 273.3,282.28 "/>
-        <path class="st2" d="M422.56,286.91l0.51,84.24c0.06,10.33-5.71,19.81-14.92,24.49l-143.75,73.07c-7.68,3.9-16.76,3.95-24.48,0.12
-        L97.49,398.26c-9.23-4.57-15.1-13.96-15.17-24.26l-0.65-93.66"/>
-        <polygon class="st2" points="250.86,294.51 286.6,361.68 462.16,264.53 420.6,206.01 "/>
-        <polygon class="st2" points="250.24,295.75 84.67,201.45 44.56,257.95 214.78,361.02 "/>
-        <polyline class="st2" points="250.24,110.97 194.72,53.85 28.56,139.63 84.67,201.45 250.24,110.97 "/>
-        <polyline class="st2" points="250.24,110.97 420.26,205.45 478.13,139.44 308.96,53.38 250.24,110.97 "/>
-        <line class="st2" x1="250.24" y1="110.97" x2="250.24" y2="264.75"/>
-        </g>
-        <g id="Batterie">
-        </g>
-        <g id="Electronics">
-        </g>
-        <g id="Textile">
-        </g>
-        <g id="Packaging2">
-        </g>
-        <g id="Batterie2">
-        </g>
-        <g id="Textile2">
-        </g>
-        <g id="Electronic2">
-        </g>
-        <g id="Calque_19">
-        </g>
-        <g id="Calque_21-test">
-        </g>
-        <g id="Calque_22">
-        </g>
-        </svg>`;
-}
-
 
 function pinWidget(id) {
     const widget = document.getElementById(id);
@@ -784,65 +381,25 @@ function updateChart(widgetId, chartType, idprefix) {
 
 let chartInstances = new Map(); // store the chart objects to update them with new data
 
-function populateNextReports(data) {
-    var chartTag = 'widgetReportsDue';
-    const div = document.createElement('div');
-    div.style.height = '100%';
-    div.style.position = 'relative';
-
-    // Create a table
-    const table = document.createElement('table');
-    table.style.width = '95%';
-    table.style.margin = 'auto';
-    table.style.marginTop = '3%';
-    table.style.position = 'absolute';
-
-    // Add a header row
-    const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th>Country</th><th>Type</th><th>Deadline</th></tr>';
-    table.appendChild(thead);
-
-    // Add the data rows
-    const tbody = document.createElement('tbody');
-    data.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.title = item.description;
-        const tdCountry = document.createElement('td');
-        tdCountry.textContent = item.country;
-
-        const tdType = document.createElement('td');
-        tdType.textContent = item.type;
-
-        const tdDeadline = document.createElement('td');
-        tdDeadline.textContent = item.deadline;
-
-        // Check if the deadline is in the past
-        const [day, month, year] = item.deadline.split('.');
-        const formattedDeadline = `${month}/${day}/${year}`;
-        const deadlineDate = new Date(formattedDeadline);
-        const currentDate = new Date();
-        if (item.done === true) {
-            tdDeadline.classList.add('done-deadline');
-        }
-        else if (deadlineDate < currentDate) {
-            tdDeadline.classList.add('past-deadline');
-        }
-
-        tr.appendChild(tdCountry);
-        tr.appendChild(tdType);
-        tr.appendChild(tdDeadline);
-        tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    var container = document.getElementById(chartTag);
-    // Insert the table into the chart div
-    container.innerHTML = ""; // empty the container
-    div.appendChild(table);
-    container.appendChild(div);
-    return true;
-}
-
-
+function downloadCanvasImage(widgetId, idprefix='', baseName='chart', fmt='png') {
+    const canvasEl = document.getElementById(`${idprefix}chart${widgetId}`);
+    if (!canvasEl) return;
+    const title = document.getElementById(`title${widgetId}`);
+    const filename = `${title.textContent}_${new Date().toISOString().slice(0,10)}.${fmt}`;
+    
+    if (canvasEl.toBlob) {
+      canvasEl.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+      }, `image/${fmt}`, fmt === 'jpeg' ? 0.92 : undefined);
+    } else {
+      const a = document.createElement('a');
+      a.href = canvasEl.toDataURL(`image/${fmt}`);
+      a.download = filename; a.click();
+    }
+  }
 
 
 function errorMessage(widgetId, error, idprefix='') {

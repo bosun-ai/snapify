@@ -438,7 +438,7 @@
             if (activeInformation &&
                 activeInformation.country === item.country &&
                 activeInformation.report_type === item.report_type &&
-                activeInformation.pro === item.pro) {
+                activeInformation.pro.split('-')[0].trim() === item.pro.split('-')[0].trim()) {
                 row.classList.add('information-row-active');
             }
 
@@ -451,7 +451,6 @@
                 if (val !== item.pro) {
                     content.classList.add('information-cell-content-centered');
                 }
-
                 if (val === 'ERROR') {
                     content.innerHTML = `{% render 'forsure-icon-error' %}`;
                 }
@@ -465,6 +464,8 @@
                 }
                 else if (val === 'Packaging') {
                     content.innerHTML = getPackagingSVG();
+                } else if (val === item.pro) {
+                    content.innerText = val.split('-')[0].trim();
                 }
                 else {
                     content.innerText = val;

@@ -73,7 +73,7 @@
     right: 10px;
     display: flex; /* Make the icons container a flex container */
     flex-direction: row-reverse; /* Align items from right to left */
-    gap: 5px; /* Optional: Add some gap between icons */
+    gap: 2rem; /* Optional: Add some gap between icons */
 }
   .enlarge-icon {
     cursor: pointer;

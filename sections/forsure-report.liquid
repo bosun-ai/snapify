@@ -3151,7 +3151,7 @@ function updateTemplateOptions(refreshPRO=true) {
   var initPro = false;
   if (refreshPRO) {
     $('#proSelect').val('');
-    proDropdown.innerHTML = '<option value="">-- Select a PRO --</option>';
+    proDropdown.innerHTML = '<option value="">No PRO selected</option>';
   }
   const selectedPro = $('#proSelect').val();
   const selectedCountry = $('#country').val();
@@ -3225,6 +3225,7 @@ async function showConfirmationDetails() {
       var year = moment().year();
       selectedTemplate = `${$('#country').val()}-${year}-${$('#category').val()}-${$('#proSelect').val()}`;
     }
+    selectedTemplateName = null;
     if (selectedTemplate !== "default" && selectedTemplate !== null) {
       selectedFields = [`Using template ${selectedTemplate}`];
       selectedGroupBy = [`Using template ${selectedTemplate}`];
