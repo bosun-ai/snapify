@@ -2,19 +2,6 @@
 {{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
-    .tooltip {
-      position: absolute;
-      text-align: center;
-      width: 120px;
-      height: 45px;
-      padding: 2px;
-      font: 12px sans-serif;
-      background: lightsteelblue;
-      border: 0;
-      border-radius: 8px;
-      pointer-events: none;
-    }
-
     .section-{{ section.id }}-padding {
       padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
       padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
@@ -289,24 +276,6 @@
     margin-right: 10px;
   }
 
-  .tooltip {
-    display: none;
-    position: absolute;
-    background-color: #555;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px;
-    z-index: 1;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 10px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    width: 200px;
-  }
-
   .setting-item label:hover .tooltip {
     display: block;
     opacity: 1;
@@ -520,7 +489,7 @@ function renderGeneralSettings() {
 
     settingsTableBody.innerHTML += `
       <tr class=\"setting-item\" data-key=\"${setting.key}\">
-        <td><label style="width: fit-content;">${setting.title}<div class=\"tooltip\">${setting.description}</div></label></td>
+        <td><label style="width: fit-content;" title=\"${setting.description}\">${setting.title}</label></td>
         <td>${inputElement}</td>
       </tr>
     `;
@@ -614,10 +583,14 @@ function toggleSubentries(key, isChecked) {
         formData: JSON.stringify(dataToSend), 
         headerArgs: { 'Content-Type': 'application/json' }
       });
-      showMessage('Submitted settings successfully', true);
+      if (response.status === 200) {
+        showMessage('Submitted settings successfully', true);
+      } else {
+        showMessage('Failed to submit settings', false);
+      }
     } catch (error) {
       console.error('Error submitting settings', error);
-      showMessage('Failed to submit settings ' + error.message, false);
+      showMessage('Failed to submit settings', false);
     }
   }
 

@@ -381,24 +381,34 @@ function updateChart(widgetId, chartType, idprefix) {
 
 let chartInstances = new Map(); // store the chart objects to update them with new data
 
-function downloadCanvasImage(widgetId, idprefix='', baseName='chart', fmt='png') {
-    const canvasEl = document.getElementById(`${idprefix}chart${widgetId}`);
+function downloadCanvasImage(widgetId, idprefix='chart', titleRef=null, fmt='png', scale=3) {
+    const canvasEl = document.getElementById(`${idprefix}${widgetId}`);
     if (!canvasEl) return;
-    const title = document.getElementById(`title${widgetId}`);
-    const filename = `${title.textContent}_${new Date().toISOString().slice(0,10)}.${fmt}`;
-    
-    if (canvasEl.toBlob) {
-      canvasEl.toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = filename; a.click();
-        URL.revokeObjectURL(url);
-      }, `image/${fmt}`, fmt === 'jpeg' ? 0.92 : undefined);
+    if (!titleRef) {
+        var titleElement = document.getElementById(`title${widgetId}`);
     } else {
-      const a = document.createElement('a');
-      a.href = canvasEl.toDataURL(`image/${fmt}`);
-      a.download = filename; a.click();
+        var titleElement = document.getElementById(titleRef);
     }
+    var title = titleElement.textContent;
+    title = title.replace(/ /g, '_');
+    const filename = `${title}_${new Date().toISOString().slice(0,10)}.${fmt}`;
+  
+    // Create higher resolution canvas
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = canvasEl.width * scale;
+    tmpCanvas.height = canvasEl.height * scale;
+    const ctx = tmpCanvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.drawImage(canvasEl, 0, 0);
+  
+    tmpCanvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, `image/${fmt}`, fmt === 'jpeg' ? 0.92 : undefined);
   }
 
 
