@@ -430,7 +430,7 @@ td input {
 }
 
 .feature-row {
-    background-color: #f8f9fa;
+    background-color: #f8f9fa !important;
     border-left: 4px solid #2255ff !important;
 }
 
@@ -453,7 +453,13 @@ td input {
     font-weight: bold;
 }
 
-.feature-row.hidden {
+/* Ensure feature rows are visible */
+#editableTable tbody tr.feature-row {
+    display: table-row !important;
+}
+
+/* Hide feature rows when collapsed */
+#editableTable tbody tr.feature-row.hidden {
     display: none !important;
 }
 
@@ -2552,24 +2558,31 @@ function addFeatureToggleButton(rowNode, sku) {
     toggleBtn.className = 'feature-toggle-btn';
     toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     toggleBtn.title = 'Click to load features';
-    toggleBtn.onclick = () => toggleFeatures(sku, rowNode);
+    toggleBtn.onclick = () => {
+        console.log('Toggle button clicked for SKU:', sku);
+        toggleFeatures(sku, rowNode);
+    };
     
     // Initially disable the button until we know if features exist
     toggleBtn.classList.add('disabled');
     toggleBtn.title = 'Loading features...';
     
+    firstCell.insertBefore(toggleBtn, firstCell.firstChild);
+    console.log('Toggle button added for SKU:', sku);
+    
     // Check if features exist for this SKU
     checkFeaturesExist(sku, toggleBtn);
-    
-    firstCell.insertBefore(toggleBtn, firstCell.firstChild);
 }
 
 // Check if features exist for a SKU
 async function checkFeaturesExist(sku, toggleBtn) {
     try {
+        console.log('Checking features exist for SKU:', sku);
         const response = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, {method: 'GET'});
         const features = response || [];
+        console.log('Features check response:', features);
         
+        // Enable toggle button if features exist
         if (features.length > 0) {
             toggleBtn.classList.remove('disabled');
             toggleBtn.title = 'Toggle Features';
@@ -2583,25 +2596,39 @@ async function checkFeaturesExist(sku, toggleBtn) {
             toggleBtn.classList.add('disabled');
             toggleBtn.title = 'No features available';
         }
+        
+        console.log('Toggle button enabled for SKU:', sku);
     } catch (error) {
         console.error('Error checking features:', error);
+        // Disable button on error
         toggleBtn.classList.add('disabled');
-        toggleBtn.title = 'No features available';
+        toggleBtn.title = 'Error loading features';
+        console.log('Toggle button disabled due to error for SKU:', sku);
     }
 }
 
 // Toggle feature rows for a SKU
 async function toggleFeatures(sku, rowNode) {
+    console.log('toggleFeatures called for SKU:', sku);
     const toggleBtn = rowNode.querySelector('.feature-toggle-btn');
+    console.log('Toggle button found:', toggleBtn);
+    
+    if (!toggleBtn) {
+        console.error('Toggle button not found!');
+        return;
+    }
     
     // Don't allow toggle if disabled
     if (toggleBtn.classList.contains('disabled')) {
+        console.log('Toggle button is disabled');
         return;
     }
     
     const isExpanded = toggleBtn.classList.contains('expanded');
+    console.log('Is expanded:', isExpanded);
     
     if (isExpanded) {
+        console.log('Hiding features');
         // Hide features
         const featureRowsForSku = featureRows.get(sku) || [];
         featureRowsForSku.forEach(featureRow => {
@@ -2609,8 +2636,18 @@ async function toggleFeatures(sku, rowNode) {
         });
         toggleBtn.classList.remove('expanded');
     } else {
-        // Show features
-        await loadAndDisplayFeatures(sku, rowNode);
+        console.log('Showing features');
+        // Check if features are already loaded
+        const existingFeatures = featureRows.get(sku) || [];
+        if (existingFeatures.length > 0) {
+            // Features already loaded, just show them
+            existingFeatures.forEach(featureRow => {
+                $(featureRow).removeClass('hidden');
+            });
+        } else {
+            // Load features from API
+            await loadAndDisplayFeatures(sku, rowNode);
+        }
         toggleBtn.classList.add('expanded');
     }
 }
@@ -2618,27 +2655,73 @@ async function toggleFeatures(sku, rowNode) {
 // Load and display features for a SKU
 async function loadAndDisplayFeatures(sku, rowNode) {
     try {
+        console.log('Loading features for SKU:', sku);
         const response = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, {method: 'GET'});
         const features = response || [];
+        console.log('Features response:', features);
+        
+        // No test features - use real data only
         
         const table = $('#editableTable').DataTable();
         
-        // Remove existing feature rows
+        // Remove existing feature rows from DOM
         const existingFeatures = featureRows.get(sku) || [];
         existingFeatures.forEach(featureRow => {
-            table.row(featureRow).remove();
+            if (featureRow && featureRow.parentNode) {
+                featureRow.parentNode.removeChild(featureRow);
+            }
         });
         
         // Add new feature rows
         const newFeatureRows = [];
         features.forEach(feature => {
-            const featureRowData = createFeatureRowData(feature, table);
-            const featureRow = table.row.add(featureRowData).draw().node();
-            $(featureRow).addClass('feature-row');
+            // Create a simple row data object
+            const featureRowData = {};
+            const headers = Object.keys(table.data()[0] || {});
+            
+            headers.forEach((header, index) => {
+                if (index === 0) {
+                    // First column: Feature name with actions
+                    featureRowData[header] = createFeatureCellContent(feature);
+                } else {
+                    // Other columns: Use actual feature data if it matches the column
+                    // The feature data should be structured like the main item data
+                    const featureValue = feature.data_local?.[header] || feature.data?.[header] || '';
+                    featureRowData[header] = featureValue;
+                }
+            });
+            
+            // Try direct DOM insertion instead of DataTable row.add()
+            const tbody = document.querySelector('#editableTable tbody');
+            const featureRow = document.createElement('tr');
+            featureRow.className = 'feature-row';
+            
+            // Create cells for each column
+            headers.forEach((header, index) => {
+                const cell = document.createElement('td');
+                if (index === 0) {
+                    cell.innerHTML = createFeatureCellContent(feature);
+                } else {
+                    const featureValue = feature.data_local?.[header] || feature.data?.[header] || '';
+                    cell.textContent = featureValue;
+                }
+                featureRow.appendChild(cell);
+            });
+            
+            // Insert after the main row
+            const mainRow = rowNode;
+            mainRow.parentNode.insertBefore(featureRow, mainRow.nextSibling);
+            
             newFeatureRows.push(featureRow);
         });
         
+        // No need to redraw since we're inserting directly into DOM
+        // table.draw(false);
+        
         featureRows.set(sku, newFeatureRows);
+        console.log('Total feature rows for SKU:', newFeatureRows.length);
+        
+        // Feature rows added successfully
         
         // Update feature count badge
         const toggleBtn = rowNode.querySelector('.feature-toggle-btn');
@@ -2676,24 +2759,24 @@ async function loadAndDisplayFeatures(sku, rowNode) {
 
 // Create feature row data
 function createFeatureRowData(feature, table) {
-    const rowData = {};
-    
-    // Get all column headers
-    table.columns().every(function(index) {
-        const column = this;
-        const header = column.dataSrc();
+            const rowData = {};
         
-        if (index === 0) {
-            // First column: Feature name with actions
-            rowData[header] = createFeatureCellContent(feature);
-        } else {
-            // Other columns: Feature value if it matches the column
-            const featureValue = feature.data_local?.value || '';
-            rowData[header] = featureValue;
-        }
-    });
-    
-    return rowData;
+        // Get all column headers
+        table.columns().every(function(index) {
+            const column = this;
+            const header = column.dataSrc();
+            
+            if (index === 0) {
+                // First column: Feature name with actions
+                rowData[header] = createFeatureCellContent(feature);
+            } else {
+                // Other columns: Feature value if it matches the column
+                const featureValue = feature.data_local?.value || '';
+                rowData[header] = featureValue;
+            }
+        });
+        
+        return rowData;
 }
 
 // Create feature cell content with actions
