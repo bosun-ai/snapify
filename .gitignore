@@ -1,2 +1,6 @@
 .shopify/
 .idea/
+
+.venv/
+.nodeenv/
+.env
