@@ -7,11 +7,11 @@ ADDPIN = 'stats/charts/pin/add'
 DELETEPIN = 'stats/charts/pin/delete'
 
 
-CUSTOMCHARTCOLUMNS = 'stats/charts/custom/columns/'
-CUSTOMCHARTCREATE = 'stats/charts/custom/create/'
-CUSTOMCHARTADD = 'stats/charts/save/'
+CUSTOMCHARTCOLUMNS = 'stats/charts/custom/columns'
+CUSTOMCHARTCREATE = 'stats/charts/custom/create'
+CUSTOMCHARTADD = 'stats/charts/save'
 GETCHARTS = 'stats/charts/all'
-GETPINNEDCHARTS = 'stats/charts/pinned'
+GETPINNEDCHARTS = 'stats/charts/pin/all'
 GETCHARTDATA = 'stats/charts/chart'
 GETSTATSDETAILS = 'stats/charts/details'
 STATSREPORTS = "stats/charts/filters"

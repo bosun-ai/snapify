@@ -528,13 +528,24 @@ summary span svg {
                   <header-menu>
                     <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu">
                       <summary class="header__menu-item list-menu__item link focus-inset"  style="padding-right:1.2rem">
+                      {% if link.url == routes.root_url %} 
+                        <span id="spanned-{{ forloop.index }}" {%- if link.current %} class="header__active-menu-item"{% endif %} style="text-decoration: none;">{{ link.title | escape }}</span>
+                      {% else %}
                         <a href="{{ link.url }}" class="list-menu__item link link--text focus-inset"{% if link.current %} aria-current="page"{% endif %} style="text-decoration: none;">
                         <span id="spanned-{{ forloop.index }}" {%- if link.current %} class="header__active-menu-item"{% endif %} style="text-decoration: none;">{{ link.title | escape }}</span>
                         </a>
+                      {% endif %}
                         <!-- {% render 'icon-caret' %} -->
                       </summary>
                       <div id="MegaMenu-Content-{{ forloop.index }}" class="mega-menu__content gradient motion-reduce global-settings-popup" tabindex="-1"  style="display:none;text-align:left;min-width:fit-content">
                         <ul class="mega-menu__list {% if link.levels == 1 %} mega-menu__list--condensed{% endif %}" role="list">
+                          {% if link.url != routes.root_url %} 
+                          <li>
+                              <a href="{{ link.url }}" class="mega-menu-link-{{ forloop.index }}-level-2 mega-menu__link mega-menu__link--level-2 link{% if link.current %} mega-menu__link--active{% endif %}"{% if link.current %} aria-current="page"{% endif %}>
+                                {{ link.title | escape }}
+                              </a>
+                            </li>
+                          {% endif %}
                           {%- for childlink in link.links -%}
                             <li>
                               <a href="{{ childlink.url }}" class="mega-menu-link-{{ forloop.index }}-level-2 mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"{% if childlink.current %} aria-current="page"{% endif %}>
@@ -775,6 +786,7 @@ summary span svg {
   {%- endif -%}
 {% endif %}
 
+{% render 'forsure-simple-notification' %}
 <script>
   if (window.location.search.includes('contact_options')) {
       showContactOptions();
@@ -783,6 +795,11 @@ summary span svg {
   document.addEventListener('DOMContentLoaded', function() {
     addPageVisit();
   });
+
+  if (localStorage.getItem('scheduled_demo') === 'true') {
+    localStorage.removeItem('scheduled_demo');
+    showMessage("A calendar invitation has been sent to your email address.", true);
+  }
 </script>
 
 <script type="application/ld+json">

@@ -283,11 +283,25 @@
           margin: auto;
           display: flex;
       }
-      #loadingSpinnerCalendarContainer {
+      #loadingSpinnerCalendarContainer, #noavailability {
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
+      }
+
+      #noavailability {
+        background-color: #ccc;
+        border-radius: 2rem;
+        width: 25rem;
+      }
+
+      .noavailability-text {
+        text-align: center;
+        padding: 1rem;
+      }
+      .noavailability-opacity {
+        opacity: 0.5;
       }
 
       @keyframes spin {
@@ -796,6 +810,7 @@ width: fit-content;
                   <select id="timezone" class="btn btn-default" style="width: fit-content;margin: auto;"></select>
               </div>
             </div>
+            <div id="noavailability" style="display: none;"><div class="noavailability-text">No availability this month</div></div>
           </div>
           <div id="timesContainer" style="display: block;width: fit-content;">
             <div id="date"></div>
@@ -1006,8 +1021,9 @@ width: fit-content;
               {%- if form.posted_successfully? -%}
                 <script>
               setTimeout(function() {
+                  localStorage.setItem('scheduled_demo', 'true');
                   window.location.replace('/');
-              }, 50);
+              }, 5);
               // function fillSuccessContainer() {
               //       document.getElementById('successContainerDetails').style.display = 'block';
               //       document.getElementById('borderMiddle').style.display = 'none';
@@ -1059,7 +1075,7 @@ window.dataLayer.push({
   var availability = null;
   var timezone = 'Europe/Amsterdam';
 
-  generateCalendar(currentMonth, currentYear);
+  generateCalendar(currentMonth, currentYear, false);
   
   async function request(endpoint, options = {}) {
     const { formData = false, method = 'POST', headerArgs = false } = options;
@@ -1083,7 +1099,6 @@ window.dataLayer.push({
           headers: header,
         });
       }
-      console.log(response.status);
       if (response.status != 401) {
         break;
       }
@@ -1153,7 +1168,9 @@ gtag('event', 'conversion', {
         const divWrapper = document.createElement('div');
         divWrapper.className = 'text-wrapper';
         if (availability && availability[dayStr]) {
-          availableFound = true;
+          if (day.getMonth() === jsMonth) {
+            availableFound = true;  // only if the day is in the current month, not preview for next month
+          }
           dayCell.classList.add('possibletime');
           dayCell.classList.add('clickable');
           dayCell.onclick = () => {
@@ -1196,8 +1213,15 @@ gtag('event', 'conversion', {
     const monthName = document.getElementById('month');
     monthName.innerText = formatDate(dt, false);
     cal.appendChild(table);
-    if (init && !availableFound) {
-      changeMonth(1);
+    if (availability && !availableFound) {
+        document.getElementById('noavailability').style.display = 'block';
+        document.getElementById('calendar').classList.add('noavailability-opacity');
+      if (init) {
+        changeMonth(1);
+      }
+    } else {
+      document.getElementById('noavailability').style.display = 'none';
+      document.getElementById('calendar').classList.remove('noavailability-opacity');
     }
   }
 
@@ -1648,7 +1672,6 @@ gtag('event', 'conversion', {
       gtag('config', 'G-TN3P2D6506');
       gtag_report_conversion();
       window.lintrk('track', { conversion_id: 19886530 });
-      showMessage("You are scheduled. A calendar invitation has been sent to your email address.", true);
       document.getElementById('submitButton').disabled = false;
       document.getElementById('submitButton').innerText = 'Submit';
       document.body.style.cursor = 'default';
