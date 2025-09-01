@@ -387,6 +387,10 @@ td input {
     min-width: 8ch;
 }
 
+div.dt-container .dt-input {
+  margin-right: 1rem;
+}
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
@@ -1094,7 +1098,6 @@ let activeCountry = null;
 let previouslyHiddenColumns = new Set();
 function showCountryData(countryData, countryCode, generalDict) {
     const table = $('#editableTable').DataTable();
-
     // If the same tab is clicked again -> show all columns
     if (activeCountry === countryCode) {
         highlightActiveTab(-1);  // unselect
@@ -1105,6 +1108,7 @@ function showCountryData(countryData, countryCode, generalDict) {
         activeCountry = null;
         return;
     }
+
     // Otherwise, filter columns to match that country's labels
     activeCountry = countryCode;
     const countryLabels = Object.keys(countryData);
@@ -1127,6 +1131,8 @@ function showCountryData(countryData, countryCode, generalDict) {
             }
         }
     });
+    syncLayout(table);
+    refreshFeatures();
 }
 
 var versionId = null;
@@ -1467,159 +1473,31 @@ async function getCategorylistDetails() {
               }
         }
         });
+      syncLayout(categoryTable);
       $('#deleteButtonRow').mouseenter(function(){
         clearTimeout(deleteRowButtonTimer);
       })
       $('#deleteButton').mouseenter(function(){
         clearTimeout(deleteColButtonTimer);
       })
-      $('#editableTable tbody').on('click', 'td', async function() {
-        if (!editMode) {
+      $('#editableTable tbody').on('click', 'td', function (e) {
+        if (this.querySelector('.feature-title-container')) {
+          console.log('feature-title-container clicked');
+          e.stopPropagation();
           return;
         }
-        // Skip if already editing
-        if ($(this).find('input').length > 0) {
-          return;
-        }
-        closeCurrentEditor();
-        var cell = categoryTable.cell(this);
-        var originalContent = cell.data();
-
-        if (typeof originalContent === 'undefined'){
-          return; // skip as it is error message
-        }
-        var colIdx = categoryTable.cell(this).index().column;
-        var columnName = categoryTable.column(colIdx).header().textContent.trim();
-        var subentries = categorylistLabels[columnName]?.subentries || [];
-        var options = [];
-        const td = $(this);
-        $(this).empty();
-        if (subentries && subentries.length > 0) {
-            // Create input field
-            const input = $('<input>', {
-              type: 'text',
-              class: 'inline-editor',
-              value: originalContent,
-              autocomplete: 'off',
-              css: {
-                width: '100%',
-                position: 'relative'
-              }
-            });
-
-            // Create suggestion dropdown
-            const dropdown = $('<div>', {
-              class: 'suggestion-box',
-              css: {
-                position: 'absolute',
-                top: td.position().bottom + td.height(),
-                left: 0,
-                background: '#fff',
-                border: '1px solid #ccc',
-                zIndex: 9999,
-                width: td.width() + 40,
-                maxHeight: '150px',
-                overflowY: 'auto'
-              }
-            });
-
-            // Add suggestions to dropdown
-            subentries.forEach(subentry => {
-              const option = $('<div>', {
-                text: subentry.key,
-                class: 'dropdown-option',
-                title: subentry.title,
-                css: {
-                  padding: '4px 8px',
-                  cursor: 'pointer'
-                },
-                click: function () {
-                  input.val(subentry.key);
-                  saveValue();
-                },
-                mouseenter: function () {
-                  $(this).css('background', '#eee');
-                },
-                mouseleave: function () {
-                  $(this).css('background', '#fff');
-                }
-              });
-              dropdown.append(option);
-            });
-            input.on('keyup', function () {
-              const q = $(this).val().toLowerCase();
-
-              dropdown.find('.dropdown-option').each(function () {
-                const txt = $(this).text().toLowerCase();
-                const title = $(this).attr('title');
-                $(this).toggle(txt.includes(q) || title.toLowerCase().includes(q));
-              });
-            });
-
-            const saveValue = () => {
-              const newValue = input.val();
-              cell.data(newValue).draw(false);
-              td.empty().text(newValue);
-              dropdown.remove(); // cleanup
-            };
-
-            input.on('input', function () {
-              if (subentries.length > 0) {
-                dropdown.show();
-              }
-            });
-
-            let keepDropdownOpen = false;
-
-            dropdown.on('mousedown', function () {
-              keepDropdownOpen = true;
-            });
-
-            input.on('blur', function () {
-              if (!keepDropdownOpen) {
-                saveValue();
-              }
-              setTimeout(() => {
-                keepDropdownOpen = false; // reset
-              }, 200);
-            });
-
-            input.on('keydown', function (e) {
-              if (e.key === 'Enter') {
-                saveValue();
-              }
-              if (e.key === 'Escape') {
-                dropdown.remove();
-                td.empty().text(originalContent);
-              }
-            });
-
-            $(this).append(input);
-            $(this).append(dropdown);
-            input.focus();
-            currentEditor = input;
-            currentDropdown = dropdown;
-        } else {
-          input = $('<input>', {
-            type: 'text',
-            value: originalContent,
-            blur: function(e) {
-              var newValue = $(this).val();
-              cell.data(newValue).draw(false);
-            },
-            keyup: function(e) {
-              if (e.keyCode === 13) { // Enter key
-                $(this).blur();
-              }
-            }
-          });
-          $(this).empty().append(input);
-          input.focus();
-          currentEditor = input;
-          currentDropdown = null;
-        }
-
+        inlineEdit(categoryTable, this); // pass a function, don’t call it
       });
+      document.querySelectorAll('.feature-title-text').forEach(function (div) {
+        div.addEventListener('click', function (e) {
+          if (!editMode) return;
+          console.log('feature-title-text clicked');
+          e.stopPropagation();
+          editName(this);
+        });
+      });
+
+
       $('#editableTable tbody').on('mouseenter', 'td', function() {
         var colIdx = categoryTable.cell(this).index().column;
         var td = categoryTable.cell(this).node();
@@ -1644,25 +1522,6 @@ async function getCategorylistDetails() {
 
       $('#editableTable').wrap('<div class="custom-table-wrapper"></div>');
       selectCountries();
-      function closeCurrentEditor() {
-        if (currentEditor && currentEditor.length > 0) {
-          const tdElement = currentEditor.closest('td');
-          if (tdElement && tdElement.length > 0) {
-            const cell = categoryTable.cell(tdElement);
-            const newValue = currentEditor.val();
-            cell.data(newValue).draw(false);
-            tdElement.empty().text(newValue);
-          }
-        }
-
-        if (currentDropdown && currentDropdown.length > 0) {
-          currentDropdown.remove();
-        }
-
-        // Reset references
-        currentEditor = null;
-        currentDropdown = null;
-    }
 
     $(document).on('mousedown', function (e) {
       const clickedInsideEditor = $(e.target).closest('td').find('.inline-editor').length > 0;
@@ -1670,7 +1529,7 @@ async function getCategorylistDetails() {
 
       if (!clickedInsideEditor && !clickedInsideDropdown) {
         try {
-          closeCurrentEditor();
+          closeCurrentEditor(categoryTable);
         } catch (error) {
         }
       }
@@ -1679,6 +1538,206 @@ async function getCategorylistDetails() {
 
 let currentEditor = null;
 let currentDropdown = null;
+
+function closeCurrentEditor(categoryTable) {
+  if (currentEditor && currentEditor.length > 0) {
+    const tdElement = currentEditor.closest('td');
+    if (tdElement && tdElement.length > 0) {
+      const cell = categoryTable.cell(tdElement);
+      const newValue = currentEditor.val();
+      cell.data(newValue).draw(false);
+      tdElement.empty().text(newValue);
+    }
+  }
+
+  if (currentDropdown && currentDropdown.length > 0) {
+    currentDropdown.remove();
+  }
+
+  // Reset references
+  currentEditor = null;
+  currentDropdown = null;
+}
+
+var tdDebug = null;
+async function inlineEdit(categoryTable, td) {
+  tdDebug = td;
+  if (!editMode) return;
+
+  const $td = $(td);
+
+  // Skip if already editing
+  if ($td.find('input').length > 0) return;
+
+  closeCurrentEditor(categoryTable);
+
+  const cell = categoryTable.cell(td);
+  const originalContent = cell.data();
+  if (typeof originalContent === 'undefined') return; // skip error rows
+
+  const colIdx = categoryTable.cell(td).index().column;
+  const columnName = categoryTable.column(colIdx).header().textContent.trim();
+  console.log('columnName', columnName);
+  const subentries = categorylistLabels[columnName]?.subentries || [];
+  console.log('subentries', subentries);
+  $td.empty();
+
+  if (subentries.length > 0) {
+    console.log('subentries.length > 0');
+    const input = $('<input>', {
+      type: 'text',
+      class: 'inline-editor',
+      value: originalContent,
+      autocomplete: 'off',
+      css: { width: '100%', position: 'relative' }
+    });
+
+    // compute dropdown position
+    const pos = $td.position();
+    const top = $td.find('input').offset() + $td.find('input').outerHeight();
+
+    const dropdown = $('<div>', { class: 'suggestion-box', 
+      css: { position: 'absolute', top: top, left: 0, 
+        background: '#fff', 
+        border: '1px solid #ccc', 
+        zIndex: 9999, 
+        width: $td.outerWidth() + 40,
+        maxHeight: '150px', 
+        overflowY: 'auto' } });
+
+    // Add suggestions
+    subentries.forEach(subentry => {
+      const option = $('<div>', {
+        text: subentry.key,
+        class: 'dropdown-option',
+        title: subentry.title || '',
+        css: { padding: '4px 8px', cursor: 'pointer' }
+      })
+      .on('click', function () {
+        input.val(subentry.key);
+        saveValue();
+      })
+      .on('mouseenter', function () { $(this).css('background', '#eee'); })
+      .on('mouseleave', function () { $(this).css('background', ''); })
+
+      dropdown.append(option);
+    });
+
+    // filter on keyup
+    input.on('keyup', function () {
+      const q = input.val().toLowerCase();
+      dropdown.find('.dropdown-option').each(function () {
+        const txt = $(this).text().toLowerCase();
+        const title = ($(this).attr('title') || '').toLowerCase();
+        $(this).toggle(txt.includes(q) || title.includes(q));
+      });
+    });
+
+    const saveValue = () => {
+      const newValue = input.val();
+      cell.data(newValue).draw(false);
+      $td.empty().text(newValue);
+      dropdown.remove();
+    };
+
+    input.on('input', function () {
+      if (subentries.length > 0) dropdown.show();
+    });
+
+    let keepDropdownOpen = false;
+    dropdown.on('mousedown', function () { keepDropdownOpen = true; });
+
+    input.on('blur', function () {
+      if (!keepDropdownOpen) saveValue();
+      setTimeout(() => { keepDropdownOpen = false; }, 200);
+    });
+
+    input.on('keydown', function (e) {
+      if (e.key === 'Enter') saveValue();
+      if (e.key === 'Escape') {
+        dropdown.remove();
+        $td.empty().text(originalContent);
+      }
+    });
+
+    $td.append(input).append(dropdown);
+    input.focus();
+    currentEditor = input;
+    currentDropdown = dropdown;
+
+  } else {
+    // simple text input branch
+    const input = $('<input>', {
+      type: 'text',
+      value: originalContent
+    });
+
+    input.on('blur', function () {
+      const newValue = input.val();
+      cell.data(newValue).draw(false);
+      $td.empty().text(newValue);
+      categoryTable = $('#editableTable').DataTable();
+      syncLayout(categoryTable);
+    });
+
+    input.on('keyup', function (e) {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') {
+        $td.empty().text(originalContent);
+      }
+      categoryTable = $('#editableTable').DataTable();
+      syncLayout(categoryTable);
+    });
+
+    $td.empty().append(input);
+    input.focus();
+    categoryTable = $('#editableTable').DataTable();
+    syncLayout(categoryTable);
+    currentEditor = input;
+    currentDropdown = null;
+  }
+}
+
+function editName(div) {
+  td = div.closest('td');
+  // change div to input
+  const input = document.createElement('input');
+  originalContent = div.textContent;
+  input.value = originalContent;
+  input.style.width = '100%';
+  div.replaceWith(input);
+  input.focus();
+  categoryTable = $('#editableTable').DataTable();
+  syncLayout(categoryTable);
+  currentEditor = input;
+  currentDropdown = null;
+  input.addEventListener('blur', () => {
+    const newValue = input.value;
+    var newDiv = document.createElement('div');
+    newDiv.textContent = newValue;
+    newDiv.classList.add('feature-title-text');
+    input.replaceWith(newDiv);
+    categoryTable = $('#editableTable').DataTable();
+    syncLayout(categoryTable);
+    document.querySelectorAll('.feature-title-text').forEach(function (div) {
+      if (!editMode) return;
+      div.addEventListener('click', function (e) {
+      console.log('feature-title-text clicked');
+      e.stopPropagation();
+      editName(this);
+    });
+    });
+  });
+  
+  input.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') {
+      input.value = originalContent;
+      input.blur();
+    }
+  });
+}
+
 
 
 $('#editableTable thead').on('click', 'th', async function(e) {

@@ -3,7 +3,7 @@
 .feature-title-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     gap: 8px;
 }
 
@@ -14,11 +14,12 @@
     border: none;
     cursor: pointer;
     padding: 2px 6px;
-    margin-right: 8px;
+    /* margin-right: 8px; */
     border-radius: 3px;
     transition: all 0.2s ease;
     font-size: 12px;
     color: #2255ff;
+    min-width: 5rem;
 }
 
 .feature-toggle-btn:hover {
@@ -65,14 +66,14 @@
     padding-left: 40px !important;
     position: relative;
 }
-
-.feature-row td:first-child::before {
+/* 
+.feature-row-table td:first-child::before {
     content: "└─";
     position: absolute;
     left: 20px;
     color: #2255ff;
     font-weight: bold;
-}
+} */
 
 /* Ensure feature rows are visible */
 #editableTable tbody tr.feature-row {
@@ -113,6 +114,7 @@
     display: flex;
     gap: 4px;
     align-items: center;
+    margin-left: auto;
 }
 
 .feature-action-btn {
@@ -161,6 +163,7 @@
     transition: all 0.2s ease;
     display: inline-block;
     position: relative;
+    margin-left: auto;
 }
 
 .feature-add-btn:hover {
@@ -172,7 +175,51 @@
     margin-right: 4px;
 }
 
+/* keep child isolated from DataTables styling */
+/* remove the default child cell padding so the subtable aligns edge-to-edge */
+table.dataTable tr.child td { padding: 0 !important; border: 0 !important; }
 
+/* make the subtable look like the main table */
+.feature-row-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;            /* required for colgroup widths */
+}
+.feature-row-table td {
+  padding: 8px 10px;              /* match your main table td padding */
+  border-top: 1px solid #ddd;     /* match row separators */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* optional: subtle background for child rows */
+.feature-child .feature-row-table td { background: #fafafa; }
+
+.feature-child {
+    padding: 0!important;
+}
+
+#editableTable, #editableTable th, #editableTable td,
+.feature-row-table, .feature-row-table td { box-sizing: border-box; }
+
+/* child: no left/right borders that would steal width */
+table.dataTable tr.child td { padding:0 !important; border:0 !important; }
+
+/* child uses parent’s vertical gridlines; avoid double lines */
+.feature-row-table td { border-top:1px solid #ddd; border-left:0; border-right:0; box-sizing:border-box; }
+#editableTable,
+#editableTable th,
+#editableTable td,
+.feature-row-table,
+.feature-row-table td {
+  box-sizing: border-box;
+}
+
+.feature-row-table,  .feature-row-table td:first-child, .feature-row-table td:last-child {
+    border-left: none !important;
+    border-right: none !important;
+}
 
 {% endstyle %}
 
@@ -181,29 +228,27 @@
     <div class="modal-content" style="width: 45vw;">
         <span id="closeFeatureModal" class="close" onclick="closeFeatureModal()">&times;</span>
         <h2 style="margin: 2rem;" id="featureModalTitle">Add Feature</h2>
-        <form id="featureForm">
-            <div style="margin: 2rem;">
-                <label for="featureName" style="width: 50%;" title="The feature name is used to identify the feature in the report.">Feature Name:</label>
-                <input type="text" id="featureName" placeholder="e.g., Sub-SKU, Package Type" required>
+        <div style="margin: 2rem;">
+            <label for="featureName" style="width: 50%;" title="The feature name is used to identify the feature in the report.">Feature Name:</label>
+            <input type="text" id="featureName" placeholder="e.g., Sub-SKU, Package Type" required>
+        </div>
+        <div style="margin: 2rem;">
+            <label for="featureProvider" style="width: 50%;" title="Choosing a data provider will automatically fetch the data from the provider.">Data Provider (Optional):</label>
+            <select id="featureProvider" class="selectpicker">
+                <option value="">Manual Entry</option>
+                <option value="external_api">External API</option>
+                <option value="shopify">Shopify</option>
+                <option value="erp">ERP System</option>
+            </select>
+        </div>
+        <div style="display: flex; justify-content: space-between;margin: 2rem;">
+            <div>
+                <button class="button" style="background-color: #17161c;" onclick="closeFeatureModal()">Cancel</button>
             </div>
-            <div style="margin: 2rem;">
-                <label for="featureProvider" style="width: 50%;" title="Choosing a data provider will automatically fetch the data from the provider.">Data Provider (Optional):</label>
-                <select id="featureProvider" class="selectpicker">
-                    <option value="">Manual Entry</option>
-                    <option value="external_api">External API</option>
-                    <option value="shopify">Shopify</option>
-                    <option value="erp">ERP System</option>
-                </select>
+            <div>
+                <button class="button" onclick="saveFeature(event)" id="featureSubmitBtn">Save Feature</button>
             </div>
-            <div style="display: flex; justify-content: space-between;margin: 2rem;">
-                <div>
-                    <button class="button" style="background-color: #17161c;" onclick="closeFeatureModal()">Cancel</button>
-                </div>
-                <div>
-                    <button class="button" onclick="saveFeature()">Save Feature</button>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 <script>
@@ -230,6 +275,7 @@ function addFeature(row, sku) {
     var div = document.createElement('div');
     div.className = 'feature-title-container';
     var textContainer = document.createElement('div');
+    textContainer.className = 'feature-title-text';
     textContainer.textContent = text;
     firstCell.appendChild(div);
     div.appendChild(textContainer);
@@ -308,174 +354,244 @@ async function checkFeaturesExist(sku, toggleBtn) {
     }
 }
 
-// Toggle feature rows for a SKU
-async function toggleFeatures(sku, rowNode) {
-    console.log('toggleFeatures called for SKU:', sku);
-    const toggleBtn = rowNode.querySelector('.feature-toggle-btn');
-    
-    if (!toggleBtn) {
-        console.error('Toggle button not found!');
-        return;
+let visibleCols = [];      // [{idx, key, widthPx, cls}]
+const featureCache = new Map();
+const expandedSKUs = new Set();
+
+
+function syncLayout(dt){
+    const table = dt.table().node();
+    const avail = table.clientWidth;               // excludes scrollbar
+    visibleCols = [];
+    dt.columns(':visible').every(function(){
+      const th = this.header();
+      const cs = getComputedStyle(th);
+      const w  = th.getBoundingClientRect().width; // used width
+      const pct = (w / avail) * 100;
+      visibleCols.push({
+        key: this.dataSrc(),
+        widthPct: pct.toFixed(5) + '%',
+        padL: cs.paddingLeft,
+        padR: cs.paddingRight,
+        align: cs.textAlign,
+        cls: th.className || ''
+      });
+    });
+    console.log('Visible columns:', visibleCols);
+    applyColgroupToMain(dt);
+    applyColgroupsToChildren(dt);
+}
+
+function buildColgroupEl() {
+    const cg = document.createElement('colgroup');
+    cg.setAttribute('data-role', 'main-colgroup');
+    for (const c of visibleCols) {
+      const col = document.createElement('col');
+      col.style.width = c.widthPct;       // or c.widthPx
+      cg.appendChild(col);
     }
-    
-    // Don't allow toggle if disabled
-    if (toggleBtn.classList.contains('disabled')) {
-        console.log('Toggle button is disabled');
-        return;
-    }
-    
-    const isExpanded = toggleBtn.classList.contains('expanded');
-    
-    if (isExpanded) {
-        console.log('Hiding features');
-        // Hide features
-        const featureRowsForSku = featureRows.get(sku) || [];
-        featureRowsForSku.forEach(featureRow => {
-            $(featureRow).addClass('hidden');
-        });
-        toggleBtn.classList.remove('expanded');
+    return cg;
+}
+  
+function applyColgroupToMain(dt) {
+    if (!visibleCols.length) return;
+    const table = dt.table().node();
+    const newCg = buildColgroupEl();
+  
+    // replace only the direct child colgroup
+    const existing =
+      table.querySelector(':scope > colgroup[data-role="main-colgroup"]') ||
+      table.querySelector(':scope > colgroup');
+  
+    if (existing) {
+      table.replaceChild(newCg, existing);
     } else {
-        console.log('Showing features');    
-        // Check if features are already loaded
-        const existingFeatures = featureRows.get(sku) || [];
-        if (existingFeatures.length > 0) {
-            // Features already loaded, just show them
-            existingFeatures.forEach(featureRow => {
-                $(featureRow).removeClass('hidden');
-            });
-        } else {
-            // Load features from API
-            await loadAndDisplayFeatures(sku, rowNode);
-        }
-        toggleBtn.classList.add('expanded');
+      const ref = table.querySelector(':scope > thead, :scope > tbody, :scope > tfoot');
+      table.insertBefore(newCg, ref);
     }
 }
+  
+function applyColgroupsToChildren(dt) {
+if (!visibleCols.length) return;
+const newCg = buildColgroupEl();
 
-// Load and display features for a SKU
-async function loadAndDisplayFeatures(sku, rowNode) {
+// update every open child table without touching the main table
+const root = dt.table().node().parentElement; // wrapper containing child rows
+root.querySelectorAll('tr.feature-child table.feature-row-table').forEach(tbl => {
+    const old =
+    tbl.querySelector(':scope > colgroup[data-role="main-colgroup"]') ||
+    tbl.querySelector(':scope > colgroup');
+
+    const cgClone = newCg.cloneNode(true); // reuse widths for each table
+
+    if (old) {
+    tbl.replaceChild(cgClone, old);
+    } else {
+    const ref = tbl.querySelector(':scope > thead, :scope > tbody, :scope > tfoot');
+    tbl.insertBefore(cgClone, ref);
+    }
+});
+}
+  
+  
+{% comment %} new ResizeObserver(() => { const dt = $('#editableTable').DataTable(); syncLayout(dt); dt.rows({page:'current'}).every(function(){ const sku=this.data()[idcol]||this.data().SKU; if(expandedSKUs.has(sku)) this.child(buildChildHTML(featureCache.get(sku).features),'feature-child').show(); }); }).observe($('#editableTable').get(0)); {% endcomment %}
+
+{% comment %} // capture widths after init and whenever layout changes
+function captureColWidths(dt) {
+    headers = dt.columns().dataSrc().toArray();
+    colWidthsPx = [];
+    dt.columns().every(function () {
+      const w = $(this.header()).outerWidth();
+      colWidthsPx.push(`${Math.max(20, Math.floor(w))}px`);
+    });
+} {% endcomment %}
+
+// build the child table to look like a seamless continuation
+function buildChildHTML(features) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'feature-wrap';
+  
+    const table = document.createElement('table');
+    table.className = 'feature-row-table';
+    wrapper.appendChild(table);
+  
+    // build colgroup
+    const colgroup = document.createElement('colgroup');
+    visibleCols.forEach(c => {
+      const col = document.createElement('col');
+      col.style.width = c.widthPct; // or c.widthPx
+      colgroup.appendChild(col);
+    });
+    table.appendChild(colgroup);
+  
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+  
+    (features || []).forEach(f => {
+        const tr = createChildHTML(f, document.createElement('tr'));
+        tbody.appendChild(tr);
+    });
+  
+    return wrapper; // a DOM element, not a string
+}
+
+function createChildHTML(feature, tr) {
+  
+    visibleCols.forEach((c, i) => {
+        const td = document.createElement('td');
+        td.className = c.cls;
+        td.style.textAlign = c.align;
+        td.style.paddingLeft = c.padL;
+        td.style.paddingRight = c.padR;
+  
+        if (i === 0) {
+          // insert the feature cell content element (with handlers intact)
+          td.appendChild(createFeatureCellContent(feature));
+        } else {
+          const val = feature?.data_local?.[c.key] ?? feature?.data?.[c.key] ?? '';
+          const txt = escapeHtml(String(val));
+          td.textContent = txt;
+          td.title = txt; // tooltip for truncated text
+        }
+        tr.appendChild(td);
+    });
+    return tr;
+}
+  
+  // your toggle reuses buildChildHTML(features, dt)
+async function toggleFeatures(sku, rowNode) {
+    const table = $('#editableTable').DataTable();
+    syncLayout(table);
+
+    const row = table.row(rowNode);
+    const btn = rowNode.querySelector('.feature-toggle-btn');
+    if (row.child.isShown()) { row.child.hide(); btn.classList.remove('expanded'); expandedSKUs.delete(sku); return; }
+  
+    let features = featureCache.get(`${sku}`)?.features;
+    if (!features) {
+      const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, { method: 'GET' });
+      features = res || [];
+      featureCache.set(`${sku}`, { features });
+    }
+  
+    row.child(buildChildHTML(features, table), 'feature-child').show();
+    btn.classList.add('expanded'); expandedSKUs.add(sku);
+}
+
+function refreshFeatures() {
+    expandedSKUs.forEach(sku => {
+        loadAndDisplayFeatures(sku);
+    });
+}
+
+
+function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+
+async function loadAndDisplayFeatures(sku) {
+    console.log('Loading and displaying features for SKU:', sku);
+    rowNode = document.getElementById(`${sku}`);
+    const dt  = $('#editableTable').DataTable();
+    const row = dt.row(rowNode);
+    const btn = rowNode.querySelector('.feature-toggle-btn');
+  
     try {
-        console.log('Loading features for SKU:', sku);
-        const response = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, {method: 'GET'});
-        const features = response || [];
-        console.log('Features response:', features);
-        
-        // No test features - use real data only
-        
-        const table = $('#editableTable').DataTable();
-        
-        // Remove existing feature rows from DOM
-        const existingFeatures = featureRows.get(sku) || [];
-        existingFeatures.forEach(featureRow => {
-            if (featureRow && featureRow.parentNode) {
-                featureRow.parentNode.removeChild(featureRow);
-            }
-        });
-        
-        // Add new feature rows
-        const newFeatureRows = [];
-        features.forEach(feature => {
-            // Create a simple row data object
-            const featureRowData = {};
-            const headers = Object.keys(table.data()[0] || {});
-            
-            headers.forEach((header, index) => {
-                if (index === 0) {
-                    // First column: Feature name with actions
-                    featureRowData[header] = createFeatureCellContent(feature);
-                } else {
-                    // Other columns: Use actual feature data if it matches the column
-                    // The feature data should be structured like the main item data
-                    const featureValue = feature.data_local?.[header] || feature.data?.[header] || '';
-                    featureRowData[header] = featureValue;
-                }
-            });
-            
-            // Try direct DOM insertion instead of DataTable row.add()
-            const tbody = document.querySelector('#editableTable tbody');
-            const featureRow = document.createElement('tr');
-            featureRow.className = 'feature-row';
-            
-            // Create cells for each column
-            headers.forEach((header, index) => {
-                const cell = document.createElement('td');
-                if (index === 0) {
-                    cell.innerHTML = createFeatureCellContent(feature);
-                } else {
-                    const featureValue = feature.data_local?.[header] || feature.data?.[header] || '';
-                    cell.textContent = featureValue;
-                }
-                featureRow.appendChild(cell);
-            });
-            
-            // Insert after the main row
-            const mainRow = rowNode;
-            mainRow.parentNode.insertBefore(featureRow, mainRow.nextSibling);
-            
-            newFeatureRows.push(featureRow);
-        });
-        
-        // No need to redraw since we're inserting directly into DOM
-        // table.draw(false);
-        
-        featureRows.set(sku, newFeatureRows);
-        
-        // Feature rows added successfully
-        
-        // Update feature count badge
-        const toggleBtn = rowNode.querySelector('.feature-toggle-btn');
-        const badge = toggleBtn.querySelector('.feature-badge');
-        if (badge) {
-            badge.textContent = features.length;
-        } else if (features.length > 0) {
-            const newBadge = document.createElement('span');
-            newBadge.className = 'feature-badge';
-            newBadge.textContent = features.length;
-            toggleBtn.appendChild(newBadge);
+      // fetch and cache
+      const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, { method: 'GET' });
+      const features = Array.isArray(res) ? res : [];
+      featureCache.set(`${sku}`, { features });
+  
+      // badge update
+      if (btn) {
+        let badge = btn.querySelector('.feature-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'feature-badge';
+          btn.appendChild(badge);
         }
-        
-        // If no features, show message and disable toggle
-        if (features.length === 0) {
-            const toggleBtn = rowNode.querySelector('.feature-toggle-btn');
-            toggleBtn.classList.add('disabled');
-            toggleBtn.title = 'No features available';
-            showMessage(`No features found for SKU: ${sku}`, true);
-        }
-        
-    } catch (error) {
-        console.error('Error loading features:', error);
-        // Don't show error message if it's just "no features found"
-        if (error.message && !error.message.includes('404')) {
-            showMessage('Failed to load features', false);
-        } else {
-            // No features found - update UI accordingly
-            const toggleBtn = rowNode.querySelector('.feature-toggle-btn');
-            toggleBtn.classList.add('disabled');
-            toggleBtn.title = 'No features available';
-        }
-    }
-}
+        badge.textContent = String(features.length);
+        btn.classList.toggle('disabled', false);
+        btn.title = features.length ? 'Toggle Features' : 'No features available';
+      }
+  
+      // ensure column layout is synced
+      syncLayout(dt);
+  
+      // close if open, then rebuild child
+      if (row.child.isShown()) {
+        row.child.hide();
+        expandedSKUs.delete(sku);
+        if (btn) btn.classList.remove('expanded');
+      }
 
-// Create feature row data
-function createFeatureRowData(feature, table) {
-            const rowData = {};
-        
-        // Get all column headers
-        table.columns().every(function(index) {
-            const column = this;
-            const header = column.dataSrc();
-            
-            if (index === 0) {
-                // First column: Feature name with actions
-                rowData[header] = createFeatureCellContent(feature);
-            } else {
-                // Other columns: Feature value if it matches the column
-                const featureValue = feature.data_local?.value || '';
-                rowData[header] = featureValue;
-            }
-        });
-        
-        return rowData;
-}
+      if (features.length === 0) {
+        btn.classList.add('disabled');
+        btn.title = 'No features available';
+        let badge = btn.querySelector('.feature-badge');
+        if (badge) {
+            badge.remove();
+        }
+
+        return;
+      }
+  
+      // build and show child (always render; shows "No features" row if empty)
+      const childEl = buildChildHTML(features);
+      row.child(childEl, 'feature-child').show();
+      expandedSKUs.add(sku);
+      if (btn) btn.classList.add('expanded');
+  
+    } catch (error) {
+      console.error('Error loading features:', error);
+  
+      // disable toggle on hard errors
+      if (btn) {
+        btn.classList.add('disabled');
+        btn.title = 'Error loading features';
+      }
+      showMessage('Failed to load features', false);
+    }
+  }
 
 // Create feature cell content with actions
 function createFeatureCellContent(feature) {
@@ -484,6 +600,14 @@ function createFeatureCellContent(feature) {
     container.style.alignItems = 'center';
     container.style.gap = '8px';
     
+    const nameContainer = document.createElement('div');
+    nameContainer.innerHTML = '└─';
+    nameContainer.style.minWidth = '5rem';
+    nameContainer.style.justifyContent = 'end';
+    nameContainer.style.display = 'flex';
+    nameContainer.style.color = '#2255ff';
+    nameContainer.style.fontWeight = 'bold';
+    container.appendChild(nameContainer);
     const nameSpan = document.createElement('span');
     nameSpan.textContent = feature.name;
     nameSpan.style.fontWeight = 'bold';
@@ -498,7 +622,6 @@ function createFeatureCellContent(feature) {
     editBtn.innerHTML = '<i class="fas fa-edit"></i>';
     editBtn.title = 'Edit Feature';
     editBtn.onclick = () => editFeature(feature);
-    
     // Delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'feature-action-btn delete';
@@ -512,7 +635,7 @@ function createFeatureCellContent(feature) {
     container.appendChild(nameSpan);
     container.appendChild(actionsDiv);
     
-    return container.outerHTML;
+    return container;
 }
 
 // Open feature modal for adding new feature
@@ -563,7 +686,8 @@ function closeFeatureModal() {
 }
 
 // Save feature function
-async function saveFeature() {
+async function saveFeature(event) {
+    event.preventDefault();
     const featureName = document.getElementById('featureName').value;
     const featureProvider = document.getElementById('featureProvider').value;
     
@@ -577,6 +701,7 @@ async function saveFeature() {
             // Update existing feature
             const formData = new FormData();
             formData.append('data_provider', featureProvider);
+            formData.append('feature_name', featureName);
             formData.append('version', versionId);
             
             await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${currentFeatureSku}/${currentFeatureId}`, {
@@ -600,19 +725,8 @@ async function saveFeature() {
             showMessage('Feature created successfully', true);
         }
         
+        await loadAndDisplayFeatures(currentFeatureSku);
         closeFeatureModal();
-        
-        // Refresh features for the current SKU
-        const table = $('#editableTable').DataTable();
-        const rows = table.rows().nodes();
-        for (let i = 0; i < rows.length; i++) {
-            const rowData = table.row(rows[i]).data();
-            const sku = rowData[Object.keys(rowData)[0]];
-            if (sku === currentFeatureSku) {
-                await loadAndDisplayFeatures(sku, rows[i]);
-                break;
-            }
-        }
         
     } catch (error) {
         console.error('Error saving feature:', error);
@@ -635,18 +749,14 @@ async function deleteFeature(feature) {
         });
         
         showMessage('Feature deleted successfully', true);
-        
-        // Refresh features for the current SKU
-        const table = $('#editableTable').DataTable();
-        const rows = table.rows().nodes();
-        for (let i = 0; i < rows.length; i++) {
-            const rowData = table.row(rows[i]).data();
-            const sku = rowData[Object.keys(rowData)[0]];
-            if (sku === feature.sku) {
-                await loadAndDisplayFeatures(sku, rows[i]);
-                break;
-            }
+        {% comment %} newFeatures = featureCache.get(feature.sku).features.filter(f => f.id !== feature.id);
+        featureCache.set(feature.sku, { features: newFeatures });
+
+        if (featureCache.get(feature.sku).features.length === 0) {
+            featureCache.delete(feature.sku);
         }
+        {% endcomment %}
+        await loadAndDisplayFeatures(feature.sku);
         
     } catch (error) {
         console.error('Error deleting feature:', error);
