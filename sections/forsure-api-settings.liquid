@@ -413,9 +413,9 @@ div.display-flex {
   <!-- Load d3.js -->
   <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
 <script src="https://cdn.jsdelivr.net/npm/d3@7"> </script>
-<script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
-<script src="{{ 'forsure-data-loader.js' | asset_url }}"></script>
-{% render 'forsure-login' %}
+{% comment %} <script src="{{ 'forsure-endpoints.js' | asset_url }}"></script>
+<script src="{{ 'forsure-data-loader.js' | asset_url }}"></script> {% endcomment %}
+{% comment %} {% render 'forsure-login' %} {% endcomment %}
 {% render 'forsure-simple-notification' %}
 {% render 'forsure-confirmation' %}
 <div class="section-{{ section.id }}-padding" style="display: none;" id="apiSettingsContainer">
