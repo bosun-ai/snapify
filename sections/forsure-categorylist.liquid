@@ -1434,44 +1434,30 @@ async function getCategorylistDetails() {
                         $('#deleteButtonRow').hide();
                     }, 1000);
                   });
-                  
-                  // Add feature buttons to the row
-                  const sku = data[idcol];
-                  console.log('Row callback - SKU:', sku, 'ID column:', idcol);
-                  if (sku) {
-                      // Initialize feature rows for this SKU if not exists
-                      if (!featureRows.has(sku)) {
-                          featureRows.set(sku, []);
-                      }
-                      addFeature(row, sku);
-                  } else {
-                      console.log('No SKU found for row data:', data);
+
+                  if (window.userPermissions['subsku']) {
+                    // Add feature buttons to the row
+                    const sku = data[idcol];
+                    console.log('Row callback - SKU:', sku, 'ID column:', idcol);
+                    if (sku) {
+                        // Initialize feature rows for this SKU if not exists
+                        if (!featureRows.has(sku)) {
+                            featureRows.set(sku, []);
+                        }
+                        addFeature(row, sku);
+                    } else {
+                        console.log('No SKU found for row data:', data);
+                    }
                   }
-                  
                   $(row).find('td').each(function() {
                     var cell = api.cell(this);
                     var colIdx = cell.index().column;
                     var columnName = api.column(colIdx).header().textContent.trim();
-                    var subentries = categorylistLabels[columnName]?.subentries || [];
-
-                    if (subentries.length > 0) {
-                      let foundEntry = false;
-                      subentries.forEach(subentry => {
-                        if (String(cell.data()) === String(subentry.key)) {
-                          this.title = subentry.title;
-                          foundEntry = true;
-                        }
-                      });
-                      if (!foundEntry && cell.data() !== '') {
-                        this.title = 'Invalid entry found';
-                        this.classList.add('invalid-entry');
-                      } else {
-                        this.classList.remove('invalid-entry');
-                      }
-                    }
+                    var cellContent = cell.data();
+                    getValidEntry(cellContent, columnName, this);
                   });
               }
-        }
+            }
         });
       syncLayout(categoryTable);
       $('#deleteButtonRow').mouseenter(function(){
@@ -1482,7 +1468,6 @@ async function getCategorylistDetails() {
       })
       $('#editableTable tbody').on('click', 'td', function (e) {
         if (this.querySelector('.feature-title-container')) {
-          console.log('feature-title-container clicked');
           e.stopPropagation();
           return;
         }
@@ -1491,49 +1476,22 @@ async function getCategorylistDetails() {
       document.querySelectorAll('.feature-title-text').forEach(function (div) {
         div.addEventListener('click', function (e) {
           if (!editMode) return;
-          console.log('feature-title-text clicked');
           e.stopPropagation();
           editName(this);
         });
       });
 
-
-      $('#editableTable tbody').on('mouseenter', 'td', function() {
+      {% comment %} $('#editableTable tbody').on('mouseenter', 'td', function() {
         var colIdx = categoryTable.cell(this).index().column;
         var td = categoryTable.cell(this).node();
         // Get the column name from the column definition
         var columnName = categoryTable.column(colIdx).header().textContent;
-
-        var subentries = categorylistLabels[columnName.trim()]?.subentries || [];
         var cell = categoryTable.cell(this);
-        if (subentries && subentries.length > 0) {
-          var foundEntry = false;
-          subentries.forEach(subentry => {
-            if (String(cell.data()) === String(subentry.key)) {
-              td.title = subentry.title;
-              foundEntry = true;
-            }
-          });
-          if (!foundEntry && cell.data() !== '') {
-            td.title = 'Invalid entry found';
-          }
-        }
-      });
+        getValidEntry(cell, columnName, td);
+      }); {% endcomment %}
 
       $('#editableTable').wrap('<div class="custom-table-wrapper"></div>');
       selectCountries();
-
-    $(document).on('mousedown', function (e) {
-      const clickedInsideEditor = $(e.target).closest('td').find('.inline-editor').length > 0;
-      const clickedInsideDropdown = $(e.target).closest('.suggestion-box').length > 0;
-
-      if (!clickedInsideEditor && !clickedInsideDropdown) {
-        try {
-          closeCurrentEditor(categoryTable);
-        } catch (error) {
-        }
-      }
-    });
 }
 
 let currentEditor = null;
@@ -1577,6 +1535,142 @@ async function inlineEdit(categoryTable, td) {
 
   const colIdx = categoryTable.cell(td).index().column;
   const columnName = categoryTable.column(colIdx).header().textContent.trim();
+  const subentries = categorylistLabels[columnName]?.subentries || [];
+  $td.empty();
+
+  if (subentries.length > 0) {
+    const input = $('<input>', {
+      type: 'text',
+      class: 'inline-editor',
+      value: originalContent,
+      autocomplete: 'off',
+      css: { width: '100%', position: 'relative' }
+    });
+
+    // compute dropdown position
+    const pos = $td.position();
+    const top = $td.find('input').offset() + $td.find('input').outerHeight();
+
+    const dropdown = $('<div>', { class: 'suggestion-box', 
+      css: { position: 'absolute', top: top, left: 0, 
+        background: '#fff', 
+        border: '1px solid #ccc', 
+        zIndex: 9999, 
+        width: $td.outerWidth() + 40,
+        maxHeight: '150px', 
+        overflowY: 'auto' } });
+
+    // Add suggestions
+    subentries.forEach(subentry => {
+      const option = $('<div>', {
+        text: subentry.key,
+        class: 'dropdown-option',
+        title: subentry.title || '',
+        css: { padding: '4px 8px', cursor: 'pointer' }
+      })
+      .on('click', function () {
+        input.val(subentry.key);
+        saveValue();
+      })
+      .on('mouseenter', function () { $(this).css('background', '#eee'); })
+      .on('mouseleave', function () { $(this).css('background', ''); })
+
+      dropdown.append(option);
+    });
+
+    // filter on keyup
+    input.on('keyup', function () {
+      const q = input.val().toLowerCase();
+      dropdown.find('.dropdown-option').each(function () {
+        const txt = $(this).text().toLowerCase();
+        const title = ($(this).attr('title') || '').toLowerCase();
+        $(this).toggle(txt.includes(q) || title.includes(q));
+      });
+    });
+
+    const saveValue = () => {
+      const newValue = input.val();
+      cell.data(newValue).draw(false);
+      $td.empty().text(newValue);
+      dropdown.remove();
+    };
+
+    input.on('input', function () {
+      if (subentries.length > 0) dropdown.show();
+    });
+
+    let keepDropdownOpen = false;
+    dropdown.on('mousedown', function () { keepDropdownOpen = true; });
+
+    input.on('blur', function () {
+      if (!keepDropdownOpen) saveValue();
+      setTimeout(() => { keepDropdownOpen = false; }, 200);
+    });
+
+    input.on('keydown', function (e) {
+      if (e.key === 'Enter') saveValue();
+      if (e.key === 'Escape') {
+        dropdown.remove();
+        $td.empty().text(originalContent);
+      }
+    });
+
+    $td.append(input).append(dropdown);
+    input.focus();
+    currentEditor = input;
+    currentDropdown = dropdown;
+
+  } else {
+    // simple text input branch
+    const input = $('<input>', {
+      type: 'text',
+      value: originalContent
+    });
+
+    input.on('blur', function () {
+      const newValue = input.val();
+      cell.data(newValue).draw(false);
+      $td.empty().text(newValue);
+      categoryTable = $('#editableTable').DataTable();
+      syncLayout(categoryTable);
+    });
+
+    input.on('keyup', function (e) {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') {
+        $td.empty().text(originalContent);
+      }
+      categoryTable = $('#editableTable').DataTable();
+      syncLayout(categoryTable);
+    });
+
+    $td.empty().append(input);
+    input.focus();
+    categoryTable = $('#editableTable').DataTable();
+    syncLayout(categoryTable);
+    currentEditor = input;
+    currentDropdown = null;
+  }
+}
+
+
+var tdDebug = null;
+async function inlineEditFeature(categoryTable, td, cellContent, columnName) {
+  tdDebug = td;
+  if (!editMode) return;
+
+  const $td = $(td);
+
+  // Skip if already editing
+  if ($td.find('input').length > 0) return;
+
+  closeCurrentEditor(categoryTable);
+
+  const cell = categoryTable.cell(td);
+  const originalContent = cell.data();
+  if (typeof originalContent === 'undefined') return; // skip error rows
+
+  const colIdx = categoryTable.cell(td).index().column;
   console.log('columnName', columnName);
   const subentries = categorylistLabels[columnName]?.subentries || [];
   console.log('subentries', subentries);
@@ -1738,6 +1832,25 @@ function editName(div) {
   });
 }
 
+function getValidEntry(cellContent, columnName, td) {
+  var subentries = categorylistLabels[columnName]?.subentries || [];
+
+  if (subentries.length > 0) {
+    let foundEntry = false;
+    subentries.forEach(subentry => {
+      if (String(cellContent) === String(subentry.key)) {
+        td.title = subentry.title;
+        foundEntry = true;
+      }
+    });
+    if (!foundEntry && cellContent !== '') {
+      td.title = 'Invalid entry found';
+      td.classList.add('invalid-entry');
+    } else {
+      td.classList.remove('invalid-entry');
+    }
+  }
+}
 
 
 $('#editableTable thead').on('click', 'th', async function(e) {

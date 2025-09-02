@@ -492,6 +492,11 @@ function createChildHTML(feature, tr) {
           const txt = escapeHtml(String(val));
           td.textContent = txt;
           td.title = txt; // tooltip for truncated text
+          getValidEntry(val, c.key, td);
+          td.onclick = () => {
+            const categoryTable = $('#editableTable').DataTable();
+            inlineEditFeature(categoryTable, td, val, c.key);
+          };
         }
         tr.appendChild(td);
     });
