@@ -503,7 +503,7 @@ div.dt-container .dt-input {
         </div>
       </div>
       <div id="errorsDiv" style="color: var(--forsure-main-red); display: none;text-align: center"></div>
-      <table id="editableTable" style="width:100%; overflow-x: auto">
+      <table id="editableTable" style="width:100%; overflow-x: auto;position: relative;">
         <thead></thead>
       </table>
     </div>
@@ -601,7 +601,6 @@ div.dt-container .dt-input {
       <button class="button" style="background-color: #17161c;"onclick="closeConfirmOverwriteModal()">No</button>
     </div>
   </div>
-
 </div>
   <script>
     document.getElementById('category_list').addEventListener('change', openProfileModal);
@@ -1508,6 +1507,7 @@ async function getCategorylistDetails() {
 
 let currentEditor = null;
 let currentDropdown = null;
+let currentDropdownFeature = null;
 
 function closeCurrentEditor(categoryTable) {
   if (currentEditor && currentEditor.length > 0) {
@@ -1522,6 +1522,9 @@ function closeCurrentEditor(categoryTable) {
 
   if (currentDropdown && currentDropdown.length > 0) {
     currentDropdown.remove();
+  }
+  if (currentDropdownFeature) {
+    currentDropdownFeature.style.display = 'none';
   }
 
   // Reset references
@@ -1666,23 +1669,20 @@ async function inlineEdit(categoryTable, td) {
 }
 
 
-var tdDebug = null;
-async function inlineEditFeature(categoryTable, td, cellContent, columnName) {
-  tdDebug = td;
+var tdDebugFeature = null;
+async function inlineEditFeature(categoryTable, tdfeature, cellContent, columnName, feature) {
+  tdDebugFeature = tdfeature;
+  console.log('inlineEditFeature');
+  console.log(`editMode: ${editMode}, td: ${tdfeature}, cellContent: ${cellContent}, columnName: ${columnName}, feature: ${feature}`);
   if (!editMode) return;
 
-  const $td = $(td);
+  const $td = $(tdfeature);
 
   // Skip if already editing
   if ($td.find('input').length > 0) return;
 
   closeCurrentEditor(categoryTable);
-
-  const cell = categoryTable.cell(td);
-  const originalContent = cell.data();
-  if (typeof originalContent === 'undefined') return; // skip error rows
-
-  const colIdx = categoryTable.cell(td).index().column;
+  originalContent = cellContent;
   console.log('columnName', columnName);
   const subentries = categorylistLabels[columnName]?.subentries || [];
   console.log('subentries', subentries);
@@ -1699,17 +1699,29 @@ async function inlineEditFeature(categoryTable, td, cellContent, columnName) {
     });
 
     // compute dropdown position
-    const pos = $td.position();
-    const top = $td.find('input').offset() + $td.find('input').outerHeight();
+    const tdRect = tdfeature.getBoundingClientRect();
+    const tableRect = document.getElementById('editableTable').getBoundingClientRect();
+    
+    const top  = tdRect.bottom - tableRect.top;     // px from table top to td bottom
+    const left = tdRect.left   - tableRect.left;
 
-    const dropdown = $('<div>', { class: 'suggestion-box', 
+    {% comment %} const dropdown = $('<div>', { class: 'suggestion-box', 
       css: { position: 'absolute', top: top, left: 0, 
         background: '#fff', 
         border: '1px solid #ccc', 
         zIndex: 9999, 
         width: $td.outerWidth() + 40,
         maxHeight: '150px', 
-        overflowY: 'auto' } });
+        overflowY: 'auto' } }); {% endcomment %}
+    var dropdown = document.getElementById('suggestionBoxFeature');
+    dropdown.innerHTML = '';
+    dropdown.style.display = 'block';
+    dropdown.style.position = 'absolute';
+    dropdown.style.top = top + 'px';
+    dropdown.style.left = left + 'px';
+    dropdown.style.maxHeight = '150px';
+    dropdown.style.overflowY = 'auto';
+    dropdown = $(dropdown);
 
     // Add suggestions
     subentries.forEach(subentry => {
@@ -1741,9 +1753,9 @@ async function inlineEditFeature(categoryTable, td, cellContent, columnName) {
 
     const saveValue = () => {
       const newValue = input.val();
-      cell.data(newValue).draw(false);
-      $td.empty().text(newValue);
-      dropdown.remove();
+      tdfeature.innerText = newValue;
+      feature.data_local[columnName] = newValue;
+      document.getElementById('suggestionBoxFeature').style.display = 'none';
     };
 
     input.on('input', function () {
@@ -1761,15 +1773,15 @@ async function inlineEditFeature(categoryTable, td, cellContent, columnName) {
     input.on('keydown', function (e) {
       if (e.key === 'Enter') saveValue();
       if (e.key === 'Escape') {
-        dropdown.remove();
-        $td.empty().text(originalContent);
+        document.getElementById('suggestionBoxFeature').style.display = 'none';
+        tdfeature.innerText = originalContent;
       }
     });
 
-    $td.append(input).append(dropdown);
+    $td.append(input);
     input.focus();
     currentEditor = input;
-    currentDropdown = dropdown;
+    currentDropdownFeature = document.getElementById('suggestionBoxFeature');
 
   } else {
     // simple text input branch
@@ -1780,8 +1792,8 @@ async function inlineEditFeature(categoryTable, td, cellContent, columnName) {
 
     input.on('blur', function () {
       const newValue = input.val();
-      cell.data(newValue).draw(false);
-      $td.empty().text(newValue);
+      tdfeature.innerText = newValue;
+      feature.data_local[columnName] = newValue;
       categoryTable = $('#editableTable').DataTable();
       syncLayout(categoryTable);
     });
@@ -1789,18 +1801,17 @@ async function inlineEditFeature(categoryTable, td, cellContent, columnName) {
     input.on('keyup', function (e) {
       if (e.key === 'Enter') input.blur();
       if (e.key === 'Escape') {
-        $td.empty().text(originalContent);
+        tdfeature.innerText = originalContent;
       }
       categoryTable = $('#editableTable').DataTable();
       syncLayout(categoryTable);
     });
-
     $td.empty().append(input);
     input.focus();
     categoryTable = $('#editableTable').DataTable();
     syncLayout(categoryTable);
     currentEditor = input;
-    currentDropdown = null;
+    currentDropdownFeature = null;
   }
 }
 
@@ -1865,7 +1876,7 @@ function getValidEntry(cellContent, columnName, td) {
 }
 
 
-$('#editableTable thead').on('click', 'th', async function(e) {
+$('#editableTable thead').on('click', '.dt-column-title', async function(e) {
   if (editMode) {
       await renameColumn(this, e);
       return;
@@ -1941,13 +1952,18 @@ async function saveRenameColumn() {
   formData.append('newMapping', newMapping);
   formData.append('oldMapping', oldMapping);
   formData.append('version_id', versionId);
+  try {
   var data = await unifiedSendRequest(CATEGORYLISTRENAMECOLUMN, {formData: formData});
-  if (data.success) {
-    closeRenameColumnModal();
-    showMessage(data.message, true);
-    await fillVersionDropdown();
-  } else {
-    showMessage(data.message, false);
+    if (data.success) {
+      closeRenameColumnModal();
+      showMessage(data.message, true);
+      await fillVersionDropdown();
+    } else {
+      showMessage(data.message, false);
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage(error.message, false);
   }
 }
 
@@ -1980,7 +1996,7 @@ function toggleSorting(enableSorting) {
     var table = $('#editableTable').DataTable();
     table.columns().every(function () {
         var column = this;
-        column.settings()[0].aoColumns[column[0][0]].bSortable = enableSorting;
+        column.settings()[0].aoColumns[column[0][0]].bSortable = true;
     });
 }
 

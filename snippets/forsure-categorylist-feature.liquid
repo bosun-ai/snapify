@@ -66,14 +66,11 @@
     padding-left: 40px !important;
     position: relative;
 }
-/* 
-.feature-row-table td:first-child::before {
-    content: "└─";
-    position: absolute;
-    left: 20px;
-    color: #2255ff;
-    font-weight: bold;
-} */
+
+.od-branch {
+  width: 14px; height: 14px; border-left: 2px solid #2255ff; border-bottom: 2px solid #2255ff; display: flex!important;transform: translateY(-35%);margin: auto;
+  border-radius: 0 0 0 4px;
+}
 
 /* Ensure feature rows are visible */
 #editableTable tbody tr.feature-row {
@@ -277,6 +274,9 @@ function addFeature(row, sku) {
     var textContainer = document.createElement('div');
     textContainer.className = 'feature-title-text';
     textContainer.textContent = text;
+    textContainer.onclick = () => {
+        editName(textContainer);
+    };
     firstCell.appendChild(div);
     div.appendChild(textContainer);
     addFeatureButtonToRow(div, sku, row);
@@ -478,27 +478,27 @@ function buildChildHTML(features) {
 function createChildHTML(feature, tr) {
   
     visibleCols.forEach((c, i) => {
-        const td = document.createElement('td');
-        td.className = c.cls;
-        td.style.textAlign = c.align;
-        td.style.paddingLeft = c.padL;
-        td.style.paddingRight = c.padR;
+        const tdInner = document.createElement('td');
+        tdInner.className = c.cls;
+        tdInner.style.textAlign = c.align;
+        tdInner.style.paddingLeft = c.padL;
+        tdInner.style.paddingRight = c.padR;
   
         if (i === 0) {
           // insert the feature cell content element (with handlers intact)
-          td.appendChild(createFeatureCellContent(feature));
+          tdInner.appendChild(createFeatureCellContent(feature));
         } else {
           const val = feature?.data_local?.[c.key] ?? feature?.data?.[c.key] ?? '';
           const txt = escapeHtml(String(val));
-          td.textContent = txt;
-          td.title = txt; // tooltip for truncated text
-          getValidEntry(val, c.key, td);
-          td.onclick = () => {
+          tdInner.textContent = txt;
+          tdInner.title = txt; // tooltip for truncated text
+          getValidEntry(val, c.key, tdInner);
+          tdInner.onclick = () => {
             const categoryTable = $('#editableTable').DataTable();
-            inlineEditFeature(categoryTable, td, val, c.key);
+            inlineEditFeature(categoryTable, tdInner, tdInner.textContent, c.key, feature);
           };
         }
-        tr.appendChild(td);
+        tr.appendChild(tdInner);
     });
     return tr;
 }
@@ -606,7 +606,10 @@ function createFeatureCellContent(feature) {
     container.style.gap = '8px';
     
     const nameContainer = document.createElement('div');
-    nameContainer.innerHTML = '└─';
+    var branch = document.createElement('div');
+    branch.className = 'od-branch';
+    nameContainer.appendChild(branch);
+    {% comment %} nameContainer.innerHTML = '└─'; {% endcomment %}
     nameContainer.style.minWidth = '5rem';
     nameContainer.style.justifyContent = 'end';
     nameContainer.style.display = 'flex';
@@ -738,7 +741,6 @@ async function saveFeature(event) {
         showMessage('Failed to save feature', false);
     }
 }
-
 
 
 // Delete feature
