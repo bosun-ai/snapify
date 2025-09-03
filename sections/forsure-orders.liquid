@@ -1,0 +1,746 @@
+{% comment %}
+  Page template: Orders Dashboard
+  File: /templates/page.orders-dashboard.liquid
+  Notes:
+  - Demo data only (Shopify storefront templates can’t read orders directly).
+  - Replace with app blocks or AJAX to load real data if needed.
+{% endcomment %}
+
+<div class="page-width" style="margin-top: 10rem;">
+  <section id="orders-dashboard" class="orders-dashboard" data-initial-tab="orders" aria-label="Orders dashboard">
+    <div class="od-wrap">
+      <!-- Left rail -->
+      <aside class="od-rail" aria-label="Modes">
+        <button class="od-rail-btn is-active" data-tab="orders" title="Orders"><span>O</span></button>
+        <button class="od-rail-btn" data-tab="returns" title="Returns"><span>R</span></button>
+        <button class="od-rail-btn" data-tab="fulfilment" title="Fulfilment"><span>F</span></button>
+      </aside>
+
+      <!-- Main -->
+      <main class="od-main">
+        <!-- Top bar -->
+        <div class="od-topbar">
+          <div class="od-title">Orders</div>
+          <div class="od-actions">
+            <details class="od-filter">
+              <summary>Filters</summary>
+              <form class="od-filter-form" onsubmit="return false">
+                <label>
+                  Search
+                  <input type="search" name="q" placeholder="Search orders, customers…" />
+                </label>
+                            <!-- Timeframe in header -->
+                  <label>
+                  Dates
+                  </label>
+            <div class="od-dates" aria-label="Timeframe">
+              
+              <label class="od-date">
+                <span>From</span>
+                <input type="date" id="od-from" />
+              </label>
+              <label class="od-date">
+                <span>To</span>
+                <input type="date" id="od-to" />
+              </label>
+            </div>
+                <label>
+                  Status
+                  <select name="status">
+                    <option value="">Any</option>
+                    <option>New</option>
+                    <option>Processing</option>
+                    <option>Shipped</option>
+                    <option>Cancelled</option>
+                    <option>Returned</option>
+                    <option>Fulfilled</option>
+                  </select>
+                </label>
+                <div class="od-filter-row">
+                  <button class="od-btn od-btn--primary" data-action="apply-filters">Apply</button>
+                  <button class="od-btn od-btn--ghost" data-action="clear-filters" type="reset">Clear</button>
+                </div>
+              </form>
+            </details>
+            <label class="od-upload">
+              <input type="file" hidden />
+              <span class="od-btn od-btn--primary">Upload</span>
+            </label>
+          </div>
+        </div>
+
+<!-- Orders tab -->
+<div class="od-list" data-tab-panel="orders" aria-labelledby="orders-tab">
+  <!-- Header with caret column -->
+  <div class="od-list-header od-list-header--orders">
+    <div class="od-col od-col--caret" aria-hidden="true"></div>
+    <div class="od-col od-col--sm">Date</div>
+    <div class="od-col">Order</div>
+    <div class="od-col">Customer</div>
+    <div class="od-col od-col--sm">Status</div>
+    <div class="od-col od-col--sm">Country</div>
+  </div>
+
+  <ul class="od-rows">
+    <!-- Example rows — keep your own dates/customer/status/country -->
+    <li class="od-row od-row--order" data-id="ORD-101" data-kind="orders" tabindex="0" aria-expanded="false">
+      <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
+        <span class="od-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="od-col od-col--sm">2025-09-01</div>
+      <div class="od-col">ORD-101</div>
+      <div class="od-col">Customer 1</div>
+      <div class="od-col od-col--sm">Processing</div>
+      <div class="od-col od-col--sm">Germany</div>
+      <!-- ⚠️ Do NOT add product rows here — JS will inject them -->
+    </li>
+
+    <li class="od-row od-row--order" data-id="ORD-102" data-kind="orders" tabindex="0" aria-expanded="false">
+      <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
+        <span class="od-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="od-col od-col--sm">2025-09-02</div>
+      <div class="od-col">ORD-102</div>
+      <div class="od-col">Customer 2</div>
+      <div class="od-col od-col--sm">Processing</div>
+      <div class="od-col od-col--sm">France</div>
+    </li>
+
+    <!-- …repeat for ORD-103 … ORD-107 etc. -->
+  </ul>
+</div>
+
+
+
+        <!-- Returns tab -->
+        <div class="od-list is-hidden" data-tab-panel="returns" aria-labelledby="returns-tab">
+          <div class="od-list-header">
+            <div class="od-col od-col--sm">Date</div>
+            <div class="od-col">RMA</div>
+            <div class="od-col">Order</div>
+            <div class="od-col od-col--sm">State</div>
+            <div class="od-col od-col--sm">Country</div>
+          </div>
+          <ul class="od-rows">
+            {% for i in (1..5) %}
+              <li class="od-row" data-id="RMA-20{{ i }}" data-kind="returns" tabindex="0">
+                <div class="od-col od-col--sm">2025-08-1{{ i }}</div>
+                <div class="od-col">RMA-20{{ i }}</div>
+                <div class="od-col">ORD-10{{ i }}</div>
+                <div class="od-col od-col--sm">Pending</div>
+                <div class="od-col od-col--sm">{% cycle 'France','Germany','Italy','Belgium','Czechia' %}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Fulfilment tab -->
+        <div class="od-list is-hidden" data-tab-panel="fulfilment" aria-labelledby="fulfilment-tab">
+          <div class="od-list-header">
+            <div class="od-col od-col--sm">Date</div>
+            <div class="od-col">Batch</div>
+            <div class="od-col">Carrier</div>
+            <div class="od-col od-col--sm">Labels</div>
+            <div class="od-col od-col--sm">Country</div>
+          </div>
+          <ul class="od-rows">
+            {% for i in (1..6) %}
+              <li class="od-row" data-id="FUL-30{{ i }}" data-kind="fulfilment" tabindex="0">
+                <div class="od-col od-col--sm">2025-09-1{{ i }}</div>
+                <div class="od-col">FUL-30{{ i }}</div>
+                <div class="od-col">{% cycle 'DHL','DPD','UPS','GLS','FedEx','DHL' %}</div>
+                <div class="od-col od-col--sm">{{ i }}6</div>
+                <div class="od-col od-col--sm">{% cycle 'Italy','Germany','Sweden','Portugal','Ireland','Denmark' %}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </main>
+
+      <!-- Info panel -->
+      <aside class="od-info" aria-live="polite" aria-label="Info">
+        <div class="od-info-empty">Select a row to see details.</div>
+        <div class="od-info-body is-hidden">
+          <h3 class="od-info-title"></h3>
+          <dl class="od-info-grid">
+            <div><dt>ID</dt><dd data-field="id"></dd></div>
+            <div><dt>Kind</dt><dd data-field="kind"></dd></div>
+            <div><dt>Date</dt><dd data-field="date"></dd></div>
+            <div><dt>Status</dt><dd data-field="status"></dd></div>
+            <div><dt>Country</dt><dd data-field="country"></dd></div>
+          </dl>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<style>
+.orders-dashboard { --rail: 76px; --gap: 16px; --info: 320px; --radius: 14px; }
+.orders-dashboard * { box-sizing: border-box; }
+
+.od-wrap {
+  display: grid;
+  grid-template-columns: var(--rail) 1fr var(--info);
+  gap: var(--gap);
+  min-height: 70vh;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: var(--radius);
+  padding: var(--gap);
+  background: var(--color-background, #fff);
+}
+
+/* Timeframe block in header */
+.od-dates {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 12px;
+  background: #fff;
+}
+.od-date {
+  display: inline-grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.od-date > input[type="date"] {
+  padding: 6px 8px;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 10px;
+  font-size: 14px;
+}
+@media (max-width: 720px) {
+  .od-dates { flex-wrap: wrap; width: 100%; }
+}
+
+/* Rail */
+.od-rail {
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 10px;
+  background: #f7f7f8;
+  border-radius: var(--radius);
+  padding: 10px;
+}
+.od-rail-btn {
+  border: 1px solid rgba(0,0,0,.1);
+  border-radius: 12px;
+  background: #fff;
+  width: 100%;
+  aspect-ratio: 1/1;
+  font-weight: 700;
+  font-size: 22px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+}
+.od-rail-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.od-rail-btn.is-active { outline: 2px solid #111; }
+
+/* Main */
+.od-main {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.08);
+}
+.od-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  gap: 10px;
+}
+.od-title { font-weight: 600; }
+.od-actions { display: flex; align-items: center; gap: 8px; }
+
+.od-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 12px; padding: 8px 12px; border: 1px solid rgba(0,0,0,.12);
+  font-size: 14px; cursor: pointer; background: #fff;
+}
+.od-btn--primary { background: #111; color: #fff; border-color: #111; }
+.od-btn--ghost { background: transparent; }
+.od-upload input[type=file] { width: 0; height: 0; opacity: 0; }
+
+/* Filters button */
+.od-filter { position: relative; display: inline-block; margin-right: 1rem; }
+.od-filter > summary {
+  list-style: none; display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 12px; border-radius: 12px; border: 1px solid #111;
+  background: #fff; color: #111; font-weight: 600; font-size: 14px; line-height: 1; cursor: pointer;
+}
+.od-filter > summary::-webkit-details-marker { display: none; }
+.od-filter[open] > summary { background: #f2f2f2; border-color: #111; }
+.od-filter-form {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  background: #fff; border: 1px solid rgba(0,0,0,.1);
+  border-radius: 12px; padding: 12px; display: grid; gap: 10px; z-index: 3;
+  box-shadow: 0 12px 24px rgba(0,0,0,.08);
+}
+.od-filter-form label { display: grid; gap: 6px; font-size: 12px; }
+.od-filter-form input, .od-filter-form select {
+  border: 1px solid rgba(0,0,0,.15); border-radius: 10px; padding: 8px;
+}
+.od-filter-row { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* =======================
+   LIST GRIDS
+======================= */
+
+/* Default grid for lists that are NOT the Orders tab */
+.od-list:not([data-tab-panel="orders"]) .od-list-header,
+.od-list:not([data-tab-panel="orders"]) .od-row {
+  display: grid;
+  grid-template-columns: 140px 1.1fr 1.1fr 140px 110px;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Orders tab — header and rows share the SAME tracks incl. caret col */
+.od-list[data-tab-panel="orders"] .od-list-header,
+.od-list[data-tab-panel="orders"] .od-row {
+  display: grid;
+  grid-template-columns: 28px 140px 1.1fr 1.1fr 140px 140px;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Header caret placeholder */
+.od-list-header--orders .od-col--caret {
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Align text consistently */
+.od-list .od-col,
+.od-list-header .od-col {
+  text-align: left;
+}
+
+/* Header styling */
+.od-list-header {
+  padding: 10px 14px; font-size: 12px; font-weight: 600; color: #555;
+  background: #fafafa; border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+/* Rows */
+.od-rows { list-style: none; margin: 0; padding: 0; overflow: auto; }
+.od-row {
+  padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,.05);
+  cursor: pointer;
+}
+.od-row:hover { background: #fcfcfc; }
+.od-row.is-selected { outline: 2px solid #111; outline-offset: -2px; }
+.od-col--sm { white-space: nowrap; }
+
+/* Caret toggle button */
+.od-row--order .od-toggle {
+  appearance:none; border:1px solid rgba(0,0,0,.25); background:#fff; color:#333;
+  border-radius:8px; width:24px; height:24px;
+  display:grid; place-items:center;
+  margin: 0;                /* FIX: removed margin-right */
+  justify-self: center;     /* center in caret column */
+  cursor:pointer;
+}
+.od-row--order[aria-expanded="true"] .od-caret{ transform: rotate(180deg); }
+.od-caret{ transition: transform .15s ease; }
+
+/* Sub-rows container */
+.od-subrows {
+  grid-column: 2 / -1;
+  padding: 10px 8px 12px 8px;
+  background: #fafafa;
+  border-left: 3px solid rgba(0,0,0,.08);
+  margin-top: 8px;
+  border-radius: 8px;
+}
+
+/* Sub-rows header */
+.od-subheader {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 80px 1.4fr;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 6px 18px;
+}
+
+/* Sub-rows list + items */
+.od-sublist { list-style: none; margin: 0; padding: 0 0 0 18px; }
+.od-subrow {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 80px 1.4fr;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px dashed rgba(0,0,0,.08);
+}
+.od-subrow:first-child { border-top: 0; }
+
+/* Subrow columns */
+.od-subcol--prod { display: flex; align-items: center; gap: 8px; }
+.od-branch {
+  width: 14px; height: 14px; border-left: 2px solid #7c7c7c; border-bottom: 2px solid #7c7c7c;
+  border-radius: 0 0 0 4px; margin-right: 2px;
+}
+.od-link { color: #3b5cff; text-decoration: none; }
+.od-link:hover { text-decoration: underline; }
+.od-subcol--sku code {
+  background: #f0f3ff; border: 1px solid #dfe5ff; border-radius: 6px; padding: 2px 6px; font-size: 12px;
+}
+.od-subcol--qty { font-weight: 600; }
+
+/* Legislation badges */
+.od-tag {
+  display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  border: 1px solid transparent; margin-right: 6px;
+}
+.od-tag--w       { background:#eaf2ff; border-color:#c9dbff; color:#1a3da8; }
+.od-tag--b       { background:#eafbea; border-color:#c6efc6; color:#1d7a1d; }
+.od-tag--p       { background:#fff5e5; border-color:#ffe0b3; color:#8a5b0a; }
+
+/* Info */
+.od-info {
+  background: #fff; border: 1px solid rgba(0,0,0,.08);
+  border-radius: var(--radius); padding: 14px; display: grid; align-content: start;
+}
+.od-info-empty { color: #666; opacity: .9; }
+.od-info-title { margin: 0 0 10px; font-size: 16px; }
+.od-info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.od-info-grid dt { font-size: 12px; color: #666; }
+.od-info-grid dd { margin: 0; font-weight: 600; }
+
+.is-hidden { display: none !important; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .od-wrap { grid-template-columns: var(--rail) 1fr; }
+  .od-info { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  .od-list-header, .od-row { grid-template-columns: 120px 1fr 120px; }
+  .od-list-header .od-col:nth-child(3), .od-row .od-col:nth-child(3),
+  .od-list-header .od-col:nth-child(5), .od-row .od-col:nth-child(5) { display: none; }
+  .od-topbar { flex-wrap: wrap; }
+
+  .od-subheader, .od-subrow { grid-template-columns: 1fr 1fr; }
+  .od-subcol--qty, .od-subcol--tags { grid-column: 1 / -1; }
+}
+</style>
+
+
+<script>
+(() => {
+  const root = document.getElementById('orders-dashboard');
+  if (!root) return;
+
+  /* =========================
+     Sample data (edit freely)
+     Each order -> array of items: { name, sku, qty, tags[] }
+  ========================== */
+  const PRODUCTS_BY_ORDER = {
+    "ORD-101": [
+      { name: "18650 Rechargeable Li-ion Battery", sku: "BAT-101", qty: 2, tags: ["B", "P"] },
+      { name: "USB-C Charger 30W",                  sku: "CHG-101", qty: 1, tags: ["W", "P"] },
+      { name: "Smart Sensor Module V2",             sku: "SNS-201", qty: 3, tags: ["W"] }
+    ],
+    "ORD-102": [
+      { name: "AA NiMH Pack (4pcs)",                sku: "BAT-AA04", qty: 1, tags: ["B", "P"] },
+      { name: "LED Desk Lamp",                      sku: "LMP-302",  qty: 1, tags: ["W", "P"] }
+    ],
+    "ORD-103": [
+      { name: "Power Bank 10k",                     sku: "PB-10K",   qty: 1, tags: ["B", "P"] },
+      { name: "USB-C Cable 1m",                     sku: "CAB-C1",   qty: 2, tags: ["P"] }
+    ],
+    "ORD-104": [
+      { name: "AA NiMH Pack (4pcs)",                sku: "BAT-AA04", qty: 2, tags: ["Batteries", "Packaging"] }
+    ],
+    "ORD-105": [
+      { name: "Power Bank 10k",                     sku: "PB-10K",   qty: 1, tags: ["Batteries", "Packaging"] },
+      { name: "USB-C Cable 2m",                     sku: "CAB-C2",   qty: 1, tags: ["Packaging"] }
+    ],
+    "ORD-106": [
+      { name: "LED Desk Lamp",                      sku: "LMP-302",  qty: 1, tags: ["WEEE", "Packaging"] }
+    ],
+    "ORD-107": [
+      { name: "Solar Charger 20W",                  sku: "SOL-20W",  qty: 1, tags: ["WEEE", "Packaging"] },
+      { name: "18650 Rechargeable Li-ion Battery",  sku: "BAT-101",  qty: 2, tags: ["Batteries", "Packaging"] }
+    ]
+  };
+
+  /* =========================
+     Small helpers
+  ========================== */
+  const qs  = (sel, el = document) => el.querySelector(sel);
+  const qsa = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+  const parseDate = (s) => { if (!s) return null; const d = new Date(s); return isNaN(d) ? null : d; };
+  const getRowDate = (row) => {
+    const t = qs('.od-col', row)?.textContent?.trim(); // first column = Date
+    const d = new Date(t);
+    return isNaN(d) ? null : d;
+  };
+
+  /* =========================
+     Build subrows (products) via JS
+  ========================== */
+  function createTagSpan(tag) {
+    const span = document.createElement('span');
+    const cls = `od-tag od-tag--${tag.toLowerCase().replace(/\s+/g,'-')}`;
+    span.className = cls;
+    span.textContent = tag;
+    return span;
+  }
+
+  function ensureSubrowsForRow(row) {
+    // if already exists, skip
+    if (qs('.od-subrows', row)) return;
+
+    const orderId = row.dataset.id;
+    const items = PRODUCTS_BY_ORDER[orderId] || [];
+    if (!items.length) return; // nothing to render
+
+    // container
+    const wrap = document.createElement('div');
+    wrap.className = 'od-subrows';
+    wrap.hidden = true;
+
+    // header
+    const header = document.createElement('div');
+    header.className = 'od-subheader';
+    header.innerHTML = `
+      <div class="od-subcol od-subcol--prod">Product</div>
+      <div class="od-subcol od-subcol--sku">SKU</div>
+      <div class="od-subcol od-subcol--qty">Qty</div>
+      <div class="od-subcol od-subcol--tags">Legislation</div>
+    `;
+    wrap.appendChild(header);
+
+    // list
+    const ul = document.createElement('ul');
+    ul.className = 'od-sublist';
+
+    items.forEach(it => {
+      const li = document.createElement('li');
+      li.className = 'od-subrow';
+      li.innerHTML = `
+        <div class="od-subcol od-subcol--prod">
+          <span class="od-branch" aria-hidden="true"></span>
+          <a href="#" class="od-link">${it.name}</a>
+        </div>
+        <div class="od-subcol od-subcol--sku"><code>${it.sku}</code></div>
+        <div class="od-subcol od-subcol--qty">${it.qty}</div>
+        <div class="od-subcol od-subcol--tags"></div>
+      `;
+      const tagBox = qs('.od-subcol--tags', li);
+      (it.tags || []).forEach(t => tagBox.appendChild(createTagSpan(t)));
+      ul.appendChild(li);
+    });
+
+    wrap.appendChild(ul);
+    // place after the row's last column so it aligns (grid-column: 2 / -1 is in CSS)
+    row.appendChild(wrap);
+  }
+
+  // Create subrows for all orders once (can be lazy if you prefer)
+  qsa('.od-row--order', root).forEach(ensureSubrowsForRow);
+
+  /* =========================
+     Tabs (O / R / F)
+  ========================== */
+  const railBtns = qsa('.od-rail-btn', root);
+  const panels   = qsa('[data-tab-panel]', root);
+
+  function setTab(tab) {
+    railBtns.forEach(b => b.classList.toggle('is-active', b.dataset.tab === tab));
+    panels.forEach(p => p.classList.toggle('is-hidden', p.dataset.tabPanel !== tab));
+    qsa('.od-row.is-selected', root).forEach(r => r.classList.remove('is-selected'));
+    showInfo(null);
+
+    const title = qs('.od-title', root);
+    if (title) title.textContent = tab === 'orders' ? 'Orders' : tab === 'returns' ? 'Returns' : 'Fulfilment';
+
+    applyDateFilter();
+  }
+  railBtns.forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+
+  /* =========================
+     Row selection -> Info panel
+  ========================== */
+  function showInfo(row) {
+    const empty = qs('.od-info-empty', root);
+    const body  = qs('.od-info-body', root);
+
+    if (!row) {
+      empty?.classList.remove('is-hidden');
+      body?.classList.add('is-hidden');
+      return;
+    }
+    empty?.classList.add('is-hidden');
+    body?.classList.remove('is-hidden');
+
+    const cols = qsa('.od-col', row);
+    const data = {
+      id: row.dataset.id || (cols[1]?.textContent ?? ''),
+      kind: row.dataset.kind || '',
+      date: cols[0]?.textContent ?? '',
+      status: cols[3]?.textContent ?? '',
+      country: cols[4]?.textContent ?? ''
+    };
+    const title = qs('.od-info-title', root);
+    if (title) title.textContent = data.id;
+    Object.keys(data).forEach(k => {
+      const el = qs(`[data-field="${k}"]`, root);
+      if (el) el.textContent = data[k];
+    });
+  }
+
+  function bindRowSelection(scope = root) {
+    qsa('.od-row', scope).forEach(row => {
+      if (row.__boundSelect) return;
+      row.__boundSelect = true;
+
+      row.addEventListener('click', (e) => {
+        if ((e.target.closest && e.target.closest('.od-toggle')) || e.target.closest('.od-subrows')) return;
+        row.closest('.od-rows').querySelectorAll('.od-row').forEach(r => r.classList.remove('is-selected'));
+        row.classList.add('is-selected');
+        showInfo(row);
+      });
+
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+      });
+    });
+  }
+  bindRowSelection();
+
+  /* =========================
+     Expand / collapse product sub-rows (Orders tab)
+  ========================== */
+  function bindOrderToggles(scope = root) {
+    qsa('.od-row--order .od-toggle', scope).forEach(btn => {
+      if (btn.__boundToggle) return;
+      btn.__boundToggle = true;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const row = btn.closest('.od-row--order');
+        ensureSubrowsForRow(row); // make sure subrows exist (if you choose to lazy-build)
+        const sub = qs('.od-subrows', row);
+        const expanded = row.getAttribute('aria-expanded') === 'true';
+        row.setAttribute('aria-expanded', String(!expanded));
+        btn.title = expanded ? 'Show products' : 'Hide products';
+        if (sub) sub.hidden = expanded;
+      });
+    });
+
+    qsa('.od-row--order', scope).forEach(row => {
+      if (row.__boundDbl) return;
+      row.__boundDbl = true;
+      row.addEventListener('dblclick', () => qs('.od-toggle', row)?.click());
+    });
+  }
+  bindOrderToggles();
+
+/* =========================
+   Timeframe controls (inside Filters dropdown)
+========================== */
+const fromInput = document.getElementById('od-from');
+const toInput   = document.getElementById('od-to');
+
+// hook into the dropdown buttons you already have
+const filterForm   = root.querySelector('.od-filter-form');
+const applyFilterB = filterForm?.querySelector('[data-action="apply-filters"]');
+const clearFilterB = filterForm?.querySelector('[data-action="clear-filters"]');
+
+function applyDateFilter() {
+  const parseDate = s => { const d = new Date(s); return isNaN(d) ? null : d; };
+  const from  = parseDate(fromInput?.value);
+  const toRaw = parseDate(toInput?.value);
+  const to    = toRaw ? new Date(toRaw.getFullYear(), toRaw.getMonth(), toRaw.getDate() + 1) : null; // inclusive
+
+  const list = root.querySelector('.od-list:not(.is-hidden) .od-rows');
+  if (!list) return;
+
+  list.querySelectorAll('.od-row').forEach(li => {
+    const t = li.querySelector('.od-col')?.textContent?.trim();
+    const d = t ? new Date(t) : null;
+    let show = true;
+    if (from && d) show = show && d >= from;
+    if (to && d)   show = show && d <  to;
+    if ((from || to) && !d) show = false;
+    li.style.display = show ? '' : 'none';
+  });
+}
+
+function clearDateFilter() {
+  if (fromInput) fromInput.value = '';
+  if (toInput)   toInput.value   = '';
+  const list = root.querySelector('.od-list:not(.is-hidden) .od-rows');
+  list?.querySelectorAll('.od-row').forEach(li => li.style.display = '');
+}
+
+// connect to your existing buttons
+applyFilterB?.addEventListener('click', () => {
+  applyDateFilter();
+  filterForm.closest('details').open = false;
+});
+clearFilterB?.addEventListener('click', () => {
+  clearDateFilter();
+});
+
+// optional: live filter on change
+fromInput?.addEventListener('change', applyDateFilter);
+toInput?.addEventListener('change', applyDateFilter);
+
+
+  /* =========================
+     Init default tab
+  ========================== */
+  const initial = root.dataset.initialTab || 'orders';
+  setTab(initial);
+})();
+</script>
+
+{% schema %}
+  {
+    "name": "t:sections.forsure_orders.name",
+    "class": "section",
+    "settings": [
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 36
+      }, {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 36
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.forsure_orders.presets.name"
+      }
+    ]
+  }
+{% endschema %}

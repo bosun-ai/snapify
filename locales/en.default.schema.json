@@ -2091,6 +2091,13 @@
         "name": "Research Paper"
       }
     },
+    "forsure_orders": {
+      "name": "ForSURE Orders",
+      "settings": {},
+      "presets": {
+        "name": "ForSURE Orders"
+      }
+    },
     "forsure_agency_dashboard": {
       "name": "ForSURE Agency Dashboard",
       "settings": {},
