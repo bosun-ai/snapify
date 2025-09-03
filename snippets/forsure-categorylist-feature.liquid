@@ -529,6 +529,18 @@ function refreshFeatures() {
     });
 }
 
+function refreshFeaturesChangeOrder() {
+    const dt  = $('#editableTable').DataTable();
+    expandedSKUs.forEach(sku => {
+        const rowNode = document.getElementById(`${sku}`);
+        const row = dt.row(rowNode);
+        row.child.hide();
+        const features = featureCache.get(`${sku}`).features;
+        const childEl = buildChildHTML(features);
+        row.child(childEl, 'feature-child').show();
+    });
+}
+
 
 function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
@@ -542,9 +554,9 @@ async function loadAndDisplayFeatures(sku) {
   
     try {
       // fetch and cache
-      const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, { method: 'GET' });
-      const features = Array.isArray(res) ? res : [];
-      featureCache.set(`${sku}`, { features });
+        const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, { method: 'GET' });
+        const features = Array.isArray(res) ? res : [];
+        featureCache.set(`${sku}`, { features });
   
       // badge update
       if (btn) {
@@ -558,10 +570,8 @@ async function loadAndDisplayFeatures(sku) {
         btn.classList.toggle('disabled', false);
         btn.title = features.length ? 'Toggle Features' : 'No features available';
       }
-  
-      // ensure column layout is synced
-      syncLayout(dt);
-  
+        // ensure column layout is synced
+        syncLayout(dt);
       // close if open, then rebuild child
       if (row.child.isShown()) {
         row.child.hide();
