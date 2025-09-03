@@ -1459,6 +1459,18 @@ async function getCategorylistDetails() {
               }
             }
         });
+      if (window.userPermissions['subsku']) {
+        var suggestionBoxFeature = document.createElement('div');
+        suggestionBoxFeature.id = 'suggestionBoxFeature';
+        suggestionBoxFeature.style.display = 'none';
+        suggestionBoxFeature.style.position = 'absolute';
+        suggestionBoxFeature.style.background = '#fff';
+        suggestionBoxFeature.style.border = '1px solid #ccc';
+        suggestionBoxFeature.style.zIndex = '9999';
+        suggestionBoxFeature.style.maxHeight = '150px';
+        suggestionBoxFeature.style.overflowY = 'auto';
+        document.getElementById('editableTable').appendChild(suggestionBoxFeature);
+      }
       syncLayout(categoryTable);
       $('#deleteButtonRow').mouseenter(function(){
         clearTimeout(deleteRowButtonTimer);
@@ -2187,6 +2199,9 @@ async function deleteColumn() {
     try {
         var formData = new FormData();
         formData.append('new_data', `${JSON.stringify(processedData)}`);
+        if (window.userPermissions['subsku']) {
+          formData.append('features', `${JSON.stringify(Object.fromEntries(featureCache))}`);
+        }
         var data = await unifiedSendRequest(SAVECATEGORYLIST, {formData: formData});
         if (data) {
           showMessage(data['status'], true);
