@@ -42,6 +42,7 @@ SENDREPORT = 'download/send-report'
 
 UPLOADFILE = 'v2/reports/'
 UPLOADORDERSRECEIVED = 'v2/reports/ordervolumes'
+ORDERS = 'orders'
 UPLOADREPORTS = 'finishedreports/'
 UPLOADZERO = 'finishedreports/create/zero'
 REPORTTYPES = 'finishedreports/report_types'

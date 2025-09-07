@@ -824,7 +824,7 @@ content: "\2713"
         <div id="ordersReceived" style="margin: auto;width: fit-content;display: none;color:red">
         </div>
         <div class="dropZone" data-input="order_list" data-url="uploadorders/" id="orderListDropZone" style="position: relative;background: #fafafa;">
-            <div>
+            <div style="width: 100%;">
               <div style="padding:2rem">
                 <img width="220px" id="upload-imageuploadorders/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
               </div>
@@ -842,7 +842,7 @@ content: "\2713"
   <div class="step losensitive" id="step2" style="display: none">
       <h2 class="heading">Select Returnlist</h2>
       <div class="dropZone" data-input="return_list" data-url="uploadreturns/" id="returnListDropZone">
-        <div>
+        <div style="width: 100%;">
           <div style="padding:2rem">
             <img width="220px" id="upload-imageuploadreturns/" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
           </div>
@@ -871,7 +871,7 @@ content: "\2713"
               <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
               </a>
           </div>
-          <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
+          <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()" disabled>Save</button>
         </div>
         <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
           If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
@@ -881,6 +881,7 @@ content: "\2713"
             <strong>File:</strong>
             <div id='profileFileName' style="margin-left:1rem"></div>
           </div>
+          <div id='profileErrorMessage' style="margin-bottom:1rem;color:red;text-align: right;"></div>
           <table id="profileTable" style="margin: auto;">
             <tr>
               <th>Name</th>
@@ -933,6 +934,7 @@ content: "\2713"
             
             <div class="col-md-6" style="position: relative">
               {% render 'forsure-custom-calendar' %}
+              <div id="calendarError" style="color:red;text-align: right;font-size: 12px;"></div>
             </div>
           </div>
 
@@ -985,8 +987,8 @@ content: "\2713"
 
           <div class="text-center mt-4">
             <button class="prevButton button button--secondary" onclick="prevStep(2)">Back</button>
-            <button class="button" style="background-color: #17161c;" onclick="saveReportOpenModal()">Save Template</button>
-            <button class="nextButton button button" onclick="nextStep(4)">Next</button>
+            <button id="saveReportButton" class="button" style="background-color: #17161c;" onclick="saveReportOpenModal()" disabled  title="Please select all settings">Save Template</button>
+            <button id="nextButtonSummary" class="nextButton button button" onclick="nextStep(4)" disabled title="Please select all settings">Next</button>
           </div>
       </div>
   </div>
@@ -1495,6 +1497,7 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
   profileNameCell.dataset.value = '';
   profileNameCell.addEventListener('click', async () => {
     await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
+    
   });
   filePartProfile.appendChild(profileNameCell);
 
@@ -1516,6 +1519,14 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
     await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
   });
   row.appendChild(resolvedCell);
+  setTimeout(() => {
+    row.style.transition = 'background-color 0.6s ease';
+    row.style.backgroundColor = '#2255ff'; // light yellow
+
+    setTimeout(() => {
+        row.style.backgroundColor = '';
+    }, 500);
+  }, 100);
   return row;
 }
 
@@ -1712,15 +1723,25 @@ async function openProfileModal(availableProfiles, fileName, fileInput, rowId, o
   modal.dataset.row = rowId;
   {% comment %} try { {% endcomment %}
 
-    addProfileModal(availableProfiles, fileName, csvData, modal);
+  await addProfileModal(availableProfiles, fileName, csvData, modal);
+  setTimeout(() => {
+    updateSaveButton();
+  }, 200);
 }
 
+var requiredMappings = new Set();
 async function addProfileModal(availableProfiles, fileName, csvData, modal) {
     if (dataUrlCurrent == 'uploadorders/') {
       var labelsV2Options = await getOrderlistLabelsV2Options();
     } else {
       var labelsV2Options = await getReturnlistLabelsV2Options();
     }
+    requiredMappings.clear();
+    labelsV2Options.forEach(option => {
+      if (option.required) {
+        requiredMappings.add((option));
+      }
+    });
     const profileSelect = document.getElementById('profileSelect');
     const profileDetails = document.getElementById('profileDetails');
     const profileFileName = document.getElementById('profileFileName');
@@ -1760,6 +1781,9 @@ async function addProfileModal(availableProfiles, fileName, csvData, modal) {
         optionElement.setAttribute('data-description', option.description);
         optionElement.title = option.description;
         selectMapping.appendChild(optionElement);
+      });
+      selectMapping.addEventListener('change', function() {
+        updateSaveButton();
       });
       tdMapping.appendChild(selectMapping);
       tr.appendChild(tdMapping);
@@ -1807,6 +1831,29 @@ async function addProfileModal(availableProfiles, fileName, csvData, modal) {
     };
 }
 
+function updateSaveButton() {
+  const saveProfile = document.getElementById('saveProfile');
+  const profileTable = document.getElementById('profileTableBody');
+  const rows = profileTable.querySelectorAll('tr');
+  const foundMappings = Array.from(rows).map(row => {
+    const dropdown = row.querySelector('select');
+    return dropdown ? dropdown.value : null;
+  });
+  var allRequiredMapped = true;
+  const errorBox = document.getElementById('profileErrorMessage');
+  errorBox.textContent = '';
+  errorBox.style.display = 'none';
+  for (const mapping of requiredMappings) {
+    if (!foundMappings.includes(mapping.key)) {
+      allRequiredMapped = false;
+      errorBox.textContent = 'Required mapping not found for ' + mapping.title;
+      errorBox.style.display = 'block';
+      break;
+    }
+  }
+  saveProfile.disabled = !allRequiredMapped;
+}
+
 function toggleExclude(checkbox) {
   const row = checkbox.parentElement.parentElement;
   const exclude = checkbox.checked;
@@ -1843,7 +1890,7 @@ async function saveMapping() {
     }
   } catch (error) {
     console.error(error.message);
-    showMessage('Failed to save mapping ' + error.message, false);
+    showMessage(error.message, false);
   }
 }
 
@@ -3036,6 +3083,7 @@ async function populateTemplateSelector() {
   $('.selectpicker').selectpicker('refresh');
 
   $('#templateSelect').on('changed.bs.select', function () {
+    updateSaveReportButton();
     const selectedTemplate = $(this).val();
     const template = allTemplates.find(t => `${t.country}-${t.year}-${t.report_type}-${t.pro}` === selectedTemplate || t.id === selectedTemplate);
     if (!template || selectedTemplate === "default") {
@@ -3132,7 +3180,24 @@ async function populateTemplateSelector() {
     
     // Step 2: Rebuild dynamicRanges object in sorted order
     dynamicRanges = Object.fromEntries(sortedRangesArray);
-    $('#monthPicker').val(Object.values(dynamicRanges)[0][0].format('DD/MM/YYYY') + ' - ' + Object.values(dynamicRanges)[0][1].format('DD/MM/YYYY'));
+    var possibleRange = null;
+    for (const [key, [start, end]] of Object.entries(dynamicRanges)) {
+      if (anyDateInRange(availableDateOptions, new Date(start), new Date(end))) {
+        possibleRange = [start, end];
+        break;
+      }
+    }
+    if (possibleRange) {
+      $('#monthPicker').val(possibleRange[0].format('DD/MM/YYYY') + ' - ' + possibleRange[1].format('DD/MM/YYYY'));  
+      document.getElementById('calendarError').textContent = '';
+      document.getElementById('calendarError').style.display = 'none';
+    }
+    else {
+      $('#monthPicker').val('');
+      document.getElementById('calendarError').textContent = 'No data available for the ' + Object.keys(dynamicRanges)[0];
+      document.getElementById('calendarError').style.display = 'block';
+    }
+    document.getElementById('monthPicker').addEventListener('blur', updateCalendarError);
     // Replace existing datepicker with new dynamic ranges
     {% comment %} $('#monthPicker').daterangepicker({
       startDate: Object.values(dynamicRanges)[0][0],  // Set first option as default
@@ -3145,7 +3210,68 @@ async function populateTemplateSelector() {
   });
 }
 
+function updateSaveReportButton() {
+  const saveReportButton = document.getElementById('saveReportButton');
+  const nextButtonSummary = document.getElementById('nextButtonSummary');
+  const [success, message] = checkAllSettingsSelected();
+  if (success) {
+    saveReportButton.disabled = false;
+    nextButtonSummary.disabled = false;
+    saveReportButton.title = '';
+    nextButtonSummary.title = '';
+  } else {
+    saveReportButton.disabled = true;
+    nextButtonSummary.disabled = true;
+    saveReportButton.title = message;
+    nextButtonSummary.title = message;
+  }
+}
+
+function checkAllSettingsSelected() {
+  const countrySelected = $('#country').val();
+  const categorySelected = $('#category').val();
+  const proSelected = $('#proSelect').val();
+  const dateSelected = document.getElementById('monthPicker').value;
+  const templateSelected = $('#templateSelect').val();
+  const outputFieldsSelected = $('#customFields').val();
+  const groupByFieldsSelected = $('#groupByFields').val();
+
+  if (!countrySelected) {
+    return [false, 'Please select a country'];
+  }
+  if (!categorySelected) {
+    return [false, 'Please select a category'];
+  }
+  if (!proSelected) {
+    return [false, 'Please select a PRO'];
+  }
+  {% comment %} if (!dateSelected) {
+    return [false, 'Please select a date'];
+  } {% endcomment %}
+  if (!window.userPermissions['reporttemplate']) {
+    return [true, ''];
+  }
+  if (templateSelected === "default") {
+    if (!outputFieldsSelected) {
+      return [false, 'Please select at least one output field or template'];
+    }
+    if (!groupByFieldsSelected) {
+      return [false, 'Please select at least one group by field or template'];
+    }
+    return [true, ''];
+  }
+  return [true, ''];
+}
+
+
+function updateCalendarError() {
+  const calendarError = document.getElementById('calendarError');
+  calendarError.textContent = '';
+  calendarError.style.display = 'none';
+}
+
 function updateTemplateOptions(refreshPRO=true) {
+  updateCalendarError();
   const templateSelect = document.getElementById('templateSelect');
   const proDropdown = document.getElementById('proSelect');
   var initPro = false;
@@ -3194,6 +3320,10 @@ function updateTemplateOptions(refreshPRO=true) {
     $('#templateSelect').val(lastTemplate);
     $('#templateSelect').trigger('change');
     $('.selectpicker').selectpicker('refresh'); // needed twice for it to work
+  } else {
+    if (proDropdown.querySelectorAll('option').length == 1) {
+      proDropdown.innerHTML = '<option value="">Add in Overview first</option>';
+    }
   }
   $('.selectpicker').selectpicker('refresh'); // Re-render
 }
@@ -3201,13 +3331,22 @@ function updateTemplateOptions(refreshPRO=true) {
 $('#country').on('changed.bs.select', function() {
   getDateOptions($('#country').val());
   updateTemplateOptions();
+  updateSaveReportButton();
 });
 $('#category').on('changed.bs.select', function() {
   updateTemplateOptions();
+  updateSaveReportButton();
 });
 
 $('#proSelect').on('changed.bs.select', function() {
   updateTemplateOptions(refreshPRO=false);
+  updateSaveReportButton();
+});
+$('#groupByFields').on('changed.bs.select', function() {
+  updateSaveReportButton();
+});
+$('#customFields').on('changed.bs.select', function() {
+  updateSaveReportButton();
 });
 
 async function showConfirmationDetails() {

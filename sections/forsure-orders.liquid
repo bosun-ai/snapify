@@ -5,183 +5,12 @@
   - Demo data only (Shopify storefront templates can’t read orders directly).
   - Replace with app blocks or AJAX to load real data if needed.
 {% endcomment %}
+{% style %}
 
-<div class="page-width" style="margin-top: 10rem;">
-  <section id="orders-dashboard" class="orders-dashboard" data-initial-tab="orders" aria-label="Orders dashboard">
-    <div class="od-wrap">
-      <!-- Left rail -->
-      <aside class="od-rail" aria-label="Modes">
-        <button class="od-rail-btn is-active" data-tab="orders" title="Orders"><span>O</span></button>
-        <button class="od-rail-btn" data-tab="returns" title="Returns"><span>R</span></button>
-        <button class="od-rail-btn" data-tab="fulfilment" title="Fulfilment"><span>F</span></button>
-      </aside>
-
-      <!-- Main -->
-      <main class="od-main">
-        <!-- Top bar -->
-        <div class="od-topbar">
-          <div class="od-title">Orders</div>
-          <div class="od-actions">
-            <details class="od-filter">
-              <summary>Filters</summary>
-              <form class="od-filter-form" onsubmit="return false">
-                <label>
-                  Search
-                  <input type="search" name="q" placeholder="Search orders, customers…" />
-                </label>
-                            <!-- Timeframe in header -->
-                  <label>
-                  Dates
-                  </label>
-            <div class="od-dates" aria-label="Timeframe">
-              
-              <label class="od-date">
-                <span>From</span>
-                <input type="date" id="od-from" />
-              </label>
-              <label class="od-date">
-                <span>To</span>
-                <input type="date" id="od-to" />
-              </label>
-            </div>
-                <label>
-                  Status
-                  <select name="status">
-                    <option value="">Any</option>
-                    <option>New</option>
-                    <option>Processing</option>
-                    <option>Shipped</option>
-                    <option>Cancelled</option>
-                    <option>Returned</option>
-                    <option>Fulfilled</option>
-                  </select>
-                </label>
-                <div class="od-filter-row">
-                  <button class="od-btn od-btn--primary" data-action="apply-filters">Apply</button>
-                  <button class="od-btn od-btn--ghost" data-action="clear-filters" type="reset">Clear</button>
-                </div>
-              </form>
-            </details>
-            <label class="od-upload">
-              <input type="file" hidden />
-              <span class="od-btn od-btn--primary">Upload</span>
-            </label>
-          </div>
-        </div>
-
-<!-- Orders tab -->
-<div class="od-list" data-tab-panel="orders" aria-labelledby="orders-tab">
-  <!-- Header with caret column -->
-  <div class="od-list-header od-list-header--orders">
-    <div class="od-col od-col--caret" aria-hidden="true"></div>
-    <div class="od-col od-col--sm">Date</div>
-    <div class="od-col">Order</div>
-    <div class="od-col">Customer</div>
-    <div class="od-col od-col--sm">Status</div>
-    <div class="od-col od-col--sm">Country</div>
-  </div>
-
-  <ul class="od-rows">
-    <!-- Example rows — keep your own dates/customer/status/country -->
-    <li class="od-row od-row--order" data-id="ORD-101" data-kind="orders" tabindex="0" aria-expanded="false">
-      <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
-        <span class="od-caret" aria-hidden="true">▾</span>
-      </button>
-      <div class="od-col od-col--sm">2025-09-01</div>
-      <div class="od-col">ORD-101</div>
-      <div class="od-col">Customer 1</div>
-      <div class="od-col od-col--sm">Processing</div>
-      <div class="od-col od-col--sm">Germany</div>
-      <!-- ⚠️ Do NOT add product rows here — JS will inject them -->
-    </li>
-
-    <li class="od-row od-row--order" data-id="ORD-102" data-kind="orders" tabindex="0" aria-expanded="false">
-      <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
-        <span class="od-caret" aria-hidden="true">▾</span>
-      </button>
-      <div class="od-col od-col--sm">2025-09-02</div>
-      <div class="od-col">ORD-102</div>
-      <div class="od-col">Customer 2</div>
-      <div class="od-col od-col--sm">Processing</div>
-      <div class="od-col od-col--sm">France</div>
-    </li>
-
-    <!-- …repeat for ORD-103 … ORD-107 etc. -->
-  </ul>
-</div>
-
-
-
-        <!-- Returns tab -->
-        <div class="od-list is-hidden" data-tab-panel="returns" aria-labelledby="returns-tab">
-          <div class="od-list-header">
-            <div class="od-col od-col--sm">Date</div>
-            <div class="od-col">RMA</div>
-            <div class="od-col">Order</div>
-            <div class="od-col od-col--sm">State</div>
-            <div class="od-col od-col--sm">Country</div>
-          </div>
-          <ul class="od-rows">
-            {% for i in (1..5) %}
-              <li class="od-row" data-id="RMA-20{{ i }}" data-kind="returns" tabindex="0">
-                <div class="od-col od-col--sm">2025-08-1{{ i }}</div>
-                <div class="od-col">RMA-20{{ i }}</div>
-                <div class="od-col">ORD-10{{ i }}</div>
-                <div class="od-col od-col--sm">Pending</div>
-                <div class="od-col od-col--sm">{% cycle 'France','Germany','Italy','Belgium','Czechia' %}</div>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-
-        <!-- Fulfilment tab -->
-        <div class="od-list is-hidden" data-tab-panel="fulfilment" aria-labelledby="fulfilment-tab">
-          <div class="od-list-header">
-            <div class="od-col od-col--sm">Date</div>
-            <div class="od-col">Batch</div>
-            <div class="od-col">Carrier</div>
-            <div class="od-col od-col--sm">Labels</div>
-            <div class="od-col od-col--sm">Country</div>
-          </div>
-          <ul class="od-rows">
-            {% for i in (1..6) %}
-              <li class="od-row" data-id="FUL-30{{ i }}" data-kind="fulfilment" tabindex="0">
-                <div class="od-col od-col--sm">2025-09-1{{ i }}</div>
-                <div class="od-col">FUL-30{{ i }}</div>
-                <div class="od-col">{% cycle 'DHL','DPD','UPS','GLS','FedEx','DHL' %}</div>
-                <div class="od-col od-col--sm">{{ i }}6</div>
-                <div class="od-col od-col--sm">{% cycle 'Italy','Germany','Sweden','Portugal','Ireland','Denmark' %}</div>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </main>
-
-      <!-- Info panel -->
-      <aside class="od-info" aria-live="polite" aria-label="Info">
-        <div class="od-info-empty">Select a row to see details.</div>
-        <div class="od-info-body is-hidden">
-          <h3 class="od-info-title"></h3>
-          <dl class="od-info-grid">
-            <div><dt>ID</dt><dd data-field="id"></dd></div>
-            <div><dt>Kind</dt><dd data-field="kind"></dd></div>
-            <div><dt>Date</dt><dd data-field="date"></dd></div>
-            <div><dt>Status</dt><dd data-field="status"></dd></div>
-            <div><dt>Country</dt><dd data-field="country"></dd></div>
-          </dl>
-        </div>
-      </aside>
-    </div>
-  </section>
-</div>
-
-<style>
 .orders-dashboard { --rail: 76px; --gap: 16px; --info: 320px; --radius: 14px; }
 .orders-dashboard * { box-sizing: border-box; }
 
 .od-wrap {
-  display: grid;
-  grid-template-columns: var(--rail) 1fr var(--info);
   gap: var(--gap);
   min-height: 70vh;
   border: 1px solid rgba(0,0,0,.08);
@@ -189,6 +18,11 @@
   padding: var(--gap);
   background: var(--color-background, #fff);
 }
+
+.od-wrap{ display:flex; }
+.od-rail{ flex:0 0 76px; }
+.od-main{ flex:1 1 auto; min-width:0;height: fit-content; }
+.od-info{ flex:0 0 320px; }
 
 /* Timeframe block in header */
 .od-dates {
@@ -223,12 +57,13 @@
   background: #f7f7f8;
   border-radius: var(--radius);
   padding: 10px;
+  height: fit-content;
 }
 .od-rail-btn {
   border: 1px solid rgba(0,0,0,.1);
   border-radius: 12px;
   background: #fff;
-  width: 100%;
+  width: 70px;
   aspect-ratio: 1/1;
   font-weight: 700;
   font-size: 22px;
@@ -340,7 +175,7 @@
   cursor: pointer;
 }
 .od-row:hover { background: #fcfcfc; }
-.od-row.is-selected { outline: 2px solid #111; outline-offset: -2px; }
+.is-selected { outline: 2px solid #17161c; outline-offset: -2px; }
 .od-col--sm { white-space: nowrap; }
 
 /* Caret toggle button */
@@ -352,8 +187,8 @@
   justify-self: center;     /* center in caret column */
   cursor:pointer;
 }
-.od-row--order[aria-expanded="true"] .od-caret{ transform: rotate(180deg); }
-.od-caret{ transition: transform .15s ease; }
+.od-caret{ transition: transform .15s ease; transform: rotate(-90deg);}
+.od-caret-expanded{ transform: rotate(0deg); }
 
 /* Sub-rows container */
 .od-subrows {
@@ -383,7 +218,7 @@
   grid-template-columns: 1.6fr 1fr 80px 1.4fr;
   gap: 10px;
   align-items: center;
-  padding: 8px 0;
+  padding: 1rem;
   border-top: 1px dashed rgba(0,0,0,.08);
 }
 .od-subrow:first-child { border-top: 0; }
@@ -437,11 +272,151 @@
   .od-subheader, .od-subrow { grid-template-columns: 1fr 1fr; }
   .od-subcol--qty, .od-subcol--tags { grid-column: 1 / -1; }
 }
-</style>
+{% endstyle %}
+<div class="page-width" style="margin-top: 10rem;padding: 0;">
+  <section id="orders-dashboard" class="orders-dashboard" data-initial-tab="orders" aria-label="Orders dashboard">
+    <div class="od-wrap">
+      <!-- Left rail -->
+      <aside class="od-rail" aria-label="Modes">
+        <button class="od-rail-btn is-active" data-tab="orders" title="Orders"><span>O</span></button>
+        <button class="od-rail-btn" data-tab="returns" title="Returns"><span>R</span></button>
+        <button class="od-rail-btn" data-tab="fulfilment" title="Fulfilment"><span>F</span></button>
+      </aside>
+
+      <!-- Main -->
+      <main class="od-main">
+        <!-- Top bar -->
+        <div class="od-topbar">
+          <div class="od-title">Orders</div>
+          <div class="od-actions">
+            <details class="od-filter">
+              <summary>Filters</summary>
+              <form class="od-filter-form" onsubmit="return false">
+                <label>
+                  Search
+                  <input type="search" name="q" placeholder="Search orders, customers…" />
+                </label>
+                            <!-- Timeframe in header -->
+                  <label>
+                  Dates
+                  </label>
+            <div class="od-dates" aria-label="Timeframe">
+              
+              <label class="od-date">
+                <span>From</span>
+                <input type="date" id="od-from" />
+              </label>
+              <label class="od-date">
+                <span>To</span>
+                <input type="date" id="od-to" />
+              </label>
+            </div>
+                <label>
+                  Status
+                  <select name="status">
+                    <option value="">Any</option>
+                    <option>New</option>
+                    <option>Processing</option>
+                    <option>Shipped</option>
+                    <option>Cancelled</option>
+                    <option>Returned</option>
+                    <option>Fulfilled</option>
+                  </select>
+                </label>
+                <div class="od-filter-row">
+                  <button class="od-btn od-btn--primary" data-action="apply-filters">Apply</button>
+                  <button class="od-btn od-btn--ghost" data-action="clear-filters" type="reset">Clear</button>
+                </div>
+              </form>
+            </details>
+            <label class="od-upload">
+              <input type="file" hidden />
+              <span class="od-btn od-btn--primary">Upload</span>
+            </label>
+          </div>
+        </div>
+
+<!-- Orders tab -->
+<div class="od-list" data-tab-panel="orders" aria-labelledby="orders-tab">
+  <!-- Header with caret column -->
+  <div class="od-list-header od-list-header--orders">
+    <div class="od-col od-col--caret" aria-hidden="true"></div>
+    <div class="od-col od-col--sm">Date</div>
+    <div class="od-col">Order</div>
+    <div class="od-col">Customer</div>
+    <div class="od-col od-col--sm">Status</div>
+    <div class="od-col od-col--sm">Country</div>
+  </div>
+
+  <ul class="od-rows" id="orders-list" style="height: 50vh;">
+    <li style="text-align: center; padding: 10px;">Fetching orders...</li>
+  </ul>
+</div>
+
+
+
+        <!-- Returns tab -->
+        <div class="od-list is-hidden" data-tab-panel="returns" aria-labelledby="returns-tab">
+          <div class="od-list-header">
+            <div class="od-col od-col--sm">Date</div>
+            <div class="od-col">RMA</div>
+            <div class="od-col">Order</div>
+            <div class="od-col od-col--sm">State</div>
+            <div class="od-col od-col--sm">Country</div>
+          </div>
+          <ul class="od-rows">
+            {% for i in (1..5) %}
+              <li class="od-row" data-id="RMA-20{{ i }}" data-kind="returns" tabindex="0">
+                <div class="od-col od-col--sm">2025-08-1{{ i }}</div>
+                <div class="od-col">RMA-20{{ i }}</div>
+                <div class="od-col">ORD-10{{ i }}</div>
+                <div class="od-col od-col--sm">Pending</div>
+                <div class="od-col od-col--sm">{% cycle 'France','Germany','Italy','Belgium','Czechia' %}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Fulfilment tab -->
+        <div class="od-list is-hidden" data-tab-panel="fulfilment" aria-labelledby="fulfilment-tab">
+          <div class="od-list-header">
+            <div class="od-col od-col--sm">Date</div>
+            <div class="od-col">Batch</div>
+            <div class="od-col">Carrier</div>
+            <div class="od-col od-col--sm">Labels</div>
+            <div class="od-col od-col--sm">Country</div>
+          </div>
+          <ul class="od-rows">
+            {% for i in (1..6) %}
+              <li class="od-row" data-id="FUL-30{{ i }}" data-kind="fulfilment" tabindex="0">
+                <div class="od-col od-col--sm">2025-09-1{{ i }}</div>
+                <div class="od-col">FUL-30{{ i }}</div>
+                <div class="od-col">{% cycle 'DHL','DPD','UPS','GLS','FedEx','DHL' %}</div>
+                <div class="od-col od-col--sm">{{ i }}6</div>
+                <div class="od-col od-col--sm">{% cycle 'Italy','Germany','Sweden','Portugal','Ireland','Denmark' %}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </main>
+
+      <!-- Info panel -->
+      <aside class="od-info" aria-live="polite" aria-label="Info">
+        <div id="od-info-empty" class="od-info-empty">Select a row to see details.</div>
+        <div id="od-info-body" class="od-info-body is-hidden">
+          <h3 id="od-info-title" class="od-info-title"></h3>
+          <dl id="od-info-grid" class="od-info-grid">
+          </dl>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+
 
 
 <script>
-(() => {
+{% comment %} (() => {
   const root = document.getElementById('orders-dashboard');
   if (!root) return;
 
@@ -704,12 +679,332 @@ fromInput?.addEventListener('change', applyDateFilter);
 toInput?.addEventListener('change', applyDateFilter);
 
 
-  /* =========================
-     Init default tab
-  ========================== */
   const initial = root.dataset.initialTab || 'orders';
   setTab(initial);
 })();
+
+
+
+function _escapeHtml(v){return String(v??'').replace(/[&<>"']/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));}
+function _pick(o, keys, fallback=''){for(const k of keys){if(o && o[k]!=null && o[k]!== '') return o[k]} return fallback;}
+function _updateInfo(root, row){
+  const empty = root.querySelector('.od-info-empty');
+  const body  = root.querySelector('.od-info-body');
+  if(!row){ empty.classList.remove('is-hidden'); body.classList.add('is-hidden'); return; }
+  empty.classList.add('is-hidden'); body.classList.remove('is-hidden');
+  const data = {
+    id: row.dataset.id || '',
+    kind: row.dataset.kind || 'orders',
+    date: row.querySelector('.od-col:nth-child(2)')?.textContent?.trim() || '',
+    status: row.querySelector('.od-col:nth-child(5)')?.textContent?.trim() || '',
+    country: row.querySelector('.od-col:nth-child(6)')?.textContent?.trim() || ''
+  };
+  root.querySelector('.od-info-title').textContent = data.id;
+  Object.entries(data).forEach(([k,v]) => { const el = root.querySelector(`[data-field="${k}"]`); if(el) el.textContent = v; });
+}
+function _buildSubrows(row, items){
+  if(row.querySelector('.od-subrows')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'od-subrows'; wrap.hidden = true;
+  wrap.innerHTML = `
+    <div class="od-subheader">
+      <div class="od-subcol od-subcol--prod">Product</div>
+      <div class="od-subcol od-subcol--sku">SKU</div>
+      <div class="od-subcol od-subcol--qty">Qty</div>
+      <div class="od-subcol od-subcol--tags">Legislation</div>
+    </div>
+    <ul class="od-sublist"></ul>`;
+  const ul = wrap.querySelector('.od-sublist');
+  (items||[]).forEach(it=>{
+    const li = document.createElement('li');
+    li.className='od-subrow';
+    li.innerHTML = `
+      <div class="od-subcol od-subcol--prod"><span class="od-branch" aria-hidden="true"></span><a href="#" class="od-link">${_escapeHtml(it.name||'')}</a></div>
+      <div class="od-subcol od-subcol--sku"><code>${_escapeHtml(it.sku||'')}</code></div>
+      <div class="od-subcol od-subcol--qty">${_escapeHtml(it.qty||'')}</div>
+      <div class="od-subcol od-subcol--tags"></div>`;
+    const tagsBox = li.querySelector('.od-subcol--tags');
+    (it.tags||[]).forEach(t=>{
+      const s = document.createElement('span');
+      s.className = `od-tag od-tag--${String(t).toLowerCase().replace(/\s+/g,'-')}`;
+      s.textContent = t;
+      tagsBox.appendChild(s);
+    });
+    ul.appendChild(li);
+  });
+  row.appendChild(wrap);
+}
+function _attachRowHandlers(root, row, items){
+  row.addEventListener('click', (e)=>{
+    if(e.target.closest('.od-toggle') || e.target.closest('.od-subrows')) return;
+    row.parentElement.querySelectorAll('.od-row').forEach(r=>r.classList.remove('is-selected'));
+    row.classList.add('is-selected');
+    _updateInfo(root, row);
+  });
+  row.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); row.click(); }});
+
+  const btn = row.querySelector('.od-toggle');
+  if(btn){
+    btn.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const wrap = row.querySelector('.od-subrows');
+      if(!wrap){ _buildSubrows(row, items); }
+      const sub = row.querySelector('.od-subrows');
+      const expanded = row.getAttribute('aria-expanded')==='true';
+      row.setAttribute('aria-expanded', String(!expanded));
+      btn.title = expanded ? 'Show products' : 'Hide products';
+      if(sub) sub.hidden = expanded;
+    });
+    row.addEventListener('dblclick',()=>btn.click());
+  }
+}
+
+// Accepts df_merged.T.to_json() parsed as an object like {"0":{...},"1":{...}}
+function buildOrdersTable(payload){
+  const root = document.getElementById('orders-dashboard');
+  if(!root) return;
+  const list = root.querySelector('.od-list[data-tab-panel="orders"] .od-rows');
+  if(!list) return;
+
+  // Normalize to array of order objects
+  const arr = Array.isArray(payload) ? payload : Object.values(payload||{});
+
+  // Clear demo rows
+  list.innerHTML = '';
+
+  arr.forEach(o=>{
+    const id       = _pick(o, ['id','order_id','order','name','Order']);
+    const date     = _pick(o, ['date','created_at','order_date','created']);
+    const customer = _pick(o, ['customer','customer_name','Customer','buyer','buyer_name']);
+    const status   = _pick(o, ['status','fulfillment_status','financial_status','state']);
+    const country  = _pick(o, ['country','shipping_country','billing_country','country_code']);
+
+    const li = document.createElement('li');
+    li.className = 'od-row od-row--order';
+    li.dataset.id = id;
+    li.dataset.kind = 'orders';
+    li.tabIndex = 0;
+    li.setAttribute('aria-expanded','false');
+    li.innerHTML = `
+      <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
+        <span class="od-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="od-col od-col--sm">${_escapeHtml(date)}</div>
+      <div class="od-col">${_escapeHtml(id)}</div>
+      <div class="od-col">${_escapeHtml(customer)}</div>
+      <div class="od-col od-col--sm">${_escapeHtml(status)}</div>
+      <div class="od-col od-col--sm">${_escapeHtml(country)}</div>
+    `;
+
+    // Attach handlers. Prefer server items if present; fallback to demo map if defined.
+    const items = Array.isArray(o.items) ? o.items
+                 : (window.PRODUCTS_BY_ORDER && window.PRODUCTS_BY_ORDER[id]) || [];
+    _attachRowHandlers(root, li, items);
+
+    list.appendChild(li);
+  });
+
+  // Reset info panel
+  _updateInfo(root, null);
+} {% endcomment %}
+
+function escapeHtml(v){
+  return String(v??'').replace(/[&<>"']/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));
+}
+
+function toYMD(v) {
+  const d = new Date(v);
+  return !v || Number.isNaN(+d)
+    ? String(v ?? '')
+    : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+
+const orderGroupOrder = ['Order ID', 'Bought On', 'Customer', 'Status', 'Country'];
+const orderProductOrder = ['SKU', 'Amount', 'Name'];
+
+function customSort(a, b, order) {
+  // unknown entries should be at the end
+  const indexA = order.indexOf(a);
+  const indexB = order.indexOf(b);
+  if (indexA == -1) return 1;
+  if (indexB == -1) return -1;
+  return indexA - indexB;
+}
+
+function showDetails(order, group=false, li=null) {
+  document.querySelectorAll('.od-subrow').forEach(
+    r=>r.classList.remove('is-selected'));
+  document.querySelectorAll('.od-row--order').forEach(
+    r=>r.classList.remove('is-selected'));
+  li?.classList.add('is-selected');
+  document.getElementById('od-info-grid').innerHTML = '';
+  var title = 'Order Details';
+  if (group) {
+    for (entry of Object.keys(order).sort((a, b) => customSort(a, b, orderGroupOrder))) {
+      var div = document.createElement('div');
+      var dt = document.createElement('dt');
+      dt.textContent = entry;
+      div.appendChild(dt);
+      var dd = document.createElement('dd');
+      if (entry == 'Products') {
+        dd.textContent = order.Products.length;
+      } else {
+        dd.textContent = order[entry];
+      }
+      div.appendChild(dd);
+      document.getElementById('od-info-grid').appendChild(div);
+    }
+
+    {% comment %} document.getElementById('info-id').textContent = order.orderId;
+    document.getElementById('info-kind').textContent = 'Orders';
+    document.getElementById('info-date').textContent = order.date;
+    document.getElementById('info-status').textContent = order.status;
+    document.getElementById('info-country').textContent = order.country;
+    document.getElementById('info-items').textContent = order.items.length; {% endcomment %}
+  } else {
+    for (entry of Object.keys(order).sort((a, b) => customSort(a, b, orderProductOrder))) {
+      if (entry == 'unmapped') {
+        continue;
+      }
+      var div = document.createElement('div');
+      var dt = document.createElement('dt');
+      if (entry == 'legislation') {
+        dt.textContent = 'Legislation';
+        div.appendChild(dt);
+        var dd = document.createElement('dd');
+        dd.textContent = order.legislation.join(', ');
+      } else {
+        dt.textContent = entry;
+        div.appendChild(dt);
+        var dd = document.createElement('dd');
+        dd.textContent = order[entry]['value'];
+      }
+      div.appendChild(dd);
+      document.getElementById('od-info-grid').appendChild(div);
+    }
+    title = 'Product Details';
+  }
+  document.getElementById('od-info-title').textContent = title;
+  document.getElementById('od-info-body').classList.remove('is-hidden');
+  document.getElementById('od-info-empty').classList.add('is-hidden');
+}
+
+function buildSubrows(row, items){
+  if(row.querySelector('.od-subrows')) {
+    if (row.querySelector('.od-subrows').hidden) {
+      row.querySelector('.od-subrows').hidden = false;
+    } else {
+      row.querySelector('.od-subrows').hidden = true;
+    }
+    return;
+  }
+  const wrap = document.createElement('div');
+  wrap.className = 'od-subrows';
+  wrap.innerHTML = `
+    <div class="od-subheader">
+      <div class="od-subcol od-subcol--prod">Product</div>
+      <div class="od-subcol od-subcol--sku">SKU</div>
+      <div class="od-subcol od-subcol--qty">Amount</div>
+      <div class="od-subcol od-subcol--tags">Legislation</div>
+    </div>
+    <ul class="od-sublist"></ul>`;
+  const ul = wrap.querySelector('.od-sublist');
+  (items||[]).forEach(it=>{
+    const li = document.createElement('li');
+    li.className='od-subrow';
+    li.onclick = () => showDetails(it, false, li);
+    li.innerHTML = `
+      <div class="od-subcol od-subcol--prod"><span class="od-branch" aria-hidden="true"></span>${escapeHtml(it.Name['value']|| it.ProductTitle['value']||'')}</div>
+      <div class="od-subcol od-subcol--sku"><code>${escapeHtml(it.SKU['value']||'')}</code></div>
+      <div class="od-subcol od-subcol--qty">${escapeHtml(it.Amount['value']||'')}</div>
+      <div class="od-subcol od-subcol--tags"></div>`;
+    const tagsBox = li.querySelector('.od-subcol--tags');
+    (it.legislation||[]).forEach(t=>{
+      const s = document.createElement('span');
+      s.className = `od-tag od-tag--${String(t).charAt(0).toLowerCase().replace(/\s+/g,'-')}`;
+      s.textContent = t.charAt(0).toUpperCase();
+      tagsBox.appendChild(s);
+    });
+    ul.appendChild(li);
+  });
+  row.appendChild(wrap);
+}
+
+function expandOrder(li, group) {
+  showDetails(group, true, li);
+  buildSubrows(li, group.Products);
+}
+
+/**
+ * Build one <li> row for the Orders list from a grouped order.
+ * Expects: { orderId, date, customer, status, country }
+ */
+ function createOrderListItem(group) {
+  const li = document.createElement('li');
+  li.className = 'od-row od-row--order';
+  li.dataset.id = group['Order ID'] || '';
+  li.dataset.kind = 'orders';
+  li.tabIndex = 0;
+  li.setAttribute('aria-expanded', 'false');
+  li.onclick = (e) => {
+    if (e.target.closest('.od-subrows')) return;
+    e.stopPropagation();
+    li.querySelector('.od-caret').classList.toggle('od-caret-expanded');
+    expandOrder(li, group);
+  };
+
+  li.innerHTML = `
+    <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
+      <span class="od-caret" aria-hidden="true">{% render 'icon-arrow-rounded' %}</span>
+    </button>
+    <div class="od-col od-col--sm">${escapeHtml(toYMD(group['Bought On']) || '')}</div>
+    <div class="od-col">${escapeHtml(group['Order ID'])}</div>
+    <div class="od-col">${escapeHtml(group['Customer'] || 'Unknown')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['Status'] || 'Processing')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['Country'] || '')}</div>
+  `;
+  return li;
+}
+
+/**
+ * Render many grouped orders into the <ul id="orders-list">.
+ * @param {Array<Object>} groups
+ * @param {container?:Element|string, clear?:boolean} opts
+ * @returns {HTMLElement|null} the list element
+ */
+function renderOrderGroups(groups = [], opts = {}) {
+  const { container, clear = true } = opts;
+  const list =
+    typeof container === 'string'
+      ? document.querySelector(container)
+      : container instanceof Element
+      ? container
+      : document.getElementById('orders-list');
+
+  if (!list) return null;
+  if (clear) list.innerHTML = '';
+
+  for (const g of groups) list.appendChild(createOrderListItem(g));
+  return list;
+}
+
+
+async function loadOrders(offset=0, limit=50) {
+  const res = await unifiedSendRequest(ORDERS + `?offset=${offset}&limit=${limit}`, { method: 'GET' });
+  console.log(res);
+  return Object.values(res.items);
+}
+
+var orders = [];
+waitForPermission(async function() {
+  if (window.userPermissions['forsure-orders']) {
+    orders = await loadOrders();
+    console.log(orders);
+    renderOrderGroups(orders);
+  }
+});
+
 </script>
 
 {% schema %}
