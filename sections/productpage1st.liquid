@@ -504,9 +504,9 @@
     {% endif %}
     <div class="title-left-first {% if section.settings.reverse_layout %}is-reversed{% endif %}">
       <{{ section.settings.heading_size_google }} class="titlehomepage" style="{% if section.settings.background_gradient %}color: #fafafa;{% endif %}">
-        {{ section.settings.title1 }}
+        {{- section.settings.title1 -}}
         {% if section.settings.titlebluedefault != blank %}
-          <span id="namewordings" style="color: #2255ff">{{ section.settings.titlebluedefault }}</span>
+           <span id="namewordings" style="color: #2255ff">{{- section.settings.titlebluedefault -}}</span>
         {% endif %}
         <br>
         {{ section.settings.title2 }}
