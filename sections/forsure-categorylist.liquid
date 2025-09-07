@@ -1986,7 +1986,7 @@ async function saveRenameColumn() {
   var newColumnName = document.getElementById('renameColumnInput').value.trim();
   var newMapping = document.getElementById('renameColumnMapping').value;
   var oldMapping = categorylistLabels[oldColumnName];
-  if (oldMapping) {
+  if (oldMapping && oldMapping.key !== undefined) {
     oldMapping = oldMapping.key;
   } else {
     oldMapping = '';

@@ -2928,11 +2928,14 @@ async function getTimesAndCountry() {
     const countryDropdown = document.getElementById('country');
 
     countryDropdown.innerHTML = '';
-    countries.forEach((country, index) => {
+    countries.sort().forEach((country, index) => {
       const option = document.createElement('option');
       option.value = country;
       option.textContent = country;
-      if (index === 0) option.selected = true;
+      if (index === 0) {
+        option.selected = true;
+        getDateOptions(country);
+      }
       countryDropdown.appendChild(option);
     });
 
@@ -3286,6 +3289,7 @@ function updateTemplateOptions(refreshPRO=true) {
   templateSelect.innerHTML = '<option value="default">-- Select a template --</option>'; // Clear
   
   lastTemplate = 'default';
+  seenPro = new Set();
   allTemplates.forEach(template => {
     // Match filtering: if no selection, or matching the selected value
     const matchCountry = !selectedCountry || template.country === selectedCountry;
@@ -3293,6 +3297,10 @@ function updateTemplateOptions(refreshPRO=true) {
     const matchPro = !selectedPro || template.pro === selectedPro;
 
     if (matchCountry && matchCategory && refreshPRO && template.pro) {
+      if (seenPro.has(template.pro)) {
+        return;
+      }
+      seenPro.add(template.pro);
       const option = document.createElement('option');
       option.value = template.pro;
       option.textContent = template.pro;
