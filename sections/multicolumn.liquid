@@ -21,6 +21,15 @@
       width: calc(50% - {{section.settings.column_gap}}px / 2)!important;
       max-width: calc(50% - {{section.settings.column_gap}}px / 2)!important;
     }
+    
+    .subtitletext, .title {
+      margin-left: 3rem;
+    }
+    .subtitletext {
+      width: 83%;
+      text-align: center;
+      margin: 0 auto;
+    }
   }
 {%- endstyle -%}
 
@@ -127,6 +136,7 @@
         </div>
       {%- endif -%}
     </slider-component>
+    <div class="subtitletext" style="text-align: {{ section.settings.bottom_text_alignment }};">{{ section.settings.bottom_text }}</div>
     <div class="center{% if show_mobile_slider %} small-hide medium-hide{% endif %}">
       {%- if section.settings.button_label != blank -%}
         <a class="button button--primary"{% if section.settings.button_link == blank %} role="link" aria-disabled="true"{% else %} href="{{ section.settings.button_link }}"{% endif %}>
@@ -394,6 +404,32 @@
       "type": "url",
       "id": "button_link",
       "label": "t:sections.multicolumn.settings.button_link.label"
+    },
+    {
+      "type": "richtext",
+      "id": "bottom_text",
+      "default": "<p>Text below</p>",
+      "label": "Bottom Text"
+    },
+    {
+      "type": "select",
+      "id": "bottom_text_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Bottom Text Alignment"
     },
     {
       "type": "color",

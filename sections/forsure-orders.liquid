@@ -102,16 +102,16 @@
   font-size: 14px; cursor: pointer; background: #fff;
 }
 .od-btn--primary { background: #111; color: #fff; border-color: #111; }
-.od-btn--ghost { background: transparent; }
+.od-btn--ghost { background: transparent;     border: 0.1rem solid #17161c;}
 .od-upload input[type=file] { width: 0; height: 0; opacity: 0; }
 
 /* Filters button */
 .od-filter { position: relative; display: inline-block; margin-right: 1rem; }
-.od-filter > summary {
+/* .od-filter > summary {
   list-style: none; display: inline-flex; align-items: center; justify-content: center;
   padding: 8px 12px; border-radius: 12px; border: 1px solid #111;
   background: #fff; color: #111; font-weight: 600; font-size: 14px; line-height: 1; cursor: pointer;
-}
+} */
 .od-filter > summary::-webkit-details-marker { display: none; }
 .od-filter[open] > summary { background: #f2f2f2; border-color: #111; }
 .od-filter-form {
@@ -130,20 +130,27 @@
    LIST GRIDS
 ======================= */
 
-/* Default grid for lists that are NOT the Orders tab */
-.od-list:not([data-tab-panel="orders"]) .od-list-header,
-.od-list:not([data-tab-panel="orders"]) .od-row {
-  display: grid;
-  grid-template-columns: 140px 1.1fr 1.1fr 140px 110px;
-  gap: 10px;
-  align-items: center;
-}
-
 /* Orders tab — header and rows share the SAME tracks incl. caret col */
 .od-list[data-tab-panel="orders"] .od-list-header,
 .od-list[data-tab-panel="orders"] .od-row {
   display: grid;
-  grid-template-columns: 28px 140px 1.1fr 1.1fr 140px 140px;
+  grid-template-columns: 28px 140px 1.1fr 1.1fr 140px 140px 30px;
+  gap: 10px;
+  align-items: center;
+}
+
+.od-list[data-tab-panel="returns"] .od-list-header,
+.od-list[data-tab-panel="returns"] .od-row {
+  display: grid;
+  grid-template-columns: 28px 140px 1.1fr 1.1fr 30px;
+  gap: 10px;
+  align-items: center;
+}
+
+.od-list[data-tab-panel="fulfilment"] .od-list-header,
+.od-list[data-tab-panel="fulfilment"] .od-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 30px;
   gap: 10px;
   align-items: center;
 }
@@ -159,7 +166,7 @@
 /* Align text consistently */
 .od-list .od-col,
 .od-list-header .od-col {
-  text-align: left;
+  text-align: center;
 }
 
 /* Header styling */
@@ -175,7 +182,11 @@
   cursor: pointer;
 }
 .od-row:hover { background: #fcfcfc; }
-.is-selected { outline: 2px solid #17161c; outline-offset: -2px; }
+.is-selected {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #17161c;
+  /* outline: 2px solid #17161c; outline-offset: -2px;  */
+}
 .od-col--sm { white-space: nowrap; }
 
 /* Caret toggle button */
@@ -203,7 +214,6 @@
 /* Sub-rows header */
 .od-subheader {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 80px 1.4fr;
   gap: 10px;
   font-size: 12px;
   font-weight: 600;
@@ -211,11 +221,18 @@
   margin: 0 0 6px 18px;
 }
 
+.od-orders-sub {
+  grid-template-columns: 1.4fr 1fr 80px 1.4fr;
+}
+
+.od-returns-sub {
+  grid-template-columns: 1.4fr 1fr 1fr 1.4fr;
+}
+
 /* Sub-rows list + items */
 .od-sublist { list-style: none; margin: 0; padding: 0 0 0 18px; }
 .od-subrow {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 80px 1.4fr;
   gap: 10px;
   align-items: center;
   padding: 1rem;
@@ -236,6 +253,11 @@
 }
 .od-subcol--qty { font-weight: 600; }
 
+.od-subcol {
+  display: block!important;
+  text-align: center;
+}
+
 /* Legislation badges */
 .od-tag {
   display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
@@ -249,14 +271,124 @@
 .od-info {
   background: #fff; border: 1px solid rgba(0,0,0,.08);
   border-radius: var(--radius); padding: 14px; display: grid; align-content: start;
+  height: calc(50vh + 103px);
 }
+.od-info-body {
+  overflow: auto;
+  height: calc(50vh + 75px);
+}
+
 .od-info-empty { color: #666; opacity: .9; }
-.od-info-title { margin: 0 0 10px; font-size: 16px; }
-.od-info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.od-info-title { margin: 0 0 10px; font-size: 16px; padding-left: 1rem;}
+.od-info-description { margin: 0 0 10px; font-size: 12px; padding-left: 1rem;}
+.od-info-grid { display: grid; grid-template-columns: 1fr; gap: 8px;padding-left: 1rem;}
 .od-info-grid dt { font-size: 12px; color: #666; }
-.od-info-grid dd { margin: 0; font-weight: 600; }
+.od-info-grid dd { margin: 0; font-weight: 600; width: fit-content;min-height: 20px;min-width: 5rem;}
 
 .is-hidden { display: none !important; }
+
+#od-summary.active {
+  color: #fafafa;
+}
+
+.disabledbutton {
+  opacity: 0.5;
+  cursor: not-allowed!important;
+}
+
+.od-col--select input[type="checkbox"] {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease;
+}
+
+/* show on hover or when row is selected */
+.od-row:hover .od-col--select input,
+.od-subrow:hover .od-col--select input,
+.od-row.is-selected .od-col--select input,
+.od-subrow.is-selected .od-col--select input {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+.od-modal {
+  display: none; 
+  position: fixed;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,.4);
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal box */
+.od-modal-content {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  position: relative;
+}
+
+/* Close button */
+.od-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.od-modal-close:hover { color: #900; }
+
+.od-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+
+    /* Loading spinner */
+.loadingSpinner {
+  border: 4px solid rgba(34, 85, 255, 0.1);
+  border-top: 4px solid #2255ff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+  display: flex!important;
+}
+.loadingSpinnerContainer{
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#icon-orders svg, #icon-fulfilment svg {
+  width: 5rem;
+  height: 5rem;
+}
+#icon-orders, #icon-return, #icon-fulfilment {
+  margin-top: 0.5rem;
+}
+
+#icon-return svg {
+  width: 6rem;
+  height: 6rem;
+  margin-left: -0.2rem;
+}
+
 
 /* Responsive */
 @media (max-width: 1100px) {
@@ -273,138 +405,147 @@
   .od-subcol--qty, .od-subcol--tags { grid-column: 1 / -1; }
 }
 {% endstyle %}
-<div class="page-width" style="margin-top: 10rem;padding: 0;">
+{% render 'forsure-upload-module' %}
+<div class="page-width" style="margin-top: 5rem;padding: 0;">
   <section id="orders-dashboard" class="orders-dashboard" data-initial-tab="orders" aria-label="Orders dashboard">
     <div class="od-wrap">
       <!-- Left rail -->
       <aside class="od-rail" aria-label="Modes">
-        <button class="od-rail-btn is-active" data-tab="orders" title="Orders"><span>O</span></button>
-        <button class="od-rail-btn" data-tab="returns" title="Returns"><span>R</span></button>
-        <button class="od-rail-btn" data-tab="fulfilment" title="Fulfilment"><span>F</span></button>
+        <button class="od-rail-btn is-active" data-tab="orders" title="Orders" onclick="setTab('orders')"><span id="icon-orders">{% render 'icon-goods' %}</span></button>
+        <button class="od-rail-btn" data-tab="returns" title="Returns" onclick="setTab('returns')"><span id="icon-return">{% render 'icon-warehouse' %}</span></button>
+        <button class="od-rail-btn" data-tab="fulfilment" title="Fulfilment" onclick="setTab('fulfilment')"><span id="icon-fulfilment">{% render 'icon-packaging' %}</span></button>
       </aside>
 
       <!-- Main -->
       <main class="od-main">
         <!-- Top bar -->
         <div class="od-topbar">
-          <div class="od-title">Orders</div>
+          <div class="od-title" id="od-title">Orders</div>
           <div class="od-actions">
-            <details class="od-filter">
-              <summary>Filters</summary>
-              <form class="od-filter-form" onsubmit="return false">
-                <label>
-                  Search
-                  <input type="search" name="q" placeholder="Search orders, customers…" />
-                </label>
-                            <!-- Timeframe in header -->
+            <button class="od-btn od-btn--ghost" data-action="edit" style="display: none;margin-right: 1rem;" id="bulkedit" onclick="openEditModal()">Multi Edit</button>
+            <div id="filter-container">
+              <details class="od-filter" id="od-filter">
+                <summary id="od-summary" class="od-btn od-btn--ghost">Filters</summary>
+                <form class="od-filter-form" onsubmit="return false">
+                  <label>
+                    Search
+                    <input type="search" name="q" placeholder="Search orders, customers…" id="search" />
+                  </label>
+                              <!-- Timeframe in header -->
+                  <div>
+                    <label>
+                      Source
+                      <select id="source">
+                        <option value="">All</option>
+                      </select>
+                    </label>
+                  </div>
                   <label>
                   Dates
                   </label>
-            <div class="od-dates" aria-label="Timeframe">
-              
-              <label class="od-date">
-                <span>From</span>
-                <input type="date" id="od-from" />
-              </label>
-              <label class="od-date">
-                <span>To</span>
-                <input type="date" id="od-to" />
-              </label>
-            </div>
-                <label>
-                  Status
-                  <select name="status">
-                    <option value="">Any</option>
-                    <option>New</option>
-                    <option>Processing</option>
-                    <option>Shipped</option>
-                    <option>Cancelled</option>
-                    <option>Returned</option>
-                    <option>Fulfilled</option>
-                  </select>
+              <div class="od-dates" aria-label="Timeframe">
+                
+                <label class="od-date">
+                  <span>From</span>
+                  <input type="date" id="startDate" />
                 </label>
-                <div class="od-filter-row">
-                  <button class="od-btn od-btn--primary" data-action="apply-filters">Apply</button>
-                  <button class="od-btn od-btn--ghost" data-action="clear-filters" type="reset">Clear</button>
-                </div>
-              </form>
-            </details>
-            <label class="od-upload">
-              <input type="file" hidden />
-              <span class="od-btn od-btn--primary">Upload</span>
-            </label>
+                <label class="od-date">
+                  <span>To</span>
+                  <input type="date" id="endDate" />
+                </label>
+              </div>
+                  <div class="od-filter-row">
+                    <button class="od-btn od-btn--primary" data-action="apply-filters" onclick="applyFilter()">Apply</button>
+                    <button class="od-btn od-btn--ghost" data-action="clear-filters" type="reset">Clear</button>
+                  </div>
+                </form>
+              </details>
+            </div>
+            <button class="od-btn od-btn--ghost" data-action="close-upload" style="display: none;" id="close-upload" onclick="closeUpload()">Close</button>
+            <button class="od-btn od-btn--primary" data-action="upload" onclick="openUpload()" id="upload-button">Upload</button>
           </div>
         </div>
+        <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
-<!-- Orders tab -->
-<div class="od-list" data-tab-panel="orders" aria-labelledby="orders-tab">
-  <!-- Header with caret column -->
-  <div class="od-list-header od-list-header--orders">
-    <div class="od-col od-col--caret" aria-hidden="true"></div>
-    <div class="od-col od-col--sm">Date</div>
-    <div class="od-col">Order</div>
-    <div class="od-col">Customer</div>
-    <div class="od-col od-col--sm">Status</div>
-    <div class="od-col od-col--sm">Country</div>
-  </div>
+        <div id="upload" style="display: none;width: 100%;">
+          <div class="dropZone" id="fileListDropZone" style="position: relative;border: 2px dashed #17161c;margin: 2rem;height: 50vh;display: block;overflow: auto;height: 40vh;">
+            <div id="imagecontainerwrapper" style="display: flex;align-items: center;height: 100%;width: 100%;justify-content: center;">
+              <div>
+                <div style="padding:1rem;width: fit-content;margin: auto;" id="upload-imagecontainerupload">
+                  <img width="220px" id="upload-imageupload" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy">
+                </div>
+                <div id="upload-textupload" style="text-align: center;">
+                  Drag & Drop your Order List here. You can upload multiple files at once.
+                </div>
+              </div>
+            </div>
+            <div class="fileList" id="fileList_file_list" style="width:100%; padding:2rem"></div>
+        </div>
+        <input type="file" id="file_list" style="display: none" multiple>
+        <div id="errorsorder_list"></div>
+        </div>
 
-  <ul class="od-rows" id="orders-list" style="height: 50vh;">
-    <li style="text-align: center; padding: 10px;">Fetching orders...</li>
-  </ul>
-</div>
+        <!-- Orders tab -->
+        <div class="od-list" data-tab-panel="orders" aria-labelledby="orders-tab" id="orders-tab">
+          <!-- Header with caret column -->
+          <div id="orders-list-header" class="od-list-header od-list-header--orders">
+            <div class="od-col od-col--caret" aria-hidden="true"></div>
+            <div class="od-col od-col--sm">Date</div>
+            <div class="od-col">Order</div>
+            <div class="od-col">Profile</div>
+            <div class="od-col od-col--sm">Status</div>
+            <div class="od-col od-col--sm">Country</div>
+            <div class="od-col od-col--selectall">
+              <input type="checkbox" id="select-all-orders" />
+            </div>
+          </div>
 
-
+          <ul class="od-rows" id="orders-list" style="height: 50vh;">
+            <li style="text-align: center; padding: 10px;">Fetching orders...</li>
+          </ul>
+        </div>
 
         <!-- Returns tab -->
-        <div class="od-list is-hidden" data-tab-panel="returns" aria-labelledby="returns-tab">
-          <div class="od-list-header">
-            <div class="od-col od-col--sm">Date</div>
-            <div class="od-col">RMA</div>
-            <div class="od-col">Order</div>
-            <div class="od-col od-col--sm">State</div>
-            <div class="od-col od-col--sm">Country</div>
+        <div class="od-list is-hidden" data-tab-panel="returns" aria-labelledby="returns-tab" id="returns-tab">
+          <div id="returns-list-header" class="od-list-header od-list-header--orders">
+            <div class="od-col od-col--caret" aria-hidden="true"></div>
+            <div class="od-col od-col--sm">Date Returned</div>
+            <div class="od-col">Order ID</div>
+            <div class="od-col od-col--sm">Status</div>
+            <div class="od-col od-col--selectall">
+              <input type="checkbox" id="select-all-returns" />
+            </div>
           </div>
-          <ul class="od-rows">
-            {% for i in (1..5) %}
-              <li class="od-row" data-id="RMA-20{{ i }}" data-kind="returns" tabindex="0">
-                <div class="od-col od-col--sm">2025-08-1{{ i }}</div>
-                <div class="od-col">RMA-20{{ i }}</div>
-                <div class="od-col">ORD-10{{ i }}</div>
-                <div class="od-col od-col--sm">Pending</div>
-                <div class="od-col od-col--sm">{% cycle 'France','Germany','Italy','Belgium','Czechia' %}</div>
-              </li>
-            {% endfor %}
+          <ul class="od-rows" id="returns-list" style="height: 50vh;">
+            <li style="text-align: center; padding: 10px;">Fetching returns...</li>
           </ul>
         </div>
 
         <!-- Fulfilment tab -->
-        <div class="od-list is-hidden" data-tab-panel="fulfilment" aria-labelledby="fulfilment-tab">
-          <div class="od-list-header">
-            <div class="od-col od-col--sm">Date</div>
-            <div class="od-col">Batch</div>
-            <div class="od-col">Carrier</div>
-            <div class="od-col od-col--sm">Labels</div>
-            <div class="od-col od-col--sm">Country</div>
+        <div class="od-list is-hidden" data-tab-panel="fulfilment" aria-labelledby="fulfilment-tab" id="fulfilment-tab">
+          <div id="fulfilment-list-header" class="od-list-header od-list-header--orders">
+            <div class="od-col od-col--sm">Order ID</div>
+            <div class="od-col">Total Weight</div>
+            <div class="od-col">Main Type</div>
+            <div class="od-col">Main Type Weight</div>
+            <div class="od-col od-col--sm">Status</div>
+            <div class="od-col od-col--selectall">
+              <input type="checkbox" id="select-all-fulfilment" />
+            </div>
           </div>
-          <ul class="od-rows">
-            {% for i in (1..6) %}
-              <li class="od-row" data-id="FUL-30{{ i }}" data-kind="fulfilment" tabindex="0">
-                <div class="od-col od-col--sm">2025-09-1{{ i }}</div>
-                <div class="od-col">FUL-30{{ i }}</div>
-                <div class="od-col">{% cycle 'DHL','DPD','UPS','GLS','FedEx','DHL' %}</div>
-                <div class="od-col od-col--sm">{{ i }}6</div>
-                <div class="od-col od-col--sm">{% cycle 'Italy','Germany','Sweden','Portugal','Ireland','Denmark' %}</div>
-              </li>
-            {% endfor %}
+          <ul class="od-rows" id="fulfilment-list" style="height: 50vh;">
+            <li style="text-align: center; padding: 10px;">Fetching fulfilment...</li>
           </ul>
         </div>
-      </main>
+</main>
 
       <!-- Info panel -->
-      <aside class="od-info" aria-live="polite" aria-label="Info">
+      <aside class="od-info" aria-live="polite" aria-label="Info" id="od-info">
         <div id="od-info-empty" class="od-info-empty">Select a row to see details.</div>
         <div id="od-info-body" class="od-info-body is-hidden">
           <h3 id="od-info-title" class="od-info-title"></h3>
+          <h3 id="od-info-description" class="od-info-description" style="display: none;">[Click on a value to edit it.]</h3>
           <dl id="od-info-grid" class="od-info-grid">
           </dl>
         </div>
@@ -412,401 +553,109 @@
     </div>
   </section>
 </div>
-
-
+<div id="editModal" class="od-modal" aria-hidden="true">
+  <div class="od-modal-content">
+    <span class="od-modal-close" id="editModalClose" onclick="closeEditModal()">&times;</span>
+    <h2 id="editModalTitle" style="margin-top: 0rem;margin-bottom: 1rem;"></h2>
+    <p id="editModalBody"></p>
+    <div style="display: flex;gap: 10px;">
+      <select id="editModalSelect" class="btn dropdown-toggle bs-placeholder btn-default" style="position: relative;width: 50%;text-align: left;">
+      </select>
+      <input type="text" id="editModalInput" placeholder="New value" style="width: 50%;">
+    </div>
+    <div class="od-modal-actions">
+      <button class="od-btn od-btn--ghost" id="editModalCancel" onclick="closeEditModal()">Cancel</button>
+      <button class="od-btn od-btn--primary" id="editModalConfirm" onclick="editModalConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+<script src="{{ 'forsure-profile.js' | asset_url }}" defer></script>
 
 <script>
-{% comment %} (() => {
-  const root = document.getElementById('orders-dashboard');
-  if (!root) return;
-
-  /* =========================
-     Sample data (edit freely)
-     Each order -> array of items: { name, sku, qty, tags[] }
-  ========================== */
-  const PRODUCTS_BY_ORDER = {
-    "ORD-101": [
-      { name: "18650 Rechargeable Li-ion Battery", sku: "BAT-101", qty: 2, tags: ["B", "P"] },
-      { name: "USB-C Charger 30W",                  sku: "CHG-101", qty: 1, tags: ["W", "P"] },
-      { name: "Smart Sensor Module V2",             sku: "SNS-201", qty: 3, tags: ["W"] }
-    ],
-    "ORD-102": [
-      { name: "AA NiMH Pack (4pcs)",                sku: "BAT-AA04", qty: 1, tags: ["B", "P"] },
-      { name: "LED Desk Lamp",                      sku: "LMP-302",  qty: 1, tags: ["W", "P"] }
-    ],
-    "ORD-103": [
-      { name: "Power Bank 10k",                     sku: "PB-10K",   qty: 1, tags: ["B", "P"] },
-      { name: "USB-C Cable 1m",                     sku: "CAB-C1",   qty: 2, tags: ["P"] }
-    ],
-    "ORD-104": [
-      { name: "AA NiMH Pack (4pcs)",                sku: "BAT-AA04", qty: 2, tags: ["Batteries", "Packaging"] }
-    ],
-    "ORD-105": [
-      { name: "Power Bank 10k",                     sku: "PB-10K",   qty: 1, tags: ["Batteries", "Packaging"] },
-      { name: "USB-C Cable 2m",                     sku: "CAB-C2",   qty: 1, tags: ["Packaging"] }
-    ],
-    "ORD-106": [
-      { name: "LED Desk Lamp",                      sku: "LMP-302",  qty: 1, tags: ["WEEE", "Packaging"] }
-    ],
-    "ORD-107": [
-      { name: "Solar Charger 20W",                  sku: "SOL-20W",  qty: 1, tags: ["WEEE", "Packaging"] },
-      { name: "18650 Rechargeable Li-ion Battery",  sku: "BAT-101",  qty: 2, tags: ["Batteries", "Packaging"] }
-    ]
-  };
-
-  /* =========================
-     Small helpers
-  ========================== */
-  const qs  = (sel, el = document) => el.querySelector(sel);
-  const qsa = (sel, el = document) => Array.from(el.querySelectorAll(sel));
-  const parseDate = (s) => { if (!s) return null; const d = new Date(s); return isNaN(d) ? null : d; };
-  const getRowDate = (row) => {
-    const t = qs('.od-col', row)?.textContent?.trim(); // first column = Date
-    const d = new Date(t);
-    return isNaN(d) ? null : d;
-  };
-
-  /* =========================
-     Build subrows (products) via JS
-  ========================== */
-  function createTagSpan(tag) {
-    const span = document.createElement('span');
-    const cls = `od-tag od-tag--${tag.toLowerCase().replace(/\s+/g,'-')}`;
-    span.className = cls;
-    span.textContent = tag;
-    return span;
+var uploadVisible = false;
+function openUpload() {
+  if (uploadVisible) {
+    uploadFiles();
+    return;
   }
+  unselectAll();
+  document.getElementById('upload').style.display = 'block';
+  document.getElementById('close-upload').style.display = 'block';
+  document.getElementById('filter-container').style.display = 'none';
+  document.getElementById('upload-textupload').style.display = 'block';
+  document.getElementById('upload-button').style.backgroundColor = '#2255ff';
+  document.getElementById('upload-textupload').innerText = 'Drag & Drop your ' + activeTab.charAt(0).toUpperCase() + activeTab.slice(1) + ' List here. You can upload multiple files at once.';
+  document.getElementById('upload-button').innerText = 'Upload ' + activeTab;
+  document.getElementById('upload-button').disabled = true;
+  document.getElementById('upload-button').classList.add('disabledbutton');
+  document.getElementById('upload-button').title = 'Please upload a file first';
+  document.getElementById('upload-imagecontainerupload').style.display = 'block';
+  document.getElementById('imagecontainerwrapper').style.height = '100%';
 
-  function ensureSubrowsForRow(row) {
-    // if already exists, skip
-    if (qs('.od-subrows', row)) return;
+  document.querySelectorAll('.od-list').forEach(b => b.style.display = 'none');
+  document.getElementById('od-info').style.display = 'none';
+  uploadVisible = true;
+}
 
-    const orderId = row.dataset.id;
-    const items = PRODUCTS_BY_ORDER[orderId] || [];
-    if (!items.length) return; // nothing to render
+function closeUpload() {
+  document.getElementById('upload').style.display = 'none';
+  document.getElementById('close-upload').style.display = 'none';
+  document.getElementById('filter-container').style.display = 'block';
+  document.getElementById('upload-button').style.backgroundColor = '#17161c';
+  document.getElementById('upload-button').innerText = 'Upload';
+  document.getElementById("upload-button").disabled = false;
+  document.getElementById("upload-button").classList.remove('disabledbutton');
+  document.getElementById("upload-button").title = '';
+  document.querySelectorAll('.od-list').forEach(b => b.style.display = 'block');
+  document.getElementById('od-info').style.display = 'block';
+  uploadVisible = false;
+}
 
-    // container
-    const wrap = document.createElement('div');
-    wrap.className = 'od-subrows';
-    wrap.hidden = true;
+function showSpinner() {
+  // prevent duplicates
+  console.log(activeTab);
+  const container = document.querySelector("#" + activeTab + "-tab");
+  if (container.querySelector(".loadingSpinnerContainer")) return;
 
-    // header
-    const header = document.createElement('div');
-    header.className = 'od-subheader';
-    header.innerHTML = `
-      <div class="od-subcol od-subcol--prod">Product</div>
-      <div class="od-subcol od-subcol--sku">SKU</div>
-      <div class="od-subcol od-subcol--qty">Qty</div>
-      <div class="od-subcol od-subcol--tags">Legislation</div>
-    `;
-    wrap.appendChild(header);
+  const spinnerContainer = document.createElement("div");
+  spinnerContainer.className = "loadingSpinnerContainer";
+  spinnerContainer.innerHTML = `<div class="loadingSpinner"></div>`;
 
-    // list
-    const ul = document.createElement('ul');
-    ul.className = 'od-sublist';
+  container.style.position = "relative"; // anchor for absolute
+  container.appendChild(spinnerContainer);
+}
 
-    items.forEach(it => {
-      const li = document.createElement('li');
-      li.className = 'od-subrow';
-      li.innerHTML = `
-        <div class="od-subcol od-subcol--prod">
-          <span class="od-branch" aria-hidden="true"></span>
-          <a href="#" class="od-link">${it.name}</a>
-        </div>
-        <div class="od-subcol od-subcol--sku"><code>${it.sku}</code></div>
-        <div class="od-subcol od-subcol--qty">${it.qty}</div>
-        <div class="od-subcol od-subcol--tags"></div>
-      `;
-      const tagBox = qs('.od-subcol--tags', li);
-      (it.tags || []).forEach(t => tagBox.appendChild(createTagSpan(t)));
-      ul.appendChild(li);
-    });
+function hideSpinner() {
+  const container = document.querySelector("#" + activeTab + "-tab");
+  const el = container.querySelector(".loadingSpinnerContainer");
+  if (el) el.remove();
+}
 
-    wrap.appendChild(ul);
-    // place after the row's last column so it aligns (grid-column: 2 / -1 is in CSS)
-    row.appendChild(wrap);
-  }
+setupDropZone(document.getElementById('fileListDropZone'), document.getElementById('file_list'), 'fileList_file_list');
 
-  // Create subrows for all orders once (can be lazy if you prefer)
-  qsa('.od-row--order', root).forEach(ensureSubrowsForRow);
-
-  /* =========================
-     Tabs (O / R / F)
-  ========================== */
-  const railBtns = qsa('.od-rail-btn', root);
-  const panels   = qsa('[data-tab-panel]', root);
-
-  function setTab(tab) {
-    railBtns.forEach(b => b.classList.toggle('is-active', b.dataset.tab === tab));
-    panels.forEach(p => p.classList.toggle('is-hidden', p.dataset.tabPanel !== tab));
-    qsa('.od-row.is-selected', root).forEach(r => r.classList.remove('is-selected'));
-    showInfo(null);
-
-    const title = qs('.od-title', root);
-    if (title) title.textContent = tab === 'orders' ? 'Orders' : tab === 'returns' ? 'Returns' : 'Fulfilment';
-
-    applyDateFilter();
-  }
-  railBtns.forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
-
-  /* =========================
-     Row selection -> Info panel
-  ========================== */
-  function showInfo(row) {
-    const empty = qs('.od-info-empty', root);
-    const body  = qs('.od-info-body', root);
-
-    if (!row) {
-      empty?.classList.remove('is-hidden');
-      body?.classList.add('is-hidden');
-      return;
+function canSwitchTab(tab) {
+  if (uploadVisible) {
+    if (document.querySelectorAll('#fileList_file_list .file-row').length > 0) {
+      return confirm('Are you sure you want to switch tabs? You have uploaded files that will be lost.');
     }
-    empty?.classList.add('is-hidden');
-    body?.classList.remove('is-hidden');
-
-    const cols = qsa('.od-col', row);
-    const data = {
-      id: row.dataset.id || (cols[1]?.textContent ?? ''),
-      kind: row.dataset.kind || '',
-      date: cols[0]?.textContent ?? '',
-      status: cols[3]?.textContent ?? '',
-      country: cols[4]?.textContent ?? ''
-    };
-    const title = qs('.od-info-title', root);
-    if (title) title.textContent = data.id;
-    Object.keys(data).forEach(k => {
-      const el = qs(`[data-field="${k}"]`, root);
-      if (el) el.textContent = data[k];
-    });
   }
-
-  function bindRowSelection(scope = root) {
-    qsa('.od-row', scope).forEach(row => {
-      if (row.__boundSelect) return;
-      row.__boundSelect = true;
-
-      row.addEventListener('click', (e) => {
-        if ((e.target.closest && e.target.closest('.od-toggle')) || e.target.closest('.od-subrows')) return;
-        row.closest('.od-rows').querySelectorAll('.od-row').forEach(r => r.classList.remove('is-selected'));
-        row.classList.add('is-selected');
-        showInfo(row);
-      });
-
-      row.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
-      });
-    });
-  }
-  bindRowSelection();
-
-  /* =========================
-     Expand / collapse product sub-rows (Orders tab)
-  ========================== */
-  function bindOrderToggles(scope = root) {
-    qsa('.od-row--order .od-toggle', scope).forEach(btn => {
-      if (btn.__boundToggle) return;
-      btn.__boundToggle = true;
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const row = btn.closest('.od-row--order');
-        ensureSubrowsForRow(row); // make sure subrows exist (if you choose to lazy-build)
-        const sub = qs('.od-subrows', row);
-        const expanded = row.getAttribute('aria-expanded') === 'true';
-        row.setAttribute('aria-expanded', String(!expanded));
-        btn.title = expanded ? 'Show products' : 'Hide products';
-        if (sub) sub.hidden = expanded;
-      });
-    });
-
-    qsa('.od-row--order', scope).forEach(row => {
-      if (row.__boundDbl) return;
-      row.__boundDbl = true;
-      row.addEventListener('dblclick', () => qs('.od-toggle', row)?.click());
-    });
-  }
-  bindOrderToggles();
-
-/* =========================
-   Timeframe controls (inside Filters dropdown)
-========================== */
-const fromInput = document.getElementById('od-from');
-const toInput   = document.getElementById('od-to');
-
-// hook into the dropdown buttons you already have
-const filterForm   = root.querySelector('.od-filter-form');
-const applyFilterB = filterForm?.querySelector('[data-action="apply-filters"]');
-const clearFilterB = filterForm?.querySelector('[data-action="clear-filters"]');
-
-function applyDateFilter() {
-  const parseDate = s => { const d = new Date(s); return isNaN(d) ? null : d; };
-  const from  = parseDate(fromInput?.value);
-  const toRaw = parseDate(toInput?.value);
-  const to    = toRaw ? new Date(toRaw.getFullYear(), toRaw.getMonth(), toRaw.getDate() + 1) : null; // inclusive
-
-  const list = root.querySelector('.od-list:not(.is-hidden) .od-rows');
-  if (!list) return;
-
-  list.querySelectorAll('.od-row').forEach(li => {
-    const t = li.querySelector('.od-col')?.textContent?.trim();
-    const d = t ? new Date(t) : null;
-    let show = true;
-    if (from && d) show = show && d >= from;
-    if (to && d)   show = show && d <  to;
-    if ((from || to) && !d) show = false;
-    li.style.display = show ? '' : 'none';
-  });
+  return true;
 }
 
-function clearDateFilter() {
-  if (fromInput) fromInput.value = '';
-  if (toInput)   toInput.value   = '';
-  const list = root.querySelector('.od-list:not(.is-hidden) .od-rows');
-  list?.querySelectorAll('.od-row').forEach(li => li.style.display = '');
+function hideUploadImages() {
+  document.getElementById('upload-imagecontainerupload').style.display = 'none';
+  document.getElementById('imagecontainerwrapper').style.height = 'fit-content';
 }
 
-// connect to your existing buttons
-applyFilterB?.addEventListener('click', () => {
-  applyDateFilter();
-  filterForm.closest('details').open = false;
-});
-clearFilterB?.addEventListener('click', () => {
-  clearDateFilter();
-});
-
-// optional: live filter on change
-fromInput?.addEventListener('change', applyDateFilter);
-toInput?.addEventListener('change', applyDateFilter);
-
-
-  const initial = root.dataset.initialTab || 'orders';
-  setTab(initial);
-})();
-
-
-
-function _escapeHtml(v){return String(v??'').replace(/[&<>"']/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));}
-function _pick(o, keys, fallback=''){for(const k of keys){if(o && o[k]!=null && o[k]!== '') return o[k]} return fallback;}
-function _updateInfo(root, row){
-  const empty = root.querySelector('.od-info-empty');
-  const body  = root.querySelector('.od-info-body');
-  if(!row){ empty.classList.remove('is-hidden'); body.classList.add('is-hidden'); return; }
-  empty.classList.add('is-hidden'); body.classList.remove('is-hidden');
-  const data = {
-    id: row.dataset.id || '',
-    kind: row.dataset.kind || 'orders',
-    date: row.querySelector('.od-col:nth-child(2)')?.textContent?.trim() || '',
-    status: row.querySelector('.od-col:nth-child(5)')?.textContent?.trim() || '',
-    country: row.querySelector('.od-col:nth-child(6)')?.textContent?.trim() || ''
-  };
-  root.querySelector('.od-info-title').textContent = data.id;
-  Object.entries(data).forEach(([k,v]) => { const el = root.querySelector(`[data-field="${k}"]`); if(el) el.textContent = v; });
-}
-function _buildSubrows(row, items){
-  if(row.querySelector('.od-subrows')) return;
-  const wrap = document.createElement('div');
-  wrap.className = 'od-subrows'; wrap.hidden = true;
-  wrap.innerHTML = `
-    <div class="od-subheader">
-      <div class="od-subcol od-subcol--prod">Product</div>
-      <div class="od-subcol od-subcol--sku">SKU</div>
-      <div class="od-subcol od-subcol--qty">Qty</div>
-      <div class="od-subcol od-subcol--tags">Legislation</div>
-    </div>
-    <ul class="od-sublist"></ul>`;
-  const ul = wrap.querySelector('.od-sublist');
-  (items||[]).forEach(it=>{
-    const li = document.createElement('li');
-    li.className='od-subrow';
-    li.innerHTML = `
-      <div class="od-subcol od-subcol--prod"><span class="od-branch" aria-hidden="true"></span><a href="#" class="od-link">${_escapeHtml(it.name||'')}</a></div>
-      <div class="od-subcol od-subcol--sku"><code>${_escapeHtml(it.sku||'')}</code></div>
-      <div class="od-subcol od-subcol--qty">${_escapeHtml(it.qty||'')}</div>
-      <div class="od-subcol od-subcol--tags"></div>`;
-    const tagsBox = li.querySelector('.od-subcol--tags');
-    (it.tags||[]).forEach(t=>{
-      const s = document.createElement('span');
-      s.className = `od-tag od-tag--${String(t).toLowerCase().replace(/\s+/g,'-')}`;
-      s.textContent = t;
-      tagsBox.appendChild(s);
-    });
-    ul.appendChild(li);
-  });
-  row.appendChild(wrap);
-}
-function _attachRowHandlers(root, row, items){
-  row.addEventListener('click', (e)=>{
-    if(e.target.closest('.od-toggle') || e.target.closest('.od-subrows')) return;
-    row.parentElement.querySelectorAll('.od-row').forEach(r=>r.classList.remove('is-selected'));
-    row.classList.add('is-selected');
-    _updateInfo(root, row);
-  });
-  row.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); row.click(); }});
-
-  const btn = row.querySelector('.od-toggle');
-  if(btn){
-    btn.addEventListener('click',(e)=>{
-      e.stopPropagation();
-      const wrap = row.querySelector('.od-subrows');
-      if(!wrap){ _buildSubrows(row, items); }
-      const sub = row.querySelector('.od-subrows');
-      const expanded = row.getAttribute('aria-expanded')==='true';
-      row.setAttribute('aria-expanded', String(!expanded));
-      btn.title = expanded ? 'Show products' : 'Hide products';
-      if(sub) sub.hidden = expanded;
-    });
-    row.addEventListener('dblclick',()=>btn.click());
-  }
+function showUploadImages() {
+  document.getElementById('upload-imagecontainerupload').style.display = 'block';
+  document.getElementById('imagecontainerwrapper').style.height = '100%';
 }
 
-// Accepts df_merged.T.to_json() parsed as an object like {"0":{...},"1":{...}}
-function buildOrdersTable(payload){
-  const root = document.getElementById('orders-dashboard');
-  if(!root) return;
-  const list = root.querySelector('.od-list[data-tab-panel="orders"] .od-rows');
-  if(!list) return;
-
-  // Normalize to array of order objects
-  const arr = Array.isArray(payload) ? payload : Object.values(payload||{});
-
-  // Clear demo rows
-  list.innerHTML = '';
-
-  arr.forEach(o=>{
-    const id       = _pick(o, ['id','order_id','order','name','Order']);
-    const date     = _pick(o, ['date','created_at','order_date','created']);
-    const customer = _pick(o, ['customer','customer_name','Customer','buyer','buyer_name']);
-    const status   = _pick(o, ['status','fulfillment_status','financial_status','state']);
-    const country  = _pick(o, ['country','shipping_country','billing_country','country_code']);
-
-    const li = document.createElement('li');
-    li.className = 'od-row od-row--order';
-    li.dataset.id = id;
-    li.dataset.kind = 'orders';
-    li.tabIndex = 0;
-    li.setAttribute('aria-expanded','false');
-    li.innerHTML = `
-      <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
-        <span class="od-caret" aria-hidden="true">▾</span>
-      </button>
-      <div class="od-col od-col--sm">${_escapeHtml(date)}</div>
-      <div class="od-col">${_escapeHtml(id)}</div>
-      <div class="od-col">${_escapeHtml(customer)}</div>
-      <div class="od-col od-col--sm">${_escapeHtml(status)}</div>
-      <div class="od-col od-col--sm">${_escapeHtml(country)}</div>
-    `;
-
-    // Attach handlers. Prefer server items if present; fallback to demo map if defined.
-    const items = Array.isArray(o.items) ? o.items
-                 : (window.PRODUCTS_BY_ORDER && window.PRODUCTS_BY_ORDER[id]) || [];
-    _attachRowHandlers(root, li, items);
-
-    list.appendChild(li);
-  });
-
-  // Reset info panel
-  _updateInfo(root, null);
-} {% endcomment %}
+function clearFileList() {
+  document.getElementById('fileList_file_list').innerHTML = '';
+  document.getElementById('file_list').value = '';
+}
 
 function escapeHtml(v){
   return String(v??'').replace(/[&<>"']/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));
@@ -819,9 +668,88 @@ function toYMD(v) {
     : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+async function setTab(tab) {
+  if (!canSwitchTab(tab)) {
+    return;
+  }
+  unselectAll();
+  if (uploadVisible) {
+    clearFileList();
+    document.getElementById('upload-textupload').innerText = 'Drag & Drop your ' + tab.charAt(0).toUpperCase() + tab.slice(1) + ' List here. You can upload multiple files at once.';
+    document.getElementById('upload-button').innerText = 'Upload ' + tab.charAt(0).toUpperCase() + tab.slice(1);
+    document.getElementById('upload-imagecontainerupload').style.display = 'block';
+  }
+  document.querySelectorAll('.od-rail-btn').forEach(b => b.classList.toggle('is-active', b.dataset.tab === tab));
+  document.querySelectorAll('.od-list').forEach(p => p.classList.toggle('is-hidden', p.dataset.tabPanel !== tab));
 
-const orderGroupOrder = ['Order ID', 'Bought On', 'Customer', 'Status', 'Country'];
-const orderProductOrder = ['SKU', 'Amount', 'Name'];
+  const title = document.getElementById('od-title');
+  if (title) title.textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
+  activeTab = tab;
+  if (getOffset() == 0) {
+    await appendData(true);
+  }
+}
+
+function getOffset() {
+  if (activeTab == 'orders') {
+    return nextOffsetOrders;
+  } else if (activeTab == 'returns') {
+    return nextOffsetReturns;
+  } else if (activeTab == 'fulfilment') {
+    return nextOffsetFulfilment;
+  }
+}
+
+function setOffset(offset, all=false) {
+  if (activeTab == 'orders' || all) {
+    nextOffsetOrders = offset;
+  } 
+  if (activeTab == 'returns' || all) {
+    nextOffsetReturns = offset;
+  } 
+  if (activeTab == 'fulfilment' || all) {
+    nextOffsetFulfilment = offset;
+  }
+}
+
+var search = '';
+var startDate = '';
+var endDate = '';
+var sourcefile = '';
+function applyFilter() {
+  search = document.getElementById('search').value;
+  startDate = document.getElementById('startDate').value;
+  endDate = document.getElementById('endDate').value;
+  sourcefile = document.getElementById('source').value;
+  unselectAll();
+  // reset offsets to reload all pages
+  setOffset(0, true);
+  appendData(true);
+  document.getElementById('od-filter').removeAttribute("open");
+  if (search != '' || startDate != '' || endDate != '' || sourcefile != '') {
+    document.getElementById("od-summary").classList.add("active");
+  } else {
+    document.getElementById("od-summary").classList.remove("active");
+  }
+}
+
+const orderGroupOrder = ['Order ID', 'Bought On', 'Profile', 'Status', 'Country', 'Customer'];
+const returnGroupOrder = ['Order ID', 'Returned On', 'Status', 'Source'];
+const fulfilmentGroupOrder = ['Order ID', 'Fulfilment Day', 'Total Weight', 'Main Type', 'Main Type Weight', 'Name', 'Country'];
+const groupDict = {
+  'orders': orderGroupOrder,
+  'returns': returnGroupOrder,
+  'fulfilment': fulfilmentGroupOrder
+};
+const orderProductOrder = ['General'];
+const returnProductOrder = ['SKU', 'Amount', 'Name'];
+const productDict = {
+  'orders': orderProductOrder,
+  'returns': returnProductOrder,
+  'fulfilment': []
+};
+
+var activeTab = 'orders';
 
 function customSort(a, b, order) {
   // unknown entries should be at the end
@@ -836,12 +764,18 @@ function showDetails(order, group=false, li=null) {
   document.querySelectorAll('.od-subrow').forEach(
     r=>r.classList.remove('is-selected'));
   document.querySelectorAll('.od-row--order').forEach(
-    r=>r.classList.remove('is-selected'));
+    r=>{
+      if (r.querySelector('.od-select').checked) {
+        return;
+      }
+      r.classList.remove('is-selected');
+    });
   li?.classList.add('is-selected');
   document.getElementById('od-info-grid').innerHTML = '';
-  var title = 'Order Details';
+  var title = activeTab == 'orders' ? 'Order Details' : activeTab == 'returns' ? 'Return Details' : 'Fulfilment Details';
   if (group) {
-    for (entry of Object.keys(order).sort((a, b) => customSort(a, b, orderGroupOrder))) {
+    document.getElementById('od-info-description').style.display = 'none';
+    for (entry of Object.keys(order).sort((a, b) => customSort(a, b, groupDict[activeTab]))) {
       var div = document.createElement('div');
       var dt = document.createElement('dt');
       dt.textContent = entry;
@@ -852,6 +786,8 @@ function showDetails(order, group=false, li=null) {
       } else {
         dd.textContent = order[entry];
       }
+      dd.style.cursor = 'default';
+      dd.title = 'This field is not editable';
       div.appendChild(dd);
       document.getElementById('od-info-grid').appendChild(div);
     }
@@ -863,25 +799,36 @@ function showDetails(order, group=false, li=null) {
     document.getElementById('info-country').textContent = order.country;
     document.getElementById('info-items').textContent = order.items.length; {% endcomment %}
   } else {
-    for (entry of Object.keys(order).sort((a, b) => customSort(a, b, orderProductOrder))) {
-      if (entry == 'unmapped') {
-        continue;
-      }
-      var div = document.createElement('div');
-      var dt = document.createElement('dt');
-      if (entry == 'legislation') {
-        dt.textContent = 'Legislation';
+    document.getElementById('od-info-description').style.display = 'block';
+    var productOrder = productDict[activeTab];
+    if (activeTab == 'orders') {
+      // if legislation is given, sort by that instead of the default order (so e.g. Packaging is first)
+      legislation = order['General']['legislation'].sort((a, b) => customSort(a,b, ['WEEE', 'Batteries', 'Packaging'])) || [];
+      productOrder = productOrder.concat(legislation);
+    }
+    for (const entry of Object.keys(order).sort((a, b) => customSort(a, b, productOrder))) {
+      for (const subentry of Object.keys(order[entry])) {
+        if (subentry == 'unmapped') {
+          continue;
+        }
+        var div = document.createElement('div');
+        var dt = document.createElement('dt');
+        var label = subentry;
+        var value = order[entry][subentry]['value'];
+        var editable = order[entry][subentry]['editable'];
+        if (subentry == 'legislation') {
+          label = 'Legislation';
+          value = order[entry][subentry].join(', ');
+          editable = false;
+        }
+        dt.textContent = label;
         div.appendChild(dt);
-        var dd = document.createElement('dd');
-        dd.textContent = order.legislation.join(', ');
-      } else {
-        dt.textContent = entry;
-        div.appendChild(dt);
-        var dd = document.createElement('dd');
-        dd.textContent = order[entry]['value'];
+        var dd = createDD(value, editable, order, entry, subentry);
+        div.appendChild(dd);
+        document.getElementById('od-info-grid').appendChild(div);
       }
-      div.appendChild(dd);
-      document.getElementById('od-info-grid').appendChild(div);
+      var br = document.createElement('br');
+      document.getElementById('od-info-grid').appendChild(br);
     }
     title = 'Product Details';
   }
@@ -890,45 +837,252 @@ function showDetails(order, group=false, li=null) {
   document.getElementById('od-info-empty').classList.add('is-hidden');
 }
 
-function buildSubrows(row, items){
-  if(row.querySelector('.od-subrows')) {
-    if (row.querySelector('.od-subrows').hidden) {
-      row.querySelector('.od-subrows').hidden = false;
-    } else {
-      row.querySelector('.od-subrows').hidden = true;
-    }
-    return;
+
+function createDD(value, editable, order, entry, subentry)  {
+  var dd = document.createElement('dd');
+  dd.textContent = value;
+  if (editable) {
+    dd.contentEditable = 'true';
+    let originalValue = value;
+    let cancelled = false;
+    dd.onblur = async (e) => {
+      if (cancelled) {
+        cancelled = false;                 // reset for next time
+        e.target.textContent = originalValue; // restore
+        return;                            // skip saving
+      }
+      if (e.target.textContent == originalValue) {
+        return;
+      }
+      originalValue = e.target.textContent;
+      await editValue(order, entry, subentry, e.target.textContent);
+    };
+    dd.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.target.blur();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cancelled = true;
+        e.target.blur();
+      }
+    };
+    dd.style.cursor = 'text';
+  } else {
+    dd.style.cursor = 'default';
+    dd.title = 'This field is not editable';
   }
-  const wrap = document.createElement('div');
-  wrap.className = 'od-subrows';
-  wrap.innerHTML = `
-    <div class="od-subheader">
-      <div class="od-subcol od-subcol--prod">Product</div>
-      <div class="od-subcol od-subcol--sku">SKU</div>
-      <div class="od-subcol od-subcol--qty">Amount</div>
-      <div class="od-subcol od-subcol--tags">Legislation</div>
-    </div>
-    <ul class="od-sublist"></ul>`;
-  const ul = wrap.querySelector('.od-sublist');
-  (items||[]).forEach(it=>{
-    const li = document.createElement('li');
-    li.className='od-subrow';
+  return dd;
+}
+
+function showDetailsFulfilment(order, li=null) {
+  document.querySelectorAll('.od-subrow').forEach(
+    r=>r.classList.remove('is-selected'));
+  document.querySelectorAll('.od-row--order').forEach(
+    r=>{
+      if (r.querySelector('.od-select').checked) {
+        return;
+      }
+      r.classList.remove('is-selected');
+    });
+  li?.classList.add('is-selected');
+  document.getElementById('od-info-grid').innerHTML = '';
+  var title = 'Fulfilment Details';
+  for (entry of Object.keys(order).sort((a, b) => customSort(a, b, ['General', 'WEEE', 'Batteries', 'Packaging']))) {
+    for (subentry of Object.keys(order[entry])) {
+      if (subentry == 'unmapped') {
+        continue;
+      }
+      var div = document.createElement('div');
+      var dt = document.createElement('dt');
+      var label = subentry;
+      var value = order[entry][subentry]['value'];
+      var editable = order[entry][subentry]['editable'];
+      dt.textContent = label;
+      div.appendChild(dt);
+      var dd = createDD(value, editable, order, entry, subentry);
+      div.appendChild(dd);
+      document.getElementById('od-info-grid').appendChild(div);
+    }
+    var br = document.createElement('br');
+    document.getElementById('od-info-grid').appendChild(br);
+  }
+  document.getElementById('od-info-title').textContent = title;
+  document.getElementById('od-info-body').classList.remove('is-hidden');
+  document.getElementById('od-info-empty').classList.add('is-hidden');
+}
+
+async function editValue(order, entry, subentry, newValue) {
+  // TODO save to database
+  console.log(newValue, order, entry, subentry);
+  try {
+    var change = {
+      new_value: newValue,
+      change_type: activeTab,
+      label_group: entry,
+      country: order['General']['Country']['value'],
+      label: subentry,
+      order_id: order['General']['Order ID']['value'],
+      sku: order['General']['SKU']?.['value'] || ''
+    }
+    var changes = [change];
+    var bulkChanges = {
+      changes: changes
+    }
+    var response = await unifiedSendRequest(CHANGES, {formData: JSON.stringify(bulkChanges), headerArgs: {'Content-Type': 'application/json'}});
+    if (response.status_code != 200) {
+      showMessage('Failed to save changes', false);
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save changes', false);
+  }
+
+}
+
+async function editValues(orders, group, subentry, newValue) {
+  // TODO save to database
+  console.log(newValue, orders, group, subentry);
+  var changes = [];
+  try {
+    for (var order of orders) {
+      var change = {
+        new_value: newValue,
+        change_type: activeTab,
+        label_group: group,
+        country: order['General']['Country']['value'],
+        label: subentry,
+        order_id: order['General']['Order ID']['value'],
+        sku: order['General']['SKU']?.['value'] || ''
+      }
+      changes.push(change);
+    }
+    var bulkChanges = {
+      changes: changes
+    }
+    var response = await unifiedSendRequest(CHANGES, {formData: JSON.stringify(bulkChanges), headerArgs: {'Content-Type': 'application/json'}});
+    if (response.status_code != 200) {
+      showMessage('Failed to save changes', false);
+    }
+    return response;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save changes', false);
+    return false;
+  }
+}
+
+function buildSubrows(row, items) {
+    const existing = row.querySelector('.od-subrows');
+    if (existing) {
+      existing.hidden = !existing.hidden;
+      return;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'od-subrows';
+
+    if (activeTab === 'orders') {
+      ul = buildOrdersSubheader(wrap);
+    } else if (activeTab == 'returns') {
+      ul = buildReturnsSubheader(wrap);
+    }
+
+    (items || []).forEach(it => {
+      if (activeTab == 'orders') { li = buildOrdersSubrows(it); } else if (activeTab == 'returns') { li = buildReturnsSubrows(it); }
+      ul.appendChild(li);
+    });
+    row.appendChild(wrap);
+}
+
+function buildOrdersSubheader(wrap) {
+    const header = document.createElement('div');
+    header.className = 'od-subheader od-orders-sub';
+
+    const prod = document.createElement('div');
+    prod.className = 'od-subcol od-subcol--prod';
+    prod.textContent = 'Product';
+
+    const sku = document.createElement('div');
+    sku.className = 'od-subcol od-subcol--sku';
+    sku.textContent = 'SKU';
+
+    const qty = document.createElement('div');
+    qty.className = 'od-subcol od-subcol--qty';
+    qty.textContent = 'Amount';
+
+    const tags = document.createElement('div');
+    tags.className = 'od-subcol od-subcol--tags';
+    tags.textContent = 'Legislation';
+
+    const ul = document.createElement('ul');
+    ul.className = 'od-sublist';
+
+    header.append(prod, sku, qty, tags);
+    wrap.appendChild(header);
+    wrap.appendChild(ul);
+    return ul;
+}
+
+function buildReturnsSubheader(wrap) {
+    const header = document.createElement('div');
+    header.className = 'od-subheader od-returns-sub';
+
+    const prod = document.createElement('div');
+    prod.className = 'od-subcol od-subcol--prod';
+    prod.textContent = 'Product';
+
+    const sku = document.createElement('div');
+    sku.className = 'od-subcol od-subcol--sku';
+    sku.textContent = 'SKU';
+
+    const qtyOrdered = document.createElement('div');
+    qtyOrdered.className = 'od-subcol od-subcol--qty';
+    qtyOrdered.textContent = 'Amount Ordered';
+
+    const qtyReturned = document.createElement('div');
+    qtyReturned.className = 'od-subcol od-subcol--qty';
+    qtyReturned.textContent = 'Amount Returned';
+
+    const ul = document.createElement('ul');
+    ul.className = 'od-sublist';
+
+    header.append(prod, sku, qtyOrdered, qtyReturned);
+    wrap.appendChild(header);
+    wrap.appendChild(ul);
+    return ul;
+}
+
+function buildOrdersSubrows(it) {
+  const li = document.createElement('li');
+    li.className='od-subrow od-orders-sub';
+    li.dataset.id = it['General']['SKU']['value']||'';
     li.onclick = () => showDetails(it, false, li);
     li.innerHTML = `
-      <div class="od-subcol od-subcol--prod"><span class="od-branch" aria-hidden="true"></span>${escapeHtml(it.Name['value']|| it.ProductTitle['value']||'')}</div>
-      <div class="od-subcol od-subcol--sku"><code>${escapeHtml(it.SKU['value']||'')}</code></div>
-      <div class="od-subcol od-subcol--qty">${escapeHtml(it.Amount['value']||'')}</div>
+      <div class="od-subcol od-subcol--prod">${escapeHtml(it['General']['Name']['value']|| it['General']['Product Name']['value']||'')}</div>
+      <div class="od-subcol od-subcol--sku"><code>${escapeHtml(it['General']['SKU']['value']||'')}</code></div>
+      <div class="od-subcol od-subcol--qty">${escapeHtml(it['General']['Amount']['value']||'')}</div>
       <div class="od-subcol od-subcol--tags"></div>`;
     const tagsBox = li.querySelector('.od-subcol--tags');
-    (it.legislation||[]).forEach(t=>{
+    (it['General'].legislation||[]).forEach(t=>{
       const s = document.createElement('span');
       s.className = `od-tag od-tag--${String(t).charAt(0).toLowerCase().replace(/\s+/g,'-')}`;
       s.textContent = t.charAt(0).toUpperCase();
       tagsBox.appendChild(s);
     });
-    ul.appendChild(li);
-  });
-  row.appendChild(wrap);
+    return li;
+  }
+
+function buildReturnsSubrows(it) {
+  const li = document.createElement('li');
+  li.className='od-subrow od-returns-sub';
+  li.onclick = () => showDetails(it, false, li);
+  li.innerHTML = `
+    <div class="od-subcol od-subcol--prod">${escapeHtml(it['General']['Name']['value']|| it['General']['Product Name']['value']||'')}</div>
+    <div class="od-subcol od-subcol--sku"><code>${escapeHtml(it['General']['SKU']['value']||'')}</code></div>
+    <div class="od-subcol od-subcol--qty">${escapeHtml(it['General']['Amount Ordered']['value']||'')}</div>
+    <div class="od-subcol od-subcol--qty">${escapeHtml(it['General']['Amount Returned']['value']||'')}</div>`;
+  return li;
 }
 
 function expandOrder(li, group) {
@@ -960,10 +1114,83 @@ function expandOrder(li, group) {
     </button>
     <div class="od-col od-col--sm">${escapeHtml(toYMD(group['Bought On']) || '')}</div>
     <div class="od-col">${escapeHtml(group['Order ID'])}</div>
-    <div class="od-col">${escapeHtml(group['Customer'] || 'Unknown')}</div>
+    <div class="od-col">${escapeHtml(group['Profile'] || 'Unknown')}</div>
     <div class="od-col od-col--sm">${escapeHtml(group['Status'] || 'Processing')}</div>
     <div class="od-col od-col--sm">${escapeHtml(group['Country'] || '')}</div>
+    <div class="od-col od-col--select">
+      <input type="checkbox" class="od-select" />
+    </div>
   `;
+
+  // get the rendered checkbox and stop row click when using it
+  const checkbox = li.querySelector('.od-select');
+  checkbox.addEventListener('click', e => {
+    e.stopPropagation();
+  });
+  return li;
+}
+
+/**
+ * Build one <li> row for the Orders list from a grouped order.
+ * Expects: { orderId, date, customer, status, country }
+ */
+ function createReturnListItem(group) {
+  const li = document.createElement('li');
+  li.className = 'od-row od-row--order';
+  li.dataset.id = group['Order ID'] || '';
+  li.dataset.kind = 'returns';
+  li.tabIndex = 0;
+  li.setAttribute('aria-expanded', 'false');
+  li.onclick = (e) => {
+    if (e.target.closest('.od-subrows')) return;
+    e.stopPropagation();
+    li.querySelector('.od-caret').classList.toggle('od-caret-expanded');
+    expandOrder(li, group);
+  };
+
+  li.innerHTML = `
+    <button class="od-toggle" type="button" aria-label="Toggle product lines" title="Show products">
+      <span class="od-caret" aria-hidden="true">{% render 'icon-arrow-rounded' %}</span>
+    </button>
+    <div class="od-col od-col--sm">${escapeHtml(toYMD(group['Returned On']) || '')}</div>
+    <div class="od-col">${escapeHtml(group['Order ID'])}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['Status'] || 'Pending')}</div>
+    <div class="od-col od-col--select">
+      <input type="checkbox" class="od-select" />
+    </div>
+  `;
+
+  // get the rendered checkbox and stop row click when using it
+  const checkbox = li.querySelector('.od-select');
+  checkbox.addEventListener('click', e => {
+    e.stopPropagation();
+  });
+  return li;
+}
+
+function createFulfilmentListItem(group) {
+  const li = document.createElement('li');
+  console.log(group);
+  li.className = 'od-row od-row--order';
+  li.dataset.id = group['General']['Order ID']['value'] || '';
+  li.dataset.kind = 'fulfilment';
+  li.tabIndex = 0;
+  li.setAttribute('aria-expanded', 'false');
+  li.innerHTML = `
+    <div class="od-col">${escapeHtml(group['General']['Order ID']['value'])}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['General']['Total Weight']['value'] || 'Unknown')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type']['value'] || 'Unknown')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type Weight']['value'] || 'Unknown')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['General']['Status']['value'] || 'Pending')}</div>
+    <div class="od-col od-col--select">
+      <input type="checkbox" class="od-select" />
+    </div>
+  `;
+  const checkbox = li.querySelector('.od-select');
+  checkbox.addEventListener('click', e => {
+    e.stopPropagation();
+  });
+  li.onclick = () => showDetailsFulfilment(group, li);
   return li;
 }
 
@@ -973,35 +1200,354 @@ function expandOrder(li, group) {
  * @param {container?:Element|string, clear?:boolean} opts
  * @returns {HTMLElement|null} the list element
  */
-function renderOrderGroups(groups = [], opts = {}) {
+function renderOrderGroups(groups = [], opts = {}, tab = 'orders') {
   const { container, clear = true } = opts;
   const list =
     typeof container === 'string'
       ? document.querySelector(container)
       : container instanceof Element
       ? container
-      : document.getElementById('orders-list');
+      : document.getElementById(tab + '-list');
 
   if (!list) return null;
   if (clear) list.innerHTML = '';
-
-  for (const g of groups) list.appendChild(createOrderListItem(g));
+  if (groups.length == 0) {
+    const liElement = document.createElement('li');
+    liElement.style.textAlign = 'center';
+    liElement.style.padding = '10px';
+    liElement.style.display = 'block';
+    if (nextOffsetOrders == null && tab == 'orders'  || nextOffsetReturns == null && tab == 'returns' || nextOffsetFulfilment == null && tab == 'fulfilment') {
+      liElement.textContent = 'No more ' + tab + ' found';
+    } else {
+      liElement.textContent = 'No ' + tab + ' found';
+    }
+    list.appendChild(liElement);
+    return list;
+  }
+  console.log(groups);
+  console.log(tab);
+  for (const g of groups) list.appendChild(tab == 'orders' ? createOrderListItem(g) : tab == 'returns' ? createReturnListItem(g) : createFulfilmentListItem(g));
   return list;
 }
 
-
-async function loadOrders(offset=0, limit=50) {
-  const res = await unifiedSendRequest(ORDERS + `?offset=${offset}&limit=${limit}`, { method: 'GET' });
-  console.log(res);
-  return Object.values(res.items);
+nextOffsetOrders = 0;
+nextOffsetReturns = 0;
+nextOffsetFulfilment = 0;
+total = {};
+var receivedData = {};
+async function loadData(offset=0, limit=50) {
+  try {
+    if(activeTab == 'orders') {
+      dataEndpoint = ORDERS;
+    } else if (activeTab == 'returns') {
+      dataEndpoint = RETURNS;
+    } else if (activeTab == 'fulfilment') {
+      dataEndpoint = FULFILMENT;
+    }
+    const params = new URLSearchParams();
+    params.append('offset', offset);
+    params.append('limit', limit);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    if (search) params.append('search', search);
+    if (sourcefile) params.append('source', sourcefile);
+    const res = await unifiedSendRequest(dataEndpoint + `?${params.toString()}`, { method: 'GET' });
+    if (activeTab == 'orders') {
+      nextOffsetOrders = res.next_offset;
+    } else if (activeTab == 'returns') {
+      nextOffsetReturns = res.next_offset;
+    } else if (activeTab == 'fulfilment') {
+      nextOffsetFulfilment = res.next_offset;
+    }
+    total[activeTab] = res.total;
+    receivedData[activeTab] = res.items;
+    document.getElementById('source').innerHTML = '';
+    var option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'All';
+    document.getElementById('source').appendChild(option);
+    for (var src of res.source_names.sort()) {
+      var option = document.createElement('option');
+      option.value = src;
+      option.textContent = src;
+      document.getElementById('source').appendChild(option);
+    }
+    return Object.values(res.items);
+  } catch (error) {
+    console.error(error);
+    showMessage('Failed to load ' + activeTab, false);
+    return [];
+  }
 }
+
+let loading = false;
+async function appendData(force=false) {
+  if (loading && !force) return;
+  loading = true;
+  if (activeTab == 'orders') {
+    nextOffsetData = nextOffsetOrders;
+  } else if (activeTab == 'returns') {
+    nextOffsetData = nextOffsetReturns;
+  } else if (activeTab == 'fulfilment') {
+    nextOffsetData = nextOffsetFulfilment;
+  }
+  if (nextOffsetData == null) { // no more data
+    return;
+  }
+  if (force) {
+    showSpinner();
+  }
+  var currentTab = activeTab;
+  const newData = await loadData(nextOffsetData);
+  if (currentTab != activeTab) {
+    return;
+  }
+  renderOrderGroups(newData, { container: '#' + activeTab + '-list', clear: force }, activeTab);
+  checkOverflow();
+  if (force) {
+    hideSpinner();
+  }
+  loading = false;
+}
+
+// attach scroll listener
+const container = document.getElementById('orders-list');
+const containerReturns = document.getElementById('returns-list');
+const containerFulfilment = document.getElementById('fulfilment-list');
+
+container.addEventListener('scroll', async () => {
+  const threshold = 100; // px from bottom
+  if (container.scrollTop + container.clientHeight >= container.scrollHeight - threshold) {
+    await appendData();
+  }
+});
+
+containerReturns.addEventListener('scroll', async () => {
+  const threshold = 100; // px from bottom
+  if (containerReturns.scrollTop + containerReturns.clientHeight >= containerReturns.scrollHeight - threshold) {
+    await appendData();
+  }
+});
+
+containerFulfilment.addEventListener('scroll', async () => {
+  const threshold = 100; // px from bottom
+  if (containerFulfilment.scrollTop + containerFulfilment.clientHeight >= containerFulfilment.scrollHeight - threshold) {
+    await appendData();
+  }
+});
+
+var ordersToEdit = [];
+var allSelected = false;
+function openEditModal() {
+  const modal = document.getElementById('editModal');
+  const title = document.getElementById('editModalTitle');
+  const body = document.getElementById('editModalBody');
+
+  // compute total
+  allSelected = document.getElementById('select-all-' + activeTab).checked;
+  let totalSelected = total[activeTab];
+  var selectedEntriesList = document.querySelectorAll(`#${activeTab}-list .od-select:checked`);
+
+  var editModalSelect = document.getElementById('editModalSelect');
+  editModalSelect.innerHTML = '';
+  ordersToEdit = [];
+  for (var entry of selectedEntriesList) {
+    var orderId = entry.closest('li').dataset.id;
+    ordersToEdit.push({ orderId: orderId });
+  }
+
+  var exampleEntry = ordersToEdit[0];
+  if (activeTab == 'fulfilment') {
+    var exampleEntryData = receivedData[activeTab][exampleEntry.orderId];
+  } else {
+    var exampleEntryData = receivedData[activeTab][exampleEntry.orderId].Products[0];
+  }
+
+  for (var optGroup of Object.keys(exampleEntryData).sort((a, b) => customSort(a, b, groupDict[activeTab]))) {
+    var optionGroup = document.createElement('optgroup');
+    optionGroup.label = optGroup;
+    optionGroup.value = optGroup;
+    var optionGroupOptions = 0;
+    for (var option of Object.keys(exampleEntryData[optGroup])) {
+        if (option == 'unmapped') {
+          continue;
+        }
+        if (option == 'legislation') {
+          continue;
+        }
+        if (!exampleEntryData[optGroup][option]['editable']) {
+          continue;
+        }
+        var optionElement = document.createElement('option');
+        optionElement.textContent = option;
+        optionElement.value = option;
+        optionElement.dataset.group = optGroup;
+        optionElement.dataset.country = exampleEntryData['General']['Country']['value'];
+        optionGroup.appendChild(optionElement);
+        optionGroupOptions++;
+    }
+    if (optionGroupOptions == 0) {
+      continue;
+    }
+    editModalSelect.appendChild(optionGroup);
+  }
+
+  if (!allSelected) {
+    totalSelected = ordersToEdit.length;
+  }
+
+  title.textContent = `Edit ${activeTab}`;
+  if (totalSelected == 1) {
+    body.textContent = `Editing 1 entry`;
+  } else {
+    body.textContent = `Editing ${totalSelected} entries`;
+  }
+
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden','false');
+}
+
+// Close modal helper
+function closeEditModal() {
+  const modal = document.getElementById('editModal');
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden','true');
+  document.getElementById('editModalSelect').value = '';
+  document.getElementById('editModalInput').value = '';
+}
+
+
+async function editModalConfirm() {
+  nrEntries = allSelected ? total[activeTab] : ordersToEdit.length;
+  var editValue = document.getElementById('editModalSelect').value;
+  var editGroup = document.getElementById('editModalSelect').querySelector('option:checked').dataset.group;
+  var country = document.getElementById('editModalSelect').querySelector('option:checked').dataset.country;
+  var editInput = document.getElementById('editModalInput').value;
+  if (editValue == '') {
+    showMessage('Please select a value to edit', false);
+    return;
+  }
+  if (editInput == '') {
+    showMessage('Please enter a new value', false);
+    return;
+  }
+  var confirmed = confirm('You are about to change the value of ' + nrEntries + ' entries for ' + editValue + ' to ' + editInput + '. This cannot be undone. Are you sure you want to continue?');
+  if (confirmed) {
+    if (allSelected) {
+      try {
+        var formData = new FormData();
+        formData.append('change_type', activeTab);
+        formData.append('label_group', editGroup);
+        formData.append('label', editValue);
+        formData.append('country', country);
+        formData.append('new_value', editInput);
+        if(search) formData.append('search', search);
+        if(startDate) formData.append('start_date', startDate);
+        if(endDate) formData.append('end_date', endDate);
+        if(sourcefile) formData.append('source', sourcefile);
+        var response = await unifiedSendRequest(CHANGES + '/query', {formData: formData});
+        if (response.status_code == 200) {
+          showMessage('Changes saved successfully', true);
+          closeEditModal();
+          unselectAll();
+          setOffset(0, true);
+          appendData(true);
+        } else {
+          showMessage('Failed to save changes', false);
+        }
+        return;
+      } catch (error) {
+        console.error(error.message);
+        showMessage('Failed to save changes', false);
+        return;
+      }
+    }
+    var dataToEdit = [];
+    for (var order of ordersToEdit) {
+      if (activeTab == 'fulfilment') {
+        dataToEdit.push(receivedData[activeTab][order.orderId]);
+      } else {
+        for (var product of receivedData[activeTab][order.orderId].Products) {
+          dataToEdit.push(product);
+        }
+      }
+    }
+    var response = await editValues(dataToEdit, editGroup, editValue, editInput);
+    if (response) {
+      showMessage('Changes saved successfully', true);
+      closeEditModal();
+      unselectAll();
+      setOffset(0, true);
+      appendData(true);
+    } else {
+      showMessage('Failed to save changes', false);
+    }
+  }
+}
+
+function updateHeaderCheckbox(listId, headerId) {
+  const checkboxes = document.querySelectorAll(`#${listId} .od-select`);
+  const header = document.getElementById(headerId);
+
+  const checkedCount = [...checkboxes].filter(cb => cb.checked).length;
+  if (checkedCount === 0) {
+    header.checked = false;
+    header.indeterminate = false;
+    document.getElementById('bulkedit').style.display = 'none';
+  } else if (checkedCount === checkboxes.length) {
+    header.checked = true;
+    header.indeterminate = false;
+    document.getElementById('bulkedit').style.display = 'block';
+  } else {
+    header.checked = false;
+    header.indeterminate = true;
+    document.getElementById('bulkedit').style.display = 'block';
+  }
+}
+
+function unselectAll() {
+  document.querySelectorAll('#' + activeTab + '-list .od-select').forEach(cb => {
+    cb.checked = false;
+    cb.closest('li').classList.remove('is-selected');
+  });
+  updateHeaderCheckbox('' + activeTab + '-list', 'select-all-' + activeTab);
+}
+
+document.addEventListener('change', e => {
+
+  if (e.target.id === 'select-all-' + activeTab) {
+    const checked = e.target.checked;
+    document.querySelectorAll('#' + activeTab + '-list .od-select').forEach(cb => {
+      cb.checked = checked;
+      cb.closest('li').classList.toggle('is-selected', checked);
+    });
+    updateHeaderCheckbox('' + activeTab + '-list', 'select-all-' + activeTab);
+  }
+
+  if (e.target.classList.contains('od-select')) {
+    const li = e.target.closest('li');
+    li.classList.toggle('is-selected', e.target.checked);
+    e.stopPropagation();
+    updateHeaderCheckbox('' + activeTab + '-list', 'select-all-' + activeTab);
+  }
+});
+
+function checkOverflow() {
+  const containerOverflow = document.querySelector("#" + activeTab + "-list");
+  const targetOverflow = document.querySelector("#" + activeTab + "-list-header");
+  if (containerOverflow.scrollHeight > containerOverflow.clientHeight) {
+    targetOverflow.style.paddingRight = "3rem"; // or addClass
+  } else {
+    targetOverflow.style.paddingRight = "14px";
+  }
+}
+
+window.addEventListener("resize", () => checkOverflow());
 
 var orders = [];
 waitForPermission(async function() {
   if (window.userPermissions['forsure-orders']) {
-    orders = await loadOrders();
-    console.log(orders);
-    renderOrderGroups(orders);
+    orders = await appendData(true);
   }
 });
 
@@ -1012,6 +1558,11 @@ waitForPermission(async function() {
     "name": "t:sections.forsure_orders.name",
     "class": "section",
     "settings": [
+      {
+        "type": "image_picker",
+        "id": "upload",
+        "label": "Upload"
+      },
       {
         "type": "range",
         "id": "padding_top",

@@ -219,7 +219,7 @@
 {% if customer.tags contains 'member' %}
     {% comment %} logged in but already a member {% endcomment %}
   <script>
-      window.location.href = '{{ pages['forsure-statistics'].url }}';
+      window.location.href = '{{ pages['forsure-dashboard'].url }}';
   </script>
 {% elsif customer.tags contains 'free-plan' %}
   <script>
@@ -237,6 +237,7 @@
   <div class="page-width">
     <div style="border-radius: 2.5rem;    overflow: hidden;">
     <div style="background: #fafafa;">
+      <h1 style="text-align: center;margin: 0;padding-top: 2rem;">Register</h1>
       <div class="container" style="background: #fafafa;margin:auto;padding:3%;display:flex;width: 90%;position:relative;height: fit-content">
         <div class="buttonList">
           <div style="justify-content: center;padding-top:5%">

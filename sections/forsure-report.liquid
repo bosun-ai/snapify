@@ -52,26 +52,7 @@
 .dropZone.error {
     border-color: var(--forsure-main-red);
 }
-#progressIcons {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
 
-.progressIcon {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1px solid #cccccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* cursor: pointer; */
-}
-
-.progressIcon:hover {
-    background-color: #f0f0f0;
-}
 #uploadSteps {
     position: relative;
     min-height: 680px;
@@ -381,7 +362,7 @@ content: "\2713"
 
 
 
-#step3 .container, #step4 .container {
+#step1 .container, #step2 .container {
   max-width: 1000px;
   margin: auto;
   margin-bottom: 4rem;
@@ -391,23 +372,23 @@ content: "\2713"
   box-shadow: 0 0 20px rgba(0,0,0,0.05);
 }
 
-#step3 h2.heading, #step4 h2.heading{
+#step1 h2.heading, #step2 h2.heading{
   font-size: 28px;
   font-weight: 600;
   text-align: center;
   margin-bottom: 30px;
 }
 
-#step3 label.form-label {
+#step1 label.form-label {
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
   color: #17161c;
 }
 
-#step3 .form-control,
-#step3 .selectpicker,
-#step3 select.form-select {
+#step1 .form-control,
+#step1 .selectpicker,
+#step1 select.form-select {
   border-radius: 8px !important;
   padding: 8px 12px !important;
   height: auto !important;
@@ -415,41 +396,41 @@ content: "\2713"
   background-color: #fff !important;
 }
 
-#step3 .small-date-input {
+#step1 .small-date-input {
   min-width: 220px;
   max-width: 100%;
   cursor: pointer;
 }
 
-#step3 .wide-select .dropdown-toggle {
+#step1 .wide-select .dropdown-toggle {
   white-space: normal !important;
   text-align: left !important;
   width: 100% !important;
 }
 
-#step3 .bootstrap-select > .dropdown-toggle {
+#step1 .bootstrap-select > .dropdown-toggle {
   width: 100% !important;
   border-radius: 8px !important;
 }
 
-#step3 .bootstrap-select .dropdown-menu {
+#step1 .bootstrap-select .dropdown-menu {
   border-radius: 8px;
   box-shadow: 0px 5px 20px rgba(0,0,0,0.08);
   max-width: 100%;
   overflow-x: auto;
 }
 
-#step3 input[type="checkbox"] {
+#step1 input[type="checkbox"] {
   transform: scale(1.3);
   margin-right: 8px;
 }
 
-#step3 .form-check-label {
+#step1 .form-check-label {
   font-weight: 500;
   color: #333;
 }
 
-#step3 .row > div {
+#step1 .row > div {
   margin-bottom: 20px;
 }
 
@@ -461,10 +442,10 @@ content: "\2713"
 }
 
 @media (max-width: 767px) {
-  #step3 .row > div {
+  #step1 .row > div {
     margin-bottom: 20px;
   }
-  #step3 .container {
+  #step1 .container {
     padding: 20px;
   }
 }
@@ -631,24 +612,6 @@ content: "\2713"
 
   <!-- Create a div where the graph will take place -->
 <div id="uploadSteps" class="border-uploads page-width" style="border-radius:1rem;">
-      <div id="progressIcons" style="margin-top: 3rem;display: none">
-        <div class="progressIcon" data-step="1">
-          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M75.59,36.31v50.27H61.72V53.68c-2.24,1.7-4.42,3.07-6.53,4.12 c-2.11,1.05-4.74,2.06-7.91,3.02V49.63c4.67-1.52,8.31-3.34,10.89-5.45c2.59-2.13,4.61-4.75,6.08-7.87H75.59L75.59,36.31z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85c-15.35,0-29.25,6.22-39.31,16.28C12.07,32.19,5.85,46.09,5.85,61.44 c0,15.35,6.22,29.25,16.28,39.31c10.06,10.06,23.96,16.28,39.31,16.28c15.35,0,29.25-6.22,39.31-16.28 c10.06-10.06,16.28-23.96,16.28-39.31C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
-          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
-        </div>
-        <div class="progressIcon" data-step="2">
-          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M82.15,86.69H40.73c0.47-4.08,1.92-7.93,4.32-11.53c2.41-3.61,6.91-7.86,13.53-12.77 c4.05-3.01,6.64-5.28,7.78-6.85c1.13-1.56,1.7-3.04,1.7-4.44c0-1.51-0.56-2.81-1.68-3.89c-1.12-1.08-2.53-1.61-4.23-1.61 c-1.76,0-3.2,0.56-4.32,1.67c-1.12,1.12-1.87,3.08-2.25,5.9l-13.81-1.12c0.54-3.9,1.54-6.93,2.98-9.11 c1.45-2.19,3.48-3.85,6.1-5.02c2.64-1.17,6.28-1.75,10.93-1.75c4.86,0,8.63,0.55,11.33,1.67c2.69,1.1,4.82,2.8,6.36,5.09 c1.55,2.3,2.32,4.87,2.32,7.71c0,3.02-0.89,5.91-2.66,8.67c-1.77,2.75-5,5.78-9.68,9.08c-2.78,1.92-4.64,3.27-5.57,4.04 c-0.94,0.77-2.04,1.77-3.31,3.02h21.56V86.69L82.15,86.69z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85 c-15.35,0-29.25,6.22-39.31,16.28C12.07,32.19,5.85,46.09,5.85,61.44c0,15.35,6.22,29.25,16.28,39.31 c10.06,10.06,23.96,16.28,39.31,16.28c15.35,0,29.25-6.22,39.31-16.28c10.06-10.06,16.28-23.96,16.28-39.31 C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
-          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
-        </div>
-        <div class="progressIcon" data-step="3">
-          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M54.83,51.45l-12.88-2.29c1.07-4.1,3.12-7.24,6.16-9.43c3.04-2.18,7.34-3.28,12.9-3.28 c6.39,0,11,1.19,13.86,3.57c2.84,2.39,4.27,5.39,4.27,9c0,2.11-0.58,4.03-1.74,5.74c-1.15,1.71-2.89,3.22-5.22,4.51 c1.89,0.47,3.34,1.02,4.34,1.64c1.63,1,2.89,2.33,3.79,3.96c0.9,1.64,1.36,3.6,1.36,5.87c0,2.85-0.74,5.59-2.24,8.22 c-1.5,2.61-3.64,4.63-6.45,6.05c-2.81,1.42-6.5,2.12-11.07,2.12c-4.45,0-7.97-0.53-10.54-1.58c-2.58-1.05-4.69-2.58-6.36-4.6 c-1.66-2.02-2.93-4.57-3.82-7.63l13.63-1.82c0.54,2.75,1.36,4.67,2.49,5.73c1.12,1.06,2.55,1.6,4.29,1.6 c1.82,0,3.33-0.67,4.55-2.01c1.21-1.34,1.82-3.12,1.82-5.35c0-2.27-0.58-4.03-1.75-5.29c-1.16-1.24-2.75-1.87-4.75-1.87 c-1.06,0-2.53,0.26-4.4,0.8l0.71-9.74c0.74,0.11,1.32,0.17,1.75,0.17c1.76,0,3.23-0.57,4.41-1.7s1.77-2.47,1.77-4.02 c0-1.5-0.45-2.68-1.32-3.56c-0.89-0.89-2.11-1.34-3.65-1.34c-1.6,0-2.89,0.48-3.89,1.45C55.86,47.35,55.18,49.04,54.83,51.45 L54.83,51.45z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85c-15.35,0-29.25,6.22-39.31,16.28 C12.07,32.19,5.85,46.09,5.85,61.44c0,15.35,6.22,29.25,16.28,39.31c10.06,10.06,23.96,16.28,39.31,16.28 c15.35,0,29.25-6.22,39.31-16.28c10.06-10.06,16.28-23.96,16.28-39.31C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
-          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
-        </div>
-        <div class="progressIcon" data-step="4">
-          <svg class="active-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><g><path fill="#17161c" d="M61.44,0c16.97,0,32.33,6.88,43.44,18c11.12,11.12,18,26.48,18,43.44c0,16.97-6.88,32.33-18,43.44 c-11.12,11.12-26.48,18-43.44,18c-16.97,0-32.33-6.88-43.44-18C6.88,93.77,0,78.41,0,61.44C0,44.47,6.88,29.11,18,18 C29.11,6.88,44.47,0,61.44,0L61.44,0z M64.9,77.74H39.58V66.3L64.9,36.19H77v30.78h6.3v10.77H77v9.37H64.9V77.74L64.9,77.74z M64.9,66.96V51.16L51.53,66.96H64.9L64.9,66.96z M100.75,22.13C90.69,12.07,76.79,5.85,61.44,5.85 c-15.35,0-29.25,6.22-39.31,16.28C12.07,32.19,5.85,46.09,5.85,61.44c0,15.35,6.22,29.25,16.28,39.31 c10.06,10.06,23.96,16.28,39.31,16.28c15.35,0,29.25-6.22,39.31-16.28c10.06-10.06,16.28-23.96,16.28-39.31 C117.03,46.09,110.81,32.19,100.75,22.13L100.75,22.13z"/></g></svg>
-          <svg class="completed-icon" style="display: none;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 117.72 117.72" style="enable-background:new 0 0 117.72 117.72" xml:space="preserve"><style type="text/css"><![CDATA[.st0{fill:#17161c;}]]></style><g><path class="st0" d="M58.86,0c9.13,0,17.77,2.08,25.49,5.79c-3.16,2.5-6.09,4.9-8.82,7.21c-5.2-1.89-10.81-2.92-16.66-2.92 c-13.47,0-25.67,5.46-34.49,14.29c-8.83,8.83-14.29,21.02-14.29,34.49c0,13.47,5.46,25.66,14.29,34.49 c8.83,8.83,21.02,14.29,34.49,14.29s25.67-5.46,34.49-14.29c8.83-8.83,14.29-21.02,14.29-34.49c0-3.2-0.31-6.34-0.9-9.37 c2.53-3.3,5.12-6.59,7.77-9.85c2.08,6.02,3.21,12.49,3.21,19.22c0,16.25-6.59,30.97-17.24,41.62 c-10.65,10.65-25.37,17.24-41.62,17.24c-16.25,0-30.97-6.59-41.62-17.24C6.59,89.83,0,75.11,0,58.86 c0-16.25,6.59-30.97,17.24-41.62S42.61,0,58.86,0L58.86,0z M31.44,49.19L45.8,49l1.07,0.28c2.9,1.67,5.63,3.58,8.18,5.74 c1.84,1.56,3.6,3.26,5.27,5.1c5.15-8.29,10.64-15.9,16.44-22.9c6.35-7.67,13.09-14.63,20.17-20.98l1.4-0.54H114l-3.16,3.51 C101.13,30,92.32,41.15,84.36,52.65C76.4,64.16,69.28,76.04,62.95,88.27l-1.97,3.8l-1.81-3.87c-3.34-7.17-7.34-13.75-12.11-19.63 c-4.77-5.88-10.32-11.1-16.79-15.54L31.44,49.19L31.44,49.19z"/></g></svg>
-        </div>
-    </div>
     <div class="step" id="chooseoption">
         <h2 class="heading">Choose an Option</h2>
         <div class="display-flex" style="margin: auto; width: fit-content; justify-content: space-between; gap: 2rem;">
@@ -809,7 +772,7 @@ content: "\2713"
     </div>
 
 
-    <div class="step losensitive" id="step1" style="display: none;">
+    {% comment %} <div class="step losensitive" id="step0" style="display: none;">
         <h2 class="heading">Select Orderlist</h2>
         <div class="display-flex" style="margin: auto;width: fit-content;display:flex;height: 7rem;">
           <h3 id="liveDataText" class="toggle-options">Use live data</h3>
@@ -836,10 +799,10 @@ content: "\2713"
         <div id="errorsorder_list"></div>
         <div class="navButtons" id="navButtonsStep1">
             <button class="nextButton button" onclick="uploadOrders('uploadorders/')" id="nextBtnuploadorders" style="position: relative;" disabled>Next</button>
-        </div>
-    </div>
+        </div> 
+      </div> {% endcomment %}
 
-  <div class="step losensitive" id="step2" style="display: none">
+  {% comment %} <div class="step losensitive" id="step2" style="display: none">
       <h2 class="heading">Select Returnlist</h2>
       <div class="dropZone" data-input="return_list" data-url="uploadreturns/" id="returnListDropZone">
         <div style="width: 100%;">
@@ -855,8 +818,9 @@ content: "\2713"
       <div class="navButtons">
           <button class="prevButton button button--secondary" onclick="prevStep(1)">Back</button>
           <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns">Next</button>
-      </div>
-  </div>
+      </div> 
+     </div>
+      {% endcomment %}
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
   <div id="profileModal" class="losensitive modal">
     <div class="modal-content">
@@ -903,7 +867,7 @@ content: "\2713"
     <button class="button" onclick="confirmOverwrite()">Yes</button>
     <button class="button" onclick="closeConfirmOverwriteModal()">No</button>
   </div>
-  <div class="step losensitive" id="step3" style="display: none;">
+  <div class="step losensitive" id="step1" style="display: none;">
       <h2 class="heading">Select country and timeframe</h2>
 
 
@@ -986,16 +950,15 @@ content: "\2713"
           </div>
 
           <div class="text-center mt-4">
-            <button class="prevButton button button--secondary" onclick="prevStep(2)">Back</button>
             <button id="saveReportButton" class="button" style="background-color: #17161c;" onclick="saveReportOpenModal()" disabled  title="Please select all settings">Save Template</button>
-            <button id="nextButtonSummary" class="nextButton button button" onclick="nextStep(4)" disabled title="Please select all settings">Next</button>
+            <button id="nextButtonSummary" class="nextButton button button" onclick="nextStep(2)" disabled title="Please select all settings">Next</button>
           </div>
       </div>
   </div>
 
 
 
-  <div class="step losensitive" id="step4" style="display: none;">
+  <div class="step losensitive" id="step2" style="display: none;">
       <h2 class="heading">Confirm</h2>
 
         <div class="container">
@@ -1073,7 +1036,7 @@ content: "\2713"
         </div>
 
       <div class="text-center mt-4" style="margin-bottom: 3rem;">
-          <button class="prevButton button button--secondary" onclick="prevStep(3)">Back</button>
+          <button class="prevButton button button--secondary" onclick="prevStep(1)">Back</button>
           <button class="nextButton button" onclick="createReport()">Create Report</button>
       </div>
   </div>
@@ -1195,11 +1158,11 @@ async function cancreatereports() {
         console.error(error.message);
         showMessage('Failed to get history ' + error.message, false);
     }
-    canuselivedata();
+    {% comment %} canuselivedata(); {% endcomment %}
 }
 
 
-async function canuselivedata() {
+{% comment %} async function canuselivedata() {
   try {
     if (window.userPermissions['forsure-report'] === false || window.userPermissions['livedata'] === false) {
       document.getElementById('liveDataToggleSlider').style.cursor = 'not-allowed';
@@ -1211,21 +1174,22 @@ async function canuselivedata() {
   } catch (error) {
     console.error(error.message);
   }
-}
+} {% endcomment %}
 
 var ordersReceived = 0;
 async function getOrdersReceived() {
   try {
-    let data = await unifiedSendRequest(UPLOADORDERSRECEIVED, {method: 'GET'});
+    let data = await unifiedSendRequest(ORDERVOLUMES, {method: 'GET'});
     ordersReceived = data['Orders']['used'];
-    if (ordersReceived > 0) {
+    nextStep(1);
+    {% comment %} if (ordersReceived > 0) {
       document.getElementById('nextBtnuploadorders').disabled = false;
       document.getElementById('nextBtnuploadorders').title = 'Please upload orders first';
     } else {
       document.getElementById('ordersReceived').innerHTML = 'No Orders Received yet';
       document.getElementById('nextBtnuploadorders').disabled = true;
-    }
-    document.getElementById('ordersReceived').style.display = 'block';
+    } {% endcomment %}
+    {% comment %} document.getElementById('ordersReceived').style.display = 'block'; {% endcomment %}
   } catch (error) {
     console.error(error.message);
   }
@@ -1237,7 +1201,7 @@ const createReportBtn = document.getElementById('createReport');
 const steps = document.querySelectorAll('.step');
 const dropZones = document.querySelectorAll('.dropZone');
 
-document.getElementById('liveDataToggle').addEventListener('change', function() {
+{% comment %} document.getElementById('liveDataToggle').addEventListener('change', function() {
     var liveDataText = document.getElementById('liveDataText');
     if (this.checked) {
       liveDataText.innerText = "Using live data";
@@ -1251,7 +1215,7 @@ document.getElementById('liveDataToggle').addEventListener('change', function() 
       liveDataText.innerText = "Use live data";
       document.getElementById('nextBtnuploadorders').disabled = true; // todo check if file was added
     }
-});
+}); {% endcomment %}
 
 
 var guideToShow = null;
@@ -1259,21 +1223,19 @@ async function selectOption(option) {
     document.getElementById('chooseoption').style.display = 'none';
     if (option === 'new') {
       document.getElementById('uploadReport').style.display = 'none';
-      document.getElementById('progressIcons').style.display = 'flex';
-        document.getElementById('step1').style.display = 'block';  // TODO change to step 1
+      nextStep(1);
+        {% comment %} document.getElementById('step1').style.display = 'block';  // TODO change to step 1 {% endcomment %}
         {% comment %} nextStep(3);  // TODO remove {% endcomment %}
         sessionStorage.setItem('currentFlow', 'new');
         guideToShow = 'new';
         await getOrdersReceived();
     } else if (option === 'upload') {
         getClientsFile();
-        document.getElementById('progressIcons').style.display = 'none';
         document.getElementById('step1').style.display = 'none';
         document.getElementById('uploadReport').style.display = 'block';
         sessionStorage.setItem('currentFlow', 'upload');
         guideToShow = 'upload';
     } else if (option === 'overview') {
-      document.getElementById('progressIcons').style.display = 'none';
       document.getElementById('step1').style.display = 'none';
       document.getElementById('uploadReport').style.display = 'none';
       document.getElementById('chooseoption').style.display = 'block';
@@ -2431,7 +2393,7 @@ function handleFileDeletion(uniqueId, orders, returns, reports, dataUrl) {
     image.style.width = newWidth + 'px';
 }
 
-async function uploadOrders(endpoint) {
+{% comment %} async function uploadOrders(endpoint) {
     document.getElementById('uploadSteps').style.cursor = 'wait';
     document.getElementById('nextBtnuploadorders').disabled = true;
     document.getElementsByClassName('dropZone')[0].style.cursor = 'wait';
@@ -2490,9 +2452,9 @@ async function uploadOrders(endpoint) {
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
         showMessage('Failed to upload orders ' + error.message, false);
     }
-}
+} {% endcomment %}
 
-async function uploadReturns(endpoint) {
+{% comment %} async function uploadReturns(endpoint) {
   document.getElementById('uploadSteps').style.cursor = 'wait';
     document.getElementById('nextBtnuploadreturns').disabled = true;
     document.getElementsByClassName('dropZone')[1].style.cursor = 'wait';
@@ -2551,7 +2513,7 @@ async function uploadReturns(endpoint) {
         document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
         showMessage('Failed to upload returns ' + error.message, false);
     }
-}
+} {% endcomment %}
 
 async function uploadReports() {
     if (Object.keys(selectedFilesReports).length === 0 && Object.keys(zeroDeclarationRows).length === 0) {
@@ -2563,6 +2525,7 @@ async function uploadReports() {
       submitZeroDeclaration();
     }
     if (Object.keys(selectedFilesReports).length == 0) {
+      document.getElementById('fileList_report_list').innerHTML = '';
       document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
       return;
     }
@@ -2875,45 +2838,23 @@ async function saveClientsEdits() {
         showMessage('Failed to save clients data: ' + error.message, false);
     }
 }
-
-function updateProgressIcons(currentStep) {
-    const icons = document.querySelectorAll('.progressIcon');
-    icons.forEach(icon => {
-        const step = parseInt(icon.getAttribute('data-step'));
-        const activeIcon = icon.querySelector('.active-icon');
-        const completedIcon = icon.querySelector('.completed-icon');
-        if (step < currentStep) {
-            activeIcon.style.display = 'none';
-            completedIcon.style.display = 'block';
-        } else if (step === currentStep) {
-            activeIcon.style.display = 'block';
-            completedIcon.style.display = 'none';
-        } else {
-            activeIcon.style.display = 'block';
-            completedIcon.style.display = 'none';
-        }
-    });
-}
-
 function nextStep(stepNumber) {
     stepFunctions(stepNumber);
     steps.forEach(step => step.style.display = 'none');
     document.getElementById('step' + stepNumber).style.display = 'block';
-    updateProgressIcons(stepNumber);
 }
 
 function prevStep(stepNumber) {
     stepFunctions(stepNumber);
     steps.forEach(step => step.style.display = 'none');
     document.getElementById('step' + stepNumber).style.display = 'block';
-    updateProgressIcons(stepNumber);
 }
 
 function stepFunctions(stepNumber){
-    if (stepNumber === 3) {
+    if (stepNumber === 1) {
       getTimesAndCountry();
     }
-    if (stepNumber === 4) {
+    if (stepNumber === 2) {
       showConfirmationDetails();
     }
 }
@@ -3094,6 +3035,8 @@ async function populateTemplateSelector() {
       $('#customFields').selectpicker('refresh');
       document.getElementById('groupByFields').disabled = false;
       $('#groupByFields').selectpicker('refresh');
+      document.getElementById('useBoughtFromSameCountry').disabled = false;
+      document.getElementById('useReturns').disabled = false;
       return;
     }
     $('#customFields').selectpicker('val', null);
@@ -3102,6 +3045,8 @@ async function populateTemplateSelector() {
     $('#groupByFields').selectpicker('val', null);
     document.getElementById('groupByFields').disabled = true;
     $('#groupByFields').selectpicker('refresh');
+    document.getElementById('useBoughtFromSameCountry').disabled = true;
+    document.getElementById('useReturns').disabled = true;
     let dynamicRanges = {};
 
     if (template.deadlines) {

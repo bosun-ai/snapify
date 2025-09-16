@@ -149,7 +149,7 @@
 }
 
 .feature-add-btn {
-    background-color: #28a745;
+    background-color: #17161c;
     color: white;
     border: none;
     padding: 4px 8px;
@@ -164,7 +164,7 @@
 }
 
 .feature-add-btn:hover {
-    background-color: #218838;
+    background-color: #17161c;
     transform: scale(1.05);
 }
 
@@ -290,7 +290,7 @@ function addFeatureButtonToRow(firstCell, sku, rowNode) {
     if (firstCell.querySelector('.feature-add-btn')) return;
     const addBtn = document.createElement('button');
     addBtn.className = 'feature-add-btn';
-    addBtn.innerHTML = '<i class="fas fa-plus"></i> Add Feature';
+    addBtn.innerHTML = '<i class="fas fa-plus"></i> Add Sub-SKU';
     addBtn.onclick = () => {
         openFeatureModal(sku);
     };
@@ -637,13 +637,13 @@ function createFeatureCellContent(feature) {
     // Edit button
     const editBtn = document.createElement('button');
     editBtn.className = 'feature-action-btn save';
-    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+    editBtn.innerHTML = `{% render "icon-edit" %}`;
     editBtn.title = 'Edit Feature';
     editBtn.onclick = () => editFeature(feature);
     // Delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'feature-action-btn delete';
-    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtn.innerHTML = '<img width="16px" src="{{ section.settings.trashcan | image_url }}" alt="{{ section.settings.trashcan.alt | escape }}" loading="lazy">';
     deleteBtn.title = 'Delete Feature';
     deleteBtn.onclick = () => deleteFeature(feature);
     

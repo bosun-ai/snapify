@@ -1,0 +1,1433 @@
+
+{{ 'component-image-with-text.css' | asset_url | stylesheet_tag }}
+{{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: 45px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.section-{{ section.id }}-padding {
+  padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+  padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+}
+
+
+@media screen and (min-width: 750px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+}
+.image-with-text p {
+  text-align: left;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+.border-uploads {
+  border: 0.2rem solid #17161c;
+}
+.dropZone {
+    display: flex;
+    justify-content: center;
+    border: 2px dashed #17161c;
+    gap: 2rem;
+    padding: 20px;
+    margin: auto;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    scroll-behavior: smooth; 
+}
+.dropZone.error {
+    border-color: var(--forsure-main-red);
+}
+#progressIcons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.progressIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #cccccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* cursor: pointer; */
+}
+
+.progressIcon:hover {
+    background-color: #f0f0f0;
+}
+#uploadSteps {
+    position: relative;
+    min-height: 680px;
+}
+.navButtons {
+    position: absolute;
+    bottom: 3rem;  /* Adjust as needed for distance from the bottom */
+    left: 50%;  /* Center the navButtons */
+    transform: translateX(-50%); /* This ensures the centering works correctly */
+}
+.heading {
+  text-align: center;
+}
+/* .wrapper {
+    display: flex;
+}
+.left, .right {
+    flex: 1;  /* Each div will take up half the width of the parent container */
+
+.button--secondary {
+    border: 0.2rem solid #17161c !important;
+}
+
+.fileList {
+  height: auto;
+  width: 100%;
+  /* If you want a maximum height with a scrollbar appearing after reaching it */
+  /* max-height: 200px; */
+  /* overflow-y: auto; */
+
+  position: relative;
+
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.fileList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Dynamic grid columns */
+    gap: 1rem; /* Space between grid items */
+    padding: 1rem;
+    align-items: start;
+}
+.fileList .file-row {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0.5rem;
+    background: #f9f9f9;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7); /* White background with 70% opacity */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10; /* Ensures the overlay is on top */
+}
+
+.loading-overlay::before {
+    content: '';
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db; /* Blue color */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+td {
+  padding: 3px;
+  text-align: left;
+}
+.deletebtn {
+  background-color: #fafafa;
+  border-radius: 25%;
+  border: none;
+}
+.deletebtn:hover {
+  background-color: #f0f0f0;
+}
+
+/* .trConfirm {
+  display: flex;
+}
+.tdConfirm {
+  flex: 1;
+} */
+.wrapper {
+    margin: auto;
+    width: 0%; /* You can adjust this width as needed */
+}
+.wrapper1 {
+  margin: auto;
+  width: 50%;
+}
+.tdConfirm {
+  padding-top: 2rem;
+}
+.tdConfirm:first-child {
+    text-align: right;
+    padding-right: 10px; /* Optional: Adds some space between the columns */
+    font-weight: bold;
+}
+.tdConfirm:last-child {
+    text-align: left;
+}
+#btnOverview:hover {
+  color: #fafafa;
+}
+#btnShowReports:hover {
+  color: #fafafa;
+}
+
+
+.toggle-container {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    /* margin-left: 10px; */
+    vertical-align: middle;
+    margin: auto;
+    flex-shrink: 0;
+}
+
+.toggle-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #2255ff;
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px #2255ff;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+.toggle-options {
+  align-items: center;
+  display: flex;
+}
+div.display-flex {
+    display: flex;
+    align-items: center; /* Align items vertically in the middle */
+    justify-content: flex-start; /* Align items to the start of the container */
+    gap: 10px; /* Adjust as needed, adds space between children */
+}
+.option-card {
+    border: 0.2rem solid #17161c;
+    padding: 1rem;
+    width: 500px;
+    height: 500px;
+    border-radius: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.option-card:hover {
+    background-color: #f0f0f0;
+}
+
+.file-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+#clientsTable thead th {
+        position: sticky;
+        top: 0;
+        background-color: white; /* Background color to ensure readability */
+        z-index: 10; /* Ensure it stays above the table body content */
+        border-bottom: 2px solid #ddd; /* Keep the header visually separated */
+}
+#clientsDatatableContainer div {
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.tabulator-col-sorter .tabulator-arrow {
+    display: block;
+}
+
+.greyed_out {
+    cursor: not-allowed;
+    background-color: grey!important;
+    opacity: 0.5;
+    position: relative; /* Needed for positioning the tooltip */
+    pointer-events: none; /* Disable clicks on links */
+    color: inherit; /* Ensure the link text doesn't look like a link */
+    text-decoration: none; /* Remove underline or other link styles */
+}
+
+.greyed_out_wrapper:hover .greyedout-tooltip-feature {
+    display: block; /* Show the tooltip on hover */
+}
+
+.greyedout-tooltip-feature {
+    display: none; /* Hide the tooltip by default */
+    position: absolute;
+    top: 50%; /* Position above the element */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--forsure-main-red);
+    color: white;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+.blurred {
+  filter: blur(5px);
+}
+
+.blurred:hover {
+  filter: none;
+}
+
+
+#tabs-container {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+.tab-button {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-button:hover {
+    background-color: #eaeaea;
+}
+
+.tab-button.active {
+    background-color: #2255ff;
+    color: #fafafa;
+    border-bottom: 2px solid #fff;
+    font-weight: bold;
+}
+
+#clientsDatatableContainer {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.tabulator .tabulator-footer .tabulator-page.active {
+  color: #fafafa!important;
+}
+
+.glyphicon-ok:before {
+content: "\2713"
+}
+
+
+
+
+#step3 .container, #step4 .container {
+  max-width: 1000px;
+  margin: auto;
+  margin-bottom: 4rem;
+  padding: 30px;
+  background: #fafafa;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+#step3 h2.heading, #step4 h2.heading{
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+#step3 label.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #17161c;
+}
+
+#step3 .form-control,
+#step3 .selectpicker,
+#step3 select.form-select {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  height: auto !important;
+  border-color: #ccc;
+  background-color: #fff !important;
+}
+
+#step3 .small-date-input {
+  min-width: 220px;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+#step3 .wide-select .dropdown-toggle {
+  white-space: normal !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+#step3 .bootstrap-select > .dropdown-toggle {
+  width: 100% !important;
+  border-radius: 8px !important;
+}
+
+#step3 .bootstrap-select .dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0px 5px 20px rgba(0,0,0,0.08);
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+#step3 input[type="checkbox"] {
+  transform: scale(1.3);
+  margin-right: 8px;
+}
+
+#step3 .form-check-label {
+  font-weight: 500;
+  color: #333;
+}
+
+#step3 .row > div {
+  margin-bottom: 20px;
+}
+
+.row {
+    margin: auto;
+    width: fit-content;
+    display: flex;
+    gap: 10rem;
+}
+
+@media (max-width: 767px) {
+  #step3 .row > div {
+    margin-bottom: 20px;
+  }
+  #step3 .container {
+    padding: 20px;
+  }
+}
+
+#step4 h5 {
+    width: 20rem;
+    margin-top: 1rem;
+}
+
+.card {
+  border: 0.2rem solid #17161c;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  background-color: #fafafa;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.list-group-item {
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem;
+  background-color: #fafafa;
+  transition: background-color 0.2s;
+}
+
+.list-group-item:last-child {
+  margin-bottom: 0;
+}
+.separator {
+  border-top: 1px solid #17161c;
+  display: block!important;
+  margin-bottom: 1rem;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    top: 1.5rem;
+    position: absolute;
+    right: 1.5rem;
+  }
+  .closeError, .closePreview {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    top: 0.5rem;
+  }
+  .close:hover,
+  .close:focus, .closeError:hover, .closeError:focus, .closePreview:hover, .closePreview:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .exclude {
+    text-decoration: line-through;
+  }
+
+
+  .modal-content {
+  background-color: #fefefe;
+  padding: 1rem 2rem;
+  border: 1px solid #888;
+  width: fit-content;
+  max-width: 80vw;
+  margin: 15% auto;
+  box-sizing: border-box;
+}
+
+.profile-wrapper {
+  display: inline-block;
+  max-width: 100%;
+  padding: 2rem;
+  padding-top: 0;
+}
+
+#profileTable {
+  width: 100%;
+  table-layout: auto;
+}
+
+#profileTable th, #profileTable td {
+  white-space: nowrap;
+  padding: 0.5rem;
+}
+#resolutionSelect {
+  padding: 1rem;
+}
+.disableclicks {
+  pointer-events: none;
+}
+
+
+#returnListDropZone {
+  margin-top: 9.55rem;
+}
+
+{%- endstyle -%}
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
+<div id="profileModal" class="losensitive modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="profile-wrapper">
+        <div style="display: flex; justify-content: space-between;">
+          <h2>Select Mapping</h2>
+          <div id="profileDropdownContainer" style="margin: auto 0;border-radius: 4px;padding-right: 0.4rem;">
+            <select id="profileSelect" class="btn dropdown-toggle bs-placeholder btn-default" style="position: relative">
+            </select>
+            <a id="editIcon" href="#" title="Edit">
+              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
+              </a>
+          </div>
+          <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()" disabled>Save</button>
+        </div>
+        <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
+          If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
+        </div>
+        <div id="profileDetails">
+          <div style="display:flex;padding: 1rem 0;">
+            <strong>File:</strong>
+            <div id='profileFileName' style="margin-left:1rem"></div>
+          </div>
+          <div id='profileErrorMessage' style="margin-bottom:1rem;color:red;text-align: right;"></div>
+          <div id='extraOptions' style="margin-bottom:1rem;display: none;">
+            <label for="extraOptionsSelect" style="margin-right:1rem;">Primary packaging type</label>
+            <select id="extraOptionsSelect" style="padding 1rem" class="btn dropdown-toggle bs-placeholder btn-default">
+                <option value="">Select packaging type</option>
+                <option value="Cardboard">Cardboard</option>
+                <option value="Paper">Paper</option>
+                <option value="Wood">Wood</option>
+            </select>
+          </div>
+          <table id="profileTable" style="margin: auto;">
+            <tr>
+              <th>Name</th>
+              <th>Preview</th>
+              <th>Mapping</th>
+              <th>Exclude</th>
+            </tr>
+            <tbody id="profileTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+</div>
+<div id="confirmOverwriteModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+     background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
+    <h2>Confirm Overwrite</h2>
+    <p>Are you sure you want to overwrite the existing mapping?</p>
+    <div style="display: flex; justify-content: space-between;">
+        <button class="button" style="background-color: #fafafa;color: #17161c;border: 0.1rem solid #17161c;" onclick="closeConfirmOverwriteModal()">No</button>
+        <button class="button" onclick="confirmOverwrite()">Yes</button>
+    </div>
+</div>
+<div id="errorModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
+    <div style="display:flex;gap:1rem;">
+      <h2 id="error-modal-title">Errors</h2>
+      <div style="display:flex;gap:1rem;margin: auto;margin-right: 1rem;height: fit-content;">
+        <select id="resolutionSelect" style="padding 1rem">
+        </select>
+        <button id="nextErrorButton" class="nextButton button">Next</button>
+      </div>
+      <span class="closeError" onclick="closeErrorModal()">&times;</span>
+    </div>
+    <div id="error-description">
+    </div>
+    <div id="error-table-data"></div>
+    <input id="fileid" type="hidden" style="display:none;">
+</div>
+<div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
+</div>
+<script>
+
+function setupDropZone( dropZone, fileInput, inputId ) {
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.backgroundColor = "#e0e0e0";
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.backgroundColor = "";
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        dropZone.style.backgroundColor = "";
+        if (files.length) {
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+    dropZone.addEventListener('click', function() {
+        fileInput.click();
+    });
+    const fileList = document.getElementById(inputId);
+    fileInput.addEventListener('change', async function() {
+        availableProfiles = await getProfiles();
+        for (let i = 0; i < fileInput.files.length; i++) {
+        const row = createNewFileRowCreation(fileInput.files[i].name, availableProfiles, inputId, fileInput.files[i]);
+        fileList.appendChild(row);
+        }
+    });
+    fileList.addEventListener('click', function(event) {
+        event.stopPropagation(); // This stops the event from bubbling up
+    });
+}
+
+async function getProfiles() {
+    try {
+      const data = await unifiedSendRequest(GETPROFILES, {method: 'GET'});
+      return data;
+    } catch (error) {
+      console.error(error.message);
+      showMessage('Failed to get profiles ' + error.message, false);
+    }
+}
+
+let selectedFiles = {};
+let fileCounter = 0;
+function generateUniqueId() {
+    return `file-${Date.now()}-${fileCounter++}`;
+}
+
+function createNewFileRowCreation(fileName, availableProfiles, inputId, file) {
+    hideUploadImages();
+  
+    // Create a new "card" for the file
+    const row = document.createElement('div');
+    row.classList.add('file-row'); // Styled as a grid item
+    const uniqueId = generateUniqueId();
+    row.style.display = 'block';
+    row.id = uniqueId;
+    var filePartTitle = document.createElement('div');
+    filePartTitle.style.display = 'flex';
+    filePartTitle.classList.add('file-part-title');
+    var filePartProfile = document.createElement('div');
+    filePartProfile.title = 'Click to create mapping';
+    filePartProfile.classList.add('file-part-profile');
+    var filePartError = document.createElement('div');
+    filePartError.classList.add('file-part-error');
+    // Add filename
+    const nameCell = document.createElement('div');
+    var updatedFileName = fileName;
+    if (updatedFileName.length > 20) {
+      updatedFileName = updatedFileName.slice(0, 10) + '...' + updatedFileName.slice(-10);
+    }
+    nameCell.textContent = updatedFileName;
+    nameCell.style.fontWeight = 'bold';
+    nameCell.style.marginBottom = '0.5rem';
+    nameCell.style.cursor = 'pointer';
+    nameCell.style.margin = 'auto';
+    nameCell.addEventListener('click', async () => {
+      await openProfileModal(availableProfiles, fileName, file, row.id, activeTab);
+    });
+    filePartTitle.appendChild(nameCell);
+  
+    filePartTitle.appendChild(deleteButton(uniqueId, activeTab, row));
+  
+    // Add profile name
+    const profileNameCell = document.createElement('div');
+    profileNameCell.classList.add('profile-name');
+    profileNameCell.textContent = 'Unmapped';
+    profileNameCell.style.fontWeight = 'bold';
+    profileNameCell.style.color = 'red';
+    profileNameCell.style.margin = 'auto';
+    profileNameCell.dataset.value = '';
+    profileNameCell.addEventListener('click', async () => {
+      await openProfileModal(availableProfiles, fileName, file, row.id, activeTab);
+      
+    });
+    filePartProfile.appendChild(profileNameCell);
+  
+    if (!selectedFiles[activeTab]) {
+      selectedFiles[activeTab] = {};
+    }
+    selectedFiles[activeTab][uniqueId] = { file: file, filename: fileName };
+    row.appendChild(filePartTitle);
+    row.appendChild(filePartProfile);
+    row.appendChild(filePartError);
+    const resolvedCell = document.createElement('div');
+    resolvedCell.classList.add('resolve-cell');
+    resolvedCell.textContent = 'Click to resolve';
+    resolvedCell.addEventListener('click', async () => {
+      await openProfileModal(availableProfiles, fileName, file, row.id, activeTab);
+    });
+    row.appendChild(resolvedCell);
+    updateNextButton();
+    setTimeout(() => {
+      row.style.transition = 'background-color 0.6s ease';
+      row.style.backgroundColor = '#2255ff';
+  
+      setTimeout(() => {
+          row.style.backgroundColor = '';
+      }, 500);
+    }, 100);
+    return row;
+}
+
+function deleteButton(uniqueId, activeTab, row) {
+    // Add delete button
+    const deleteCell = document.createElement('div');
+    deleteCell.style.margin = 'auto';
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add('deletebtn');
+    deleteButton.textContent = 'X';
+    deleteButton.style.margin = 'auto';
+    deleteButton.addEventListener('click', function (event) {
+      event.stopPropagation();
+        // Remove the row from the grid
+        row.remove();
+  
+        // Additional logic to handle file deletion
+        handleFileDeletion(uniqueId, activeTab);
+        updateNextButton();
+    });
+    return deleteButton;
+}
+
+function handleFileDeletion(uniqueId, activeTab) {
+    if (selectedFiles[activeTab].hasOwnProperty(uniqueId)) {
+        delete selectedFiles[activeTab][uniqueId];
+        document.getElementById('fileList_file_list').removeChild(document.getElementById(uniqueId));
+    } else {
+        console.log(activeTab + " File not found: ", uniqueId);
+    }
+    if (Object.keys(selectedFiles[activeTab]).length == 0) {
+        showUploadImages();
+    }
+    updateNextButton();
+}
+
+function updateNextButton() {
+    var allFilesValid = true;
+    var allfiles = document.querySelectorAll('.file-row');
+    allfiles.forEach(file => {
+      if (file.querySelector('.profile-name').getAttribute('data-value') === '') {
+        allFilesValid = false;
+      }
+      if (file.querySelector('.file-part-error').getAttribute('data-value') === 'error') {
+        allFilesValid = false;
+      }
+    });
+    var description = 'Please resolve all errors first';
+    if (allfiles.length === 0) {
+      allFilesValid = false;
+      description = 'Please upload at least one file';
+    }
+    if (allFilesValid) {
+      if (document.getElementById("upload-button")) {
+        document.getElementById("upload-button").disabled = false;
+        document.getElementById("upload-button").classList.remove('disabledbutton');
+        document.getElementById("upload-button").title = '';
+        return;
+      }
+    }
+    document.getElementById("upload-button").disabled = true;
+    document.getElementById("upload-button").title = description;
+    if (!document.getElementById("upload-button").classList.contains('disabledbutton')) {
+      document.getElementById("upload-button").classList.add('disabledbutton');
+    }
+}
+
+async function parseCSV(text, nrows=3) {
+    return new Promise((resolve, reject) => {
+      Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        preview: nrows,
+        complete: function(results) {
+          const data = results.data;
+          const columnDict = {};
+  
+          if (data.length > 0) {
+            const keys = Object.keys(data[0]);
+            keys.forEach(key => {
+              columnDict[key] = data.map(row => row[key]);
+            });
+          }
+          resolve(columnDict);
+        },
+        error: function(err) {
+          console.error(err);
+          showMessage('Error parsing file ' + err.message, false);
+          reject(err);
+        }
+      });
+    });
+}
+  
+async function parseExcel(file, nrows = 3) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+  
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+  
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+          const headers = jsonData[0];
+          const rows = jsonData.slice(1, nrows + 1);
+  
+          const columnDict = {};
+          headers.forEach((header, colIndex) => {
+            columnDict[header] = rows.map(row => row[colIndex] ?? '');
+          });
+  
+          resolve(columnDict);
+        } catch (err) {
+          console.error(err);
+          showMessage('Error parsing Excel file: ' + err.message, false);
+          reject(err);
+        }
+      };
+      reader.onerror = err => reject(err);
+      reader.readAsArrayBuffer(file);
+    });
+}
+
+function updateSaveButton() {
+    const saveProfile = document.getElementById('saveProfile');
+    const profileTable = document.getElementById('profileTableBody');
+    const rows = profileTable.querySelectorAll('tr');
+    const foundMappings = Array.from(rows).map(row => {
+      const dropdown = row.querySelector('select');
+      return dropdown ? dropdown.value : null;
+    });
+    var allRequiredMapped = true;
+    const errorBox = document.getElementById('profileErrorMessage');
+    errorBox.textContent = '';
+    errorBox.style.display = 'none';
+    for (const mapping of requiredMappings) {
+      if (!foundMappings.includes(mapping.key)) {
+        allRequiredMapped = false;
+        errorBox.textContent = 'Required mapping not found for ' + mapping.title;
+        errorBox.style.display = 'block';
+        break;
+      }
+    }
+    saveProfile.disabled = !allRequiredMapped;
+}
+  
+async function openProfileModal(availableProfiles, fileName, fileInput, rowId, activeTab) {
+    let csvData;
+    if (fileName.endsWith('.csv')) {
+        var text;
+        if (rowId in selectedFiles[activeTab] && selectedFiles[activeTab][rowId].text) {
+          text = selectedFiles[activeTab][rowId].text;
+        } else {
+            text = await fileInput.text();
+            selectedFiles[activeTab][rowId].text = text;
+        }
+        csvData = await parseCSV(text);
+    } else if (
+      fileName.endsWith('.xls') || 
+      fileName.endsWith('.xlsx') || 
+      fileInput.type.includes('sheet')
+    ) {
+      csvData = await parseExcel(fileInput);
+    } else {
+      showMessage('Unsupported file type. Please upload a CSV or Excel file.', false);
+      return;
+    }
+    const modal = document.getElementById('profileModal');
+    modal.dataset.row = rowId;
+    if (activeTab == 'fulfilment') {
+      document.getElementById('extraOptions').style.display = 'block';
+    } else {
+      document.getElementById('extraOptions').style.display = 'none';
+    }
+    await addProfileModal(availableProfiles, fileName, csvData, modal);
+    setTimeout(() => {
+      updateSaveButton();
+    }, 200);
+}
+
+var requiredMappings = new Set();
+async function addProfileModal(availableProfiles, fileName, csvData, modal) {
+    requiredMappings.clear();
+    var labelsV2Options = await getLabels(activeTab);
+    labelsV2Options.forEach(option => {
+      if (option.required) {
+        requiredMappings.add((option));
+      }
+    });
+    const profileSelect = document.getElementById('profileSelect');
+    const profileDetails = document.getElementById('profileDetails');
+    const profileFileName = document.getElementById('profileFileName');
+    profileFileName.textContent = fileName;
+    var profileTable = document.getElementById('profileTableBody');
+    profileTable.innerHTML = '';
+    Object.keys(csvData).forEach((key, index) => {
+      const tr = document.createElement('tr');
+      const tdKey = document.createElement('td');
+      tdKey.textContent = key;
+      tr.appendChild(tdKey);
+      const tdEntry = document.createElement('td');
+      var preview = csvData[key].join(', ');
+      if (preview.length > 50) { // limit the preview to 100 characters
+        preview = preview.slice(0, 50) + '...';
+      }
+      tdEntry.textContent = preview;
+      tr.appendChild(tdEntry);
+
+      const tdMapping = document.createElement('td');
+      const selectMapping = document.createElement('select');
+      selectMapping.classList.add('btn', 'bs-placeholder', 'btn-default');
+      var defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Unmapped';
+      defaultOption.selected = true;
+      selectMapping.appendChild(defaultOption);
+      selectMapping.setAttribute('data-name', key);
+      labelsV2Options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.key;
+        var star = '';  
+        if (option.required) {
+          star = ' *';
+        }
+        optionElement.textContent = option.title + star;
+        optionElement.setAttribute('data-description', option.description);
+        optionElement.title = option.description;
+        selectMapping.appendChild(optionElement);
+      });
+      selectMapping.addEventListener('change', function() {
+        updateSaveButton();
+      });
+      tdMapping.appendChild(selectMapping);
+      tr.appendChild(tdMapping);
+
+      const tdExclude = document.createElement('td');
+      const checkboxExclude = document.createElement('input');
+      checkboxExclude.type = 'checkbox';
+      checkboxExclude.title = 'Exclude this column from the upload';
+      checkboxExclude.addEventListener('change', function() {
+        toggleExclude(checkboxExclude);
+      });
+      tdExclude.appendChild(checkboxExclude);
+      tr.appendChild(tdExclude);
+      profileTable.appendChild(tr);
+    });
+    // Populate the select dropdown
+    profileSelect.innerHTML = '';
+    availableProfiles.forEach(profile => {
+      const option = document.createElement('option');
+      option.value = profile.id;
+      option.textContent = profile.name;
+      profileSelect.appendChild(option);
+    });
+    addNewProfileOption(profileSelect);
+    // Add an event listener to the SVG for click events
+    document.getElementById("editIcon").addEventListener("click", async function() {
+        editProfile();
+    });
+
+    profileSelect.addEventListener("change", async function() {
+        const dropdown = this;
+        selectProfile(dropdown);
+    });
+    getProfileLabels(profileSelect.value, activeTab);
+    modal.style.display = 'block';
+
+    document.querySelector('.close').onclick = function() {
+      modal.style.display = 'none';
+    };
+}
+
+async function getLabels(activeTab) {
+    try {
+      if (activeTab == 'orders') {
+        return await unifiedSendRequest(GETORDERLISTLABELSV2OPTIONS, {method: 'GET'});
+      } else if (activeTab == 'returns') {
+        return await unifiedSendRequest(GETRETURNLISTLABELSV2OPTIONS, {method: 'GET'});
+      } else if (activeTab == 'fulfilment') {
+        return await unifiedSendRequest(GETFULFILMENTLABELSV2OPTIONS, {method: 'GET'});
+      }
+      return [];
+    } catch (error) {
+      console.error(error.message);
+      showMessage('Failed to get label options for ' + activeTab + ' ' + error.message, false);
+    }
+}
+
+function toggleExclude(checkbox) {
+    const row = checkbox.parentElement.parentElement;
+    const exclude = checkbox.checked;
+    row.classList.toggle('exclude', exclude);
+    row.querySelector('select').disabled = exclude;
+}
+
+function addNewProfileOption(profileSelect) {
+    const addProfileOption = document.createElement('option');
+    addProfileOption.value = 'add_new';
+    addProfileOption.textContent = 'Add New Profile';
+    profileSelect.appendChild(addProfileOption);
+}
+
+async function saveMapping() {
+    const selectedProfile = document.getElementById('profileSelect').value;
+    const mapping = {};
+    const profileTable = document.getElementById('profileTableBody');
+    const rows = profileTable.querySelectorAll('tr');
+    rows.forEach(row => {
+      var dropdown = row.querySelector('select');
+      var key = dropdown.getAttribute('data-name');
+      if (!dropdown.disabled) {
+        var value = dropdown.value;
+        mapping[key] = value;
+      }
+    });
+    var url = GETORDERLISTLABELSV2COMPARE;
+    if (activeTab == 'returns') {
+      url = GETRETURNLISTLABELSV2COMPARE;
+    } else if (activeTab == 'fulfilment') {
+      url = GETFULFILMENTLABELSV2COMPARE;
+      // reverse as the key is the user column name and the value is the internal mapping
+      mapping[document.getElementById('extraOptionsSelect').value] = 'default_main_type';
+    }
+    request_data = {'profile': selectedProfile, 'mapping': mapping};
+  
+    try {
+      var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+      if (response) {
+        confirmOverwrite();
+      } else {
+        showConfirmOverwriteModal();
+      }
+    } catch (error) {
+      console.error(error.message);
+      showMessage(error.message, false);
+    }
+}
+
+async function showConfirmOverwriteModal() {
+    document.getElementById('confirmOverwriteModal').style.display = 'block';
+}
+
+async function closeConfirmOverwriteModal() {
+    document.getElementById('confirmOverwriteModal').style.display = 'none';
+    updateNextButton();
+}
+
+async function confirmOverwrite() {
+    try {
+      var url = GETORDERLISTLABELSV2;
+      if (activeTab == 'returns') {
+        url = GETRETURNLISTLABELSV2;
+      } else if (activeTab == 'fulfilment') {
+        url = GETFULFILMENTLABELSV2;
+      }
+      var response = await unifiedSendRequest(url, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+      document.getElementById('profileModal').style.display = 'none';
+      showMessage('Mapping saved successfully', true);
+      var fileId = document.getElementById('profileModal').dataset.row;
+      var rowElement = document.getElementById(fileId);
+      var profileName = document.getElementById('profileSelect').options[document.getElementById('profileSelect').selectedIndex].textContent;
+      rowElement.querySelector('.profile-name').textContent = profileName;
+      rowElement.querySelector('.profile-name').dataset.value = profileName;
+      rowElement.querySelector('.profile-name').dataset.id = document.getElementById('profileSelect').value;
+      rowElement.querySelector('.profile-name').style.color = 'green';
+      const filteredFile = await parseAndFilterCSV(selectedFiles[activeTab][fileId].text, request_data, selectedFiles[activeTab][fileId].file.name, selectedFiles[activeTab][fileId].file.type, selectedFiles[activeTab][fileId].file.lastModified, selectedFiles[activeTab][fileId].file.lastModifiedDate);
+      selectedFiles[activeTab][fileId]['fileFiltered'] = filteredFile;
+      selectedFiles[activeTab][fileId]['profileId'] = document.getElementById('profileSelect').value;
+      closeConfirmOverwriteModal();
+      url = CHECKORDERSFILE;
+      if (activeTab == 'returns') {
+        url = CHECKRETURNSFILE;
+      } else if (activeTab == 'fulfilment') {
+        url = CHECKFULFILMENTFILE;
+      }
+      await checkFileContent(fileId, rowElement, url);
+    } catch (error) {
+      console.error(error.message);
+      showMessage('Failed to save mapping ' + error.message, false);
+    }
+}
+
+async function parseAndFilterCSV(text, allowedColumns, fileName, fileType, lastModified, lastModifiedDate) {
+    return new Promise((resolve, reject) => {
+      Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          const filteredData = results.data.map(row => {
+            const filteredRow = {};
+            for (const key in row) {
+              if (allowedColumns['mapping'].hasOwnProperty(key)) {
+                filteredRow[key] = row[key];
+              }
+            }
+            return filteredRow;
+          });
+          const csv = Papa.unparse(filteredData);
+          const blob = new File([csv], fileName, {
+            type: fileType,
+            lastModified: lastModified,
+            lastModifiedDate: lastModifiedDate,
+          });
+          resolve(blob);
+        },
+        error: function(err) {
+          console.error(err);
+          showMessage('Error parsing file ' + err.message, false);
+          reject(err);
+        }
+      });
+    });
+}
+  
+async function checkFileContent(fileId, rowElement, url) {
+    var file = selectedFiles[activeTab][fileId];
+    var formData = new FormData();
+    formData.append('file_list', file.fileFiltered);
+    formData.append('profile', file.profileId);
+    formData.append('file_id', fileId);
+    rowElement.querySelector('.resolve-cell').innerHTML = 'Checking...';
+    console.log(formData);
+    document.getElementById("upload-button").disabled = true;
+    document.getElementById("upload-button").title = 'Checking file content...';
+    if (!document.getElementById("upload-button").classList.contains('disabledbutton')) {
+      document.getElementById("upload-button").classList.add('disabledbutton');
+    }
+
+    var response = await unifiedSendRequest(url, {formData: formData});
+    if (response.success) {
+      selectedFiles[activeTab][fileId]['failed'] = {};
+      rowElement.querySelector('.file-part-error').textContent = '';
+      rowElement.querySelector('.file-part-error').style.display = 'none';
+      rowElement.querySelector('.resolve-cell').style.display = 'none';
+      rowElement.style.color = '#17161c';
+    } else {
+      var details = {};
+      for (const [k, v] of Object.entries(response.details)) {
+        details[k] = JSON.parse(v);
+      }
+      selectedFiles[activeTab][fileId]['failed'] = details;
+      selectedFiles[activeTab][fileId]['failedDescription'] = response.description;
+      if (activeTab == 'orders') {
+      rowElement.querySelector('.file-part-error').textContent = `${response.missing_orders}/${response.total_orders} orders failed`;
+      } else if (activeTab == 'returns') {
+        rowElement.querySelector('.file-part-error').textContent = `${response.missing_returns}/${response.total_returns} returns failed`;
+      } else if (activeTab == 'fulfilment') {
+        rowElement.querySelector('.file-part-error').textContent = `${response.missing_fulfilment}/${response.total_fulfilment} fulfilment failed`;
+      }
+      rowElement.querySelector('.file-part-error').style.display = 'block';
+      rowElement.style.cursor = 'pointer';
+      rowElement.style.color = 'red';
+      rowElement.querySelector('.file-part-error').setAttribute('data-value', 'error');
+      rowElement.onclick = function() {
+        displayErrorReport(details, fileId);
+      }
+      rowElement.querySelector('.file-part-profile').classList.add('disableclicks');
+      rowElement.querySelector('.file-part-title div').classList.add('disableclicks');
+      rowElement.querySelector('.resolve-cell').classList.add('disableclicks');
+      rowElement.querySelector('.resolve-cell').innerHTML = 'Click to resolve';
+      rowElement.querySelector('.resolve-cell').style.display = 'block';
+    }
+    updateNextButton();
+}
+
+let currentErrorIndex = 0;
+var resolutionMap = {};
+
+function displayErrorReport(data, fileId) {
+    currentErrorIndex = 0;
+    resolutionMap = {};  // Reset previous selections
+  
+    document.getElementById('errorModal').style.display = 'block';
+    document.getElementById('modalOverlayError').style.display = 'block';
+    document.getElementById('fileid').value = fileId;
+    loadErrorAtIndex(currentErrorIndex);
+}
+  
+function loadErrorAtIndex(index) {
+    const tableContainer = document.getElementById('error-table-data');
+    tableContainer.innerHTML = ''; // Clear previous table
+    var fileId = document.getElementById('fileid').value;
+    var file = selectedFiles[activeTab][fileId];
+    var errorTypes = Object.keys(file['failed']);
+    if (index >= errorTypes.length) {
+      file['resolutions'] = resolutionMap;
+      var row = document.getElementById(fileId);
+      row.style.color = '#17161c';
+      var errorRow = row.querySelector('.file-part-error');
+      errorRow.textContent = 'Resolved';
+      errorRow.setAttribute('data-value', 'resolved');
+      closeErrorModal();
+      row.querySelector('.file-part-profile').classList.remove('disableclicks');
+      row.querySelector('.file-part-title div').classList.remove('disableclicks');
+      row.querySelector('.resolve-cell').classList.remove('disableclicks');
+      row.querySelector('.resolve-cell').style.display = 'none';
+      row.onclick = null;
+      updateNextButton();
+      return;
+    }
+    if (index == errorTypes.length - 1) {
+      document.getElementById('nextErrorButton').textContent = 'Save';
+    } else {
+      document.getElementById('nextErrorButton').textContent = 'Next';
+    }
+    const errorType = errorTypes[index];
+    const entries = file['failed'][errorType];
+    var defaultResolution = 'ignore';
+    document.getElementById('error-description').textContent = file['failedDescription'][errorType];
+    // Update title
+    if (errorType.includes('Duplicated')) {
+      // update resolutionSelect to contain keep first and keep last
+      const resolutionSelect = document.getElementById('resolutionSelect');
+      resolutionSelect.innerHTML = '';
+      const option1 = document.createElement('option');
+      option1.value = 'keep_first';
+      option1.textContent = 'Keep First';
+      option1.title = 'Keep the first value and ignore the other values';
+      resolutionSelect.appendChild(option1);
+      const option2 = document.createElement('option');
+      option2.value = 'keep_last';
+      option2.textContent = 'Keep Last';
+      option2.title = 'Keep the last value and ignore the other values';
+      resolutionSelect.appendChild(option2);
+      defaultResolution = 'keep_first';
+    } else {
+      resolutionSelect.innerHTML = '';
+      const option1 = document.createElement('option');
+      option1.value = 'ignore';
+      option1.textContent = 'Keep old';
+      option1.title = 'Keep the old values and ignore the new values';
+      resolutionSelect.appendChild(option1);
+      const option2 = document.createElement('option');
+      option2.value = 'replace';
+      option2.textContent = 'Replace';
+      option2.title = 'Replace the old values with the new values';
+      resolutionSelect.appendChild(option2);
+      defaultResolution = 'ignore';
+    }
+    document.getElementById('error-modal-title').innerText = `Error: ${errorType}`;
+  
+    // Default resolution (if not set before)
+    document.getElementById('resolutionSelect').value = resolutionMap[errorType] || defaultResolution;
+    var sheetData = Object.values(entries);
+    // Render Tabulator table
+    new Tabulator("#error-table-data", {
+      data: sheetData,
+      layout: "fitDataFill",
+      responsiveLayout: false,
+      autoColumns: true,
+      pagination: sheetData.length > 10,
+      paginationCounter: "rows",
+      paginationSize: 10
+    });
+
+    // Save resolution and show next error
+    document.getElementById('nextErrorButton').addEventListener('click', () => {
+        const resolution = document.getElementById('resolutionSelect').value;
+        var fileId = document.getElementById('fileid').value;
+        var file = {};
+        file = selectedFiles[activeTab][fileId];
+        const currentError = Object.keys(file['failed'])[currentErrorIndex];
+        resolutionMap[currentError] = resolution;
+    
+        currentErrorIndex++;
+        loadErrorAtIndex(currentErrorIndex);
+    });
+}
+
+document.getElementById('modalOverlayError').addEventListener('click', function() {
+    closeErrorModal();
+});
+  
+function closeErrorModal() {
+    document.getElementById('errorModal').style.display = 'none';
+    document.getElementById('modalOverlayError').style.display = 'none';
+}
+  
+
+async function uploadFiles() {
+    const formData = new FormData();
+    const rows = document.querySelectorAll('#fileList_file_list .file-row');
+    rows.forEach(row => {
+        const fileId = row.id;
+        if (selectedFiles[activeTab].hasOwnProperty(fileId)){
+        var file = selectedFiles[activeTab][fileId];
+        if (file.fileFiltered) {
+            formData.append('file_lists', file.fileFiltered);
+        } else {
+            formData.append('file_lists', file.file);
+        }
+        if (file.resolutions) {
+            formData.append('resolutions', JSON.stringify(file.resolutions));
+        } else {
+            formData.append('resolutions', '{}');
+        }
+        formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
+        formData.append('fileId', fileId);
+        }
+    });
+    try {
+        document.getElementById('upload-button').disabled = true;
+        var endpoint = UPLOADORDERS;
+        if (activeTab == 'returns') {
+          endpoint = UPLOADRETURNS;
+        } else if (activeTab == 'fulfilment') {
+          endpoint = UPLOADFULFILMENT;
+        }
+        const data = await unifiedSendRequest(endpoint, { formData: formData });
+        document.getElementById('upload-button').disabled = false;
+        if (data.status_code == 400) {
+            showMessage('Failed to upload files', false);
+            return;
+        }
+        selectedFiles[activeTab] = {};
+        document.getElementById('fileList_file_list').innerHTML = '';
+        document.getElementById('file_list').value = '';
+        document.getElementById('upload-imagecontainerupload').style.display = 'block';
+        updateNextButton();
+        setOffset(0, true);
+        showMessage('Files uploaded successfully', true);
+        await appendData(true);
+
+    } catch (error) {
+        console.error(error);
+        showMessage('Failed to upload files ' + error.message, false);
+        document.getElementById('upload-button').disabled = false;
+    }
+}
+</script>

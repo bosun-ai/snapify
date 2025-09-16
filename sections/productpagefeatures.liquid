@@ -137,6 +137,11 @@
     padding: 0;
   }
 
+.productfeaturesvg svg {
+  width: 100%;
+  height: 100%;
+}
+
 {%- endstyle -%}
 
 {%- liquid
@@ -173,7 +178,7 @@
       </div>
     {%- endunless -%}
     {% if section.settings.subtitle != blank %}
-      <div class="subtitletextproduct" style="margin-bottom: 3rem">{{section.settings.subtitle}}</div>
+      <div class="subtitletextproduct" style="margin-bottom: 3rem;text-align: {{ section.settings.subtitle_alignment }};">{{section.settings.subtitle}}</div>
     {% endif %}
     <slider-component class="slider-mobile-gutter background-none">
       <ul class="{% if section.settings.center_columns %}center_columns{% endif %} contains-content-container grid grid--{{ section.settings.columns_mobile }}-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop{% if show_mobile_slider %} slider slider--mobile grid--peek{% endif %}"
@@ -216,7 +221,9 @@
                     }}
                   {% endif %}
                 {% if block.settings.image_as_snippet %}
-                  {% render 'icon-renderer', icon_to_render: block.settings.image_as_snippet %}
+                  <div style="padding: {{ block.settings.image_as_snippet_padding }}%;height: 100%;width: 100%;" class="productfeaturesvg">
+                    {% render 'icon-renderer', icon_to_render: block.settings.image_as_snippet %}
+                  </div>
                 {% endif %}
                 </div>
               {%- endif -%}
@@ -261,7 +268,7 @@
       {%- endif -%}
     </slider-component>
     
-    <div class="subtitletextproduct" style="">{{ section.settings.bottom_text }}</div>
+    <div class="subtitletextproduct" style="text-align: {{ section.settings.bottom_text_alignment }};">{{ section.settings.bottom_text }}</div>
     <div class="center{% if show_mobile_slider %} small-hide medium-hide{% endif %}">
       {%- if section.settings.button_label != blank -%}
         <a class="button button--primary"{% if section.settings.button_link == blank %} role="link" aria-disabled="true"{% else %} href="{{ section.settings.button_link }}"{% endif %}
@@ -350,10 +357,50 @@ function hideTextContainer(section_id) {
       "label": "Subtitle"
     },
     {
+      "type": "select",
+      "id": "subtitle_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Subtitle Alignment"
+    },
+    {
       "type": "richtext",
       "id": "bottom_text",
       "default": "<p>Text below</p>",
       "label": "Bottom Text"
+    },
+    {
+      "type": "select",
+      "id": "bottom_text_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Bottom Text Alignment"
     },
     {
       "type": "select",
@@ -703,6 +750,12 @@ function hideTextContainer(section_id) {
           "type": "text",
           "id": "image_as_snippet",
           "label": "Icon (choose from snippets)"
+        },
+        {
+          "type": "number",
+          "id": "image_as_snippet_padding",
+          "label": "Padding for the Icon",
+          "default": 0
         },
         {
           "type": "checkbox",
