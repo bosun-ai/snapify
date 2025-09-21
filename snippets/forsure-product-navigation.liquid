@@ -53,9 +53,9 @@
     }
     ul{
       float: left; width: fit-content;position: fixed;z-index:9999;
-  
+
     }
-  } 
+  }
   */
   #ul-submenu {
     display: flex;
@@ -80,7 +80,7 @@
     margin-left: 0!important;
   }
 
-  
+
 #reopenButton {
     position: fixed;      /* Fixed positioning to keep it on the viewport */
     top: 90%;             /* Center it vertically */
@@ -217,7 +217,7 @@
     -%}
 
   {% render 'forsure-notifications' %}
-  
+
   <div id="navbar-side" class="header__inline-menu page-width multicolumn color-{{ section.settings.color_scheme }} gradient{% unless section.settings.background_style == 'none' and settings.text_boxes_border_thickness > 0 or settings.text_boxes_shadow_opacity > 0 %} background-{{ section.settings.background_style }}{% endunless %}{% if section.settings.title == blank %} no-heading{% endif %}">
   <!-- <nav> -->
   <slider-component class="slider-mobile-gutter" style="display: flex;">
@@ -319,7 +319,7 @@
                     <option value="DE">ForSURE Europe B.V.</option>
                     </select>
                 </div>
-                
+
                 {% comment %} <script>
                 if (typeof $('.selectpicker').selectpicker === 'function') {
                     $('.selectpicker').selectpicker('refresh');
@@ -339,7 +339,7 @@
       -%}
     </span>
   </a>
-        {% comment %} 
+        {% comment %}
     {% else %}
       <style>
         .slider-mobile-gutter {
@@ -430,14 +430,16 @@
                     document.getElementById('agency-home-icon').style.display = 'none';
                     document.getElementById('notification-badge-header').style.top = '0px';
                   }
-                  
+
                 } else {
                   // Special case for 'forsure-statistics' if no orders received
                   const tooltip = document.getElementById(`greyedout-tooltip-${nav_element}`);
                   tooltip.innerText = show;
                 }
             }
-            if (data['{{ currentLink }}'] != true && data['{{ currentLink }}?logged_in'] != true) {
+            if (data['{{ currentLink }}'] != true && data['{{ currentLink }}?logged_in'] != true && 
+                '{{ currentLink }}' != 'forsure-orders'
+            ) {
                 if (available_url === null) {
                   window.location.href = '/';
                 } else {

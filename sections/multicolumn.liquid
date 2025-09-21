@@ -21,7 +21,7 @@
       width: calc(50% - {{section.settings.column_gap}}px / 2)!important;
       max-width: calc(50% - {{section.settings.column_gap}}px / 2)!important;
     }
-    
+
     .subtitletext, .title {
       margin-left: 3rem;
     }
@@ -53,6 +53,9 @@
           <a href="{{ section.settings.button_link }}" class="link underlined-link large-up-hide">{{ section.settings.button_label | escape }}</a>
         {%- endif -%}
       </div>
+      {% if section.settings.subtitle != blank %}
+        <div class="subtitletextproduct" style="margin-bottom: 3rem">{{section.settings.subtitle}}</div>
+      {% endif %}
     {%- endunless -%}
     <slider-component class="slider-mobile-gutter">
       <ul class="{% if section.settings.center_columns %}center_columns{% endif %} multicolumn-list contains-content-container multicolumn-grid grid grid--{{ section.settings.columns_mobile }}-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop{% if show_mobile_slider %} slider slider--mobile grid--peek{% endif %}"
@@ -158,6 +161,11 @@
       "id": "title",
       "default": "Multicolumn",
       "label": "t:sections.multicolumn.settings.title.label"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "label": "Subtitle"
     },
     {
       "type": "checkbox",

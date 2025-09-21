@@ -545,7 +545,7 @@
         <div id="od-info-empty" class="od-info-empty">Select a row to see details.</div>
         <div id="od-info-body" class="od-info-body is-hidden">
           <h3 id="od-info-title" class="od-info-title"></h3>
-          <h3 id="od-info-description" class="od-info-description" style="display: none;">[Click on a value to edit it.]</h3>
+          <h3 id="od-info-description" class="od-info-description" style="display: none;">[Click on a value to edit it]</h3>
           <dl id="od-info-grid" class="od-info-grid">
           </dl>
         </div>
@@ -900,7 +900,18 @@ function showDetailsFulfilment(order, li=null) {
       var editable = order[entry][subentry]['editable'];
       dt.textContent = label;
       div.appendChild(dt);
-      var dd = createDD(value, editable, order, entry, subentry);
+      if (subentry == 'Box ID' && window.userPermissions['fulfilment-algorithm'] && order[entry][subentry]['value'] == '') {
+        var dd = document.createElement('button');  
+        dd.className = 'od-btn od-btn--primary';
+        dd.style.cursor = 'pointer';
+        dd.textContent = 'Calculate';
+        dd.onclick = async () => {
+          await calculateBoxID(order, entry, subentry);
+        };
+        dd.title = 'Calculate Box ID';
+      } else {
+        var dd = createDD(value, editable, order, entry, subentry);
+      }
       div.appendChild(dd);
       document.getElementById('od-info-grid').appendChild(div);
     }
@@ -912,6 +923,27 @@ function showDetailsFulfilment(order, li=null) {
   document.getElementById('od-info-empty').classList.add('is-hidden');
 }
 
+async function calculateBoxID(order, entry, subentry) {
+  console.log(order, entry, subentry);
+  try {
+    var formData = new FormData();
+    formData.append('orderid', order['General']['Order ID']['value']);
+    var response = await unifiedSendRequest(RUNFULFILMENTALGORITHM, {formData: formData});
+    if (response.status_code != 200) {
+      showMessage('Failed to calculate Box ID, ' + response.message, false);
+      return false;
+    }
+    showMessage('Box ID calculated successfully', true);
+    setOffset(0, true);
+    await appendData(true);
+    return response;
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to calculate Box ID, ' + error.message, false);
+    return false;
+  }
+}
+
 async function editValue(order, entry, subentry, newValue) {
   // TODO save to database
   console.log(newValue, order, entry, subentry);
@@ -920,7 +952,7 @@ async function editValue(order, entry, subentry, newValue) {
       new_value: newValue,
       change_type: activeTab,
       label_group: entry,
-      country: order['General']['Country']['value'],
+      country: order['General']['Country']?.['value'] || 'Unknown',
       label: subentry,
       order_id: order['General']['Order ID']['value'],
       sku: order['General']['SKU']?.['value'] || ''
@@ -950,7 +982,7 @@ async function editValues(orders, group, subentry, newValue) {
         new_value: newValue,
         change_type: activeTab,
         label_group: group,
-        country: order['General']['Country']['value'],
+        country: order['General']['Country']?.['value'] || 'Unknown',
         label: subentry,
         order_id: order['General']['Order ID']['value'],
         sku: order['General']['SKU']?.['value'] || ''
@@ -1176,12 +1208,18 @@ function createFulfilmentListItem(group) {
   li.dataset.kind = 'fulfilment';
   li.tabIndex = 0;
   li.setAttribute('aria-expanded', 'false');
+  if (group['General']['Error']['value']) {
+    statusTitle = `title="${group['General']['Error']['value']}"`;
+  } else {
+    statusTitle = '';
+  }
+  console.log(statusTitle);
   li.innerHTML = `
     <div class="od-col">${escapeHtml(group['General']['Order ID']['value'])}</div>
-    <div class="od-col od-col--sm">${escapeHtml(group['General']['Total Weight']['value'] || 'Unknown')}</div>
-    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type']['value'] || 'Unknown')}</div>
-    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type Weight']['value'] || 'Unknown')}</div>
-    <div class="od-col od-col--sm">${escapeHtml(group['General']['Status']['value'] || 'Pending')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['General']['Total Weight']['value'] ?? 'Unknown')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type']['value'] ?? 'Unknown')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type Weight']['value'] ?? 'Unknown')}</div>
+    <div class="od-col od-col--sm" ${statusTitle}>${escapeHtml(group['General']['Status']['value'] ?? 'Pending')}</div>
     <div class="od-col od-col--select">
       <input type="checkbox" class="od-select" />
     </div>
@@ -1382,7 +1420,7 @@ function openEditModal() {
         optionElement.textContent = option;
         optionElement.value = option;
         optionElement.dataset.group = optGroup;
-        optionElement.dataset.country = exampleEntryData['General']['Country']['value'];
+        optionElement.dataset.country = exampleEntryData['General']['Country']?.['value'];
         optionGroup.appendChild(optionElement);
         optionGroupOptions++;
     }
