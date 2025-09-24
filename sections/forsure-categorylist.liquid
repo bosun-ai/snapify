@@ -1548,6 +1548,8 @@ async function getCategorylistDetails() {
             console.log('column-reorder done');
           }, 5);
       });
+      var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+      loadingSpinnerContainer.style.display = 'none';
 }
 
 let currentEditor = null;
@@ -2349,6 +2351,8 @@ function showGuideFromButton(element) {
 waitForPermission(function() {
   if (window.userPermissions['forsure-categorylist-editor']) {
     document.getElementById('categorylistWrapper').style.display = 'block';
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+    loadingSpinnerContainer.style.display = 'block';
     fillVersionDropdown();
     if(readCookie('showedGuideCategory') === null) {
       setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary

@@ -239,7 +239,7 @@
             id="list-element-{{ page_name }}"
             class="list-element-active grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
             style="width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
-            <div id="greyedout-tooltip-{{ page_name }}" class="greyedout-tooltip">Please upgrade to the full version to access this</div>
+            <div id="greyedout-tooltip-{{ page_name }}" class="greyedout-tooltip">Loading...</div>
             <a
               href="{{ link.url }}"
               id="a-{{ page_name }}"
@@ -262,7 +262,7 @@
             id="list-element-{{ page_name }}"
             class="list-element grid__item slider__slide slider__slide--full-width greyed_out_wrapper"
             style="background-color: #fafafa;width:fit-content;max-width:fit-content;min-width:fit-content;{% unless forloop.last %}border-right:0.2rem solid #17161c{% endunless %}">
-            <div id="greyedout-tooltip-{{ page_name }}" class="greyedout-tooltip">Please upgrade to the full version to access this</div>
+            <div id="greyedout-tooltip-{{ page_name }}" class="greyedout-tooltip">Loading...</div>
             <a
                 href="{{ link.url }}"
                 id="a-{{ page_name }}"
@@ -401,6 +401,10 @@
                       }
                   }
                 } else if (show === false) {
+                  const tooltip = document.getElementById(`greyedout-tooltip-${nav_element}`);
+                  if (tooltip) {
+                    tooltip.innerText = 'Please upgrade to the full version to access this';
+                  }
                 } else if (nav_element === 'companies') {
                   selectedCompany = null;
                   if (Object.keys(data['companies']).length > 1) {
@@ -437,9 +441,7 @@
                   tooltip.innerText = show;
                 }
             }
-            if (data['{{ currentLink }}'] != true && data['{{ currentLink }}?logged_in'] != true && 
-                '{{ currentLink }}' != 'forsure-orders'
-            ) {
+            if (data['{{ currentLink }}'] != true && data['{{ currentLink }}?logged_in'] != true) {
                 if (available_url === null) {
                   window.location.href = '/';
                 } else {

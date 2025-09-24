@@ -1166,8 +1166,10 @@ async function confirmOverwrite() {
       rowElement.querySelector('.profile-name').dataset.value = profileName;
       rowElement.querySelector('.profile-name').dataset.id = document.getElementById('profileSelect').value;
       rowElement.querySelector('.profile-name').style.color = 'green';
-      const filteredFile = await parseAndFilterCSV(selectedFiles[activeTab][fileId].text, request_data, selectedFiles[activeTab][fileId].file.name, selectedFiles[activeTab][fileId].file.type, selectedFiles[activeTab][fileId].file.lastModified, selectedFiles[activeTab][fileId].file.lastModifiedDate);
-      selectedFiles[activeTab][fileId]['fileFiltered'] = filteredFile;
+      if (selectedFiles[activeTab][fileId].file.name.endsWith('.csv')) {
+          const filteredFile = await parseAndFilterCSV(selectedFiles[activeTab][fileId].text, request_data, selectedFiles[activeTab][fileId].file.name, selectedFiles[activeTab][fileId].file.type, selectedFiles[activeTab][fileId].file.lastModified, selectedFiles[activeTab][fileId].file.lastModifiedDate);
+          selectedFiles[activeTab][fileId]['fileFiltered'] = filteredFile;
+      }
       selectedFiles[activeTab][fileId]['profileId'] = document.getElementById('profileSelect').value;
       closeConfirmOverwriteModal();
       url = CHECKORDERSFILE;
@@ -1218,7 +1220,11 @@ async function parseAndFilterCSV(text, allowedColumns, fileName, fileType, lastM
 async function checkFileContent(fileId, rowElement, url) {
     var file = selectedFiles[activeTab][fileId];
     var formData = new FormData();
+    if (file.fileFiltered) {
     formData.append('file_list', file.fileFiltered);
+    } else {
+      formData.append('file_list', file.file);
+    }
     formData.append('profile', file.profileId);
     formData.append('file_id', fileId);
     rowElement.querySelector('.resolve-cell').innerHTML = 'Checking...';

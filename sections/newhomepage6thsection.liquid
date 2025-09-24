@@ -24,6 +24,26 @@
           "type": "url",
           "id": "button_link",
           "label": "t:sections.text-with-text.blocks.button.settings.button_link.label"
+        },
+        {
+          "type": "range",
+          "id": "padding_top",
+          "min": 0,
+          "max": 300,
+          "step": 4,
+          "unit": "px",
+          "label": "t:sections.all.padding.padding_top",
+          "default": 36
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 300,
+          "step": 4,
+          "unit": "px",
+          "label": "t:sections.all.padding.padding_bottom",
+          "default": 36
         }
     ],
     "blocks": [
@@ -59,6 +79,17 @@
 {% endschema %}
 
 {%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
   .gradientparnter {
     background: linear-gradient(60deg, #2c2b30 35%, #2255ff);
   }
@@ -140,8 +171,6 @@
     flex-direction: column; /* Stack children vertically */
     background: #fafafa; /* Changed to white background */
     width: 100%;
-    padding-top: 10%;
-    padding-bottom: 10%;
     position: relative;
     align-items: flex-start;
   }
@@ -220,7 +249,7 @@
   }
 {%- endstyle -%}
 
-<div style="position: relative;" class="background6th">
+<div style="position: relative;" class="background6th section-{{ section.id }}-padding">
   <div style="display: flex" class="page-width section6">
     <div class="triangle"></div>
     <div class="triangle1"></div>

@@ -47,7 +47,7 @@
     text-align: center;
     transition: background-color 0.3s ease;
     cursor: pointer;
-    scroll-behavior: smooth; 
+    scroll-behavior: smooth;
 }
 .dropZone.error {
     border-color: var(--forsure-main-red);
@@ -581,6 +581,28 @@ content: "\2713"
 #returnListDropZone {
   margin-top: 9.55rem;
 }
+/* Loading spinner */
+#loadingSpinner, #loadingSpinnerCalendar {
+  border: 4px solid rgba(34, 85, 255, 0.1);
+  border-top: 4px solid #2255ff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+  display: flex;
+}
+#loadingSpinnerContainer, #loadingSpinnerCalendarContainer {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
@@ -592,7 +614,7 @@ content: "\2713"
   <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
   {% render 'forsure-simple-notification' %}
   {% render 'forsure-confirmation' %}
-  
+
   <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
   <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
@@ -648,12 +670,12 @@ content: "\2713"
             <h3 style="margin-bottom: 1rem;text-align: center;">Client Credentials</h3>
             <button class="button button--secondary" onclick="openClientsModal()">Manage Login Details</button>
               {% comment %} <div id="clientsFileContainer" style="display: flex; align-items: center; padding: 0.5rem 0;border: 0.2rem solid #17161c;background-color: #fff;border-color: #ccc;margin-bottom: 1.5rem;">
-                
+
                   {% comment %} <span id="clientsFileName" style="margin: auto">No file uploaded</span>
                   <a id="editIconClients" href="#" title="Edit" onclick="openClientsModal()" style="margin-left: 1rem;margin-right: 1rem;  margin-top: 0.5rem; display: none">
                     <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0px" y="0px" viewBox="0 0 117.74 122.88" style="enable-background:new 0 0 117.74 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#17161c" class="st0" d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"/></g></svg>
                   </a> {% endcomment %}
-                  
+
                   {% comment %} <img width="20px" id="upload-clients" style="margin-left: 1rem; margin-right: 1rem; cursor: pointer" onclick="document.getElementById('clientsFileInput').click()" src="{{ section.settings.upload | image_url }}" alt="{{ section.settings.upload.alt | escape }}" loading="lazy"> {% endcomment %}
               </div> {% endcomment %}
               <input type="file" id="clientsFileInput" style="display: none;" accept=".xlsx" onchange="handleClientsUpload(this)">
@@ -799,7 +821,7 @@ content: "\2713"
         <div id="errorsorder_list"></div>
         <div class="navButtons" id="navButtonsStep1">
             <button class="nextButton button" onclick="uploadOrders('uploadorders/')" id="nextBtnuploadorders" style="position: relative;" disabled>Next</button>
-        </div> 
+        </div>
       </div> {% endcomment %}
 
   {% comment %} <div class="step losensitive" id="step2" style="display: none">
@@ -818,7 +840,7 @@ content: "\2713"
       <div class="navButtons">
           <button class="prevButton button button--secondary" onclick="prevStep(1)">Back</button>
           <button class="nextButton button" onclick="uploadReturns('uploadreturns/')" id="nextBtnuploadreturns">Next</button>
-      </div> 
+      </div>
      </div>
       {% endcomment %}
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
@@ -895,7 +917,7 @@ content: "\2713"
               </select>
             </div>
 
-            
+
             <div class="col-md-6" style="position: relative">
               {% render 'forsure-custom-calendar' %}
               <div id="calendarError" style="color:red;text-align: right;font-size: 12px;"></div>
@@ -913,7 +935,7 @@ content: "\2713"
                 <select id="groupByFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
                 <div onclick="previewReport()" style="cursor:pointer;margin: auto;margin-left: 1rem;width: 3rem;" title="Preview Output">
                   {% render 'icon-inspect' %}
-                </div>  
+                </div>
               </div>
             </div>
           </div>
@@ -1054,6 +1076,9 @@ content: "\2713"
       </div>
   </div>
 </div>
+<div id="loadingSpinnerContainer" style="display: none;">
+  <div id="loadingSpinner" style="display: block!important;"></div>
+</div>
 <div id="errorModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
   <div style="display:flex;gap:1rem;">
     <h2 id="error-modal-title">Errors</h2>
@@ -1093,13 +1118,13 @@ content: "\2713"
       <h2 id="save-modal-title" style="margin: 0;">Save Report</h2>
       <span class="closeSave closePreview" onclick="closeSaveModal()" aria-label="Close">&times;</span>
     </div>
-  
+
     <form onsubmit="saveReport(); return false;">
       <div style="margin-bottom: 1rem;">
         <label for="saveReportName" style="display: block; width: 100%;margin-bottom: 1rem;">Please enter a name for the report:</label>
         <input type="text" id="saveReportName" placeholder="Report Name" style="padding: 0.5rem;width: 100%;margin-bottom: 1rem;">
       </div>
-  
+
       <div style="flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
         <div style="flex: 1; min-width: 180px;">
           <label for="recurrence" style="display: block; width: 100%;margin-bottom: 1rem;">Recurrence:</label>
@@ -1111,24 +1136,24 @@ content: "\2713"
             <option value="yearly">Yearly</option>
           </select>
         </div>
-  
+
         <div style="flex: 1; min-width: 180px;">
           <label for="saveReportDate" style="display: block; width: 100%;margin-top: 1rem;margin-bottom: 1rem;">Report Deadline:</label>
           <input type="date" id="saveReportDate" style="padding: 0.5rem;width: 100%;margin-bottom: 1rem;">
         </div>
-  
+
         <div id="overwriteReportCheckboxContainer" style="flex: 1; min-width: 180px; display: none; align-items: center; gap: 0.5rem; margin-top: 1.5rem;width: 100%;margin-bottom: 1rem;">
           <input type="checkbox" id="overwriteReportCheckbox" name="overwriteReportCheckbox" value="true">
           <label for="overwriteReportCheckbox" style="margin: 0;">Overwrite Existing</label>
         </div>
       </div>
-  
+
       <div style="text-align: right;">
         <button id="saveReportButton" class="button" type="submit" style="padding: 0.6rem 1.2rem;">Save</button>
       </div>
     </form>
   </div>
-  
+
 </div>
 <div id="modalOverlaySave" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
 </div>
@@ -1459,7 +1484,7 @@ function createNewFileRowCreation(fileName, availableProfiles, dataUrl, inputId,
   profileNameCell.dataset.value = '';
   profileNameCell.addEventListener('click', async () => {
     await openProfileModal(availableProfiles, fileName, file, row.id, orders, returns);
-    
+
   });
   filePartProfile.appendChild(profileNameCell);
 
@@ -1672,8 +1697,8 @@ async function openProfileModal(availableProfiles, fileName, fileInput, rowId, o
     }
     csvData = await parseCSV(text);
   } else if (
-    fileInput.name.endsWith('.xls') || 
-    fileInput.name.endsWith('.xlsx') || 
+    fileInput.name.endsWith('.xls') ||
+    fileInput.name.endsWith('.xlsx') ||
     fileInput.type.includes('sheet')
   ) {
     csvData = await parseExcel(fileInput);
@@ -1735,7 +1760,7 @@ async function addProfileModal(availableProfiles, fileName, csvData, modal) {
       labelsV2Options.forEach(option => {
         const optionElement = document.createElement('option');
         optionElement.value = option.key;
-        var star = '';  
+        var star = '';
         if (option.required) {
           star = ' *';
         }
@@ -2393,127 +2418,6 @@ function handleFileDeletion(uniqueId, orders, returns, reports, dataUrl) {
     image.style.width = newWidth + 'px';
 }
 
-{% comment %} async function uploadOrders(endpoint) {
-    document.getElementById('uploadSteps').style.cursor = 'wait';
-    document.getElementById('nextBtnuploadorders').disabled = true;
-    document.getElementsByClassName('dropZone')[0].style.cursor = 'wait';
-    const formData = new FormData();
-    formData.append('live_data', document.getElementById('liveDataToggle').checked);
-    // Assuming each row in your table has a class 'file-row'
-    const rows = document.querySelectorAll('#fileList_order_list .file-row');
-    rows.forEach(row => {
-        const fileId = row.id;
-        if (selectedFilesOrders.hasOwnProperty(fileId)){
-          var file = selectedFilesOrders[fileId];
-          if (file.fileFiltered) {
-            formData.append('order_lists', file.fileFiltered);
-          } else {
-            formData.append('order_lists', file.file);
-          }
-          if (file.resolutions) {
-            formData.append('resolutions', JSON.stringify(file.resolutions));
-          } else {
-            formData.append('resolutions', '{}');
-          }
-          formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
-          formData.append('fileId', fileId);
-        }
-    });
-    try {
-        const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
-        // Check if an error message already exists
-        if (data['status_code'] === 400) {
-          data['data'].forEach(failedData => {
-            var failedRow = document.getElementById(failedData['file_id']);
-            failedRow.style.color = 'red';
-            let errorMessage = failedRow.querySelector('.upload-error-message');
-            if (!errorMessage) {
-              errorMessage = document.createElement('td');
-
-              errorMessage.className = 'upload-error-message';
-              errorMessage.style.color = "red";
-              errorMessage.textContent = failedData["error"];
-              failedRow.appendChild(errorMessage);
-            }
-
-          });
-        } else {
-          nextStep(2);
-        }
-        document.getElementById('nextBtnuploadorders').disabled = false;
-        document.getElementById('uploadSteps').style.cursor = 'default';
-        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
-        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
-    } catch (error) {
-        console.error(error);
-        document.getElementById('nextBtnuploadorders').disabled = false;
-        document.getElementById('uploadSteps').style.cursor = 'default';
-        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
-        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
-        showMessage('Failed to upload orders ' + error.message, false);
-    }
-} {% endcomment %}
-
-{% comment %} async function uploadReturns(endpoint) {
-  document.getElementById('uploadSteps').style.cursor = 'wait';
-    document.getElementById('nextBtnuploadreturns').disabled = true;
-    document.getElementsByClassName('dropZone')[1].style.cursor = 'wait';
-    const formData = new FormData();
-    formData.append('live_data', document.getElementById('liveDataToggle').checked);
-    // Assuming each row in your table has a class 'file-row'
-    const rows = document.querySelectorAll('#fileList_return_list .file-row');
-    rows.forEach((row, index)=> {
-        const fileId = row.id;
-        if (selectedFilesReturns.hasOwnProperty(fileId)){
-          var file = selectedFilesReturns[fileId];
-          if (file.fileFiltered) {
-            formData.append('return_lists', file.fileFiltered);
-          } else {
-            formData.append('return_lists', file.file);
-          }
-          if (file.resolutions) {
-            formData.append('resolutions', JSON.stringify(file.resolutions));
-          } else {
-            formData.append('resolutions', '{}');
-          }
-          formData.append('profiles', row.querySelector('.profile-name').getAttribute('data-id'));
-          formData.append('fileId', fileId);
-        }
-    });
-    try {
-        const data = await unifiedSendRequest(UPLOADFILE + endpoint, { formData: formData });
-        // Check if an error message already exists
-        if (data['status_code'] === 400) {
-          data['data'].forEach(failedData => {
-            var failedRow = document.getElementById(failedData['id']);
-            failedRow.style.color = 'red';
-            let errorMessage = failedRow.querySelector('.upload-error-message');
-            if (!errorMessage) {
-              errorMessage = document.createElement('td');
-
-              errorMessage.className = 'upload-error-message';
-              errorMessage.style.color = "red";
-              errorMessage.textContent = failedData["error"];
-              failedRow.appendChild(errorMessage);
-            }
-
-          });
-        } else {
-          nextStep(3);
-        }
-        document.getElementById('nextBtnuploadreturns').disabled = false;
-        document.getElementById('uploadSteps').style.cursor = 'default';
-        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
-        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
-    } catch (error) {
-        console.error(error);
-        document.getElementById('nextBtnuploadreturns').disabled = false;
-        document.getElementById('uploadSteps').style.cursor = 'default';
-        document.getElementsByClassName('dropZone')[0].style.cursor = 'pointer';
-        document.getElementsByClassName('dropZone')[1].style.cursor = 'pointer';
-        showMessage('Failed to upload returns ' + error.message, false);
-    }
-} {% endcomment %}
 
 async function uploadReports() {
     if (Object.keys(selectedFilesReports).length === 0 && Object.keys(zeroDeclarationRows).length === 0) {
@@ -2557,7 +2461,7 @@ async function uploadReports() {
               failedRow.appendChild(errorMessage);
             }
 
-          }); 
+          });
         } else {
           showMessage('Successfully uploaded reports, they will be handed in now', true);
           document.getElementById('fileList_report_list').innerHTML = '';
@@ -2862,6 +2766,8 @@ function stepFunctions(stepNumber){
 let allTemplates = [];
 async function getTimesAndCountry() {
   try {
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+    loadingSpinnerContainer.style.display = 'block';
     var data = await unifiedSendRequest(GETREPORTTIMES, { method: 'GET' });
     const minDate = data[0];
     const maxDate = data[1];
@@ -2932,6 +2838,8 @@ async function getTimesAndCountry() {
     document.getElementById('templateContainer').style.display = 'flex';
     document.getElementById('includeReturnsContainer').style.display = 'flex';
     await populateRulesDropdown();
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+    loadingSpinnerContainer.style.display = 'none';
   } catch (error) {
     console.error(error.message);
     showMessage('Failed to retrieve countries from orders ' + error.message, false);
@@ -3052,23 +2960,23 @@ async function populateTemplateSelector() {
     if (template.deadlines) {
       template.deadlines.forEach(deadline => {
         if (!deadline.timeframeStart || !deadline.timeframeEnd || !deadline.recurrence) return;
-  
+
         const recurrenceName = deadline.recurrence.replace('ly', ''); // Yearly -> Year, Monthly -> Month
         const label = `Last ${recurrenceName}`;
-  
+
         const now = moment();
-  
+
         if (deadline.recurrence.toLowerCase() === "monthly") {
           const lastMonth = now.clone().subtract(1, 'month');
           periodStart = lastMonth.clone().startOf('month');
           periodEnd = lastMonth.clone().endOf('month');
-      
+
         } else if (deadline.recurrence.toLowerCase() === "quarterly") {
           const currentQuarter = Math.floor((now.month()) / 3) + 1;
           const lastQuarter = currentQuarter - 1 <= 0 ? 4 : currentQuarter - 1;
           const lastQuarterYear = currentQuarter - 1 <= 0 ? now.year() - 1 : now.year();
           const quarterStartMonth = (lastQuarter - 1) * 3;
-      
+
           periodStart = moment({ year: lastQuarterYear, month: quarterStartMonth, day: 1 });
           periodEnd = periodStart.clone().add(2, 'months').endOf('month');
           // TODO periodEnd doesn't seem to be correct
@@ -3083,7 +2991,7 @@ async function populateTemplateSelector() {
             periodStart = moment({ year: now.year(), month: 0, day: 1 }); // January
             periodEnd = periodStart.clone().add(5, 'months').endOf('month'); // June
           }
-      
+
         } else if (deadline.recurrence.toLowerCase() === "yearly") {
           const lastYear = now.clone().subtract(1, 'year');
           periodStart = moment({ year: lastYear.year(), month: 0, day: 1 });
@@ -3097,11 +3005,11 @@ async function populateTemplateSelector() {
         const to = (endDay >= 28)
           ? periodEnd
           : periodStart.clone().date(endDay);
-  
+
         dynamicRanges[label] = [from, to];
       });
     }
-  
+
     // Fallback: if no template deadlines, at least offer standard choices
     if (Object.keys(dynamicRanges).length === 0) {
       dynamicRanges = {
@@ -3119,13 +3027,13 @@ async function populateTemplateSelector() {
     const sortedRangesArray = Object.entries(dynamicRanges).sort((a, b) => {
       const [ , [aStart, aEnd] ] = a;
       const [ , [bStart, bEnd] ] = b;
-    
+
       const aDuration = aEnd.diff(aStart, 'days');
       const bDuration = bEnd.diff(bStart, 'days');
-    
+
       return aDuration - bDuration; // Shortest first
     });
-    
+
     // Step 2: Rebuild dynamicRanges object in sorted order
     dynamicRanges = Object.fromEntries(sortedRangesArray);
     var possibleRange = null;
@@ -3136,7 +3044,7 @@ async function populateTemplateSelector() {
       }
     }
     if (possibleRange) {
-      $('#monthPicker').val(possibleRange[0].format('DD/MM/YYYY') + ' - ' + possibleRange[1].format('DD/MM/YYYY'));  
+      $('#monthPicker').val(possibleRange[0].format('DD/MM/YYYY') + ' - ' + possibleRange[1].format('DD/MM/YYYY'));
       document.getElementById('calendarError').textContent = '';
       document.getElementById('calendarError').style.display = 'none';
     }
@@ -3232,7 +3140,7 @@ function updateTemplateOptions(refreshPRO=true) {
   const selectedCategory = $('#category').val();
 
   templateSelect.innerHTML = '<option value="default">-- Select a template --</option>'; // Clear
-  
+
   lastTemplate = 'default';
   seenPro = new Set();
   allTemplates.forEach(template => {
@@ -3251,7 +3159,7 @@ function updateTemplateOptions(refreshPRO=true) {
       option.textContent = template.pro;
       proDropdown.appendChild(option);
     }
-    
+
     if (matchCountry && matchCategory && matchPro) {
       if (template.id !== undefined) {
         const option = document.createElement('option');
@@ -3521,10 +3429,10 @@ function viewPreview(data) {
     }
     table.appendChild(tbody);
 
-  
+
   // Step 5: Add table to the document
   document.getElementById('previewContainer').appendChild(table);
-}  
+}
 
 function saveReportOpenModal() {
   if (!document.getElementById('monthPicker').value) {
@@ -3538,7 +3446,7 @@ function saveReportOpenModal() {
     document.getElementById('saveReportName').value = templateName;
     document.getElementById('overwriteReportCheckboxContainer').style.display = 'flex';
     document.getElementById('overwriteReportCheckbox').checked = true;
-    
+
   }
   document.getElementById('saveReportDate').value = moment().format('YYYY-MM-DD');
 }
@@ -3592,7 +3500,7 @@ async function openZeroDeclarationModal() {
     const countryDropdown = document.getElementById("countryDropdown");
     const reporttypeDropdown = document.getElementById("reporttypeDropdown");
     const proDropdown = document.getElementById("proDropdown");
-    const timeframeDropdown = document.getElementById("timeframeDropdown"); 
+    const timeframeDropdown = document.getElementById("timeframeDropdown");
     const companyDropdown = document.getElementById("companyDropdown");
     countryDropdown.innerHTML = '';
     reporttypeDropdown.innerHTML = '';
@@ -3726,7 +3634,7 @@ async function openZeroDeclarationModal() {
       $('.selectpicker').selectpicker('refresh');
     }
     $('.selectpicker').selectpicker('refresh');
-    
+
   } catch (error) {
     console.error(error.message);
     showMessage('Failed to create zero declaration ' + error.message, false);
@@ -3778,7 +3686,7 @@ async function submitZeroDeclaration() {
 
 
 function showGuide() {
-  if(guideToShow == 'new') {// create new report 
+  if(guideToShow == 'new') {// create new report
     var guideSteps = [];
     guideSteps.push({ element: "main", group: "{{ 'software.guide.report.create.group' | t }}", title: "{{ 'software.guide.report.create.title' | t }}", text: "{{ 'software.guide.report.create.text' | t }}", where: 'middle'});
     guideSteps.push({ element: "#liveDataToggleSlider", group: "{{ 'software.guide.report.liveData.group' | t }}", title: "{{ 'software.guide.report.liveData.title' | t }}", text: "{{ 'software.guide.report.liveData.text' | t }}", where: 'right', runBefore: function() {selectOption('new')} });

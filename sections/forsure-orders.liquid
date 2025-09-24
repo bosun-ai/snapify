@@ -1216,10 +1216,10 @@ function createFulfilmentListItem(group) {
   console.log(statusTitle);
   li.innerHTML = `
     <div class="od-col">${escapeHtml(group['General']['Order ID']['value'])}</div>
-    <div class="od-col od-col--sm">${escapeHtml(group['General']['Total Weight']['value'] ?? 'Unknown')}</div>
-    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type']['value'] ?? 'Unknown')}</div>
-    <div class="od-col od-col--sm">${escapeHtml(group['General']['Main Type Weight']['value'] ?? 'Unknown')}</div>
-    <div class="od-col od-col--sm" ${statusTitle}>${escapeHtml(group['General']['Status']['value'] ?? 'Pending')}</div>
+    <div class="od-col od-col--sm">${escapeHtml(showValue(group['General']['Total Weight']['value']))}</div>
+    <div class="od-col od-col--sm">${escapeHtml(showValue(group['General']['Main Type']['value']))}</div>
+    <div class="od-col od-col--sm">${escapeHtml(showValue(group['General']['Main Type Weight']['value']))}</div>
+    <div class="od-col od-col--sm" ${statusTitle}>${escapeHtml(showValue(group['General']['Status']['value'], 'Pending'))}</div>
     <div class="od-col od-col--select">
       <input type="checkbox" class="od-select" />
     </div>
@@ -1232,6 +1232,9 @@ function createFulfilmentListItem(group) {
   return li;
 }
 
+function showValue(v, fallback = 'Unknown') {
+  return v === undefined || v === null || v === '' ? fallback : v;
+}
 /**
  * Render many grouped orders into the <ul id="orders-list">.
  * @param {Array<Object>} groups
