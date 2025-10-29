@@ -1091,7 +1091,7 @@ function buildOrdersSubrows(it) {
     li.dataset.id = it['General']['SKU']['value']||'';
     li.onclick = () => showDetails(it, false, li);
     li.innerHTML = `
-      <div class="od-subcol od-subcol--prod">${escapeHtml(it['General']['Name']['value']|| it['General']['Product Name']['value']||'')}</div>
+      <div class="od-subcol od-subcol--prod">${escapeHtml(it['General']['Product Name']['value']||'')}</div>
       <div class="od-subcol od-subcol--sku"><code>${escapeHtml(it['General']['SKU']['value']||'')}</code></div>
       <div class="od-subcol od-subcol--qty">${escapeHtml(it['General']['Amount']['value']||'')}</div>
       <div class="od-subcol od-subcol--tags"></div>`;
@@ -1110,7 +1110,7 @@ function buildReturnsSubrows(it) {
   li.className='od-subrow od-returns-sub';
   li.onclick = () => showDetails(it, false, li);
   li.innerHTML = `
-    <div class="od-subcol od-subcol--prod">${escapeHtml(it['General']['Name']['value']|| it['General']['Product Name']['value']||'')}</div>
+    <div class="od-subcol od-subcol--prod">${escapeHtml(it['General']['Product Name']['value']||'')}</div>
     <div class="od-subcol od-subcol--sku"><code>${escapeHtml(it['General']['SKU']['value']||'')}</code></div>
     <div class="od-subcol od-subcol--qty">${escapeHtml(it['General']['Amount Ordered']['value']||'')}</div>
     <div class="od-subcol od-subcol--qty">${escapeHtml(it['General']['Amount Returned']['value']||'')}</div>`;

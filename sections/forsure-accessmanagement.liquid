@@ -354,7 +354,22 @@ div.display-flex {
   {% render 'forsure-confirmation' %}
   <div id="accessManagementWrapper" class="section-{{ section.id }}-padding" style="display: none;">
     <div id="accessManagement" class="configbox page-width border" style="border-radius: 1rem;position:relative;background: #fafafa;">
-        <div><h2>Manage Access</h2></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;position:relative;">
+          <h2>Manage Access</h2>
+          <div style="display: none; align-items: center;" id="user-icon-container">
+            <div
+              id="bug-icon-accessmanagement"
+              style="cursor: pointer; background: #fafafa; padding-top: 5px; margin-right: 1rem;"
+            >
+              {% render 'icon-bug' %}
+            </div>
+            
+            <div id="user-icon"  style="cursor: pointer;background: #fafafa;padding-top: 5px;margin-right: 1rem;" onclick="window.location.href='/account?logged_in'">
+              {% render 'icon-user' %}
+            </div>
+            <h5 style="text-decoration: underline;cursor: pointer;margin-right: 2rem;" onclick="window.location.href='/account?logged_in'">{{ customer.email }}</h5>
+          </div>
+      </div>
         <table>
             <thead>
                 <tr>
@@ -606,6 +621,9 @@ window.onclick = function(event) {
 waitForPermission(function() {
     if (window.userPermissions['forsure-configuration'] && window.userPermissions['accessmanagement']) {
       document.getElementById('accessManagementWrapper').style.display = 'block';
+      if (!window.userPermissions['generalsettings']) {
+        document.getElementById('user-icon-container').style.display = 'flex';
+      }
       getUsers();
     }
   });

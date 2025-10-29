@@ -604,6 +604,22 @@ content: "\2713"
   100% { transform: rotate(360deg); }
 }
 
+.previewActive svg {
+  border-radius: 1rem;
+  background-color: #2255FF;
+
+  fill: #fafafa!important;
+}
+
+#previewIcon svg {
+  padding: 1rem;
+  min-width: 5rem;
+}
+
+#outputFieldsContainer .dropdown {
+  width: 160px!important;
+}
+
 {%- endstyle -%}
 {% if customer.tags contains 'member' %}
 
@@ -926,16 +942,16 @@ content: "\2713"
 
           <div id="customFieldsContainer" class="row mb-3" style="display: none;">
             <div class="col-md-6">
-              <label for="customFields" class="form-label">Select Fields for Report</label>
-              <select id="customFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
+              <label for="groupByFields" class="form-label">Show one line per</label>
+              <select id="groupByFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
             </div>
-            <div class="col-md-6">
-              <label for="groupByFields" class="form-label">Group Results By</label>
-              <div style="display: flex;width: 220px;">
-                <select id="groupByFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
-                <div onclick="previewReport()" style="cursor:pointer;margin: auto;margin-left: 1rem;width: 3rem;" title="Preview Output">
-                  {% render 'icon-inspect' %}
-                </div>
+            <div class="col-md-6" style="display: flex;width: 250px;">
+              <div style="width: 160px;" id="outputFieldsContainer">
+                <label for="customFields" class="form-label">Show these totals</label>
+                <select id="customFields" class="selectpicker form-select wide-select" multiple data-live-search="true"></select>
+              </div>
+              <div onclick="previewReport()" id="previewIcon" style="cursor:pointer;margin: auto;margin-left: 1rem;width: 5rem;" title="Preview Output">
+                {% render 'icon-inspect' %}
               </div>
             </div>
           </div>
@@ -3205,9 +3221,23 @@ $('#proSelect').on('changed.bs.select', function() {
 });
 $('#groupByFields').on('changed.bs.select', function() {
   updateSaveReportButton();
+
+  if ($('#customFields').val().length > 0 && $('#groupByFields').val().length > 0) {
+    document.getElementById('previewIcon').classList.add('previewActive');
+    setTimeout(() => {
+      document.getElementById('previewIcon').classList.remove('previewActive');
+    }, 1000);
+  }
 });
 $('#customFields').on('changed.bs.select', function() {
   updateSaveReportButton();
+  
+  if ($('#customFields').val().length > 0 && $('#groupByFields').val().length > 0) {
+    document.getElementById('previewIcon').classList.add('previewActive');
+    setTimeout(() => {
+      document.getElementById('previewIcon').classList.remove('previewActive');
+    }, 1000);
+  }
 });
 
 async function showConfirmationDetails() {

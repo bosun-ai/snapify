@@ -161,6 +161,7 @@
     display: inline-block;
     position: relative;
     margin-left: auto;
+    width: 130px;
 }
 
 .feature-add-btn:hover {
@@ -218,6 +219,9 @@ table.dataTable tr.child td { padding:0 !important; border:0 !important; }
     border-right: none !important;
 }
 
+.feature-title-text {
+    width: 250px;
+}
 {% endstyle %}
 
   <!-- Feature Modal -->
@@ -237,6 +241,30 @@ table.dataTable tr.child td { padding:0 !important; border:0 !important; }
                 <option value="shopify">Shopify</option>
                 <option value="erp">ERP System</option>
             </select>
+        </div>
+        <div id="bulkApply">
+            <div style="margin: 2rem;">
+                <label for="skuMode" style="width: 50%;" >Apply to:</label>
+                <select id="skuMode" class="selectpicker">
+                    <option value="current">Current SKU</option>
+                    <option value="all">All SKUs</option>
+                    <option value="range">Range</option>
+                    <option value="prefix">Starts with...</option>
+                </select>
+            </div>
+            <div style="margin: 2rem;">
+                    <!-- Range -->
+                <div id="skuRange" style="display:none; margin-top:8px;">
+                    <input type="text" id="skuStart" placeholder="Start SKU (e.g. 1000)">
+                    <input type="text" id="skuEnd" placeholder="End SKU (e.g. 5000)">
+                </div>
+            </div>
+            <div style="margin: 2rem;">
+                    <!-- Prefix -->
+                <div id="skuPrefix" style="display:none; margin-top:8px;">
+                    <input type="text" id="skuPrefixInput" placeholder="Prefix (e.g. 12)">
+                </div>
+            </div>
         </div>
         <div style="display: flex; justify-content: space-between;margin: 2rem;">
             <div>
@@ -267,15 +295,20 @@ function addFeature(row, sku) {
         console.log('Feature add button already exists for SKU:', sku);
         return;
     }
-    var text = firstCell.textContent;
+    var text = firstCell.textContent || 'Click to edit';
     firstCell.innerHTML = '';
     var div = document.createElement('div');
     div.className = 'feature-title-container';
     var textContainer = document.createElement('div');
     textContainer.className = 'feature-title-text';
     textContainer.textContent = text;
-    textContainer.onclick = () => {
-        editName(textContainer);
+    {% comment %} textContainer.onclick = () => {
+        d(textContainer);
+    }; {% endcomment %}
+    textContainer.onclick = function(e) {
+        e.stopPropagation();
+        td = firstCell.closest('td');
+        editCell(td, false, td.querySelector('.feature-title-text'));
     };
     firstCell.appendChild(div);
     div.appendChild(textContainer);
@@ -359,30 +392,13 @@ const featureCache = new Map();
 const expandedSKUs = new Set();
 
 
-function syncLayout(dt){
-    const table = dt.table().node();
-    const avail = table.clientWidth;               // excludes scrollbar
-    visibleCols = [];
-    dt.columns(':visible').every(function(){
-      const th = this.header();
-      const cs = getComputedStyle(th);
-      const w  = th.getBoundingClientRect().width; // used width
-      const pct = (w / avail) * 100;
-      visibleCols.push({
-        key: this.dataSrc(),
-        widthPct: pct.toFixed(5) + '%',
-        padL: cs.paddingLeft,
-        padR: cs.paddingRight,
-        align: cs.textAlign,
-        cls: th.className || ''
-      });
-    });
+{% comment %} function syncLayout(dt){
     console.log('Visible columns:', visibleCols);
     applyColgroupToMain(dt);
     applyColgroupsToChildren(dt);
-}
+} {% endcomment %}
 
-function buildColgroupEl() {
+{% comment %} function buildColgroupEl() {
     const cg = document.createElement('colgroup');
     cg.setAttribute('data-role', 'main-colgroup');
     for (const c of visibleCols) {
@@ -392,8 +408,8 @@ function buildColgroupEl() {
     }
     return cg;
 }
-  
-function applyColgroupToMain(dt) {
+   {% endcomment %}
+{% comment %} function applyColgroupToMain(dt) {
     if (!visibleCols.length) return;
     const table = dt.table().node();
     const newCg = buildColgroupEl();
@@ -431,23 +447,11 @@ root.querySelectorAll('tr.feature-child table.feature-row-table').forEach(tbl =>
     tbl.insertBefore(cgClone, ref);
     }
 });
-}
-  
-  
-{% comment %} new ResizeObserver(() => { const dt = $('#editableTable').DataTable(); syncLayout(dt); dt.rows({page:'current'}).every(function(){ const sku=this.data()[idcol]||this.data().SKU; if(expandedSKUs.has(sku)) this.child(buildChildHTML(featureCache.get(sku).features),'feature-child').show(); }); }).observe($('#editableTable').get(0)); {% endcomment %}
-
-{% comment %} // capture widths after init and whenever layout changes
-function captureColWidths(dt) {
-    headers = dt.columns().dataSrc().toArray();
-    colWidthsPx = [];
-    dt.columns().every(function () {
-      const w = $(this.header()).outerWidth();
-      colWidthsPx.push(`${Math.max(20, Math.floor(w))}px`);
-    });
 } {% endcomment %}
-
+  
+  
 // build the child table to look like a seamless continuation
-function buildChildHTML(features) {
+{% comment %} function buildChildHTML(features) {
     const wrapper = document.createElement('div');
     wrapper.className = 'feature-wrap';
   
@@ -468,7 +472,9 @@ function buildChildHTML(features) {
     table.appendChild(tbody);
   
     (features || []).forEach(f => {
+        console.log('f', f);
         const tr = createChildHTML(f, document.createElement('tr'));
+        tr.dataset.featureId = f.id;
         tbody.appendChild(tr);
     });
   
@@ -477,7 +483,7 @@ function buildChildHTML(features) {
 
 function createChildHTML(feature, tr) {
   
-    visibleCols.forEach((c, i) => {
+    columnMapping.forEach((c, i) => {
         const tdInner = document.createElement('td');
         tdInner.className = c.cls;
         tdInner.style.textAlign = c.align;
@@ -501,27 +507,89 @@ function createChildHTML(feature, tr) {
         tr.appendChild(tdInner);
     });
     return tr;
+} {% endcomment %}
+
+async function getCategorylistFeatures(sku) {
+    params = {
+        version: versionId,
+    };
+    if (country) {
+        params.country = country;
+    }
+    const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?` + new URLSearchParams(params).toString(), { method: 'GET' });
+    return res || [];
 }
   
   // your toggle reuses buildChildHTML(features, dt)
-async function toggleFeatures(sku, rowNode) {
-    const table = $('#editableTable').DataTable();
-    syncLayout(table);
+  async function toggleFeatures(sku, row) {
+    const btn = row.querySelector('.feature-toggle-btn');
+    const tableBody = row.parentNode;
+    const isExpanded = expandedSKUs.has(sku);
 
-    const row = table.row(rowNode);
-    const btn = rowNode.querySelector('.feature-toggle-btn');
-    if (row.child.isShown()) { row.child.hide(); btn.classList.remove('expanded'); expandedSKUs.delete(sku); return; }
-  
-    let features = featureCache.get(`${sku}`)?.features;
-    if (!features) {
-      const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, { method: 'GET' });
-      features = res || [];
-      featureCache.set(`${sku}`, { features });
+    // --- Collapse existing features ---
+    if (isExpanded) {
+        expandedSKUs.delete(sku);
+        btn.classList.remove('expanded');
+
+        // remove all consecutive feature rows that belong to this SKU
+        let next = row.nextElementSibling;
+        while (next && next.dataset.sku === sku && next.dataset.type === 'feature') {
+            const toRemove = next;
+            next = next.nextElementSibling;
+            toRemove.remove();
+        }
+        return;
     }
-  
-    row.child(buildChildHTML(features, table), 'feature-child').show();
-    btn.classList.add('expanded'); expandedSKUs.add(sku);
+
+    // --- Expand: load and insert feature rows ---
+    expandedSKUs.add(sku);
+    btn.classList.add('expanded');
+
+    // retrieve cached or fetched features
+    let features = featureCache.get(sku)?.features;
+    if (!features) {
+        const res = await getCategorylistFeatures(sku);
+        features = res || [];
+        featureCache.set(sku, { features });
+    }
+
+    // insert rows immediately after parent row, in original order
+    let insertAfter = row;
+    for (const feature of features) {
+        const tr = document.createElement('tr');
+        tr.dataset.featureId = feature.id;
+        tr.dataset.sku = sku;
+        tr.dataset.type = 'feature';
+        first = true;
+        for (const header of Object.keys(columnMapping)) {
+            if (first) {
+                var container = document.createElement('td');
+                var content = createFeatureCellContent(feature);
+                container.appendChild(content);
+                tr.appendChild(container);
+                first = false;
+                continue;
+            }
+            const td = document.createElement('td');
+            td.textContent = feature.data_local?.[header] || feature.data?.[header] || '';
+            td.dataset.name = header;
+            td.dataset.id = feature.id;
+            td.title = columnMapping[header].description;
+            td.addEventListener('click', e => {
+                e.stopPropagation();
+                editCell(td, true);
+            });
+            tr.appendChild(td);
+        }
+
+        insertAfter.insertAdjacentElement('afterend', tr);
+        insertAfter = tr; // move insertion point
+    }
+
+    // optional post-processing
+    // checkValidSum(sku);
 }
+
 
 function refreshFeatures() {
     expandedSKUs.forEach(sku => {
@@ -547,14 +615,12 @@ function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m=>({ '&':'&a
 
 async function loadAndDisplayFeatures(sku) {
     console.log('Loading and displaying features for SKU:', sku);
-    rowNode = document.getElementById(`${sku}`);
-    const dt  = $('#editableTable').DataTable();
-    const row = dt.row(rowNode);
-    const btn = rowNode.querySelector('.feature-toggle-btn');
+    row = document.getElementById(`${sku}`);
+    const btn = row.querySelector('.feature-toggle-btn');
   
     try {
       // fetch and cache
-        const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${sku}?version=${versionId}`, { method: 'GET' });
+        const res = await getCategorylistFeatures(sku);
         const features = Array.isArray(res) ? res : [];
         featureCache.set(`${sku}`, { features });
   
@@ -571,31 +637,61 @@ async function loadAndDisplayFeatures(sku) {
         btn.title = features.length ? 'Toggle Features' : 'No features available';
       }
         // ensure column layout is synced
-        syncLayout(dt);
-      // close if open, then rebuild child
-      if (row.child.isShown()) {
-        row.child.hide();
-        expandedSKUs.delete(sku);
-        if (btn) btn.classList.remove('expanded');
-      }
+        {% comment %} syncLayout(dt); {% endcomment %}
+      {% comment %} // close if open, then rebuild child {% endcomment %}
+      const isExpanded = expandedSKUs.has(sku);
 
-      if (features.length === 0) {
-        btn.classList.add('disabled');
-        btn.title = 'No features available';
-        let badge = btn.querySelector('.feature-badge');
-        if (badge) {
-            badge.remove();
-        }
-
-        return;
-      }
+      // --- Collapse existing features ---
+      if (isExpanded) {
+          expandedSKUs.delete(sku);
+          btn.classList.remove('expanded');
   
-      // build and show child (always render; shows "No features" row if empty)
-      const childEl = buildChildHTML(features);
-      row.child(childEl, 'feature-child').show();
+          // remove all consecutive feature rows that belong to this SKU
+          let next = row.nextElementSibling;
+          while (next && next.dataset.sku === sku && next.dataset.type === 'feature') {
+              const toRemove = next;
+              next = next.nextElementSibling;
+              toRemove.remove();
+          }
+          btn.click();
+          btn.click();
+          btn.click();
+          return;  // todo remove, but then it puts all feature SKUs in one SKU
+      }
       expandedSKUs.add(sku);
-      if (btn) btn.classList.add('expanded');
-  
+      btn.classList.add('expanded');
+        // insert rows immediately after parent row, in original order
+        let insertAfter = row;
+        for (const feature of features) {
+            const tr = document.createElement('tr');
+            tr.dataset.featureId = feature.id;
+            tr.dataset.sku = sku;
+            tr.dataset.type = 'feature';
+            first = true;
+            for (const header of Object.keys(columnMapping)) {
+                if (first) {
+                    var container = document.createElement('td');
+                    var content = createFeatureCellContent(feature);
+                    container.appendChild(content);
+                    tr.appendChild(container);
+                    first = false;
+                    continue;
+                }
+                const td = document.createElement('td');
+                td.textContent = feature.data_local?.[header] || feature.data?.[header] || '';
+                td.dataset.name = header;
+                td.dataset.id = feature.id;
+                td.title = columnMapping[header].description;
+                td.addEventListener('click', e => {
+                    e.stopPropagation();
+                    editCell(td, true);
+                });
+                tr.appendChild(td);
+            }
+
+            insertAfter.insertAdjacentElement('afterend', tr);
+            insertAfter = tr; // move insertion point
+        }
     } catch (error) {
       console.error('Error loading features:', error);
   
@@ -657,7 +753,8 @@ function createFeatureCellContent(feature) {
 }
 
 // Open feature modal for adding new feature
-function openFeatureModal(sku) {
+async function openFeatureModal(sku) {
+    document.getElementById('bulkApply').style.display = 'block';
     currentFeatureSku = sku;
     currentFeatureId = null;
     
@@ -677,13 +774,19 @@ function openFeatureModal(sku) {
     providerSelect.value = '';
     
     modal.style.display = 'block';
-    
+    const mode = document.getElementById('skuMode');
+    mode.addEventListener('change', e => {
+    document.getElementById('skuRange').style.display = e.target.value === 'range' ? 'block' : 'none';
+    document.getElementById('skuPrefix').style.display = e.target.value === 'prefix' ? 'block' : 'none';
+    });
+
     // Force a repaint
     modal.offsetHeight;
 }
 
 // Edit existing feature
 function editFeature(feature) {
+    document.getElementById('bulkApply').style.display = 'none';
     console.log('Editing feature:', feature);
     currentFeatureSku = feature.sku;
     currentFeatureId = feature.id;
@@ -722,7 +825,7 @@ async function saveFeature(event) {
             formData.append('feature_name', featureName);
             formData.append('version', versionId);
             
-            await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${currentFeatureSku}/${currentFeatureId}`, {
+            await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${currentFeatureId}`, {
                 method: 'PUT',
                 formData: formData
             });
@@ -734,8 +837,22 @@ async function saveFeature(event) {
             formData.append('feature_name', featureName);
             formData.append('data_provider', featureProvider);
             formData.append('version', versionId);
+
+            if (document.getElementById('skuMode').value === 'current') {
+                var url = `${CATEGORYLISTFEATURES}/simple/${currentFeatureSku}`;
+            } else {
+                const skuMode = document.getElementById('skuMode').value;
+                formData.append('sku_mode', skuMode);
+                if (skuMode === 'range') {
+                    formData.append('sku_start', document.getElementById('skuStart').value);
+                    formData.append('sku_end', document.getElementById('skuEnd').value);
+                } else if (skuMode === 'prefix') {
+                    formData.append('sku_prefix', document.getElementById('skuPrefixInput').value);
+                }
+                var url = `${CATEGORYLISTFEATURES}/bulk`;
+            }
             
-            await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${currentFeatureSku}`, {
+            await unifiedSendRequest(url, {
                 method: 'POST',
                 formData: formData
             });
@@ -745,6 +862,7 @@ async function saveFeature(event) {
         
         await loadAndDisplayFeatures(currentFeatureSku);
         closeFeatureModal();
+        getCategorylistDetails();
         
     } catch (error) {
         console.error('Error saving feature:', error);

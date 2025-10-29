@@ -178,8 +178,8 @@ function resetDateRange() {
       qBtn.textContent = block.q;
       qBtn.className   = 'quarter-btn';
       // Build Date objects for the first and last day of the quarter
-      const qStart = new Date(year, block.m[0] - 1, 1);          // 1st of first month
-      const qEnd   = new Date(year, block.m[2],     0);          // 0th day ⇒ last of prev month
+      const qStart = new Date(year, block.m[0], 1);          // 1st of first month
+      const qEnd   = new Date(year, block.m[2]+1,     0);          // 0th day ⇒ last of prev month
       if (!anyDateInRange(availableDateOptions, qStart, qEnd)) {
         qBtn.classList.add('disabled');
         qBtn.style.cursor = 'not-allowed';

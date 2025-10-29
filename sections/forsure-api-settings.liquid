@@ -6,7 +6,7 @@
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
-  
+
 table {
     border-collapse: collapse;
     margin: 20px 0;
@@ -404,6 +404,7 @@ div.display-flex {
 
 #apiTokenModal .modal-content {
     position: fixed !important;
+    z-index: 100;
 }
 
 {%- endstyle -%}
@@ -431,7 +432,7 @@ div.display-flex {
                     <th style="width: 10%">Delete</th>
                 </tr>
             </thead>
-            <tbody id="integrationList">          
+            <tbody id="integrationList">
             </tbody>
         </table>
         <div id="container" style="padding-bottom: 2rem; display: flex">
@@ -520,7 +521,7 @@ div.display-flex {
                 <button id="newIntegrationButton" class="button" onclick="saveNewIntegration()">Save</button>
             </div>
         </div>
-       
+
     </div>
 </div>
 
@@ -610,7 +611,7 @@ div.display-flex {
         var text = `Are you sure you want to delete the following integration?<br><br>Name: ${integrationName}`;
         showConfirmationMessage("Delete Integration", text, "Cancel", "Delete", function() {deleteIntegration(integrationId)});
     }
-    
+
     async function deleteIntegration(integrationId) {
         try {
             document.getElementById('validateModalSendButton').disabled=true;
@@ -636,8 +637,8 @@ div.display-flex {
             document.body.style.cursor = 'default';
         }
     }
-    
-    
+
+
     async function openEditIntegrationModal(integrationId) {
         try {
             var integration = await unifiedSendRequest(GETINTEGRATIONBYID + '?id=' + integrationId, {method: 'GET'});
@@ -674,7 +675,7 @@ div.display-flex {
             showMessage('Failed to get integration: ' + error.message, false);
         }
     }
-    
+
     function closeEditIntegrationModal() {
         var modal = document.getElementById('editIntegrationModal');
         modal.style.display = "none";
@@ -682,7 +683,7 @@ div.display-flex {
 
     function addNewIntegration() {
         var modal = document.getElementById('addIntegrationModal');
-        modal.style.display = "block";    
+        modal.style.display = "block";
         document.getElementById('addIntegrationForm').style.display = "none";
         document.getElementById('chooseConnectorType').style.display = "block";
     }
@@ -694,7 +695,7 @@ div.display-flex {
             if (response.status == 'success') {
                 showMessage('API Token added successfully!', true);
                 getIntegrations();
-                document.getElementById('apiToken').innerHTML = response.token;
+                document.getElementById('apiToken').innerHTML = response.data.token;
                 openApiTokenModal();
             } else {
                 console.error('Failed to add API Token:', response);
@@ -708,10 +709,10 @@ div.display-flex {
         }
     }
 
-    
+
     function copyApiToken() {
         const apiToken = document.getElementById('apiToken').textContent;
-        
+
         navigator.clipboard.writeText(apiToken)
             .then(() => {
                 console.log('API token copied to clipboard!');
@@ -724,7 +725,7 @@ div.display-flex {
 
     function copyServerDomain() {
         const domain = document.getElementById('domain').textContent;
-        
+
         navigator.clipboard.writeText(domain)
             .then(() => {
                 console.log('Server domain copied to clipboard!');

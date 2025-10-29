@@ -1228,7 +1228,6 @@ async function checkFileContent(fileId, rowElement, url) {
     formData.append('profile', file.profileId);
     formData.append('file_id', fileId);
     rowElement.querySelector('.resolve-cell').innerHTML = 'Checking...';
-    console.log(formData);
     document.getElementById("upload-button").disabled = true;
     document.getElementById("upload-button").title = 'Checking file content...';
     if (!document.getElementById("upload-button").classList.contains('disabledbutton')) {

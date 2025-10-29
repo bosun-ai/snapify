@@ -1371,8 +1371,9 @@ let editMode = false;
 var columnNames = {};
 var categorylistLabels = {};
 var col_order = [];
+var idcol = null;
 async function getCategorylistDetails() {
-      var catlabels = await unifiedSendRequest(GETCATEGORYLISTLABELSV2DETAILS += `?version_id=${versionId}`, {method: 'GET'});
+      var catlabels = await unifiedSendRequest(GETCATEGORYLISTLABELSV2DETAILS + `?version=${versionId}`, {method: 'GET'});
       col_order = catlabels['col_order'];
       categorylistLabels = catlabels['output_dict'];
       let url = GETCATEGORYLISTDETAILS;
@@ -1406,7 +1407,7 @@ async function getCategorylistDetails() {
       cols.forEach((col, index) => {
           columnNames[index] = col.data;
       });
-      var idcol = await unifiedSendRequest(GETCATEGORYLISTIDCOL, {method: 'GET'});
+      idcol = await unifiedSendRequest(GETCATEGORYLISTIDCOL, {method: 'GET'});
       var thead = document.querySelector("#editableTable thead");
       thead.innerHTML = '';
 
@@ -1447,6 +1448,10 @@ async function getCategorylistDetails() {
                 columns: ':gt(1)'
             },
             columns: cols,
+            {% comment %} scrollY: '70vh',        // table body max height {% endcomment %}
+            {% comment %} fixedHeader: true,
+            scrollX: true,
+            scrollCollapse: true,   // collapse if smaller {% endcomment %}
             rowCallback: function(row, data, dataIndex) {
               $(row).attr('id', data[idcol]);
               const firstTd = row.querySelector('td');
@@ -1735,6 +1740,43 @@ async function inlineEditFeature(categoryTable, tdfeature, cellContent, columnNa
   console.log('subentries', subentries);
   $td.empty();
 
+  const saveValue = async (newValue) => {
+    tdfeature.innerText = newValue;
+    feature.data_local[columnName] = newValue;
+    document.getElementById('suggestionBoxFeature').style.display = 'none';
+    const formData = new FormData();
+    formData.append('new_feature_data', JSON.stringify(feature.data_local));
+    formData.append('version', versionId);
+    formData.append('feature_id', feature.id);
+    formData.append('data_provider', feature.data_provider);
+    const res = await unifiedSendRequest(`${CATEGORYLISTFEATURES}/${feature.id}`, {
+      method: 'PUT',
+      formData: formData
+    });
+    refreshFeatures();
+    const parentRow = categoryTable.rows().eq(0).filter((idx) => {
+      const rowData = categoryTable.row(idx).data();
+      return rowData && rowData[idcol] === feature.sku;
+    });
+  
+    if (parentRow.length > 0) {
+      const rowIdx = parentRow[0];
+  
+      // find the right column by name
+      categoryTable.columns().every(function () {
+        const colIdx = this.index();
+        const colName = categoryTable.column(colIdx).header().textContent.trim();
+        if (colName !== columnName) return;
+  
+        const cell = categoryTable.cell(rowIdx, colIdx);
+        const cellContent = cell.data();
+        const td = cell.node();
+  
+        checkValidSum(feature.sku, columnName, cellContent, td, categoryTable);
+      });
+    }
+  };
+
   if (subentries.length > 0) {
     console.log('subentries.length > 0');
     const input = $('<input>', {
@@ -1780,7 +1822,7 @@ async function inlineEditFeature(categoryTable, tdfeature, cellContent, columnNa
       })
       .on('click', function () {
         input.val(subentry.key);
-        saveValue();
+        saveValue(input.val());
       })
       .on('mouseenter', function () { $(this).css('background', '#eee'); })
       .on('mouseleave', function () { $(this).css('background', ''); })
@@ -1798,13 +1840,6 @@ async function inlineEditFeature(categoryTable, tdfeature, cellContent, columnNa
       });
     });
 
-    const saveValue = () => {
-      const newValue = input.val();
-      tdfeature.innerText = newValue;
-      feature.data_local[columnName] = newValue;
-      document.getElementById('suggestionBoxFeature').style.display = 'none';
-    };
-
     input.on('input', function () {
       if (subentries.length > 0) dropdown.show();
     });
@@ -1813,12 +1848,12 @@ async function inlineEditFeature(categoryTable, tdfeature, cellContent, columnNa
     dropdown.on('mousedown', function () { keepDropdownOpen = true; });
 
     input.on('blur', function () {
-      if (!keepDropdownOpen) saveValue();
+      if (!keepDropdownOpen) saveValue(input.val());
       setTimeout(() => { keepDropdownOpen = false; }, 200);
     });
 
     input.on('keydown', function (e) {
-      if (e.key === 'Enter') saveValue();
+      if (e.key === 'Enter') saveValue(input.val());
       if (e.key === 'Escape') {
         document.getElementById('suggestionBoxFeature').style.display = 'none';
         tdfeature.innerText = originalContent;
@@ -1839,19 +1874,15 @@ async function inlineEditFeature(categoryTable, tdfeature, cellContent, columnNa
 
     input.on('blur', function () {
       const newValue = input.val();
-      tdfeature.innerText = newValue;
-      feature.data_local[columnName] = newValue;
-      categoryTable = $('#editableTable').DataTable();
-      syncLayout(categoryTable);
+      saveValue(newValue);
     });
 
     input.on('keyup', function (e) {
       if (e.key === 'Enter') input.blur();
       if (e.key === 'Escape') {
         tdfeature.innerText = originalContent;
+        saveValue(originalContent);
       }
-      categoryTable = $('#editableTable').DataTable();
-      syncLayout(categoryTable);
     });
     $td.empty().append(input);
     input.focus();
@@ -1904,7 +1935,6 @@ function editName(div) {
 
 function getValidEntry(cellContent, columnName, td) {
   var subentries = categorylistLabels[columnName]?.subentries || [];
-
   if (subentries.length > 0) {
     let foundEntry = false;
     subentries.forEach(subentry => {
@@ -1920,6 +1950,53 @@ function getValidEntry(cellContent, columnName, td) {
       td.classList.remove('invalid-entry');
     }
   }
+}
+
+function isStrictFloat(value) {
+  return /^-?\d+(\.\d+)?$/.test(value);
+}
+
+function checkValidSum(sku, columnName, cellContent, td, api) {
+  if (!window.userPermissions['subsku']) return;
+  if (cellContent === sku) return;
+  if (categorylistLabels[columnName]?.key === "Product Net Weight") return;
+  columnName = columnName.replace(/\u00A0/g, " ");
+  var subentries = categorylistLabels[columnName]?.subentries || [];
+  if (subentries.length > 0) return;
+    // check if the sku is in the featureCache
+    var update = cellContent === '' || cellContent === null;
+    if (!update && !isStrictFloat(cellContent)) {
+      return; // not a valid float, skip
+    }
+    const expectedSum = parseFloat(cellContent);
+  
+    if (featureCache.has(`${sku}`)) {
+      const features = featureCache.get(`${sku}`);
+      let totalSum = 0;
+      features.features.forEach(feature => {
+        if (!isStrictFloat(feature.data_local[columnName])) {
+          console.log('not a valid float, skip');
+          return; // not a valid float, skip
+        }
+        totalSum += parseFloat(feature.data_local[columnName]);
+      });
+      console.log('totalSum', totalSum);
+      console.log('expectedSum', expectedSum);
+      
+      if (td.classList.contains('invalid-entry') || totalSum === 0) {
+        return;
+      }
+      if (update) {
+        api.cell(td).data(totalSum);
+        td.classList.add('invalid-entry');
+        td.title = 'Field updated to match the sum of the subsku values';
+      } else if (totalSum !== expectedSum) {
+        td.title = 'Field value does not match the sum of the subsku values';
+        td.classList.add('invalid-entry');
+      } else {
+        td.classList.remove('invalid-entry');
+      }
+    }
 }
 
 

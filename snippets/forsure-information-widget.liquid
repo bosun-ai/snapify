@@ -30,95 +30,6 @@
     height: 100%;
 }
 
-#informationSettingsOverlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99;
-}
-
-.modal-content {
-    width: fit-content;
-    height: fit-content;
-    top: 50%;
-    left: 50%;
-    min-width: 70rem;
-    transform: translate(-50%, -50%);
-    position: absolute !important;
-    background-color: #fafafa;
-    padding: 20px;
-    border-radius: 1rem;
-}
-
-.modal-body {
-    display: flex;
-    gap: 20px;
-    padding: 1.5rem;
-    font-family: sans-serif;
-}
-
-.modal-title {
-    margin-left: 15px;
-    margin-right: 15px;
-    justify-content: space-between;
-    display: flex;
-}
-
-#buttons {
-    display: flex;
-    gap: 10px;
-    margin: auto;
-    width: fit-content;
-}
-
-#buttons > div {
-    padding: 10px 20px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    transition: background-color 0.2s ease;`
-}
-
-#buttons > div:hover {
-    background-color: #eaeaea;
-}
-
-#buttons > div.selected {
-    background-color: #2255ff;
-    color: #fafafa;
-    border-color: #2255ff;
-}
-
-#buttons-options {
-    display: flex;
-    gap: 10px;
-    margin: auto;
-    width: fit-content;
-}
-
-#buttons-options button {
-    padding: 10px 20px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    transition: background-color 0.2s ease;
-}
-
-#buttons-options button:hover {
-    background-color: #eaeaea;
-}
-
-#buttons-options button.selected {
-    background-color: #2255ff;
-    color: #fafafa;
-    border-color: #2255ff;
-}
 #informationContainer {
     height: 39%;
     flex-direction: column;
@@ -154,6 +65,7 @@
 
 .information-scroll-wrapper {
   overflow-y: auto;
+  overflow-x: hidden;
   border-top: 1px solid #ccc;
   flex: 1 1 auto;
 }
@@ -212,6 +124,12 @@
     /* fill: #fafafa; */
 }
 
+.information-row-active .information-cell div .information-icon path,
+.information-row-active .information-cell div .information-icon rect,
+.information-row-active .information-cell div .information-icon circle {
+    fill: #fafafa;
+}
+
 .information-cell svg {
     width: 30px;
     height: 30px;
@@ -258,42 +176,7 @@
         </div>
     </div>
 </div>
-<div id="informationSettingsOverlay"></div>
-<div id="informationSettingsModal" class="modal">
-    <div class="modal-content">
-        <div id="informationSettingsStep1">
-            <h2 class="modal-title">Information Settings
-                <div>
-                <button class="button button--secondary" onclick="closeInformationSettings()">Cancel</button>
-                <button class="button" onclick="saveInformationSettings()">Save</button>
-                </div>
-            </h2>
-            <div class="modal-body" style="flex-direction: column;">
-                <div>
-                <h3>Which information do you want to see and how do you want to receive it?</h3>
-                <div id="buttons">
-                    <div id="button-email" onclick="selectNotificationMethod('email')">Email</div>
-                    <div id="button-notification" onclick="selectNotificationMethod('notification')">Notification</div>
-                    <div id="button-email-notification" onclick="selectNotificationMethod('both')">Email and Notification</div>
-                </div>
-                </div>
-                <div>
-                    <h3>What types of information do you want to receive?</h3>
-                    <div id="buttons-options">
-                    <button id="button-updates-option" onclick="selectInformationType('updates')">Updates</button>
-                    <button id="button-warnings-option" onclick="selectInformationType('warnings')">Warnings</button>
-                    <button id="button-errors-option" onclick="selectInformationType('errors')">Errors</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
   <script>
-    let selectedNotificationMethod = null;
-    let selectedInformationTypes = new Set();
-
     function expandInformation() {
       document.getElementById('deadlineContainer').style.display = 'none';
       document.getElementById('informationContainer').classList.add('open');
@@ -310,92 +193,9 @@
         document.getElementById('informationContainer').style.height = '39%';
     }
 
-    function openInformationSettings() {
-        document.getElementById('informationSettingsOverlay').style.display = 'block';
-        document.getElementById('informationSettingsModal').style.display = 'block';
-        document.getElementById('informationSettingsStep1').style.display = 'block';
-        selectedNotificationMethod = null;
-        selectedInformationTypes.clear();
-        getInformationSettings();
-        updateButtonStates();
-    }
-
-    function closeInformationSettings() {
-        document.getElementById('informationSettingsOverlay').style.display = 'none';
-        document.getElementById('informationSettingsModal').style.display = 'none';
-    }
-
-    function selectNotificationMethod(method) {
-        selectedNotificationMethod = method;
-        updateButtonStates();
-    }
-
-    function selectInformationType(type) {
-        if (selectedInformationTypes.has(type)) {
-            selectedInformationTypes.delete(type);
-        } else {
-            selectedInformationTypes.add(type);
-        }
-        updateButtonStates();
-    }
-
-    function updateButtonStates() {
-        // Update notification method buttons
-        document.getElementById('button-email').classList.remove('selected');
-        document.getElementById('button-notification').classList.remove('selected');
-        document.getElementById('button-email-notification').classList.remove('selected');
-        
-        if (selectedNotificationMethod) {
-            document.getElementById(`button-${selectedNotificationMethod === 'both' ? 'email-notification' : selectedNotificationMethod}`).classList.add('selected');
-        }
-
-        // Update information type buttons
-        document.getElementById('button-updates-option').classList.remove('selected');
-        document.getElementById('button-warnings-option').classList.remove('selected');
-        document.getElementById('button-errors-option').classList.remove('selected');
-        
-        selectedInformationTypes.forEach(type => {
-            document.getElementById(`button-${type}-option`).classList.add('selected');
-        });
-    }
-
-    async function getInformationSettings() {
-        try {
-            var data = await unifiedSendRequest(INFORMATION_SETTINGS, {method: 'GET'});
-            selectedNotificationMethod = data.notification_method || null;
-            selectedInformationTypes = new Set(data.informationTypes.trim() ? data.informationTypes.split(',') : []);
-            updateButtonStates();
-        } catch (error) {
-            console.error(error);
-            showMessage(error.message, false);
-        }
-    }
-
-    async function saveInformationSettings() {
-        if (!selectedNotificationMethod) {
-            alert('Please select a notification method');
-            return;
-        }
-        if (selectedInformationTypes.size === 0) {
-            alert('Please select at least one information type');
-            return;
-        }
-        try {
-            var formData = new FormData();
-            formData.append('notificationMethod', selectedNotificationMethod);
-            formData.append('informationTypes', Array.from(selectedInformationTypes));
-            var data = await unifiedSendRequest(INFORMATION_SETTINGS, {formData: formData});
-            showMessage('Information settings saved successfully!', true);
-            closeInformationSettings();
-        } catch (error) {
-            console.error(error);
-            showMessage(error.message, false);
-        }
-    }
-
     async function getInformation() {
         try {
-            var data = await unifiedSendRequest(INFORMATION, {method: 'GET'});
+            var data = await unifiedSendRequest(NOTIFICATIONS + '?show_hidden=true', {method: 'GET'});
             return data;
         } catch (error) {
             console.error(error);
@@ -408,8 +208,13 @@
         const scrollWrapper = document.getElementById('informationList');
         scrollWrapper.innerHTML = '';
 
+        const parentWidth = scrollWrapper.clientWidth;
+
         const table = document.createElement('table');
         table.className = 'information-table';
+        table.style.width = '420px';
+        table.style.marginRight = '-1rem';
+        table.style.tableLayout = 'auto';
 
         // Create header
         const tableHeader = document.createElement('thead');
@@ -435,27 +240,24 @@
             const row = document.createElement('tr');
             row.className = 'information-row';
 
-            if (activeInformation &&
-                activeInformation.country === item.country &&
-                activeInformation.report_type === item.report_type &&
-                activeInformation.pro.split('-')[0].trim() === item.pro.split('-')[0].trim()) {
+            if (activeInformation && activeInformation.id === item.id) {
                 row.classList.add('information-row-active');
             }
 
-            const values = [item.status, item.country, item.report_type, item.pro];
+            const values = [item.level, item.country, item.type_of_report];
             values.forEach(val => {
                 const td = document.createElement('td');
                 td.className = 'information-cell';
                 var content = document.createElement('div');
                 content.className = 'information-cell-content';
-                if (val !== item.pro) {
-                    content.classList.add('information-cell-content-centered');
-                }
+                content.classList.add('information-cell-content-centered');
                 if (val === 'ERROR') {
                     content.innerHTML = `{% render 'forsure-icon-error' %}`;
                 }
                 else if (val === 'WARNING') {
                     content.innerHTML = `{% render 'forsure-icon-warning' %}`;
+                } else if (val === 'UPDATE') {
+                    content.innerHTML = `{% render 'icon-information' %}`;
                 }else if (val === 'Batteries') {
                     content.innerHTML = getBatteriesSVG();
                 }
@@ -464,15 +266,27 @@
                 }
                 else if (val === 'Packaging') {
                     content.innerHTML = getPackagingSVG();
-                } else if (val === item.pro) {
-                    content.innerText = val.split('-')[0].trim();
-                }
-                else {
+                } else {
                     content.innerText = val;
+                }
+                if (val === null) {
+                    content.innerText = 'N/A';
                 }
                 td.appendChild(content);
                 row.appendChild(td);
             });
+            const td = document.createElement('td');
+            td.className = 'information-cell';
+            var content = document.createElement('div');
+            content.className = 'information-cell-content';
+            if (item.pro === null) {
+                content.innerText = 'N/A';
+            } else {
+                content.innerText = item.pro.split('-')[0].trim();
+            }
+            td.appendChild(content);
+            row.appendChild(td);
+
 
             row.onclick = (function(currentItem, currentData) {
                 return function() {
@@ -502,23 +316,23 @@
     function openInformationDetails(item) {
 
         document.getElementById('informationDetails').innerHTML = `
-        <h3 style="text-align: center;">Received the following ${item.status[0].toUpperCase() + item.status.slice(1).toLowerCase()}:</h3>    
-            <table style="margin: auto;margin-top: 1rem">
+        <h3 style="text-align: center;">Received the following ${item.level[0].toUpperCase() + item.level.slice(1).toLowerCase()}:</h3>    
+            <table style="margin: auto;margin-top: 1rem;">
                 <tr>
                     <td style="font-weight: bold;width: 50%;">Country</td>
-                    <td>${item.country}</td>
+                    <td>${item.country || 'N/A'}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold;width: 50%;">Report Type</td>
-                    <td>${item.report_type}</td>
+                    <td>${item.type_of_report}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold;width: 50%;">PRO</td>
-                    <td>${item.pro}</td>
+                    <td>${item.pro || 'N/A'}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold;width: 50%;">Description</td>
-                    <td>${item.description}</td>
+                    <td>${item.error_message}</td>
                 </tr>
             </table>
         `;
@@ -539,7 +353,7 @@
       
           setInterval(() => {
             getInformation().then(data => {
-                {% comment %} updateInformation(data); {% endcomment %}
+                updateInformation(data);
             });
           }, 10000);
         }

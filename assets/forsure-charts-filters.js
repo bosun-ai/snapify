@@ -144,7 +144,7 @@ async function initDropdowns() {
 
         const entries = response[key];
         
-        entries.forEach(entry => {
+        entries.sort().forEach(entry => {
             const option = document.createElement("option");
             if(key === 'profile'){
                 option.value = entry['profile_id'];

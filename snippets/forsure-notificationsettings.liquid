@@ -1,0 +1,235 @@
+{% style %}
+#informationSettingsOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 102;
+}
+
+#informationSettingsModal {
+    z-index: 102;
+}
+
+.modal-content-information {
+    width: fit-content;
+    height: fit-content;
+    top: 50%;
+    left: 50%;
+    min-width: 70rem;
+    transform: translate(-50%, -50%);
+    position: absolute !important;
+    background-color: #fafafa;
+    padding: 20px;
+    border-radius: 1rem;
+}
+
+.modal-body-information {
+    display: flex;
+    padding: 1.5rem;
+    font-family: sans-serif;
+}
+
+.modal-title-information {
+    margin-left: 15px;
+    margin-right: 15px;
+    justify-content: space-between;
+    display: flex;
+    margin-top: 0px;
+    align-items: center;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin: auto;
+    width: fit-content;
+}
+
+.buttons label{
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.2s ease;`
+}
+
+.buttons label:hover {
+    background-color: #eaeaea;
+}
+
+.buttons input[type="radio"]:checked + label {
+    background-color: #2255ff;
+    color: #fafafa;
+    border-color: #2255ff;
+}
+
+.buttons input[type="radio"]:checked + label[for="email-update"] { background-color: #2255ff; }
+.buttons input[type="radio"]:checked + label[for="email-warning"] { background-color: #E6B83C; }
+.buttons input[type="radio"]:checked + label[for="email-error"] { background-color: #E63C6B; }
+.buttons input[type="radio"]:checked + label[for="email-none"] { background-color: #17161c; }
+.buttons input[type="radio"]:checked + label[for="notification-update"] { background-color: #2255ff; }
+.buttons input[type="radio"]:checked + label[for="notification-warning"] { background-color: #E6B83C; }
+.buttons input[type="radio"]:checked + label[for="notification-error"] { background-color: #E63C6B; }
+.buttons input[type="radio"]:checked + label[for="notification-none"] { background-color: #17161c; }
+
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: auto;
+    width: fit-content;
+    margin-top: 2rem;
+}
+
+{% endstyle %}
+
+<div id="informationSettingsOverlay"></div>
+<div id="informationSettingsModal" class="modal">
+    <div class="modal-content-information">
+        <div>
+            <h2 class="modal-title-information">Notification Settings
+                <div>
+                    <button class="button button--secondary" onclick="closeInformationSettings()" style="border: 0.2rem solid #17161C;">Cancel</button>
+                    <button class="button" onclick="saveInformationSettings()">Save</button>
+                </div>
+            </h2>
+            <div class="modal-body-information" style="flex-direction: column;">
+                <p class="helper-text">Select the minimum severity. You will also receive all higher-level alerts.</p>
+                <div>
+                    <h3>Email Preferences</h3>
+                    <div>
+                        <div class="buttons">
+                            <input type="radio" id="email-update" name="email-severity" value="UPDATE" hidden>
+                            <label for="email-update" class="button-email">Updates</label>
+                          
+                            <input type="radio" id="email-warning" name="email-severity" value="WARNING" hidden>
+                            <label for="email-warning" class="button-email">Warnings</label>
+                          
+                            <input type="radio" id="email-error" name="email-severity" value="ERROR" hidden>
+                            <label for="email-error" class="button-email">Errors</label>
+                          
+                            <input type="radio" id="email-none" name="email-severity" value="NONE" hidden>
+                            <label for="email-none" class="button-email">None</label>
+                            {% comment %} <div id="button-emails-UPDATE" class="button-email" onclick="selectInformationType('UPDATE', 'email')">Updates</div>
+                            <div id="button-emails-WARNING" class="button-email" onclick="selectInformationType('WARNING', 'email')">Warnings</div>
+                            <div id="button-emails-ERROR" class="button-email" onclick="selectInformationType('ERROR', 'email')">Errors</div>
+                            <div id="button-emails-NONE" class="button-email" onclick="selectInformationType('NONE', 'email')">None</div> {% endcomment %}
+                        </div>
+                        <div class="checkbox-container">
+                            <label>
+                                <input type="checkbox" id="all-email-input">
+                                Send all emails (also for PROs I am not responsible for)
+                              </label>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Notification Preferences</h3>
+                    <div>
+                        <div class="buttons">
+                            <input type="radio" id="notification-update" name="notification-severity" value="UPDATE" hidden>
+                            <label for="notification-update" class="button-notification">Updates</label>
+                            <input type="radio" id="notification-warning" name="notification-severity" value="WARNING" hidden>
+                            <label for="notification-warning" class="button-notification">Warnings</label>
+                            <input type="radio" id="notification-error" name="notification-severity" value="ERROR" hidden>
+                            <label for="notification-error" class="button-notification">Errors</label>
+                            <input type="radio" id="notification-none" name="notification-severity" value="NONE" hidden>
+                            <label for="notification-none" class="button-notification">None</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <label>
+                                <input type="checkbox" id="all-notification-input">
+                                Show all notifications (also for PROs I am not responsible for)
+                              </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    
+    async function openInformationSettings() {
+        document.getElementById('informationSettingsOverlay').style.display = 'block';
+        document.getElementById('informationSettingsModal').style.display = 'block';
+        var data = await getInformationSettings();
+        updateButtonStates(data);
+    }
+
+    function updateButtonStates(data) {
+        if (!data) return;
+    
+        // email level
+        const emailLevel = data.send_email_level || "NONE";
+        const emailInput = document.querySelector(
+            `input[name="email-severity"][value="${emailLevel}"]`
+        );
+        if (emailInput) {
+            emailInput.checked = true;
+        }
+    
+        // notification level
+        const notifLevel = data.show_notification || "NONE";
+        const notifInput = document.querySelector(
+            `input[name="notification-severity"][value="${notifLevel}"]`
+        );
+        if (notifInput) {
+            notifInput.checked = true;
+        }
+    
+        // checkboxes
+        document.getElementById("all-email-input").checked = !!data.send_all_notifications;
+        document.getElementById("all-notification-input").checked = !!data.show_all_notifications;
+    }
+
+    function closeInformationSettings() {
+        document.getElementById('informationSettingsOverlay').style.display = 'none';
+        document.getElementById('informationSettingsModal').style.display = 'none';
+    }
+
+    async function getInformationSettings() {
+        try {
+            var data = await unifiedSendRequest(NOTIFICATION_PREFERENCES, {method: 'GET'});
+            return data;
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message, false);
+        }
+    }
+
+    async function saveInformationSettings() {
+        var emailLevel = document.querySelector(`input[name="email-severity"]:checked`).value;
+        var notificationLevel = document.querySelector(`input[name="notification-severity"]:checked`).value;
+        if (!emailLevel && !notificationLevel) {
+            alert('Please select at least one notification type');
+            return;
+        }
+        if (emailLevel == 'NONE') {
+            emailLevel = null;
+        }
+        if (notificationLevel == 'NONE') {
+            notificationLevel = null;
+        }
+        let settings = {
+            send_email_level: emailLevel,
+            send_all_notifications: document.getElementById('all-email-input').checked,
+            show_notification: notificationLevel,
+            show_all_notifications: document.getElementById('all-notification-input').checked
+        }
+        try {
+            var data = await unifiedSendRequest(NOTIFICATION_PREFERENCES, {formData: JSON.stringify(settings), headerArgs: {'Content-Type': 'application/json'} });
+            showMessage('Notification settings saved successfully!', true);
+            closeInformationSettings();
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message, false);
+        }
+    }
+</script>

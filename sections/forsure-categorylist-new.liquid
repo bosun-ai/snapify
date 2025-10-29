@@ -1,0 +1,1069 @@
+{{ 'bootstrap3.4.1min.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+.section-{{ section.id }}-padding {
+  padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+  padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+}
+
+
+@media screen and (min-width: 750px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+}
+
+/* Overlay style */
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Black with 50% opacity */
+  z-index: 2; /* Displayed behind the modal */
+}
+
+/* Modal style */
+#popup {
+  /* display: none; */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the modal */
+  padding: 20px;
+  background-color: #fafafa;
+  border: #17161c solid 0.2rem;
+  border-radius: 2rem;
+  z-index: 2; /* Displayed in front of the overlay */
+  width: 40%; /* Adjust width as needed */
+  max-width: 40%; /* Adjust max width as needed */
+  /* overflow-y: auto; /* Make it scrollable if the content is too big */
+  */ border-radius: 8px; /* Rounded corners */
+}
+
+.button {
+  z-index: 0;
+}
+
+
+#overlayExitNewCol {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Black with 50% opacity */
+  z-index: 2; /* Displayed behind the modal */
+}
+#newColPopup {
+  display: none;
+  position: fixed;
+  top: 40%;
+  left: 40%;
+  background-color: #fafafa;
+  z-index: 3; /* Display in front of other overlay */
+  padding: 2rem;
+  border-radius: 3rem;
+}
+
+#confirmPopup {
+  /* Styling for popup */
+  position: fixed;
+  /* Other styling as needed */
+}
+
+#deactivateEditModeSave:hover, #savestorecategory:hover {
+  color: #fafafa;
+}
+
+.button--secondary {
+border: 0.2rem solid #17161c!important;
+}
+
+.disabled {
+  pointer-events: none; /* Prevents clicks */
+  opacity: 0.8; /* Make it look visually disabled */
+}
+.glyphicon-ok:before {
+  content: "\2713"
+}
+
+/* Native select styling for renameColumnMapping */
+#renameColumnMapping, #addColumnMapping {
+  width: 180px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 14px;
+  height: auto;
+  min-height: 38px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 35px;
+}
+
+#renameColumnMapping:hover, #addColumnMapping:hover {
+  border-color: #999;
+}
+
+#renameColumnMapping option, #addColumnMapping option {
+  padding: 8px 12px;
+}
+
+#renameColumnMapping option:hover, #addColumnMapping option:hover {
+  background-color: #f0f0f0;
+}
+
+#renameColumnMapping optgroup, #addColumnMapping optgroup {
+  font-weight: bold;
+  padding: 8px 0 4px 0;
+}
+
+.person-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  margin: 5px;
+  text-align: center;
+}
+
+  /* Container for all online people icons */
+#onlinePeople {
+  display: flex;
+  flex-wrap: wrap;
+  margin: auto;
+  margin-right: 0;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  top: 1.5rem;
+  position: absolute;
+  right: 1.5rem;
+  font-weight: bold;
+}
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.exclude {
+  text-decoration: line-through;
+}
+
+.modal-content {
+background-color: #fefefe;
+padding: 1rem 2rem;
+border: 1px solid #888;
+width: fit-content;
+max-width: 80vw;
+margin: 15% auto;
+box-sizing: border-box;
+}
+
+.profile-wrapper {
+display: inline-block;
+max-width: 100%;
+padding: 2rem;
+padding-top: 0;
+}
+
+#profileTable {
+width: 100%;
+table-layout: auto;
+}
+
+#profileTable th, #profileTable td {
+white-space: nowrap;
+padding: 0.5rem;
+max-width: 20vw;
+}
+
+{%- endstyle -%}
+{% if customer.tags contains 'member' or customer.tags contains 'vendor' %}
+    <script src="{{ 'cookie-handler.js' | asset_url }}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    {% render 'forsure-simple-notification' %}
+    {% render 'forsure-categorylist-feature' %}
+<div class="section-{{ section.id }}-padding">
+        <input
+          type="file"
+          id="category_list"
+          accept=".csv,.xls,.xlsx"
+          style="display: none">
+        <button id="deleteButton" style="position: absolute;display:none;z-index:2" onclick="deleteColumn()">X</button>
+        <button id="deleteButtonRow" style="position: absolute;display:none;z-index:2" onclick="deleteRow()">X</button>
+        {% render 'forsure-rules' %}
+        <div id="loadingSpinnerContainer" style="display: none;">
+          <div id="loadingSpinner" style="display: block!important;"></div>
+        </div>
+        <div id="categorylistWrapper" style="padding: 3rem;margin: 3rem;margin-top: 0;border-radius: 2rem;border:0.2rem solid #17161c;display: none;">
+          <div id="overlay"></div>
+          <div id="popup" style="z-index:50;display: none">
+            <div id="popupcontent" style="width: 70%; margin: auto">
+                <h2 style="text-align: center">Connect to your store</h2>
+                <div><h4>Choose from Profiles</h4>
+                  <select
+                      id="profileDropdown"
+                      class="selectpicker"
+                      multiple
+                      data-live-search="true"></select>
+                </div>
+                <div>
+                  <h4>Or add it manually</h4>
+                  <div>
+                    <table>
+                      <tr>
+                        <td><label for="storeUrl">Store URL:</label></td>
+                        <td><input type="text" id="storeUrl" placeholder="Store URL"/></td>
+                      </tr>
+                      <tr>
+                        <td><label for="token">Token:</label></td>
+                        <td><input type="password" id="token" placeholder="shpat..." /></td>
+                      </tr>
+                      <tr>
+                        <td><label for="username">Username:</label></td>
+                        <td><input type="text" id="username" placeholder="username" /></td>
+                      </tr>
+                      <tr>
+                        <td><label for="password">Password:</label></td>
+                        <td><input type="password" id="password" placeholder="****" /></td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; margin-top: 20px;">
+                      <div id="progress-bar" style="width: 0%; height: 20px; background-color: #4caf50; border-radius: 5px;display: block;"></div>
+                  </div>
+                </div>
+                <a id="savestorecategory" onclick="importFromStore()" class="button" style="margin: 1rem;cursor: pointer;">Save</a>
+            </div>
+          </div>
+          <div style="width: 96%;overflow-x: auto;margin-left: 2%;margin-right: 2%;">
+            <div id="icons" style="display: flex;justify-content: space-between;">
+              <div>
+                <div id="addCategoryButton">
+                    <a id="activateCategoryMode" onclick="activateCategorylistMode()" class="button button--secondary" style="margin: 1rem;cursor: pointer;background-color: #fafafa;position: relative">Add Category List</a>
+                </div>
+                <div id="categoryModeActivated" style="display: none">
+                    <a id="deactivateCategorylistMode" onclick="deactivateCategorylistMode(false)" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Cancel</a>
+                    <a onclick="document.getElementById('category_list').click()" style="cursor:pointer;margin: 1rem;"
+                    class="button button--secondary" id="uploadCategorylistButton">Upload categorylist</a>
+                    <a id="categorylistfromstore" onclick="openImportFromStorePopup()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add from Store
+                      <div class="greyedout-tooltip">Contact us to set up live data</div>
+                    </a>
+                </div>
+              </div>
+              <div id="onlinePeople">
+              </div>
+              <div id="editButton">
+                <a id="activateEditMode" onclick="activateEditMode()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Edit</a>
+              </div>
+              <div id="editModeActivated" style="display: none">
+                <a id="deactivateEditMode" onclick="deactivateEditMode()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Cancel</a>
+                <a id="addRowBtn" onclick="openAddRowModal()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Row</a>
+                <a id="addColumnBtn" onclick="openAddColumnModal()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Column</a>
+                <a id="addRuleBtn" onclick="displayRules()" class="button button--secondary" style="margin: 1rem;cursor: pointer;">Add Rule
+                  <div class="greyedout-tooltip">Contact us to set up rules</div>
+                </a>
+                <a id="deactivateEditModeSave" onclick="saveData()" class="button" style="margin: 1rem;cursor: pointer;">Save</a>
+              </div>
+            </div>
+
+            {% render 'forsure-catalog' %}
+          </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
+        <div id="profileModal" class="modal losensitive">
+          <div class="modal-content">
+            <span id="closeMapping" class="close">&times;</span>
+            <div class="profile-wrapper">
+            <div style="display: flex; justify-content: space-between;">
+              <h2>Select Mapping</h2>
+              <button class="button" style="margin: auto 0;" id="saveProfile" onclick="saveMapping()">Save</button>
+            </div>
+            <div>Create the mapping you want to use for this file, each dropdown value with a star is required to be mapped.
+              If you want to exclude a column, click the exclude button. Unmapped columns will be excluded from the report, but can be viewed in the dashboard.
+            </div>
+            <div id="profileDetails">
+              <div style="display:flex;padding: 1rem 0;">
+                <strong>File:</strong>
+                <div id='profileFileName' style="margin-left:1rem"></div>
+              </div>
+              <table id="profileTable" style="margin: auto;">
+                <tr>
+                  <th style="max-width: 20vw">Name</th>
+                  <th style="max-width: 20vw">Preview</th>
+                  <th style="max-width: 20vw">Mapping</th>
+                  <th width="10%">Exclude</th>
+                </tr>
+                <tbody id="profileTableBody">
+                </tbody>
+              </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="renameColumnModal" class="modal losensitive" style="display: none;">
+          <div class="modal-content" style="width: 45vw;">
+            <span id="closeRenameColumn" class="close" onclick="closeRenameColumnModal()">&times;</span>
+            <h2 style="margin: 2rem;">Rename Column</h2>
+            <div style="margin: 2rem;">
+              <label for="renameColumnInput" style="width: 50%;">Current Column Name:</label>
+              <span id="currentColumnName"></span>
+            </div>
+            <div style="margin: 2rem;">
+              <label for="renameColumnInput" style="width: 50%;">New Column Name:</label>
+              <input type="text" id="renameColumnInput" style="width: 180px;" placeholder="New Column Name">
+            </div>
+            <div style="margin: 2rem;">
+              <label for="renameColumnInput" style="width: 50%;">Corresponding Mapping:</label>
+              <select id="renameColumnMapping">
+                <option value="">Unmapped</option>
+              </select>
+            </div>
+            <div style="display: flex; justify-content: space-between;margin: 2rem;">
+              <div>
+                <button class="button" style="background-color: #17161c;" onclick="closeRenameColumnModal()">Cancel</button>
+              </div>
+              <div>
+                <button class="button" onclick="saveRenameColumn()">Rename</button>
+              </div>
+          </div>
+          </div>
+        </div>
+      
+        <div id="addColumnModal" class="modal losensitive" style="display: none;">
+          <div class="modal-content" style="width: 45vw;">
+            <span id="closeAddColumn" class="close" onclick="closeAddColumnModal()">&times;</span>
+            <h2 style="margin: 2rem;">Add Column</h2>
+            <div style="margin: 2rem;">
+              <label for="addColumnInput" style="width: 50%;">New Column Name:</label>
+              <input type="text" id="addColumnInput" placeholder="New Column Name" style="width: 180px;">
+            </div>
+            <div style="margin: 2rem;">
+              <label for="addColumnMapping" style="width: 50%;">Corresponding Mapping:</label>
+              <select id="addColumnMapping">
+                <option value="">Unmapped</option>
+              </select>
+            </div>
+            <div style="display: flex; justify-content: space-between;margin: 2rem;">
+              <div>
+                <button class="button" style="background-color: #17161c;" onclick="closeAddColumnModal()">Cancel</button>
+              </div>
+              <div>
+                <button class="button" onclick="saveAddColumn()">Add</button>
+              </div>
+          </div>
+          </div>
+        </div>
+        <div id="addRowModal" class="modal losensitive" style="display: none;">
+          <div class="modal-content" style="width: 45vw;">
+            <span id="closeAddRow" class="close" onclick="closeAddRowModal()">&times;</span>
+            <h2 style="margin: 2rem;">Add Row</h2>
+            <div style="margin: 2rem;">
+              <label for="addRowInput" style="width: 50%;">New Row SKU:</label>
+              <input type="text" id="addRowInput" placeholder="New Row SKU">
+            </div>
+            <div style="display: flex; justify-content: space-between;margin: 2rem;">
+              <div>
+                <button class="button" style="background-color: #17161c;" onclick="closeAddRowModal()">Cancel</button>
+              </div>
+              <div>
+                <button class="button" onclick="saveAddRow()">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="confirmOverwriteModal" class="losensitive" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%;
+           background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 91;border: 0.1rem solid #17161c;">
+          <h2>Confirm Overwrite</h2>
+          <p>Are you sure you want to overwrite the existing mapping?</p>
+          <div style="display: flex; justify-content: space-between;">
+            <button class="button" onclick="confirmOverwrite()">Yes</button>
+            <button class="button" style="background-color: #17161c;"onclick="closeConfirmOverwriteModal()">No</button>
+          </div>
+        </div>
+</div>
+<script>
+    document.getElementById('category_list').addEventListener('change', openProfileModal);
+
+async function parseCSV(fileInput, nrows=3) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(fileInput, {
+      header: true,
+      skipEmptyLines: true,
+      preview: nrows,
+      complete: function(results) {
+        const data = results.data;
+        const columnDict = {};
+
+        if (data.length > 0) {
+          const keys = Object.keys(data[0]);
+          keys.forEach(key => {
+            columnDict[key] = data.map(row => row[key]);
+          });
+        }
+        resolve(columnDict);
+      },
+      error: function(err) {
+        console.error(err);
+        showMessage('Error parsing file ' + err.message, false);
+        reject(err);
+      }
+    });
+  });
+}
+
+
+async function parseExcel(file, nrows = 3) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+  
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+  
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+          const headers = jsonData[0];
+          const rows = jsonData.slice(1, nrows + 1);
+  
+          const columnDict = {};
+          headers.forEach((header, colIndex) => {
+            columnDict[header] = rows.map(row => row[colIndex] ?? '');
+          });
+  
+          resolve(columnDict);
+        } catch (err) {
+          console.error(err);
+          showMessage('Error parsing Excel file: ' + err.message, false);
+          reject(err);
+        }
+      };
+      reader.onerror = err => reject(err);
+      reader.readAsArrayBuffer(file);
+    });
+}
+ 
+function levenshtein(a, b) {
+    const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+    for (let j = 0; j <= a.length; j++) {
+      matrix[0][j] = j;
+    }
+  
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b[i - 1] === a[j - 1]) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,    // deletion
+            matrix[i][j - 1] + 1,    // insertion
+            matrix[i - 1][j - 1] + 1 // substitution
+          );
+        }
+      }
+    }
+  
+    return matrix[b.length][a.length];
+}
+
+async function openProfileModal(event) {
+    const fileInput = event.target.files[0];
+    if (!fileInput) {
+      return;
+    }
+    var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+    loadingSpinnerContainer.style.display = 'block';
+    const fileName = fileInput.name;
+    const modal = document.getElementById('profileModal');
+    const profileSelect = document.getElementById('profileSelect');
+    const profileDetails = document.getElementById('profileDetails');
+    const profileFileName = document.getElementById('profileFileName');
+    {% comment %} try { {% endcomment %}
+    let csvData;
+    if (fileInput.name.endsWith('.csv')) {
+      csvData = await parseCSV(fileInput);
+    } else if (
+      fileInput.name.endsWith('.xls') ||
+      fileInput.name.endsWith('.xlsx') ||
+      fileInput.type.includes('sheet')
+    ) {
+      csvData = await parseExcel(fileInput);
+    } else {
+      showMessage('Unsupported file type. Please upload a CSV or Excel file.', false);
+      loadingSpinnerContainer.style.display = 'none';
+      return;
+    }
+    var labelsV2Options = await getCategorylistLabelsV2Options();
+    profileFileName.textContent = fileName;
+    var profileTable = document.getElementById('profileTableBody');
+    profileTable.innerHTML = '';
+    Object.keys(csvData).forEach((key, index) => {
+      const tr = document.createElement('tr');
+      const tdKey = document.createElement('td');
+      tdKey.textContent = key;
+      tr.appendChild(tdKey);
+      const tdEntry = document.createElement('td');
+      var preview = csvData[key].filter(value => value !== '').join(', ');
+      if (preview.length > 30) { // limit the preview to 100 characters
+        preview = preview.slice(0, 30) + '...';
+      }
+      tdEntry.textContent = preview;
+      tr.appendChild(tdEntry);
+
+      const tdMapping = document.createElement('td');
+      const selectMapping = document.createElement('select');
+      selectMapping.classList.add('btn', 'bs-placeholder', 'btn-default');
+      selectMapping.style.width = '100%';
+      var defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Unmapped';
+      defaultOption.selected = true;
+      selectMapping.appendChild(defaultOption);
+      selectMapping.setAttribute('data-name', key);
+      // find closest match based on edit distance
+      let bestMatchValue = '';
+      let bestMatchScore = Infinity;
+      let bestMatchOptions = [];
+      Object.keys(labelsV2Options).forEach(groupKey => {
+        var optionGroup = document.createElement('optgroup');
+        optionGroup.label = groupKey;
+        optionGroup.setAttribute('data-name', groupKey);
+        labelsV2Options[groupKey].forEach(option => {
+          const optionElement = document.createElement('option');
+          optionElement.value = option.key;
+          optionElement.setAttribute('data-units', option.options);
+          var star = '';
+          if (option.required) {
+            star = ' *';
+          }
+          optionElement.textContent = option.title + star;
+          optionElement.setAttribute('data-description', option.description);
+          {% comment %} optionElement.title = option.description; {% endcomment %}
+
+          optionGroup.appendChild(optionElement);
+
+
+          // Score similarity (very basic: case-insensitive substring match length)
+          const titleLower = option.title.toLowerCase();
+          const keyLower = key.toLowerCase();
+          const distance = levenshtein(keyLower, titleLower);
+
+          if (distance < bestMatchScore) {
+            bestMatchScore = distance;
+            bestMatchValue = option.key;
+            bestMatchOptions = [optionElement];
+          } else if (distance == bestMatchScore) {
+            bestMatchOptions.push(optionElement);
+          }
+        });
+        selectMapping.appendChild(optionGroup);
+      });
+      tdMapping.appendChild(selectMapping);
+      tr.appendChild(tdMapping);
+      const tdExclude = document.createElement('td');
+      const checkboxExclude = document.createElement('input');
+      checkboxExclude.type = 'checkbox';
+      checkboxExclude.title = 'Exclude this column from the upload';
+      checkboxExclude.addEventListener('change', function() {
+        toggleExclude(checkboxExclude);
+      });
+      tdExclude.appendChild(checkboxExclude);
+      tr.appendChild(tdExclude);
+      profileTable.appendChild(tr);
+
+      // dont select the best match if two are equally close
+      // TODO enable once tested properly
+      {% comment %} if (bestMatchOptions.length == 1) {
+        setTimeout(() => {
+          selectMapping.value = bestMatchOptions[0].value;
+          // Refresh the UI
+          $(selectMapping).selectpicker('refresh');
+        }, 500);
+        {% comment %} $(selectMapping).selectpicker('refresh'); {% endcomment %}
+      } else {
+        $(selectMapping).selectpicker('refresh');
+      } {% endcomment %}
+    });
+  {% comment %} } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to parse file ' + fileName, false);
+    return;
+  } {% endcomment %}
+
+
+    getCategorylistLabels();
+  // Display column details (mockup for demonstration)
+
+  // Show the modal
+  modal.style.display = 'block';
+
+  // Close modal on click of close button
+  document.getElementById('closeMapping').onclick = function() {
+    closeMappingModal();
+  };
+
+}
+
+function toggleExclude(checkbox) {
+    const row = checkbox.parentElement.parentElement;
+    const exclude = checkbox.checked;
+    row.classList.toggle('exclude', exclude);
+    row.querySelector('select').disabled = exclude;
+}
+
+
+var editMode = false;
+async function activateEditMode() {
+    document.getElementById('editModeActivated').style.display = 'block';
+    document.getElementById('activateEditMode').style.display = 'none';
+    if (window.userPermissions['rules'] === false) {
+      document.getElementById('addRuleBtn').classList.add('greyed_out_wrapper');
+      document.getElementById('addRuleBtn').style.cursor = 'not-allowed';
+      document.getElementById('addRuleBtn').style.backgroundColor = '#ddd';
+      document.getElementById('addRuleBtn').onclick = null;
+    }
+    editMode = true;
+  }
+
+  async function deactivateEditMode() {
+    document.getElementById('editModeActivated').style.display = 'none';
+    document.getElementById('activateEditMode').style.display = 'flex';
+    document.getElementById('deleteButton').style.display = 'none';
+    document.getElementById('deleteButtonRow').style.display = 'none';
+    editMode = false;
+  }
+
+  async function activateCategorylistMode() {
+    if (window.userPermissions['livedata'] === false) {
+      document.getElementById('categorylistfromstore').style.cursor = 'not-allowed';
+      document.getElementById('categorylistfromstore').style.backgroundColor = '#ddd';
+      document.getElementById('categorylistfromstore').onclick = null;
+      document.getElementById('categorylistfromstore').classList.add('greyed_out_wrapper');
+    }
+    document.getElementById('categoryModeActivated').style.display = 'block';
+    document.getElementById('activateCategoryMode').style.display = 'none';
+    editMode = true;
+  }
+
+  async function deactivateCategorylistMode(save) {
+    document.getElementById('categoryModeActivated').style.display = 'none';
+    document.getElementById('activateCategoryMode').style.display = 'flex';
+  }
+
+  async function uploadCategoryList() {
+    var errorDiv = document.getElementById('errorsDiv');
+    errorDiv.style.display = 'none';
+    var files = document.getElementById('category_list').files;
+    if (files.length) {
+      try {
+        const file = files[0];
+        const formData = new FormData();
+        formData.append('category_list', file);
+        formData.append('categorylabels', JSON.stringify(request_data));
+  
+        // TODO remove profile
+        res = await unifiedSendRequest(UPLOADCATEGORYLIST, {formData: formData});
+        if (res.message) {
+          showMessage('Categorylist uploaded successfully. ' + res.message, true);
+          await fillVersionDropdown();
+        } else {
+          showMessage('Categorylist uploaded successfully', true);
+        }
+        // window.location.reload();
+      } catch (error) {
+        console.error(error);
+        errorDiv.style.display = 'block';
+        errorDiv.innerText = error;
+      }
+    }
+  }
+  
+  function openImportFromStorePopup() {
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+  }
+  
+  function hideModalCategorylist() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('popup').style.display = 'none';
+  }
+  
+  document.getElementById('overlay').addEventListener('click', hideModalCategorylist);
+
+
+
+
+  var importStoreUpdateInterval = null;
+  async function importFromStore() {
+    try {
+          var dataToSend = {
+            'profile': currentProfile,
+            'store_url': document.getElementById('storeUrl').value,
+            'token': document.getElementById('token').value,
+            'username': document.getElementById('username').value,
+            'password': document.getElementById('password').value
+          }
+          const response = await unifiedSendRequest(UPLOADCATEGORYLISTSTORE, {formData: JSON.stringify(dataToSend), headerArgs: { 'Content-Type': 'application/json'}});
+          document.getElementById('popupcontent').classList.add('disabled');
+          document.getElementById('popup').style.cursor = 'progress';
+      } catch (error) {
+          console.error('Error fetching categorylist:', error);
+          showMessage('An error occurred while fetching categorylist.' + error, false);
+      }
+      setTimeout(() => {
+          importStoreUpdateInterval = setInterval(importFromStoreUpdates, 1000);
+      }, 1000); // Delay of 1 second before starting the interval
+  }
+  
+  async function importFromStoreUpdates() {
+    try {
+          const response = await unifiedSendRequest(UPLOADCATEGORYLISTSTORESTATUS, {method: 'GET'});
+          if (response.status == 'success') {
+              showMessage('Fetched categorylist successfully', true);
+              updateProgressBar(100);
+              clearInterval(importStoreUpdateInterval);
+              hideModalCategorylist();
+          } else if (response.status == 'in_progress') {
+              current_element = response.message[0];
+              total_elements = response.message[1];
+              const progressPercentage = (current_element / total_elements) * 100;
+              updateProgressBar(progressPercentage);
+              return;
+          } else {
+              console.error('Error fetching categorylist:', error);
+              showMessage('Failed to fetch categorylist. Please try again.', false);
+              clearInterval(importStoreUpdateInterval);
+          }
+      } catch (error) {
+          console.error('Error fetching categorylist:', error);
+          showMessage('An error occurred while fetching categorylist.' + error, false);
+          clearInterval(importStoreUpdateInterval);
+      }
+      document.getElementById('popupcontent').classList.remove('disabled');
+      document.getElementById('popup').style.cursor = 'default';
+  }
+  
+  function updateProgressBar(percentage) {
+      const progressBar = document.getElementById('progress-bar');
+      progressBar.style.width = percentage + '%';
+  }
+  
+function getUniqueColor(userid) {
+    let hash = 0;
+    for (let i = 0; i < userid.length; i++) {
+        hash = userid.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Generate color using hash
+    const r = (hash >> 24) & 0xFF;
+    const g = (hash >> 16) & 0xFF;
+    const b = (hash >> 8) & 0xFF;
+    return `rgb(${r % 256}, ${g % 256}, ${b % 256})`;
+}
+
+function openDropdownGuide() {
+    // get the 16th td inside the row with id 1
+    var row = document.getElementById('editableTable').querySelector('tbody tr');
+    var td = row.querySelectorAll('td')[6];
+    td.click();
+  }
+
+
+function showGuide() {
+    startGuide([
+        { element: "main", group: "{{ 'software.guide.categorylist.welcome.group' | t }}", title: "{{ 'software.guide.categorylist.welcome.title' | t }}", text: "{{ 'software.guide.categorylist.welcome.text' | t }}", where: 'middle' },
+        { element: "#activateCategoryMode", group: "{{ 'software.guide.categorylist.upload.group' | t }}", title: "{{ 'software.guide.categorylist.upload.title' | t }}", text: "{{ 'software.guide.categorylist.upload.text' | t }}", where: 'below' },
+        { element: "#editButton", group: "{{ 'software.guide.categorylist.edit.group' | t }}", title: "{{ 'software.guide.categorylist.edit.title' | t }}", text: "{{ 'software.guide.categorylist.edit.text' | t }}", where: 'below', secondElement: '#editModeActivated', runBefore: activateEditMode},
+        { element: "#addRowBtn", group: "{{ 'software.guide.categorylist.addRow.group' | t }}", title: "{{ 'software.guide.categorylist.addRow.title' | t }}", text: "{{ 'software.guide.categorylist.addRow.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#addColumnBtn", group: "{{ 'software.guide.categorylist.addColumn.group' | t }}", title: "{{ 'software.guide.categorylist.addColumn.title' | t }}", text: "{{ 'software.guide.categorylist.addColumn.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#addRuleBtn", group: "{{ 'software.guide.categorylist.addRule.group' | t }}", title: "{{ 'software.guide.categorylist.addRule.title' | t }}", text: "{{ 'software.guide.categorylist.addRule.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#deactivateEditModeSave", group: "{{ 'software.guide.categorylist.save.group' | t }}", title: "{{ 'software.guide.categorylist.save.title' | t }}", text: "{{ 'software.guide.categorylist.save.text' | t }}", where: 'below', runBefore: activateEditMode},
+        { element: "#tabs-container", group: "{{ 'software.guide.categorylist.tabs.group' | t }}", title: "{{ 'software.guide.categorylist.tabs.title' | t }}", text: "{{ 'software.guide.categorylist.tabs.text' | t }}", where: 'below'},
+        { element: "#versionsContainer", group: "{{ 'software.guide.categorylist.versions.group' | t }}", title: "{{ 'software.guide.categorylist.versions.title' | t }}", text: "{{ 'software.guide.categorylist.versions.text' | t }}", where: 'below'},
+        { element: "#editableTable tbody tr", group: "{{ 'software.guide.categorylist.dropdown.group' | t }}", title: "{{ 'software.guide.categorylist.dropdown.title' | t }}", text: "{{ 'software.guide.categorylist.dropdown.text' | t }}", where: 'middle', runBefore: openDropdownGuide},
+    ]);
+    setCookie('showedGuideCategory', 'true', 300);
+}
+
+function showGuideFromButton(element) {
+  showGuide();
+}
+
+
+waitForPermission(function() {
+    if (window.userPermissions['forsure-categorylist-editor']) {
+      document.getElementById('categorylistWrapper').style.display = 'block';
+      var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+      loadingSpinnerContainer.style.display = 'block';
+      fillVersionDropdown();
+      if(readCookie('showedGuideCategory') === null) {
+        setTimeout(showGuide, 1000); // Delay in milliseconds, adjust as necessary
+      }
+    }
+  });  
+
+</script>
+{% else %}
+    <div class="image-with-text image-with-text--{{ section.settings.content_layout }} page-width isolate{% if settings.text_boxes_border_thickness > 0 and settings.text_boxes_border_opacity > 0 and settings.media_border_thickness > 0 and settings.media_border_opacity > 0 %} collapse-borders{% endif %}{% unless section.settings.color_scheme == 'background-1' and settings.media_border_thickness > 0 and settings.text_boxes_shadow_opacity == 0 and settings.text_boxes_border_thickness == 0 or settings.text_boxes_border_opacity == 0 %} collapse-corners{% endunless %} section-{{ section.id }}-padding">
+      <h1>Welcome,</h1>
+      <h2>Please log in to see this page</h2>
+    </div>
+{% endif %}
+
+{% schema %}
+{
+    "name": "t:sections.forsure_categorylist.name",
+    "class": "section",
+    "settings": [
+
+    {
+        "type": "select",
+        "id": "desktop_image_width",
+        "options": [
+        {
+            "value": "small",
+            "label": "t:sections.forsure_categorylist.settings.desktop_image_width.options__1.label"
+        }, {
+            "value": "medium",
+            "label": "t:sections.forsure_categorylist.settings.desktop_image_width.options__2.label"
+        }, {
+            "value": "large",
+            "label": "t:sections.forsure_categorylist.settings.desktop_image_width.options__3.label"
+        }
+        ],
+        "default": "medium",
+        "label": "t:sections.forsure_categorylist.settings.desktop_image_width.label",
+        "info": "t:sections.forsure_categorylist.settings.desktop_image_width.info"
+    },
+    {
+        "type": "select",
+        "id": "layout",
+        "options": [
+        {
+            "value": "image_first",
+            "label": "t:sections.forsure_categorylist.settings.layout.options__1.label"
+        }, {
+            "value": "text_first",
+            "label": "t:sections.forsure_categorylist.settings.layout.options__2.label"
+        }
+        ],
+        "default": "image_first",
+        "label": "t:sections.forsure_categorylist.settings.layout.label",
+        "info": "t:sections.forsure_categorylist.settings.layout.info"
+    },
+    {
+        "type": "select",
+        "id": "desktop_content_position",
+        "options": [
+        {
+            "value": "top",
+            "label": "t:sections.forsure_categorylist.settings.desktop_content_position.options__1.label"
+        }, {
+            "value": "middle",
+            "label": "t:sections.forsure_categorylist.settings.desktop_content_position.options__2.label"
+        }, {
+            "value": "bottom",
+            "label": "t:sections.forsure_categorylist.settings.desktop_content_position.options__3.label"
+        }
+        ],
+        "default": "top",
+        "label": "t:sections.forsure_categorylist.settings.desktop_content_position.label"
+    },
+    {
+        "type": "select",
+        "id": "desktop_content_alignment",
+        "options": [
+        {
+            "value": "left",
+            "label": "t:sections.forsure_categorylist.settings.desktop_content_alignment.options__1.label"
+        }, {
+            "value": "center",
+            "label": "t:sections.forsure_categorylist.settings.desktop_content_alignment.options__2.label"
+        }, {
+            "value": "right",
+            "label": "t:sections.forsure_categorylist.settings.desktop_content_alignment.options__3.label"
+        }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_categorylist.settings.desktop_content_alignment.label"
+    }, {
+        "type": "select",
+        "id": "content_layout",
+        "options": [
+        {
+            "value": "no-overlap",
+            "label": "t:sections.forsure_categorylist.settings.content_layout.options__1.label"
+        }, {
+            "value": "overlap",
+            "label": "t:sections.forsure_categorylist.settings.content_layout.options__2.label"
+        }
+        ],
+        "default": "no-overlap",
+        "label": "t:sections.forsure_categorylist.settings.content_layout.label"
+    }, {
+        "type": "select",
+        "id": "color_scheme",
+        "options": [
+        {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+        }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+        }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+    }, {
+        "type": "select",
+        "id": "color_scheme2",
+        "options": [
+        {
+            "value": "accent-1",
+            "label": "t:sections.all.colors.accent_1.label"
+        },
+        {
+            "value": "accent-2",
+            "label": "t:sections.all.colors.accent_2.label"
+        },
+        {
+            "value": "background-1",
+            "label": "t:sections.all.colors.background_1.label"
+        },
+        {
+            "value": "background-2",
+            "label": "t:sections.all.colors.background_2.label"
+        }, {
+            "value": "inverse",
+            "label": "t:sections.all.colors.inverse.label"
+        }
+        ],
+        "default": "background-1",
+        "label": "t:sections.all.colors.label"
+    }, {
+        "type": "header",
+        "content": "Mobile layout"
+    }, {
+        "type": "select",
+        "id": "mobile_content_alignment",
+        "options": [
+        {
+            "value": "left",
+            "label": "t:sections.forsure_categorylist.settings.mobile_content_alignment.options__1.label"
+        }, {
+            "value": "center",
+            "label": "t:sections.forsure_categorylist.settings.mobile_content_alignment.options__2.label"
+        }, {
+            "value": "right",
+            "label": "t:sections.forsure_categorylist.settings.mobile_content_alignment.options__3.label"
+        }
+        ],
+        "default": "left",
+        "label": "t:sections.forsure_categorylist.settings.mobile_content_alignment.label"
+    }, {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+    }, {
+        "type": "image_picker",
+        "id": "trashcan",
+        "label": "Trashcan"
+    }, {
+        "type": "image_picker",
+        "id": "open",
+        "label": "Open"
+    }, {
+        "type": "image_picker",
+        "id": "download",
+        "label": "Download"
+    }, {
+        "type": "image_picker",
+        "id": "share",
+        "label": "Share"
+    }, {
+        "type": "image_picker",
+        "id": "filter",
+        "label": "Filter"
+    }, {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 36
+    }, {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 36
+    }
+    ],
+    "presets": [
+    {
+        "name": "t:sections.forsure_categorylist.presets.name"
+    }
+    ]
+}
+{% endschema %}
+  
