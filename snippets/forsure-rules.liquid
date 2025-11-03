@@ -89,6 +89,9 @@ Usage:
     .delete-condition-button, .add-condition-button {
         cursor: pointer;
     }
+    .column {
+        width: 30%;
+    }
 
 
 #overlayRules {
@@ -527,7 +530,7 @@ function deleteCondition(button) {
 
 async function getColumns() {
     try {
-        const response = await unifiedSendRequest(GETCATEGORYLISTCOLS, {method: 'GET'});
+        const response = await unifiedSendRequest(GETCATEGORYLISTCOLS + `?version=${versionId}`, {method: 'GET'});
         return response;
     } catch (error) {
         console.error('Failed to get categorylist columns:', error.message);

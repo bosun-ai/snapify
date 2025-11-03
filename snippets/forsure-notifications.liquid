@@ -52,6 +52,10 @@ Usage:
           height: calc(100% - 3.5rem);
           overflow-y: auto;
       }
+      #updateBoxContent {
+          padding: 1rem;
+          overflow-y: auto;
+      }
     
       /* Notification card styling */
       .notificationCard {
@@ -203,7 +207,12 @@ Usage:
     async function getUpdateNotifications() {
         try {
             var updateNotifications = await unifiedSendRequest(MAINTENANCE_NOTIFICATIONS, {method: 'GET'});
-            showUpdateNotification(updateNotifications);
+            if (updateNotifications.length > 0) {
+                showUpdateNotification(updateNotifications);
+            } else {
+                const contentBox = document.getElementById('updateBoxContent');
+                contentBox.style.display = 'none';
+            }
         } catch (error) {
             console.error(error);
         }
@@ -221,7 +230,9 @@ Usage:
         updateNotifications.forEach((notification, index) => {
             const card = document.createElement("div");
             card.className = "notificationCard";
-            card.innerHTML = `<div class="notificationDetails">${notification.message}</div>
+            card.innerHTML = `<div class="notificationDetails"><h4>${notification.title}</h4>${notification.message}
+                <div class="date">${notification.date_of_notification}</div></div>`;
+            card.innerHTML += `
                 <button class="removeButton" onclick="removeUpdateNotification(${notification.id})">✖</button>`;
             contentBox.appendChild(card);
         });
@@ -320,7 +331,7 @@ Usage:
 
     async function removeUpdateNotification(notificationId) {
         try {
-            const response = await unifiedSendRequest(UPDATE_NOTIFICATIONS + `/${notificationId}/resolve`, {method: 'PUT'});
+            const response = await unifiedSendRequest(MAINTENANCE_NOTIFICATIONS + `/${notificationId}/hide`, {method: 'PUT'});
             await getUpdateNotifications();
             showMessage(response.message, true);
         } catch (error) {

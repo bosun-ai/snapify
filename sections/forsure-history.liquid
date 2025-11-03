@@ -1309,7 +1309,7 @@ function createFolderStructureOverview(configDiv, data, reportsFound) {
     configDiv.appendChild(companyDiv);
     country_selected_div = null;
     companyDiv.addEventListener('click', async () => {
-      const countries = Object.keys(data[company]);
+      const countries = Object.keys(data[company]).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
       toggleSubItems(
         companyDiv,
         countries,
@@ -1322,7 +1322,7 @@ function createFolderStructureOverview(configDiv, data, reportsFound) {
 
           // attach report toggle to each country row now
           countryDiv.addEventListener('click', async (e) => {
-            const reportTypes = Object.keys(data[company][country]);
+            const reportTypes = Object.keys(data[company][country]).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
             reportType_selected = null;
             toggleSubItems(
               countryDiv,

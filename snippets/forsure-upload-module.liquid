@@ -519,7 +519,7 @@ content: "\2713"
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 2;
     left: 0;
     top: 0;
     width: 100%;
@@ -635,6 +635,10 @@ content: "\2713"
                 <option value="Wood">Wood</option>
             </select>
           </div>
+          <div id='extraOptionsReturns' style="margin-bottom:1rem;display: none;">
+            <label for="extraOptionsReturnsTextarea" style="margin-right:1rem;">Valid reasons for returns</label>
+            <button class="button" onclick="addReasonForReturns()">Configure reasons</button>
+          </div>
           <table id="profileTable" style="margin: auto;">
             <tr>
               <th>Name</th>
@@ -658,6 +662,22 @@ content: "\2713"
         <button class="button" onclick="confirmOverwrite()">Yes</button>
     </div>
 </div>
+
+<div id="returnReasonsModal" class="losensitive" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; max-height: 70%; overflow: auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 100; border: 0.1rem solid #17161c;">
+  <div style="display:flex; align-items:center; justify-content: space-between; margin-bottom: 1rem;">
+    <h2 style="margin:0;">Configure return reasons</h2>
+    <span class="close" onclick="closeReturnReasonsModal()">&times;</span>
+  </div>
+  <div id="returnReasonsList" style="display:flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;overflow: auto;height: 200px;"></div>
+  <div style="display:flex; gap: 0.5rem; margin-bottom: 1rem;">
+    <button class="button" onclick="addReturnReasonRow()">Add reason</button>
+  </div>
+  <div style="display:flex; gap: 1rem; justify-content: flex-end;">
+    <button class="button" style="background-color: #fafafa;color: #17161c;border: 0.1rem solid #17161c;" onclick="closeReturnReasonsModal()">Cancel</button>
+    <button class="button" onclick="saveReturnReasons()">Save</button>
+  </div>
+</div>
+
 <div id="errorModal" class="losensitive" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; height:80%; background:white; overflow:auto; padding:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:100;">
     <div style="display:flex;gap:1rem;">
       <h2 id="error-modal-title">Errors</h2>
@@ -676,6 +696,68 @@ content: "\2713"
 <div id="modalOverlayError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.5); z-index:99;">
 </div>
 <script>
+
+async function addReasonForReturns() {
+  await openReturnReasonsModal();
+}
+
+async function openReturnReasonsModal() {
+  try {
+    const reasons = await unifiedSendRequest(GETRETURNREASONS, { method: 'GET' });
+    const list = document.getElementById('returnReasonsList');
+    list.innerHTML = '';
+    const createdReasons = JSON.parse(reasons.reasons);  // {"reasons":"[\"test123\", \"test2\"]"} -> ["test123", "test2"]
+    createdReasons.sort().forEach((reason) => addReturnReasonRow(reason));
+    document.getElementById('returnReasonsModal').style.display = 'block';
+  } catch (e) {
+    console.error(e.message);
+    showMessage('Failed to get return reasons ' + e.message, false);
+  }
+}
+
+function closeReturnReasonsModal() {
+  document.getElementById('returnReasonsModal').style.display = 'none';
+}
+
+function addReturnReasonRow(value) {
+  const list = document.getElementById('returnReasonsList');
+  const row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.gap = '0.5rem';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = value || '';
+  input.style.flex = '1';
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'button';
+  removeBtn.style.backgroundColor = '#fafafa';
+  removeBtn.style.color = '#17161c';
+  removeBtn.style.border = '0.1rem solid #17161c';
+  removeBtn.textContent = 'Remove';
+  removeBtn.onclick = function() { list.removeChild(row); };
+  row.appendChild(input);
+  row.appendChild(removeBtn);
+  list.appendChild(row);
+}
+
+async function saveReturnReasons() {
+  const inputs = Array.from(document.querySelectorAll('#returnReasonsList input'));
+  const reasons = inputs
+    .map(i => (i.value || '').trim())
+    .filter(v => v.length > 0);
+  try {
+    const response = await unifiedSendRequest(SAVERETURNREASONS, { formData: JSON.stringify({ reasons }), headerArgs: { 'Content-Type': 'application/json' } });
+    if (response) {
+      showMessage('Return reasons saved', true);
+      closeReturnReasonsModal();
+    } else {
+      showMessage('Failed to save return reasons', false);
+    }
+  } catch (e) {
+    console.error(e.message);
+    showMessage('Failed to save return reasons ' + e.message, false);
+  }
+}
 
 function setupDropZone( dropZone, fileInput, inputId ) {
     dropZone.addEventListener('dragover', (e) => {
@@ -972,8 +1054,26 @@ async function openProfileModal(availableProfiles, fileName, fileInput, rowId, a
     modal.dataset.row = rowId;
     if (activeTab == 'fulfilment') {
       document.getElementById('extraOptions').style.display = 'block';
+      document.getElementById('extraOptionsReturns').style.display = 'none';
+    } else if (activeTab == 'returns') {
+      document.getElementById('extraOptions').style.display = 'none';
+      document.getElementById('extraOptionsReturns').style.display = 'block';
+      // Load reasons into the textarea on open
+      try {
+        const reasons = await unifiedSendRequest(GETRETURNREASONS, { method: 'GET' });
+        const textarea = document.getElementById('extraOptionsReturnsTextarea');
+        if (Array.isArray(reasons) && reasons.length > 0) {
+          textarea.value = reasons.join('\n');
+        } else {
+          textarea.value = '';
+          textarea.placeholder = 'No reasons configured';
+        }
+      } catch (e) {
+        console.error(e.message);
+      }
     } else {
       document.getElementById('extraOptions').style.display = 'none';
+      document.getElementById('extraOptionsReturns').style.display = 'none';
     }
     await addProfileModal(availableProfiles, fileName, csvData, modal);
     setTimeout(() => {

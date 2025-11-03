@@ -594,6 +594,7 @@ async function getCategorylistDetails() {
         th.dataset.maxChars = maxChars;
         th.dataset.name = header;
         th.title = columnMapping[header].description;
+        th.dataset.unit = columnMapping[header].unit;
         th.addEventListener('mouseenter', function() {
             currentTh = th;
             clearTimeout(deleteColButtonTimer);
@@ -631,7 +632,11 @@ async function getCategorylistDetails() {
             const td = document.createElement('td');
             td.textContent = item[key];
             td.title = key;
+            if (columnMapping[key].unit) {
+                td.title += ` in ${columnMapping[key].unit}`;
+            }
             td.dataset.id = item[idcol];
+            td.dataset.unit = columnMapping[key].unit;
             td.dataset.name = key;
             if (first) {
                 td.addEventListener('mouseenter', function() {

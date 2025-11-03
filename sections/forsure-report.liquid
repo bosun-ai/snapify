@@ -914,11 +914,12 @@ content: "\2713"
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="country" class="form-label">Select Country</label>
-              <select id="country" class="selectpicker form-select" data-live-search="true"></select>
+              <select id="country" class="selectpicker form-select" multiple data-live-search="true"></select>
             </div>
             <div class="col-md-6">
               <label for="category" class="form-label">Select Category</label>
               <select id="category" class="selectpicker form-select" data-live-search="true">
+                <option value="Custom">Custom</option>
                 <option value="Batteries">Batteries</option>
                 <option value="Packaging">Packaging</option>
                 <option value="WEEE">WEEE</option>
@@ -1194,28 +1195,15 @@ async function cancreatereports() {
         if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-creation'] === true && window.userPermissions['report-upload'] === false) {
           selectOption('new');  // For end customers, we don't need to show the upload option
         }
+        if (window.userPermissions['forsure-report'] === true && window.userPermissions['report-creation'] === false && window.userPermissions['report-upload'] === true) {
+          selectOption('upload');
+        }
 
     } catch (error) {
         console.error(error.message);
         showMessage('Failed to get history ' + error.message, false);
     }
-    {% comment %} canuselivedata(); {% endcomment %}
 }
-
-
-{% comment %} async function canuselivedata() {
-  try {
-    if (window.userPermissions['forsure-report'] === false || window.userPermissions['livedata'] === false) {
-      document.getElementById('liveDataToggleSlider').style.cursor = 'not-allowed';
-      document.getElementById('liveDataToggleSlider').style.backgroundColor = '#ddd';
-      document.getElementById('liveDataToggle').disabled = true;
-      document.getElementById('liveDataToggleSlider').onclick = null;
-      document.getElementById('liveDataToggleSlider').classList.add('greyed_out_wrapper');
-    }
-  } catch (error) {
-    console.error(error.message);
-  }
-} {% endcomment %}
 
 var ordersReceived = 0;
 async function getOrdersReceived() {
@@ -1223,14 +1211,6 @@ async function getOrdersReceived() {
     let data = await unifiedSendRequest(ORDERVOLUMES, {method: 'GET'});
     ordersReceived = data['Orders']['used'];
     nextStep(1);
-    {% comment %} if (ordersReceived > 0) {
-      document.getElementById('nextBtnuploadorders').disabled = false;
-      document.getElementById('nextBtnuploadorders').title = 'Please upload orders first';
-    } else {
-      document.getElementById('ordersReceived').innerHTML = 'No Orders Received yet';
-      document.getElementById('nextBtnuploadorders').disabled = true;
-    } {% endcomment %}
-    {% comment %} document.getElementById('ordersReceived').style.display = 'block'; {% endcomment %}
   } catch (error) {
     console.error(error.message);
   }
@@ -1242,31 +1222,12 @@ const createReportBtn = document.getElementById('createReport');
 const steps = document.querySelectorAll('.step');
 const dropZones = document.querySelectorAll('.dropZone');
 
-{% comment %} document.getElementById('liveDataToggle').addEventListener('change', function() {
-    var liveDataText = document.getElementById('liveDataText');
-    if (this.checked) {
-      liveDataText.innerText = "Using live data";
-      if (ordersReceived > 0) {
-        document.getElementById('nextBtnuploadorders').disabled = false;
-        document.getElementById('nextBtnuploadorders').title = 'Please upload orders first';
-      } else {
-        document.getElementById('nextBtnuploadorders').disabled = true;
-      }
-    } else {
-      liveDataText.innerText = "Use live data";
-      document.getElementById('nextBtnuploadorders').disabled = true; // todo check if file was added
-    }
-}); {% endcomment %}
-
-
 var guideToShow = null;
 async function selectOption(option) {
     document.getElementById('chooseoption').style.display = 'none';
     if (option === 'new') {
-      document.getElementById('uploadReport').style.display = 'none';
-      nextStep(1);
-        {% comment %} document.getElementById('step1').style.display = 'block';  // TODO change to step 1 {% endcomment %}
-        {% comment %} nextStep(3);  // TODO remove {% endcomment %}
+        document.getElementById('uploadReport').style.display = 'none';
+        nextStep(1);
         sessionStorage.setItem('currentFlow', 'new');
         guideToShow = 'new';
         await getOrdersReceived();
@@ -2537,37 +2498,6 @@ async function handleClientsUpload(input, additionalInfo) {
     }
 }
 
-{% comment %} function handleClientsUploadReplacePrompt(input) {
-  const modalContent = `
-        <div>
-            <label>Country: <input type="text" id="countryInput" placeholder="Enter country"></label><br>
-            <label>Wastestream: <input type="text" id="wastestreamInput" placeholder="Enter wastestream"></label><br>
-            <label>Scheme: <input type="text" id="schemeInput" placeholder="Enter scheme"></label>
-        </div>
-    `;
-
-    showConfirmationMessage(
-        "Replace file",
-        "Are you sure you want to replace the current clients file with the new one?" + modalContent,
-        "Cancel",
-        "Replace",
-        function () {
-            const additionalInfo = {
-                country: document.getElementById('countryInput').value,
-                wastestream: document.getElementById('wastestreamInput').value,
-                scheme: document.getElementById('schemeInput').value
-            };
-            handleClientsUploadReplace(input, additionalInfo);
-        },
-        true // Allow HTML content inside the modal
-    );
-} {% endcomment %}
-
-{% comment %} async function handleClientsUploadReplace(input, additionalInfo) {
-  closeConfirmationModal();
-  await handleClientsUpload(input, additionalInfo);
-  await openClientsModal();
-} {% endcomment %}
 
 var datatable = null;
 
@@ -2758,6 +2688,7 @@ async function saveClientsEdits() {
         showMessage('Failed to save clients data: ' + error.message, false);
     }
 }
+
 function nextStep(stepNumber) {
     stepFunctions(stepNumber);
     steps.forEach(step => step.style.display = 'none');
@@ -2780,70 +2711,41 @@ function stepFunctions(stepNumber){
 }
 
 let allTemplates = [];
+let minDate = null;
+let maxDate = null;
 async function getTimesAndCountry() {
   try {
     var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
     loadingSpinnerContainer.style.display = 'block';
-    var data = await unifiedSendRequest(GETREPORTTIMES, { method: 'GET' });
-    const minDate = data[0];
-    const maxDate = data[1];
-    const countries = data[2];
-    const countryDropdown = document.getElementById('country');
+    unifiedSendRequest(GETREPORTTIMES, { method: 'GET' }).then(data => {
+        minDate = data[0];
+        maxDate = data[1];
+        const countries = data[2];
+        const countryDropdown = document.getElementById('country');
 
-    countryDropdown.innerHTML = '';
-    countries.sort().forEach((country, index) => {
-      const option = document.createElement('option');
-      option.value = country;
-      option.textContent = country;
-      if (index === 0) {
-        option.selected = true;
-        getDateOptions(country);
-      }
-      countryDropdown.appendChild(option);
+        countryDropdown.innerHTML = '';
+        countries.sort().forEach((country, index) => {
+          const option = document.createElement('option');
+          option.value = country;
+          option.textContent = country;
+          {% comment %} if (index === 0) {
+            option.selected = true;
+            getDateOptions(country);
+          } {% endcomment %}
+          countryDropdown.appendChild(option);
+        });
+
+        $('.selectpicker').selectpicker('refresh');
+
+        changeYear(0);
+    }).catch(error => {
+      console.error(error.message);
+      showMessage('Failed to retrieve countries from orders ' + error.message, false);
     });
-
-    $('.selectpicker').selectpicker('refresh');
-
-    {% comment %} const currentQuarter = Math.floor((moment().month()) / 3) + 1;
-    const lastQuarter = currentQuarter - 1 <= 0 ? 4 : currentQuarter - 1;
-    const lastQuarterYear = currentQuarter - 1 <= 0 ? moment().year() - 1 : moment().year();
-    const quarterStart = moment(`${lastQuarterYear}-01-01`).quarter(lastQuarter).startOf('quarter');
-    const quarterEnd = moment(`${lastQuarterYear}-01-01`).quarter(lastQuarter).endOf('quarter');
-    const twoYearsAgoYear = moment().subtract(2, 'year').year(); {% endcomment %}
-
-
-  changeYear(0);
-    {% comment %} const ranges = {
-        'Last Month': [
-            moment().subtract(1, 'month').startOf('month'),
-            moment().subtract(1, 'month').endOf('month')
-        ],
-        [`Last Quarter (Q${lastQuarter} ${lastQuarterYear})`]: [
-            quarterStart, quarterEnd
-        ],
-        'Last Year': [
-            moment().subtract(1, 'year').startOf('year'),
-            moment().subtract(1, 'year').endOf('year')
-        ],
-        [`${twoYearsAgoYear}`]: [
-            moment().subtract(2, 'year').startOf('year'),
-            moment().subtract(2, 'year').endOf('year')
-        ]
-    };
-
-    // Initialize date range picker with minDate and maxDate
-    $('#monthPicker').daterangepicker({
-      startDate: moment(minDate),
-      endDate: moment(maxDate),
-      minDate: moment(minDate),
-      maxDate: moment(maxDate),
-      locale: { format: 'DD/MM/YYYY' },
-      ranges: ranges
-    }); {% endcomment %}
-
-    var availableColumns = await unifiedSendRequest(CUSTOMCHARTCOLUMNS + '?flat=true', { method: 'GET' });
-    document.getElementById('previewContainer').innerHTML = '';
-    fillColumnSelectors(availableColumns);
+    unifiedSendRequest(CUSTOMCHARTCOLUMNS + '?flat=true', { method: 'GET' }).then(availableColumns => {
+        document.getElementById('previewContainer').innerHTML = '';
+        fillColumnSelectors(availableColumns);
+    });
     await populateTemplateSelector();
     if (!window.userPermissions['reporttemplate']) {
       document.getElementById('confirmAgency').style.display = 'block';
@@ -2856,6 +2758,7 @@ async function getTimesAndCountry() {
     await populateRulesDropdown();
     var loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
     loadingSpinnerContainer.style.display = 'none';
+    updateSaveReportButton();
   } catch (error) {
     console.error(error.message);
     showMessage('Failed to retrieve countries from orders ' + error.message, false);
@@ -3107,28 +3010,15 @@ function checkAllSettingsSelected() {
   const templateSelected = $('#templateSelect').val();
   const outputFieldsSelected = $('#customFields').val();
   const groupByFieldsSelected = $('#groupByFields').val();
-
-  if (!countrySelected) {
-    return [false, 'Please select a country'];
-  }
-  if (!categorySelected) {
-    return [false, 'Please select a category'];
-  }
-  if (!proSelected) {
-    return [false, 'Please select a PRO'];
-  }
-  {% comment %} if (!dateSelected) {
-    return [false, 'Please select a date'];
-  } {% endcomment %}
   if (!window.userPermissions['reporttemplate']) {
     return [true, ''];
   }
   if (templateSelected === "default") {
-    if (!outputFieldsSelected) {
-      return [false, 'Please select at least one output field or template'];
+    if (groupByFieldsSelected.length === 0) {
+      return [false, 'Please select at least one field for "Show one line per" or template'];
     }
-    if (!groupByFieldsSelected) {
-      return [false, 'Please select at least one group by field or template'];
+    if (outputFieldsSelected.length === 0) {
+      return [false, 'Please select at least one field for "Show these totals" or template'];
     }
     return [true, ''];
   }
@@ -3161,7 +3051,7 @@ function updateTemplateOptions(refreshPRO=true) {
   seenPro = new Set();
   allTemplates.forEach(template => {
     // Match filtering: if no selection, or matching the selected value
-    const matchCountry = !selectedCountry || template.country === selectedCountry;
+    const matchCountry = !selectedCountry || selectedCountry.includes(template.country);
     const matchCategory = !selectedCategory || template.report_type === selectedCategory;
     const matchPro = !selectedPro || template.pro === selectedPro;
 
@@ -3242,12 +3132,19 @@ $('#customFields').on('changed.bs.select', function() {
 
 async function showConfirmationDetails() {
     // Get the selected values
-    document.getElementById('confirm-country').textContent = $('#country').val();
+    var selectedCountries = $('#country').val() || [];
+    document.getElementById('confirm-country').textContent = selectedCountries.join(', ') || 'All countries';
     document.getElementById('confirm-category').textContent = $('#category').val();
 
-    const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
-    document.getElementById('confirm-start').textContent = selectedStartDateValue;
-    document.getElementById('confirm-end').textContent = selectedEndDateValue;
+    const monthPickerValue = document.getElementById('monthPicker').value;
+    if (monthPickerValue) {
+      const [selectedStartDateValue, selectedEndDateValue] = monthPickerValue.split(' - ');
+      document.getElementById('confirm-start').textContent = selectedStartDateValue;
+      document.getElementById('confirm-end').textContent = selectedEndDateValue;
+    } else {
+      document.getElementById('confirm-start').textContent = minDate;
+      document.getElementById('confirm-end').textContent = maxDate;
+    }
     var selectedFields = $('#customFields').val() || [];
     var selectedGroupBy = $('#groupByFields').val() || [];
     var selectedTemplate = $('#templateSelect').val();
@@ -3334,11 +3231,17 @@ async function createReport() {
     var data;
     try {
         const countryData = new FormData();
-        countryData.append("country_id", document.getElementById('country').value);
+        var selectedCountries = $('#country').val() || [];
+        countryData.append("country_id", selectedCountries.join(','));
         countryData.append("category", document.getElementById('category').value);
-        const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
-        countryData.append("start_date", convertToISO(selectedStartDateValue));
-        countryData.append("end_date", convertToISO(selectedEndDateValue));
+        if (document.getElementById('monthPicker').value) {
+          const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
+          countryData.append("start_date", convertToISO(selectedStartDateValue));
+          countryData.append("end_date", convertToISO(selectedEndDateValue));
+        } else {
+          countryData.append("start_date", minDate);
+          countryData.append("end_date", maxDate);
+        }
         var selectedTemplate = $('#templateSelect').val();
         if (!window.userPermissions['reporttemplate']) {
           var year = moment().year();
@@ -3373,7 +3276,8 @@ async function createReport() {
 async function previewReport() {
   try {
       const countryData = new FormData();
-      countryData.append("country_id", document.getElementById('country').value || '');
+      var selectedCountries = $('#country').val() || [];
+      countryData.append("country_id", selectedCountries.join(','));
       countryData.append("category", document.getElementById('category').value || '');
       if (document.getElementById('monthPicker').value) {
         const [selectedStartDateValue, selectedEndDateValue] = document.getElementById('monthPicker').value.split(' - ');
@@ -3383,18 +3287,18 @@ async function previewReport() {
       countryData.append("preview", true);
       countryData.append("use_returns", document.getElementById('useReturns').checked || false);
       countryData.append("use_bought_from_same_country", document.getElementById('useBoughtFromSameCountry').checked || false);
-      const selectedFields = $('#customFields').val() || [];
-      if (selectedFields.length == 0) {
-        showMessage('Please select at least one report field', false);
-        return;
-      }
-      countryData.append("output_fields", selectedFields.join(','));
       const selectedGroupBy = $('#groupByFields').val() || [];
       if (selectedGroupBy.length == 0) {
-        showMessage('Please select at least one group by field', false);
+        showMessage('Please select at least one field for "Show one line per"', false);
         return;
       }
       countryData.append("groupby_fields", selectedGroupBy.join(','));
+      const selectedFields = $('#customFields').val() || [];
+      if (selectedFields.length == 0) {
+        showMessage('Please select at least one field for "Show these totals"', false);
+        return;
+      }
+      countryData.append("output_fields", selectedFields.join(','));
       const selectedRules = $('#ruleSelect').val() || [];
       countryData.append("rules", selectedRules.join(','));
       data = await unifiedSendRequest(CREATEREPORT, {formData: countryData});        // Handle file response

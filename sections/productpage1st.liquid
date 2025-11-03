@@ -19,6 +19,12 @@
       "label": "Left Button"
     },
     {
+      "type": "checkbox",
+      "id": "center_image",
+      "default": false,
+      "label": "Center Image"
+    },
+    {
       "type": "url",
       "id": "button_link_right",
       "label": "Right Button"
@@ -110,7 +116,7 @@
       "type": "text",
       "id": "alt_text",
       "label": "Alt text"
-    },    
+    },
     {
       "type": "checkbox",
       "id": "fullscreen",
@@ -194,7 +200,7 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
-  
+
   .background-triangle {
     position: relative;
   }
@@ -339,6 +345,10 @@
   }
   .title-left-first {
     position: relative;
+  }
+  .center-image {
+    margin: auto;
+    padding-bottom: 35px;
   }
   @media screen and (min-width: 1199px) {
     .title-column-product1st {
@@ -574,7 +584,7 @@
         {% endif %}
       </div>
     </div>
-    <div class="imgContainerRight" style="position: relative;">
+    <div class="imgContainerRight {% if section.settings.center_image %}center-image{% endif %}" style="position: relative;">
       <div class="imgright" style="position:relative;">
         <img
           style="border-radius: 10%; object-fit: cover; object-position: 65% center;"

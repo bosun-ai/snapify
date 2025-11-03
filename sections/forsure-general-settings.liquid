@@ -485,6 +485,16 @@ function renderGeneralSettings() {
       }
     } else if (setting.input_type === 'checkbox') {
       inputElement = `<input class=\"setting\" type=\"checkbox\" id=\"${setting.key}\" name=\"${setting.key}\" ${currentValue ? 'checked' : ''} onchange=\"toggleSubentries('${setting.key}', this.checked)\">`;
+    } else if (setting.input_type === 'select') {
+      inputElement = `<select class=\"setting\" id=\"${setting.key}\" name=\"${setting.key}\" data-type="select">`;
+      setting.options.forEach(option => {
+        if (currentValue === option.value) {
+          inputElement += `<option value=\"${option.value}\" title=\"${option.description}\" selected>${option.label}</option>`;
+        } else {
+          inputElement += `<option value=\"${option.value}\" title=\"${option.description}\">${option.label}</option>`;
+        }
+      });
+      inputElement += `</select>`;
     }
 
     settingsTableBody.innerHTML += `
@@ -524,7 +534,6 @@ function toggleSubentries(key, isChecked) {
 
   async function submitSettings() {
     const reportDataContainer = document.getElementById('configurationGeneral');
-    const formElements = reportDataContainer.querySelectorAll("input, select");  // Get both inputs and selects
     const dataToSend = { countries: {} };
     for (const entry of document.querySelectorAll(".setting")) {
       key = entry.getAttribute('name');
@@ -537,47 +546,16 @@ function toggleSubentries(key, isChecked) {
       }
       if (entry.type === "number") {
         value = parseInt(value);
+        if (value !== null && !isNaN(value)) {
+          dataToSend[key] = value;
+        }
       }
-      if (value !== null && !isNaN(value)) {
+      else if (value !== null) {
         dataToSend[key] = value;
       }
     }
-  
-    formElements.forEach(element => {
-      const category = element.getAttribute('data-category');
-      const country = element.getAttribute('data-country');
-      const inputName = element.getAttribute('data-name');
-      
-      // Get value based on element type
-      const inputValue = element.tagName === "SELECT" 
-        ? element.value  // For dropdowns
-        : element.type === "text" 
-          ? (element.value || element.placeholder)  // For text inputs
-          : element.checked;  // For checkboxes
-  
-      // Check and initialize country within 'countries' if not already present
-      if (country && !dataToSend.countries[country]) {
-        dataToSend.countries[country] = {};
-      }
-  
-      // Define targetObject to point to the right level where the data should be inserted
-      let targetObject = country ? dataToSend.countries[country] : dataToSend;
-  
-      // If category is specified, further narrow down targetObject
-      if (category) {
-        if (!targetObject[category]) {
-          targetObject[category] = {};
-        }
-        targetObject = targetObject[category];
-      }
-  
-      // Assign the input value or checked status to the correct place in the structure
-      if (inputName) {  // Only add if inputName exists
-        targetObject[inputName] = inputValue;
-      }
-    });
-  
     try {
+      console.log(dataToSend);
       var response = await unifiedSendRequest(GETGENERALCONFIG, {
         method: 'POST',  // Ensure the method is POST for sending data
         formData: JSON.stringify(dataToSend), 

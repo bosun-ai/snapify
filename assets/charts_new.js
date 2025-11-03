@@ -3,8 +3,7 @@ function updateChartNew(chartData, chartCanvas, titleId=false, bigmode=false, se
     var columnNamesX = chartData['xColumns'];
     var columnNamesXOutput = chartData['xColumns'].map(x => convertStringFormat(x));
     var columnNamesY = chartData['yColumns'];
-    var columnNamesYOutput = chartData['yColumns'].map(x => convertStringFormat(x));
-
+    var columnNamesYOutput = chartData['yColumns'].map(x => convertStringFormat(x) + ' (' + chartData['yUnits'][x] + ')');
     var mainGroupList = chartData[columnNamesX[0]];
     var subGroupList = chartData[columnNamesX[1]];
     var datasets;
@@ -35,6 +34,8 @@ function updateChartNew(chartData, chartCanvas, titleId=false, bigmode=false, se
     if (titleId) {
         document.getElementById(titleId).innerText = title;
         chartCanvas.options.plugins.title.display = false;
+        chartCanvas.config.options.scales.x.title.text = shortenTitle(columnNamesXOutput.join(" per "), bigmode);
+        chartCanvas.config.options.scales.y.title.text = shortenTitle(columnNamesYOutput.join(" - "), bigmode);
     } else {
         chartCanvas.config.options.scales.x.title.text = shortenTitle(columnNamesXOutput.join(" per "), bigmode);
         chartCanvas.config.options.scales.y.title.text = shortenTitle(columnNamesYOutput.join(" - "), bigmode);
@@ -46,6 +47,49 @@ function updateChartNew(chartData, chartCanvas, titleId=false, bigmode=false, se
     } else {
         chartCanvas.options.plugins.legend.display = true;
     }
+    
+    // Configure tooltip to include units
+    if (!chartCanvas.options.plugins.tooltip) {
+        chartCanvas.options.plugins.tooltip = {};
+    }
+    chartCanvas.options.plugins.tooltip.callbacks = {
+        ...chartCanvas.options.plugins.tooltip.callbacks,
+        label: function(context) {
+            let label = context.dataset.label || '';
+            // Handle different chart types - get y value, or use the raw value
+            let value = context.parsed.y !== undefined ? context.parsed.y : context.parsed;
+            let unit = '';
+            
+            // Try to find the unit for this dataset
+            // First, try to match by exact label
+            if (chartData['yUnits'] && chartData['yUnits'][label]) {
+                unit = chartData['yUnits'][label];
+            } else {
+                // Try to find by matching the converted label with yColumns
+                for (let yCol of columnNamesY) {
+                    if (convertStringFormat(yCol) === label && chartData['yUnits'] && chartData['yUnits'][yCol]) {
+                        unit = chartData['yUnits'][yCol];
+                        break;
+                    }
+                }
+            }
+            
+            // If no unit found and there's only one y column, use its unit
+            if (!unit && columnNamesY.length === 1 && chartData['yUnits'] && chartData['yUnits'][columnNamesY[0]]) {
+                unit = chartData['yUnits'][columnNamesY[0]];
+            }
+            
+            // Format the label with unit
+            if (unit && value !== undefined && value !== null) {
+                return label + ': ' + value + ' ' + unit;
+            } else if (value !== undefined && value !== null) {
+                return label + ': ' + value;
+            } else {
+                return label;
+            }
+        }
+    };
+    
     chartCanvas.update();
   }
 
