@@ -1,5 +1,5 @@
 {
-	"name": "snapify",
+	"name": "@bosun-ai/snapify",
 	"version": "0.1.0",
 	"description": "Visual regression snapshot runner for Shopify Liquid themes using Playwright.",
 	"type": "module",
@@ -20,7 +20,6 @@
 		"test:all": "tsx --test \"tests/**/*.test.ts\"",
 		"test:integration": "tsx --test tests/shopify.integration.test.ts",
 		"test:unit": "tsx --test tests/templateAssembler.test.ts",
-		"release": "semantic-release",
 		"security": "npm audit --omit=dev --audit-level=high",
 		"lint:knip": "knip --strict"
 	},
@@ -42,12 +41,6 @@
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@semantic-release/commit-analyzer": "^13.0.1",
-		"@semantic-release/exec": "^7.1.0",
-		"@semantic-release/git": "^10.0.1",
-		"@semantic-release/github": "^11.0.6",
-		"@semantic-release/npm": "^12.0.2",
-		"@semantic-release/release-notes-generator": "^14.1.0",
 		"@types/node": "^22.7.4",
 		"@types/yargs": "^17.0.34",
 		"c8": "^10.1.3",
