@@ -53,4 +53,5 @@ export interface RegisteredAsset {
   filePath: string;
   mimeType: string;
   body: Buffer;
+  base64: string;
 }

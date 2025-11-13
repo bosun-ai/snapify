@@ -15,13 +15,17 @@
 window.SnapifyTest = (window.SnapifyTest || 0) + 1;
 
 </script>
-<script data-snapify-inline="javascript">[object Generator]</script>
+<script data-snapify-inline="javascript">
+  window.snapifyInline = 'ok';
+</script>
 
 
     <main id="MainContent">
       <main data-snapify-template="templates/index.json">
 <div id="shopify-section-hero" class="shopify-section" data-section-id="hero" data-section-type="hero">
-<style data-snapify-inline="style">[object Generator]</style>
+<style data-snapify-inline="style">
+  .hero-inline { font-weight: 600; }
+</style>
 <section class="hero-section" data-test="hero">
   <h1>OS 2.0 Snapshot</h1>
   <a class="cta-button">Book a demo</a>
@@ -34,7 +38,10 @@ window.SnapifyTest = (window.SnapifyTest || 0) + 1;
 .hero-section[data-test=hero]{border:2px solid salmon;}
 </style>
 <div id="shopify-section-contact" class="shopify-section" data-section-id="contact" data-section-type="contact">
-<form method="post" action="/" data-snapify-form="contact">[object Generator]</form>
+<form method="post" action="/" data-snapify-form="contact">
+  <label>Email</label>
+  <input type="email" name="contact[email]" placeholder="team@example.com" />
+</form>
 
 
 </div>

@@ -49,6 +49,7 @@ export class TemplateAssembler {
   private engine: Liquid;
   private headInjections: string[] = [];
   private assetManifest = new Map<string, RegisteredAsset>();
+  private assetFallbackInjected = false;
 
   constructor(private readonly themeRoot: string) {
     this.engine = new Liquid({
@@ -73,6 +74,8 @@ export class TemplateAssembler {
 
   async compose(options: RenderOptions) {
     this.headInjections.length = 0;
+    this.assetManifest.clear();
+    this.assetFallbackInjected = false;
     this.assetManifest.clear();
     const templateLookup = await this.resolveTemplate(options.template);
     const context = options.data ?? {};
@@ -256,7 +259,7 @@ ${markup}
       },
       async render(ctx) {
         const state = this as unknown as { templates: any[]; liquid: Liquid };
-        const rendered = await state.liquid.renderer.renderTemplates(state.templates, ctx);
+        const rendered = await renderChildTemplates(state.liquid, state.templates, ctx);
         const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
         return renderWrapper(content);
       }
@@ -284,7 +287,7 @@ ${markup}
       },
       async render(ctx, _emitter, hash) {
         const state = this as unknown as { templates: any[]; liquid: Liquid; args?: string };
-        const rendered = await state.liquid.renderer.renderTemplates(state.templates, ctx);
+        const rendered = await renderChildTemplates(state.liquid, state.templates, ctx);
         const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
         const handle = extractHandleFromArgs(state.args ?? '');
         const attributes: Record<string, unknown> = {
@@ -307,19 +310,21 @@ ${markup}
     const abs = path.join(this.themeRoot, 'assets', normalized);
     const buffer = await readFile(abs);
     const mime = getMimeType(normalized);
-    const content = isTextMime(mime) ? buffer.toString('utf8') : buffer.toString('base64');
+    const textContent = isTextMime(mime) ? buffer.toString('utf8') : '';
+    const base64 = buffer.toString('base64');
     const assetUrl = this.buildAssetUrl(normalized, buffer);
     this.assetManifest.set(assetUrl, {
       url: assetUrl,
       filePath: abs,
       mimeType: mime,
-      body: buffer
+      body: buffer,
+      base64
     });
 
     const asset = {
       kind: 'asset',
       filename: normalized,
-      content,
+      content: textContent,
       mimeType: mime,
       url: assetUrl,
       toString() {
@@ -347,6 +352,26 @@ ${markup}
     return inline;
   }
 
+  private injectAssetFallbackScript() {
+    if (this.assetFallbackInjected || !this.assetManifest.size) {
+      return;
+    }
+
+    const manifestMap: Record<string, { mimeType: string; data: string }> = {};
+    for (const [url, asset] of this.assetManifest.entries()) {
+      manifestMap[url] = {
+        mimeType: asset.mimeType,
+        data: asset.base64
+      };
+    }
+
+    const payload = JSON.stringify(manifestMap);
+    const script = `(()=>{const host='${SNAPIFY_ASSET_HOST}';const manifest=${payload};const decoder=(entry)=>entry?atob(entry.data):null;const isSnapifyUrl=(url)=>typeof url==='string'&&url.startsWith(host);const inlineStyle=(node)=>{const entry=manifest[node.href];if(!entry)return;const css=decoder(entry);if(css==null)return;const style=document.createElement('style');style.setAttribute('data-snapify-fallback','style');style.textContent=css;node.replaceWith(style);};const inlineScript=(node)=>{const entry=manifest[node.src];if(!entry)return;const js=decoder(entry);if(js==null)return;const script=document.createElement('script');script.setAttribute('data-snapify-fallback','script');script.textContent=js;node.replaceWith(script);};const hydrate=()=>{document.querySelectorAll('link[rel="stylesheet"]').forEach((link)=>{if(isSnapifyUrl(link.href)){inlineStyle(link);}});document.querySelectorAll('script[src]').forEach((script)=>{if(isSnapifyUrl(script.src)){inlineScript(script);}});};document.addEventListener('error',(event)=>{const target=event.target;if(!(target instanceof Element))return;if(target.tagName==='LINK'&&isSnapifyUrl((target as HTMLLinkElement).href)){inlineStyle(target as HTMLLinkElement);}if(target.tagName==='SCRIPT'&&isSnapifyUrl((target as HTMLScriptElement).src)){inlineScript(target as HTMLScriptElement);}},true);if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hydrate,{once:true});}else{hydrate();}})();`;
+    const sanitized = script.replace(/<\/script/gi, '<\\/script');
+    this.headInjections.push(`<script data-snapify-inline="asset-fallback">${sanitized}</script>`);
+    this.assetFallbackInjected = true;
+  }
+
   private buildAssetUrl(filename: string, body: Buffer) {
     const hash = createHash('md5').update(body).digest('hex').slice(0, 10);
     const encoded = encodeURIComponent(filename);
@@ -357,6 +382,7 @@ ${markup}
     if (userStyles) {
       this.headInjections.push(`<style data-snapify-inline="user">\n${userStyles}\n</style>`);
     }
+    this.injectAssetFallbackScript();
     return this.headInjections.join('\n');
   }
 
@@ -500,4 +526,27 @@ function getMimeType(filename: string) {
 
 function isTextMime(mime: string) {
   return /^(text\/|application\/(javascript|json|xml))/i.test(mime);
+}
+
+async function renderChildTemplates(liquid: Liquid, templates: any[], ctx: any) {
+  const iterator = liquid.renderer.renderTemplates(templates, ctx);
+  return resolveGenerator(iterator);
+}
+
+async function resolveGenerator(iterable: any): Promise<any> {
+  if (!iterable) {
+    return '';
+  }
+  if (typeof iterable.then === 'function') {
+    return iterable;
+  }
+  if (typeof iterable.next !== 'function') {
+    return iterable;
+  }
+  let result = iterable.next();
+  while (!result.done) {
+    const awaited = await resolveGenerator(result.value);
+    result = iterable.next(awaited);
+  }
+  return result.value ?? '';
 }
