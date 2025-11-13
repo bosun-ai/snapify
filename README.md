@@ -2,6 +2,8 @@
 
 Visual regression snapshots for Shopify themes using Playwright — no running dev server required.
 
+This enables drastic refactoring without the fear of breaking existing themes, and makes it easy to add visual tests for new Liquid templates as you build them.
+
 ## Key ideas
 
 - ✨ Render OS 2.0 JSON or Liquid templates entirely in-memory with LiquidJS and custom Shopify helpers.
@@ -15,14 +17,11 @@ Visual regression snapshots for Shopify themes using Playwright — no running d
 ## Installation
 
 ```bash
-cd snapify
-npm install
+npm save --dev snapify playwright
 npx playwright install --with-deps chromium
-npm run build
-npm run test:integration
 ```
 
-You can then link it into another Shopify theme, or run the CLI against the current repository root (which already contains a full theme).
+You can then write your tests, or run the CLI against the current repository root (which already contains a full theme).
 
 ## CLI usage
 
@@ -70,7 +69,7 @@ await render({
 
 The resolved object includes:
 
-- `htmlPath` – rendered document saved to disk for inspection.
+- `htmlPath` – rendered document saved to disk for inspection. Recommended to add these to your .gitignore.
 - `screenshotPath` – Playwright capture for the latest run.
 - `diffPath` – optional PNG diff if the baseline mismatches.
 - `updatedBaseline` – `true` if the baseline image was re-written this run.
@@ -94,13 +93,6 @@ Snapify keeps Liquid's `relativeReference` behavior enabled, so you can co-locat
 ```
 
 Place `sections/__snapify__/partials/cta.liquid` next to it and the renderer will resolve the relative include without needing to copy files into `snippets/`.
-
-## Next steps
-
-- Add configuration discovery (`snapify.config.ts`) so command invocations stay minimal.
-- Expand Liquid helper coverage (e.g. `image_url`, `form`, predictive search).
-- Allow parallel snapshot execution and section-specific fixtures.
-- Integrate with CI providers (GitHub Actions annotations, inline diff previews).
 
 ## Testing multiple templates
 
