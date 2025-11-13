@@ -35,6 +35,7 @@ interface JsonSection {
 interface JsonSectionBlock {
   type: string;
   settings?: Record<string, unknown>;
+  disabled?: boolean;
 }
 
 interface SectionContext {
@@ -50,6 +51,9 @@ export class TemplateAssembler {
   private headInjections: string[] = [];
   private assetManifest = new Map<string, RegisteredAsset>();
   private assetFallbackInjected = false;
+  private themeSettings: Record<string, unknown> = {};
+  private configuredSections = new Map<string, JsonSection>();
+  private settingsLoaded = false;
 
   constructor(private readonly themeRoot: string) {
     this.engine = new Liquid({
@@ -73,12 +77,16 @@ export class TemplateAssembler {
   }
 
   async compose(options: RenderOptions) {
+    await this.ensureThemeSettings();
     this.headInjections.length = 0;
     this.assetManifest.clear();
     this.assetFallbackInjected = false;
-    this.assetManifest.clear();
     const templateLookup = await this.resolveTemplate(options.template);
-    const context = options.data ?? {};
+    const userData = options.data ?? {};
+    const context = {
+      settings: this.themeSettings,
+      ...userData
+    };
     let bodyHtml = '';
 
     if (templateLookup.endsWith('.json')) {
@@ -168,6 +176,23 @@ ${markup}
 </div>`;
   }
 
+  private buildSectionContextFromDefinition(sectionId: string, definition: JsonSection): SectionContext {
+    const normalized: JsonSection = {
+      type: definition.type ?? sectionId,
+      settings: definition.settings ?? {},
+      blocks: definition.blocks ?? {},
+      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {})
+    };
+
+    return {
+      id: sectionId,
+      type: normalized.type,
+      settings: normalized.settings ?? {},
+      block_order: normalized.block_order ?? Object.keys(normalized.blocks ?? {}),
+      blocks: this.materializeBlocks(normalized)
+    };
+  }
+
   private materializeBlocks(definition: JsonSection) {
     const resolved: SectionContext['blocks'] = [];
     if (!definition.blocks) {
@@ -177,7 +202,7 @@ ${markup}
     const order = definition.block_order ?? Object.keys(definition.blocks);
     for (const blockId of order) {
       const block = definition.blocks[blockId];
-      if (!block) continue;
+      if (!block || block.disabled) continue;
       resolved.push({
         id: blockId,
         type: block.type,
@@ -397,6 +422,56 @@ ${markup}
     return `${injection}\n${html}`;
   }
 
+  private async ensureThemeSettings() {
+    if (this.settingsLoaded) {
+      return;
+    }
+
+    const settingsPath = path.join(this.themeRoot, 'config', 'settings_data.json');
+    if (!(await fileExists(settingsPath))) {
+      this.settingsLoaded = true;
+      return;
+    }
+
+    try {
+      const raw = await readFile(settingsPath, 'utf8');
+      const parsed = JSON.parse(raw);
+      const current = parsed.current ?? parsed;
+      const { sections, ...globals } = current;
+      this.themeSettings = globals ?? {};
+
+      if (sections && typeof sections === 'object') {
+        for (const [id, definition] of Object.entries(sections as Record<string, JsonSection>)) {
+          this.configuredSections.set(id, this.normalizeConfiguredSection(id, definition as JsonSection));
+        }
+      }
+    } catch {
+      // ignore parse errors; fallback to defaults
+    } finally {
+      this.settingsLoaded = true;
+    }
+  }
+
+  private normalizeConfiguredSection(sectionId: string, definition: JsonSection): JsonSection {
+    const normalizedBlocks: Record<string, JsonSectionBlock> = {};
+    if (definition.blocks) {
+      for (const [blockId, block] of Object.entries(definition.blocks)) {
+        normalizedBlocks[blockId] = {
+          type: block.type,
+          settings: block.settings ?? {},
+          disabled: block.disabled
+        };
+      }
+    }
+
+    return {
+      type: definition.type ?? sectionId,
+      settings: definition.settings ?? {},
+      blocks: normalizedBlocks,
+      block_order: definition.block_order ?? Object.keys(normalizedBlocks)
+    };
+  }
+
   private decorateDeterministicHtml(body: string, extraStyles?: string) {
     if (!extraStyles) {
       return body;
@@ -444,18 +519,23 @@ ${markup}
   }
 
   private async renderStandaloneSection(sectionType: string, baseContext: Record<string, unknown>) {
+    const configured = this.configuredSections.get(sectionType);
+    const sectionContext = configured
+      ? this.buildSectionContextFromDefinition(sectionType, configured)
+      : {
+          id: `${sectionType}-static`,
+          type: sectionType,
+          settings: {},
+          block_order: [],
+          blocks: []
+        };
+
     const scope = {
       ...baseContext,
-      section: {
-        id: `${sectionType}-static`,
-        type: sectionType,
-        settings: {},
-        block_order: [],
-        blocks: []
-      }
+      section: sectionContext
     } satisfies Record<string, unknown>;
 
-    const templatePath = this.resolveSectionLookup(sectionType);
+    const templatePath = this.resolveSectionLookup(sectionContext.type ?? sectionType);
     return this.engine.renderFile(templatePath, scope);
   }
 }
