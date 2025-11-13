@@ -1,0 +1,10 @@
+{% form 'contact', class: 'contact-form' %}
+  <label>Email</label>
+  <input type="email" name="contact[email]" placeholder="{{ section.settings.placeholder }}" />
+{% endform %}
+{% schema %}{
+  "name": "Contact",
+  "settings": [
+    {"type": "text", "id": "placeholder", "default": "you@example.com"}
+  ]
+}{% endschema %}

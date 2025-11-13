@@ -140,7 +140,20 @@ ${renderedSections.join('\n')}
       ? `\n<style data-section="${sectionId}">\n${definition.custom_css.join('\n')}\n</style>`
       : '';
 
-    return `${markup}${css}`;
+    const wrapper = this.wrapSectionMarkup(sectionId, definition.type, markup);
+    return `${wrapper}${css}`;
+  }
+
+  private wrapSectionMarkup(sectionId: string, sectionType: string, markup: string) {
+    const attributes = [
+      `id="shopify-section-${sectionId}"`,
+      'class="shopify-section"',
+      `data-section-id="${sectionId}"`,
+      `data-section-type="${sectionType}"`
+    ].join(' ');
+    return `<div ${attributes}>
+${markup}
+</div>`;
   }
 
   private materializeBlocks(definition: JsonSection) {
@@ -285,12 +298,21 @@ ${renderedSections.join('\n')}
     const abs = path.join(this.themeRoot, 'assets', normalized);
     const buffer = await readFile(abs, 'utf8');
     const mime = getMimeType(normalized);
-    return {
+    const dataUrl = encodeDataUrl(buffer, mime);
+    const asset = {
       kind: 'asset',
       filename: normalized,
       content: buffer,
-      mimeType: mime
-    };
+      mimeType: mime,
+      toString() {
+        return dataUrl;
+      },
+      [Symbol.toPrimitive]() {
+        return dataUrl;
+      }
+    } satisfies InlineAsset & { toString(): string; [Symbol.toPrimitive](): string };
+
+    return asset;
   }
 
   private stylesheetTagFilter(asset: InlineAsset | string) {
@@ -402,6 +424,11 @@ function ensureAsset(value: InlineAsset | string): InlineAsset {
     };
   }
   return value;
+}
+
+function encodeDataUrl(content: string, mimeType: string) {
+  const base64 = Buffer.from(content, 'utf8').toString('base64');
+  return `data:${mimeType};base64,${base64}`;
 }
 
 function normalizeSectionHandle(raw: string) {

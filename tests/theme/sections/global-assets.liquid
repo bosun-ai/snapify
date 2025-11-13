@@ -1,0 +1,6 @@
+{{ 'main.css' | asset_url | stylesheet_tag }}
+{{ 'app.js' | asset_url | script_tag }}
+{% javascript %}
+  window.snapifyInline = 'ok';
+{% endjavascript %}
+{% schema %}{"name":"Global assets","settings":[]}{% endschema %}

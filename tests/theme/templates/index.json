@@ -1,0 +1,19 @@
+{
+	"sections": {
+		"hero": {
+			"type": "hero",
+			"settings": {
+				"heading": "OS 2.0 Snapshot",
+				"cta_label": "Book a demo"
+			},
+			"custom_css": [".hero-section[data-test=hero]{border:2px solid salmon;}"]
+		},
+		"contact": {
+			"type": "contact",
+			"settings": {
+				"placeholder": "team@example.com"
+			}
+		}
+	},
+	"order": ["hero", "contact"]
+}

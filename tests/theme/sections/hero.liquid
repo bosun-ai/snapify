@@ -1,0 +1,14 @@
+{% style %}
+  .hero-inline { font-weight: 600; }
+{% endstyle %}
+<section class="hero-section" data-test="hero">
+  <h1>{{ section.settings.heading }}</h1>
+  {% render './partials/button', label: section.settings.cta_label %}
+</section>
+{% schema %}{
+  "name": "Hero",
+  "settings": [
+    {"type": "text", "id": "heading", "default": "Welcome"},
+    {"type": "text", "id": "cta_label", "default": "Contact us"}
+  ]
+}{% endschema %}

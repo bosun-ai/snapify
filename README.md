@@ -17,6 +17,7 @@ cd snapify
 npm install
 npx playwright install --with-deps chromium
 npm run build
+npm run test:integration
 ```
 
 You can then link it into another Shopify theme, or run the CLI against the current repository root (which already contains a full theme).
@@ -97,3 +98,20 @@ Place `sections/__snapify__/partials/cta.liquid` next to it and the renderer wil
 - Expand Liquid helper coverage (e.g. `image_url`, `form`, predictive search).
 - Allow parallel snapshot execution and section-specific fixtures.
 - Integrate with CI providers (GitHub Actions annotations, inline diff previews).
+
+## Testing multiple templates
+
+Repository-level tests live in `tests/` (outside this package) and import the compiled Snapify build. From the repo root:
+
+```bash
+# build snapify first
+npm run snapify:build
+
+# refresh baselines across index/product/cart
+SNAPIFY_UPDATE_BASELINES=1 npm run snapify:test:templates
+
+# validate against existing baselines
+npm run snapify:test:templates
+```
+
+Artifacts land under `.snapify/templates/{baseline,artifacts}` at the repo root so they can be reviewed or committed.

@@ -16,7 +16,7 @@
     "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",
     "clean": "rimraf dist",
     "render": "node dist/cli.js render",
-    "test:integration": "tsx tests/render.integration.test.ts"
+    "test:integration": "tsx tests/shopify.integration.test.ts"
   },
   "keywords": [
     "shopify",
