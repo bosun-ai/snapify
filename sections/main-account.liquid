@@ -31,7 +31,7 @@
       <h2>Usage</h2>
       {% render 'forsure-usage' %}
     </div>
-    <div>
+    {% comment %} <div>
       <h2>{{ 'customer.orders.title' | t }}</h2>
 
       {% paginate customer.orders by 20 %}
@@ -121,7 +121,7 @@
           {%- endif -%}
         {%- endif -%}
       {% endpaginate %}
-    </div>
+    </div> {% endcomment %}
 
     <div>
       <h2>{{ 'customer.account.details' | t }}</h2>

@@ -279,7 +279,7 @@ max-width: 20vw;
                 <a id="savestorecategory" onclick="importFromStore()" class="button" style="margin: 1rem;cursor: pointer;">Save</a>
             </div>
           </div>
-          <div style="width: 96%;overflow-x: auto;margin-left: 2%;margin-right: 2%;">
+          <div style="width: 96%;margin-left: 2%;margin-right: 2%;">
             <div id="icons" style="display: flex;justify-content: space-between;">
               <div>
                 <div id="addCategoryButton">
@@ -523,7 +523,6 @@ async function openProfileModal(event) {
     const profileSelect = document.getElementById('profileSelect');
     const profileDetails = document.getElementById('profileDetails');
     const profileFileName = document.getElementById('profileFileName');
-    {% comment %} try { {% endcomment %}
     let csvData;
     if (fileInput.name.endsWith('.csv')) {
       csvData = await parseCSV(fileInput);
@@ -648,6 +647,129 @@ async function openProfileModal(event) {
   };
 
 }
+
+async function getCategorylistLabels() {
+  try {
+    var categorylistLabels = await unifiedSendRequest(GETCATEGORYLISTLABELSV2 + `?version=latest`, {method: 'GET'});
+    var profileTable = document.getElementById('profileTableBody');
+    if (Object.keys(categorylistLabels).length > 0) {
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        if (select.getAttribute('data-name') in categorylistLabels) {
+          select.value = categorylistLabels[select.getAttribute('data-name')];
+        } else {
+          row.querySelector('input').click(); // if the column is not in the orderlist labels, then it is excluded
+        }
+      });
+    } else {
+      // new profile, so set all to unmapped
+      profileTable.querySelectorAll('tr').forEach(row => {
+        var select = row.querySelector('select');
+        select.value = '';
+        if (row.querySelector('input').checked) {
+          row.querySelector('input').click();
+        }
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to get orderlist labels ' + error.message, false);
+  }
+}
+
+
+
+var request_data = {};
+
+
+async function saveMapping() {
+  const mapping = {};
+  const profileTable = document.getElementById('profileTableBody');
+  const rows = profileTable.querySelectorAll('tr');
+  rows.forEach(row => {
+    var dropdown = row.querySelector('select');
+    var key = dropdown.getAttribute('data-name');
+    if (!dropdown.disabled) {
+      var value = dropdown.value;
+      mapping[key] = value;
+    }
+  });
+  request_data = {'mapping': mapping};
+  try {
+    var response = await unifiedSendRequest(GETCATEGORYLISTLABELSV2COMPARE, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}});
+    if (response) {
+      confirmOverwrite();
+    } else {
+      showConfirmOverwriteModal();
+    }
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+
+async function closeConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'none';
+}
+
+async function showConfirmOverwriteModal() {
+  document.getElementById('confirmOverwriteModal').style.display = 'block';
+}
+
+async function closeMappingModal() {
+  document.getElementById('profileModal').style.display = 'none';
+  document.getElementById('loadingSpinnerContainer').style.display = 'none';
+}
+
+
+async function confirmOverwrite() {
+  try {
+    {% comment %} var response = await unifiedSendRequest(GETCATEGORYLISTLABELSV2, {formData: JSON.stringify(request_data), headerArgs: {'Content-Type': 'application/json'}}); {% endcomment %}
+    await uploadCategoryList();
+    closeConfirmOverwriteModal();
+    closeMappingModal();
+  } catch (error) {
+    console.error(error.message);
+    showMessage('Failed to save mapping ' + error.message, false);
+  }
+}
+
+async function uploadCategoryList() {
+  var errorDiv = document.getElementById('errorsDiv');
+  errorDiv.style.display = 'none';
+  var files = document.getElementById('category_list').files;
+  if (files.length) {
+    try {
+      const file = files[0];
+      const formData = new FormData();
+      formData.append('category_list', file);
+      formData.append('categorylabels', JSON.stringify(request_data));
+
+      // TODO remove profile
+      res = await unifiedSendRequest(UPLOADCATEGORYLIST, {formData: formData});
+      if (res.message) {
+        showMessage('Categorylist uploaded successfully. ' + res.message, true);
+        await fillVersionDropdown();
+      } else {
+        showMessage('Categorylist uploaded successfully', true);
+      }
+      // window.location.reload();
+    } catch (error) {
+      console.error(error);
+      errorDiv.style.display = 'block';
+      errorDiv.innerText = error;
+    }
+  }
+}
+
+function hideModalCategorylist() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('popup').style.display = 'none';
+}
+
+document.getElementById('overlay').addEventListener('click', hideModalCategorylist);
+
 
 function toggleExclude(checkbox) {
     const row = checkbox.parentElement.parentElement;

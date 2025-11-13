@@ -3,7 +3,13 @@ function updateChartNew(chartData, chartCanvas, titleId=false, bigmode=false, se
     var columnNamesX = chartData['xColumns'];
     var columnNamesXOutput = chartData['xColumns'].map(x => convertStringFormat(x));
     var columnNamesY = chartData['yColumns'];
-    var columnNamesYOutput = chartData['yColumns'].map(x => convertStringFormat(x) + ' (' + chartData['yUnits'][x] + ')');
+    var columnNamesYOutput = chartData['yColumns'].map(x => {
+        if (chartData['yUnits'] && chartData['yUnits'][x] && chartData['yUnits'][x] != 'other') {
+            return convertStringFormat(x) + ' (' + chartData['yUnits'][x] + ')';
+        } else {
+            return convertStringFormat(x);
+        }
+    });
     var mainGroupList = chartData[columnNamesX[0]];
     var subGroupList = chartData[columnNamesX[1]];
     var datasets;
@@ -80,7 +86,7 @@ function updateChartNew(chartData, chartCanvas, titleId=false, bigmode=false, se
             }
             
             // Format the label with unit
-            if (unit && value !== undefined && value !== null) {
+            if (unit && value !== undefined && value !== null && unit != 'other') {
                 return label + ': ' + value + ' ' + unit;
             } else if (value !== undefined && value !== null) {
                 return label + ': ' + value;

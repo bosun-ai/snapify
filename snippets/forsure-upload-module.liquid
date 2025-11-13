@@ -637,7 +637,7 @@ content: "\2713"
           </div>
           <div id='extraOptionsReturns' style="margin-bottom:1rem;display: none;">
             <label for="extraOptionsReturnsTextarea" style="margin-right:1rem;">Valid reasons for returns</label>
-            <button class="button" onclick="addReasonForReturns()">Configure reasons</button>
+            <button class="button" onclick="addReasonForReturns()" style="background-color: #17161c;color: #fafafa;">Configure reasons</button>
           </div>
           <table id="profileTable" style="margin: auto;">
             <tr>
@@ -670,7 +670,7 @@ content: "\2713"
   </div>
   <div id="returnReasonsList" style="display:flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;overflow: auto;height: 200px;"></div>
   <div style="display:flex; gap: 0.5rem; margin-bottom: 1rem;">
-    <button class="button" onclick="addReturnReasonRow()">Add reason</button>
+    <button class="button" onclick="addReturnReasonRow()" style="background-color: #17161c;color: #fafafa;">Add reason</button>
   </div>
   <div style="display:flex; gap: 1rem; justify-content: flex-end;">
     <button class="button" style="background-color: #fafafa;color: #17161c;border: 0.1rem solid #17161c;" onclick="closeReturnReasonsModal()">Cancel</button>
@@ -706,7 +706,7 @@ async function openReturnReasonsModal() {
     const reasons = await unifiedSendRequest(GETRETURNREASONS, { method: 'GET' });
     const list = document.getElementById('returnReasonsList');
     list.innerHTML = '';
-    const createdReasons = JSON.parse(reasons.reasons);  // {"reasons":"[\"test123\", \"test2\"]"} -> ["test123", "test2"]
+    const createdReasons = reasons.reasons;  // {"reasons":"[\"test123\", \"test2\"]"} -> ["test123", "test2"]
     createdReasons.sort().forEach((reason) => addReturnReasonRow(reason));
     document.getElementById('returnReasonsModal').style.display = 'block';
   } catch (e) {

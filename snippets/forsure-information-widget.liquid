@@ -237,6 +237,9 @@
         // Create body
         const tableBody = document.createElement('tbody');
         data.forEach(item => {
+            if (selectedCountries.length > 0 && !selectedCountries.includes(item.country)) {
+                return;
+            }
             const row = document.createElement('tr');
             row.className = 'information-row';
 
@@ -308,6 +311,9 @@
 
             tableBody.appendChild(row);
         });
+        if (tableBody.innerHTML === '') {
+            tableBody.innerHTML = '<tr><td colspan="4" style="font-weight: bold;">No information available</td></tr>';
+        }
 
         table.appendChild(tableBody);
         scrollWrapper.appendChild(table);
@@ -345,14 +351,17 @@
         document.getElementById('mapContainer').style.display = 'block';
     }
 
+    var latestInformation = null;
     waitForPermission(function() {
         if (window.userPermissions['forsure-dashboard']) {
           getInformation().then(data => {
+            latestInformation = data;
             updateInformation(data);
           });
       
           setInterval(() => {
             getInformation().then(data => {
+                latestInformation = data;
                 updateInformation(data);
             });
           }, 10000);

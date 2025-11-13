@@ -179,6 +179,8 @@
       }
   }
 
+  var selectedCountries = [];
+  var allDeadlines = [];
   function createDeadlineList(results) {
     const container = document.getElementById('deadlineContainer');
     const deadlineList = document.getElementById('deadlineList');
@@ -199,6 +201,9 @@
     }
 
     results.forEach(deadline => {
+      if (selectedCountries.length > 0 && !selectedCountries.includes(deadline.country)) {
+        return;
+      }
       const listItem = document.createElement('li');
       listItem.id = `${deadline.country}-${deadline.type}-${deadline.deadline}`;
       listItem.title = deadline.description;
@@ -254,6 +259,9 @@
 
       deadlineList.appendChild(listItem);
     });
+    if (displayedDeadlines.length === 0) {
+      deadlineList.innerHTML = '<div class="warning-item"><div id="no-deadlines">No deadlines</div></div>';
+    }
 
     
     function loadOlderDeadlines() {
@@ -307,8 +315,8 @@ function getPackagingSVG() {
 
 waitForPermission(async function() {
   if (window.userPermissions['deadline'] && window.userPermissions['forsure-dashboard']) {
-    results = await getReportsDue();
-    createDeadlineList(results);
+    allDeadlines = await getReportsDue();
+    createDeadlineList(allDeadlines);
   }
 });
 </script>

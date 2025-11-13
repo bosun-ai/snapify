@@ -869,7 +869,7 @@ function displayExcelReport(data, submit, fileName, fullPath, emptyData=null) {
     const groupLabels = {};
     var use_tabs = false;
     const header = document.getElementById('excelModalHeader');
-    header.innerHTML = fullPath.split('.')[0];
+    header.innerHTML = fullPath;
 
     if (!use_tabs) {
         const groups = {};
@@ -1041,7 +1041,7 @@ async function sendReportGov(fileName, fullPath) {
       closeModal();
       hideExcelModal();
       const data = await unifiedSendRequest(SENDREPORT, {formData: reportData});
-      showMessage("Report sent successfully", true);
+      showMessage("Report will be handed in", true);
     } catch (error) {
       console.error(error);
       TOKEN = false;

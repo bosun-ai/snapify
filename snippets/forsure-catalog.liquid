@@ -122,7 +122,6 @@ border: 0.4rem solid red!important;
 
 #tableWrapper {
   min-width: max-content;
-  overflow-x: auto;
 }
 
 #editableTable {
@@ -176,7 +175,10 @@ border: 0.4rem solid red!important;
 .dropdown-option:hover {
     background-color: #eaeaea;
 }
-
+#tableWrapperWrapper {
+    overflow-x: auto;
+    width: 100%;
+}
 {% endstyle %}
 <div style="display: flex;justify-content: space-between;">
     <div id="tabs-container"></div>
@@ -207,17 +209,19 @@ border: 0.4rem solid red!important;
             Search: <input type="text" id="search" placeholder="Search" oninput="getCategorylistItems()">
         </div>
     </div>
-    <div id="tableWrapper">
-        <table id="editableTable">
-        <thead>
-            <tr>
-            </tr>
-        </thead>
-        </table>
-        <div id="tableBodyWrapper">
-        <table id="editableTableBody">
-            <tbody></tbody>
-        </table>
+    <div id="tableWrapperWrapper">
+        <div id="tableWrapper">
+            <table id="editableTable">
+            <thead>
+                <tr>
+                </tr>
+            </thead>
+            </table>
+            <div id="tableBodyWrapper">
+            <table id="editableTableBody">
+                <tbody></tbody>
+            </table>
+            </div>
         </div>
     </div>
     <div id="tableFooter" style="display: none;justify-content: space-between;margin-top: 1rem;">
@@ -391,7 +395,7 @@ async function getCategorylistItems() {
     } catch (error) {
         console.error(error.message);
         showMessage('Failed to get catalog items', false);
-        return [];
+        return {data: [], pages: 1, total: 0, next_offset: null, prev_offset: null};
     }
 }
 
@@ -632,7 +636,7 @@ async function getCategorylistDetails() {
             const td = document.createElement('td');
             td.textContent = item[key];
             td.title = key;
-            if (columnMapping[key].unit) {
+            if (columnMapping[key].unit && columnMapping[key].unit !== 'other') {
                 td.title += ` in ${columnMapping[key].unit}`;
             }
             td.dataset.id = item[idcol];

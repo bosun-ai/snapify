@@ -9,6 +9,32 @@
         z-index: 1;
     }
 
+    /* Ensure dropdown appears above map */
+    #profile-filter-guide {
+        position: relative;
+        z-index: 1000;
+    }
+
+    /* Bootstrap Select dropdowns are appended to body, so target globally */
+    #profile-filter-guide .bootstrap-select {
+        z-index: 1000 !important;
+    }
+
+    /* Target all Bootstrap Select dropdown menus - they're appended to body */
+    /* Use very high z-index to ensure it's above Leaflet map (which uses z-index 400-600) */
+    .bootstrap-select .dropdown-menu,
+    .bootstrap-select.open .dropdown-menu,
+    .bootstrap-select .dropdown-toggle ~ .dropdown-menu {
+        z-index: 10000 !important;
+        width: 220px;
+        /* position: absolute !important; */
+    }
+
+    /* Ensure the dropdown menu container has proper stacking */
+    .bootstrap-select {
+        z-index: 1000 !important;
+    }
+
     #eprMapAdd {
       width: 80%;
       /* height: 50vh; */
@@ -240,6 +266,132 @@
     justify-content: space-between;
     align-items: center;
   }
+  
+  #mapLegend {
+    position: absolute;
+    top: 50px;
+    right: 15px;
+    background-color: #fafafa;
+    border-radius: 8px;
+    border: 0.2rem solid #17161c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    font-size: 12px;
+    font-family: sans-serif;
+    min-width: 200px;
+    max-width: 300px;
+    max-height: calc(90vh - 13rem - 45px);
+    overflow-y: auto;
+  }
+  
+  #mapLegendHeader {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 5px;
+    padding: 10px;
+    background-color: #484B52;
+  }
+  
+  #mapLegendHeader h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fafafa;
+    flex: 1;
+  }
+  
+  
+  #mapLegendContent {
+    display: none;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    background-color: #fafafa;
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  #mapLegendContent.expanded {
+    display: block;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 10px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .legend-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .legend-item.selected {
+    background-color: #e3e8ff;
+  }
+  
+  .legend-item.selected:hover {
+    background-color: #d4dcff;
+  }
+  
+  .legend-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  
+  .legend-item.disabled:hover {
+    background-color: transparent;
+  }
+  
+  .legend-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .legend-color {
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    flex-shrink: 0;
+  }
+  
+  .legend-label {
+    color: #17161c;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .legend-country-accordion {
+    display: none;
+    margin-top: 8px;
+    margin-left: 1.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    border-left: 2px solid #ddd;
+    padding-left: 10px;
+  }
+  
+  .legend-country-accordion.expanded {
+    display: block;
+  }
+  
+  .legend-country-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    font-size: 11px;
+  }
+  
+  .legend-country-item:hover {
+    background-color: #e0e0e0;
+  }
   .modal-title {
     margin-left: 15px;
     margin-right: 15px;
@@ -393,6 +545,23 @@
 .glyphicon-ok:before {
     content: "\2713"
 }
+.od-toggle {
+  width:24px;
+  height:24px;
+  display:grid; place-items:center;
+  margin: 0;                /* FIX: removed margin-right */
+  justify-self: center;     /* center in caret column */
+  cursor:pointer;
+}
+.legend-arrow{ 
+  transition: transform .15s ease; 
+  transform: rotate(-90deg);
+  cursor: pointer;
+  width: 25px;
+}
+.legend-arrow.expanded{ transform: rotate(0deg); }
+
+
 {% endstyle %}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -402,12 +571,38 @@
 <div id="mapContainer" class="widget grid-item widget-right">
   <div id="mapTitle" class="grid-title">
     <div>EPR Map</div>
-    <div class="icon-container">
-      <div onclick="openMapAdd()">{% render 'icon-add' %}</div>
-      <div onclick="openMapSettings()">{% render 'icon-gear' %}</div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div class="filter-group" id="profile-filter-guide" style="margin-left: 4rem">
+        <select
+          id="countryDropdown"
+          class="selectpicker"
+          data-size="5"
+          placeholder="Select countries"
+          data-live-search-placeholder="Choose country"
+          data-live-search="true">
+        </select>
+      </div>
+      <div class="icon-container" style="display: flex; align-items: center; gap: 1rem;">
+        {% comment %} <select
+          id="countrySearch"
+          class="selectpicker"
+          title="Search country">
+          <option value="">All countries</option>
+        </select> {% endcomment %}
+
+        <div onclick="openMapAdd()">{% render 'icon-add' %}</div>
+        <div onclick="openMapSettings()">{% render 'icon-gear' %}</div>
+      </div>
     </div>
   </div>
     <div id="eprMap"></div>
+    <div id="mapLegend">
+      <div id="mapLegendHeader">
+        <div class="legend-arrow" title="Showlegend">{% render 'icon-arrow-rounded-big' %}</div>
+        <h4>Status Legend</h4>
+      </div>
+      <div id="mapLegendContent"></div>
+    </div>
 </div>
 
 <div id="mapAddOverlay"></div>
@@ -557,6 +752,176 @@
         "UNACCOUNTED_ORDERS": "#17161c", // black
       };
 
+      // Status label mapping
+      const statusLabels = {
+        "DONE": "Done",
+        "IN_PROGRESS": "In Progress",
+        "WARNING": "Warning",
+        "ERROR": "Error",
+        "UNKNOWN": "Unknown",
+        "UNAVAILABLE": "Unavailable",
+        "UNACCOUNTED_ORDERS": "Unaccounted Orders",
+      };
+
+      // Status descriptions for tooltips
+      const statusDescriptions = {
+        "DONE": "All reports for this country are completed and validated",
+        "IN_PROGRESS": "Reports are being processed or are in progress",
+        "WARNING": "There are warnings that need attention for this country",
+        "ERROR": "There are errors that need to be resolved for this country",
+        "UNKNOWN": "Status is unknown for this country",
+        "UNAVAILABLE": "This country is not yet available in the system",
+        "UNACCOUNTED_ORDERS": "There are unaccounted orders for this country",
+      };
+
+      let countryStatusMap = {}; // Store country data by status
+      let activeLegendStatus = ''; // Currently selected status in legend
+
+      function updateMapFiltering(selectedCountries) {
+        // Update opacity of countries based on selected status
+        for (const alpha2 in countryLayers) {
+          const layerList = countryLayers[alpha2];
+          if (!layerList) continue;
+          
+          const countryInfo = countryStatusMap[alpha2];
+          let opacity = 0.7; // Default opacity
+          if (selectedCountries.length > 0 && !selectedCountries.includes(alpha2)) {
+            opacity = 0.3;
+          }
+          
+          for (const layer of layerList) {
+            const currentStyle = layer.options;
+            layer.setStyle({
+              fillColor: currentStyle.fillColor || statusColors[countryInfo?.status] || '#4E5366',
+              fillOpacity: opacity,
+              weight: currentStyle.weight || 1
+            });
+          }
+        }
+      }
+
+      function createMapLegend() {
+        const legendContent = document.getElementById('mapLegendContent');
+        if (!legendContent) return;
+        
+        // Setup header toggle
+        const legendHeader = document.getElementById('mapLegendHeader');
+        const legendArrow = legendHeader.querySelector('.legend-arrow');
+        
+        legendHeader.addEventListener('click', () => {
+          const isExpanded = legendContent.classList.contains('expanded');
+          if (isExpanded) {
+            legendContent.classList.remove('expanded');
+            legendArrow.classList.remove('expanded');
+            selectedCountries = [];
+            activeLegendStatus = '';
+            updateMapFiltering([]);
+            updateLegendContent();
+            createDeadlineList(allDeadlines);
+            updateInformation(latestInformation);
+          } else {
+            legendContent.classList.add('expanded');
+            legendArrow.classList.add('expanded');
+          }
+        });
+        
+        // Build legend items
+        updateLegendContent();
+      }
+
+      function updateLegendContent() {
+        const legendContent = document.getElementById('mapLegendContent');
+        if (!legendContent) return;
+        
+        legendContent.innerHTML = '';
+        
+        // Count countries by status
+        const statusCounts = {};
+        const statusCountries = {};
+        
+        for (const [alpha2, countryInfo] of Object.entries(countryStatusMap)) {
+          const status = countryInfo.status;
+          const countryName = countryLayers[alpha2]?.[0]?.feature?.properties?.COUNTRY_NAME || alpha2;
+          
+          if (!statusCounts[status]) {
+            statusCounts[status] = 0;
+            statusCountries[status] = [];
+          }
+          statusCounts[status]++;
+          statusCountries[status].push({ alpha2, name: countryName });
+        }
+        
+        // Create legend items
+        for (const [status, color] of Object.entries(statusColors)) {
+          const label = statusLabels[status] || status;
+          const count = statusCounts[status] || 0;
+          const countries = statusCountries[status] || [];
+          
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'legend-item';
+          itemDiv.dataset.status = status;
+          
+          // Color dot
+          const colorDot = document.createElement('span');
+          colorDot.className = 'legend-color';
+          colorDot.style.backgroundColor = color;
+          if (status === 'UNAVAILABLE') {
+            colorDot.style.border = '1px solid #999';
+          }
+          
+          // Label with count
+          const labelSpan = document.createElement('span');
+          labelSpan.className = 'legend-label';
+          labelSpan.innerHTML = `<span>${label}</span><span>(${count})</span>`;
+          
+          itemDiv.appendChild(colorDot);
+          itemDiv.appendChild(labelSpan);
+          
+          // Tooltip on hover - show description instead of countries
+          const description = statusDescriptions[status] || `${label} status`;
+          itemDiv.title = description;
+          
+          if (countries.length === 0) {
+            itemDiv.classList.add('disabled');
+          }
+          
+          // Click handler - only if there are countries
+          if (countries.length > 0) {
+            itemDiv.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (activeLegendStatus === status) {
+                // Deselect
+                selectedCountries = [];
+                activeLegendStatus = '';
+                updateMapFiltering([]);
+                updateLegendContent();
+                createDeadlineList(allDeadlines);
+                updateInformation(latestInformation);
+              } else {
+                // Select this status
+                selectedCountries = countries.map(country => country.alpha2);
+                activeLegendStatus = status;
+                updateMapFiltering(selectedCountries);
+                updateLegendContent();
+                createDeadlineList(allDeadlines);
+                updateInformation(latestInformation);
+              }
+            });
+          }
+          
+          // Add selected class and opacity for non-selected items
+          // Only allow selection if there are countries
+          if (activeLegendStatus === status && countries.length > 0) {
+            itemDiv.classList.add('selected');
+          } else if (activeLegendStatus && activeLegendStatus !== status && countries.length > 0) {
+            // Only adjust opacity for non-disabled items
+            itemDiv.style.opacity = '0.5';
+          }
+          
+          legendContent.appendChild(itemDiv);
+        }
+      }
+
       let map = null;
       let mapAdd = null;
       const countryLayers = {}; // Store per-country layers
@@ -680,15 +1045,32 @@ function toTitleCase(str) {
 }
 
 function updateCountryData(newStatusMap) {
+  // Update countryStatusMap
+  countryStatusMap = {};
+  
   for (const alpha2 in newStatusMap) {
     const info = newStatusMap[alpha2];
     const layerList = countryLayers[alpha2];
 
     if (!layerList) continue;
+    
+    // Store country status for legend
+    countryStatusMap[alpha2] = {
+      status: info.status,
+      description: info.description
+    };
+    
     for (const layer of layerList) {
       const name = layer.feature.properties.COUNTRY_NAME;
+      // Determine opacity based on active filter
+      if (selectedCountries.length > 0 && !selectedCountries.includes(alpha2)) {
+        layer.setStyle({
+          fillOpacity: 0.3
+        });
+      }
+      
       layer.setStyle({
-        fillColor: statusColors[info.status] || '#4E5366'
+        fillColor: statusColors[info.status] || '#4E5366',
       });
       if (info.status == 'UNACCOUNTED_ORDERS') {
         tableHTML = Object.values(info.description)[0];
@@ -702,9 +1084,37 @@ function updateCountryData(newStatusMap) {
         sticky: true,
         className: 'custom-tooltip'
       });
+      
+      // Add click handler to filter by country
+      layer.off('click'); // Remove any existing handlers
+      layer.on('click', () => {
+        if (selectedCountries.includes(alpha2) && selectedCountries.length == 1) {
+          selectedCountries = [];
+          updateMapFiltering([]);
+          updateLegendContent();
+          createDeadlineList(allDeadlines);
+          updateInformation(latestInformation);
+        } else {
+          selectedCountries = [alpha2];
+          updateMapFiltering(selectedCountries);
+          updateLegendContent();
+          createDeadlineList(allDeadlines);
+          updateInformation(latestInformation);
+          // show tooltip
+          layer.openTooltip();
+        }
+      });
     }
   }
+  
+  // Update legend with new data
+  updateLegendContent();
+  // Update country search dropdown
 }
+
+
+selectedCountries = [];
+
 
 async function getCountries() {
     try {
@@ -716,10 +1126,47 @@ async function getCountries() {
     }
 }
 
+async function fillCountryDropdown() {
+  const dropdown = document.getElementById('countryDropdown');
+  dropdown.innerHTML = '';
+  const option = document.createElement('option');
+  option.value = '';
+  option.textContent = 'Select country...';
+  option.selected = true;
+  dropdown.appendChild(option);
+  const sortedCountriesName = Object.keys(countryLayers).sort((a, b) => countryLayers[a][0].feature.properties.COUNTRY_NAME.localeCompare(countryLayers[b][0].feature.properties.COUNTRY_NAME));
+  for (const alpha2 of sortedCountriesName) {
+    const option = document.createElement('option');
+    option.value = alpha2;
+    option.textContent = countryLayers[alpha2][0].feature.properties.COUNTRY_NAME;
+    dropdown.appendChild(option);
+  }
+  $('#countryDropdown').selectpicker('refresh');
+  $('#countryDropdown').selectpicker('val', '');
+}
+
+$('#countryDropdown').on('change', function() {
+  if (this.value == '') {
+    selectedCountries = [];
+  } else {
+    selectedCountries = [this.value];
+  }
+  updateMapFiltering(selectedCountries);
+  updateLegendContent();
+  createDeadlineList(allDeadlines);
+  updateInformation(latestInformation);
+  if (this.value == '') {
+    return;
+  }
+  const bounds = countryLayers[this.value][0].getBounds();
+  const center = bounds.getCenter();
+
+  map.setView(center, map.getZoom());
+});
+
 
 var countries = null;
 var availableCountries = [];
-
 async function openMapAdd() {
   // only reset the checked countries if the modal is opened, not when going back
   checkedCountries.clear();
@@ -1695,11 +2142,25 @@ passwordInput.addEventListener("input", handleLoginOrPasswordInput);
 waitForPermission(function() {
   if (window.userPermissions['forsure-dashboard']) {
     initDB();
+    
+    // Configure countryDropdown to render dropdown in a container above the map
+    if ($('#countryDropdown').length && typeof $.fn.selectpicker !== 'undefined') {
+      $('#countryDropdown').selectpicker({
+        container: 'body'
+      });
+      // Ensure dropdown menu has high z-index
+      $(document).on('shown.bs.select', '#countryDropdown', function() {
+        $('.bootstrap-select.open .dropdown-menu').css('z-index', '10000');
+      });
+    }
+    
     loadGeoJSON().then(data => {
         map = setInitialMap(data, 'eprMap', countryLayers);
+        createMapLegend();
         getCountryStatus().then(data => {
           updateCountryData(data);
         });
+        fillCountryDropdown();
     });
     loadCenters();
 
