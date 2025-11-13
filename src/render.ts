@@ -4,6 +4,10 @@ import { SnapshotRunner } from './core/snapshotRunner.js';
 import { slugifySnapshotName } from './utils/naming.js';
 import type { BrowserName, RenderOptions, RenderResult } from './types.js';
 
+/**
+ * Renders a Shopify template into deterministic HTML and returns visual artifacts.
+ * Accepts either CLI-provided or programmatic options and handles baseline bookkeeping.
+ */
 export async function render(options: RenderOptions): Promise<RenderResult> {
   if (!options.template) {
     throw new Error('render() requires a template name.');

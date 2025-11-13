@@ -101,6 +101,10 @@ interface PlaceholderDimensions {
   height?: number;
 }
 
+/**
+ * Compiles Shopify themes into deterministic HTML by recreating Liquid primitives and Shopify helpers.
+ * Callers provide a theme root and then repeatedly invoke {@link TemplateAssembler.compose} with templates to render.
+ */
 export class TemplateAssembler {
   private engine: Liquid;
   private headInjections: string[] = [];
@@ -148,6 +152,9 @@ export class TemplateAssembler {
     this.registerShopifyPrimitives();
   }
 
+  /**
+   * Renders a template (Liquid or JSON) inside the configured theme root, applying Shopify conventions such as linklists, locales, and asset inlining.
+   */
   async compose(options: RenderOptions) {
     await this.setActiveLocale(options.locale);
     await this.ensureThemeSettings();
@@ -190,6 +197,9 @@ export class TemplateAssembler {
     return html;
   }
 
+  /**
+   * Returns the asset manifest generated during the last {@link compose} call so SnapshotRunner can serve them via Playwright.
+   */
   getAssetManifest() {
     return new Map(this.assetManifest);
   }

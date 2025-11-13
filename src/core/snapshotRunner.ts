@@ -22,7 +22,14 @@ interface SnapshotRuntimeOptions {
   fullPage?: boolean;
 }
 
+/**
+ * Owns the Playwright lifecycle for snapshotting rendered HTML and diffing it against stored baselines.
+ * The class is exported so higher-level tooling can subclass it (e.g., to stub browsers during tests).
+ */
 export class SnapshotRunner {
+  /**
+   * Writes the supplied HTML to disk, captures a Playwright screenshot, and either refreshes the baseline or diffs against it.
+   */
   async capture(html: string, options: SnapshotRuntimeOptions): Promise<RenderResult> {
     await ensureDir(options.outputDir);
     await writeFileRecursive(options.htmlPath, html);

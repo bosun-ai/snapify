@@ -2,6 +2,9 @@ import type { BrowserContextOptions, Page } from 'playwright';
 
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
+/**
+ * Controls where snapshots are written and how the diff/baseline lifecycle should behave.
+ */
 export interface SnapshotOptions {
   /**
    * Unique name for the snapshot. If omitted we derive it from the template path.
@@ -17,6 +20,9 @@ export interface SnapshotOptions {
   fullPage?: boolean;
 }
 
+/**
+ * User-facing inputs accepted by {@link render}, mirroring the CLI flags with extra hooks for library consumers.
+ */
 export interface RenderOptions {
   /** Absolute or relative path to the Shopify theme root. */
   themeRoot?: string;
@@ -41,6 +47,9 @@ export interface RenderOptions {
   snapshot?: SnapshotOptions;
 }
 
+/**
+ * Artifacts produced by {@link render}, allowing callers to inspect HTML, screenshots, and diffs.
+ */
 export interface RenderResult {
   htmlPath: string;
   screenshotPath: string;
@@ -48,8 +57,12 @@ export interface RenderResult {
   updatedBaseline?: boolean;
 }
 
+/** Public configuration shape for future snapify.config.ts files; currently mirrors {@link RenderOptions}. */
 export interface SnapifyConfig extends RenderOptions {}
 
+/**
+ * Asset metadata captured during template assembly so the SnapshotRunner can fulfill Playwright requests offline.
+ */
 export interface RegisteredAsset {
   url: string;
   filePath: string;

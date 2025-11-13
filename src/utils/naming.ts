@@ -1,3 +1,6 @@
+/**
+ * Produces a filesystem-safe snapshot name while keeping templates with similar handles stable.
+ */
 export function slugifySnapshotName(input: string) {
   const value = (input ?? '').toString().trim();
   const primary = value
