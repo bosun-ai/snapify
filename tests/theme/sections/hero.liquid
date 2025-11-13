@@ -3,6 +3,7 @@
 {% endstyle %}
 <section class="hero-section" data-test="hero">
   <h1>{{ section.settings.heading }}</h1>
+  <p class="hero-inline" data-test="hero-translation">{{ 'sections.featured_blog.onboarding_title' | t }}</p>
   {% render './partials/button', label: section.settings.cta_label %}
   {% if section.settings.hero_image %}
     {% assign hero_placeholder = section.settings.hero_image | image_url: width: 320, height: 180 %}

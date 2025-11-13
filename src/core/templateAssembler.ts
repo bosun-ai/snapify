@@ -112,6 +112,8 @@ export class TemplateAssembler {
   private linklists = new Map<string, LinkList>();
   private navigationLoaded = false;
   private imageCache = new Map<string, ShopifyImage>();
+  private translations = new Map<string, Record<string, string>>();
+  private activeLocale = 'en.default';
 
   constructor(private readonly themeRoot: string) {
     this.engine = new Liquid({
@@ -135,6 +137,7 @@ export class TemplateAssembler {
   }
 
   async compose(options: RenderOptions) {
+    await this.setActiveLocale(options.locale);
     await this.ensureThemeSettings();
     this.headInjections.length = 0;
     this.assetManifest.clear();
@@ -260,6 +263,25 @@ ${renderedSections.join('\n')}
     return value;
   }
 
+  private translationFilter(value: unknown, args: unknown[]) {
+    const named = extractNamedArgs(args);
+    return this.translate(value, named);
+  }
+
+  private translate(value: unknown, options?: Record<string, unknown>) {
+    const key = typeof value === 'string' ? value : String(value ?? '').trim();
+    if (!key) {
+      return '';
+    }
+    const locale = this.activeLocale;
+    const dictionary = this.translations.get(locale) ?? {};
+    const fallback = typeof options?.default === 'string' ? options.default : key;
+    const template = dictionary[key] ?? fallback ?? key;
+    const replacements: Record<string, unknown> = { ...(options ?? {}) };
+    delete replacements.default;
+    return interpolateTranslation(String(template), replacements);
+  }
+
   private async renderSection(sectionId: string, definition: JsonSection, baseContext: Record<string, unknown>) {
     const sectionContext: SectionContext = {
       id: sectionId,
@@ -345,6 +367,9 @@ ${markup}
     this.engine.registerFilter('img_url', (asset: unknown, ...args: unknown[]) => imageUrlFilter(asset, ...args));
     this.engine.registerFilter('image_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
     this.engine.registerFilter('img_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
+    const translateFilter = (value: unknown, ...args: unknown[]) => this.translationFilter(value, args);
+    this.engine.registerFilter('t', translateFilter);
+    this.engine.registerFilter('translate', translateFilter);
     this.engine.registerFilter('image_url', (asset: unknown) => this.imageUrlFilter(asset));
     this.engine.registerFilter('image_tag', (asset: unknown, attrs?: Record<string, unknown>) => this.imageTagFilter(asset, attrs));
 
@@ -726,6 +751,45 @@ ${markup}
     this.navigationLoaded = true;
   }
 
+  private async setActiveLocale(locale?: string) {
+    const fallback = 'en.default';
+    const requested = sanitizeLocale(locale ?? process.env.SNAPIFY_LOCALE ?? this.activeLocale ?? fallback);
+    const resolved = await this.ensureLocaleTranslations(requested)
+      ? requested
+      : (await this.ensureLocaleTranslations(fallback) ? fallback : requested);
+    this.activeLocale = resolved;
+  }
+
+  private async ensureLocaleTranslations(locale: string) {
+    if (this.translations.has(locale)) {
+      return true;
+    }
+    const payload = await this.loadLocaleFile(locale);
+    if (!payload) {
+      return false;
+    }
+    this.translations.set(locale, payload);
+    return true;
+  }
+
+  private async loadLocaleFile(locale: string) {
+    const candidates = buildLocaleCandidates(locale);
+    for (const candidate of candidates) {
+      const abs = path.join(this.themeRoot, 'locales', candidate);
+      if (!(await fileExists(abs))) {
+        continue;
+      }
+      try {
+        const raw = await readFile(abs, 'utf8');
+        const parsed = JSON.parse(raw);
+        return flattenTranslations(parsed);
+      } catch {
+        // ignore malformed locale file
+      }
+    }
+    return undefined;
+  }
+
   private normalizeConfiguredSection(sectionId: string, definition: JsonSection): JsonSection {
     const normalizedBlocks: Record<string, JsonSectionBlock> = {};
     if (definition.blocks) {
@@ -873,6 +937,55 @@ function slugifyHandle(value: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     || 'link';
+}
+
+function sanitizeLocale(locale: string) {
+  return locale.replace(/\.json$/i, '').toLowerCase();
+}
+
+function buildLocaleCandidates(locale: string) {
+  const sanitized = sanitizeLocale(locale);
+  const variants = new Set<string>();
+  variants.add(sanitized);
+  if (!sanitized.includes('.default')) {
+    variants.add(`${sanitized}.default`);
+  }
+  if (sanitized.includes('.default')) {
+    variants.add(sanitized.replace('.default', ''));
+  }
+  return Array.from(variants).map((variant) => `${variant}.json`);
+}
+
+function flattenTranslations(node: unknown, prefix = '', acc: Record<string, string> = {}) {
+  if (node && typeof node === 'object' && !Array.isArray(node)) {
+    for (const [key, value] of Object.entries(node)) {
+      const next = prefix ? `${prefix}.${key}` : key;
+      flattenTranslations(value, next, acc);
+    }
+    return acc;
+  }
+  if (Array.isArray(node)) {
+    node.forEach((value, index) => {
+      const next = `${prefix}.${index}`;
+      flattenTranslations(value, next, acc);
+    });
+    return acc;
+  }
+  if (prefix) {
+    acc[prefix] = node === undefined || node === null ? '' : String(node);
+  }
+  return acc;
+}
+
+function interpolateTranslation(template: string, replacements: Record<string, unknown>) {
+  const sanitized = replacements ?? {};
+  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, token: string) => {
+    const value = sanitized[token];
+    if (value === undefined || value === null) {
+      return '';
+    }
+    return String(value);
+  });
 }
 
 function extractNamedArgs(args: unknown[]) {

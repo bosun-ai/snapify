@@ -8,6 +8,7 @@ Visual regression snapshots for Shopify themes using Playwright — no running d
 - 🧱 Resolves sections, snippets, and local-path includes just like a deployed theme.
 - 🎨 Inlines CSS/JS assets (including `{{ 'theme.css' | asset_url | stylesheet_tag }}`) so snapshots reflect final storefront styling.
 - 🖼️ Replaces `shopify://shop_images/...` references with deterministic SVG placeholders (respecting requested width/height) so tests never need the real CDN assets.
+- 🌐 Respects Shopify locale strings: load `locales/en.default.json` (or pass `locale`/`SNAPIFY_LOCALE`) and `{{ 'sections.*' | t }}` renders with the same copy as production.
 - 📸 Uses Playwright to capture screenshots and `pixelmatch` to diff against baselines.
 - 🧪 Ships both a programmatic API (`render`) and a CLI (`snapify render`).
 
@@ -53,6 +54,7 @@ import { render } from 'snapify';
 await render({
   themeRoot: '/path/to/theme',
   template: 'product',
+  locale: 'en.default',
   layout: 'checkout',
   data: { product: { title: 'Sample' } },
   styles: '.debug-outline { outline: 1px solid red; }',

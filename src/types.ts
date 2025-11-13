@@ -30,6 +30,8 @@ export interface RenderOptions {
   styles?: string;
   /** Custom viewport configuration for Playwright. */
   viewport?: BrowserContextOptions['viewport'];
+  /** Locale code (e.g. en.default) used for translations. */
+  locale?: string;
   /** Which Playwright browser to launch (defaults to chromium). */
   browser?: BrowserName;
   /**
