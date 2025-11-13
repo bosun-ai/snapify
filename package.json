@@ -30,7 +30,7 @@
 		"snapshot",
 		"liquid"
 	],
-	"author": "",
+	"author": "bosun-ai",
 	"license": "MIT",
 	"dependencies": {
 		"liquidjs": "^10.11.1",
