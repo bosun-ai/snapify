@@ -1,0 +1,286 @@
+import path from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { Liquid } from 'liquidjs';
+import type { RenderOptions } from '../types.js';
+import { fileExists } from '../utils/fs.js';
+
+const DEFAULT_LAYOUT = 'theme';
+
+interface InlineAsset {
+  kind: 'asset';
+  filename: string;
+  content: string;
+  mimeType: string;
+}
+
+interface JsonTemplate {
+  sections?: Record<string, JsonSection>;
+  order?: string[];
+  wrapper?: string;
+}
+
+interface JsonSection {
+  type: string;
+  disabled?: boolean;
+  settings?: Record<string, unknown>;
+  blocks?: Record<string, JsonSectionBlock>;
+  block_order?: string[];
+  custom_css?: string[];
+}
+
+interface JsonSectionBlock {
+  type: string;
+  settings?: Record<string, unknown>;
+}
+
+interface SectionContext {
+  id: string;
+  type: string;
+  settings: Record<string, unknown>;
+  blocks: Array<{ id: string; type: string; settings: Record<string, unknown> }>; 
+  block_order: string[];
+}
+
+export class TemplateAssembler {
+  private engine: Liquid;
+  private headInjections: string[] = [];
+
+  constructor(private readonly themeRoot: string) {
+    this.engine = new Liquid({
+      root: this.themeRoot,
+      partials: [
+        path.join(this.themeRoot, 'snippets'),
+        path.join(this.themeRoot, 'sections'),
+        path.join(this.themeRoot, 'layout'),
+        this.themeRoot
+      ],
+      layouts: [path.join(this.themeRoot, 'layout')],
+      extname: '.liquid',
+      cache: false,
+      dynamicPartials: true,
+      relativeReference: true,
+      strictFilters: false,
+      strictVariables: false
+    });
+
+    this.registerShopifyPrimitives();
+  }
+
+  async compose(options: RenderOptions) {
+    this.headInjections.length = 0;
+    const templateLookup = await this.resolveTemplate(options.template);
+    const context = options.data ?? {};
+    let bodyHtml = '';
+
+    if (templateLookup.endsWith('.json')) {
+      bodyHtml = await this.renderJsonTemplate(templateLookup, context);
+    } else {
+      bodyHtml = await this.engine.renderFile(templateLookup, context);
+    }
+
+    if (options.layout === false) {
+      return this.decorateDeterministicHtml(bodyHtml, options.styles);
+    }
+
+    const layoutLookup = await this.resolveLayout(options.layout ?? DEFAULT_LAYOUT);
+    const inlineHeader = this.collectHeadMarkup(options.styles);
+    const layoutScope = {
+      ...context,
+      content_for_layout: bodyHtml,
+      content_for_header: inlineHeader
+    };
+
+    const html = await this.engine.renderFile(layoutLookup, layoutScope);
+    if (inlineHeader && !html.includes(inlineHeader)) {
+      return this.ensureHeadCarriesInlineCss(html, inlineHeader);
+    }
+
+    return html;
+  }
+
+  private async renderJsonTemplate(relativePath: string, baseContext: Record<string, unknown>) {
+    const template = await this.readJsonTemplate(relativePath);
+    if (!template.sections) {
+      return '';
+    }
+    const order = template.order ?? Object.keys(template.sections);
+    const renderedSections = [] as string[];
+
+    for (const sectionId of order) {
+      const definition = template.sections[sectionId];
+      if (!definition || definition.disabled) continue;
+      const markup = await this.renderSection(sectionId, definition, baseContext);
+      renderedSections.push(markup);
+    }
+
+    const container = template.wrapper ?? 'main';
+    return `<${container} data-snapify-template="${relativePath}">
+${renderedSections.join('\n')}
+</${container}>`;
+  }
+
+  private async renderSection(sectionId: string, definition: JsonSection, baseContext: Record<string, unknown>) {
+    const sectionContext: SectionContext = {
+      id: sectionId,
+      type: definition.type,
+      settings: definition.settings ?? {},
+      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {}),
+      blocks: this.materializeBlocks(definition)
+    };
+
+    const scope = {
+      ...baseContext,
+      section: sectionContext
+    };
+
+    const templatePath = this.resolveSectionLookup(definition.type);
+    const markup = await this.engine.renderFile(templatePath, scope);
+    const css = Array.isArray(definition.custom_css) && definition.custom_css.length
+      ? `\n<style data-section="${sectionId}">\n${definition.custom_css.join('\n')}\n</style>`
+      : '';
+
+    return `${markup}${css}`;
+  }
+
+  private materializeBlocks(definition: JsonSection) {
+    const resolved: SectionContext['blocks'] = [];
+    if (!definition.blocks) {
+      return resolved;
+    }
+
+    const order = definition.block_order ?? Object.keys(definition.blocks);
+    for (const blockId of order) {
+      const block = definition.blocks[blockId];
+      if (!block) continue;
+      resolved.push({
+        id: blockId,
+        type: block.type,
+        settings: block.settings ?? {}
+      });
+    }
+
+    return resolved;
+  }
+
+  private registerShopifyPrimitives() {
+    const assetFilter = this.assetUrlFilter.bind(this);
+    this.engine.registerFilter('asset_url', assetFilter);
+    this.engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => this.stylesheetTagFilter(asset));
+    this.engine.registerFilter('script_tag', (asset: InlineAsset | string) => this.scriptTagFilter(asset));
+
+  }
+
+  private async assetUrlFilter(filename: string): Promise<InlineAsset> {
+    const normalized = filename.trim().replace(/^['"`]|['"`]$/g, '');
+    const abs = path.join(this.themeRoot, 'assets', normalized);
+    const buffer = await readFile(abs, 'utf8');
+    const mime = getMimeType(normalized);
+    return {
+      kind: 'asset',
+      filename: normalized,
+      content: buffer,
+      mimeType: mime
+    };
+  }
+
+  private stylesheetTagFilter(asset: InlineAsset | string) {
+    const handle = ensureAsset(asset);
+    const inline = `<style data-snapify-asset="${handle.filename}">\n${handle.content}\n</style>`;
+    this.headInjections.push(inline);
+    return inline;
+  }
+
+  private scriptTagFilter(asset: InlineAsset | string) {
+    const handle = ensureAsset(asset);
+    const inline = `<script data-snapify-asset="${handle.filename}">\n${handle.content}\n</script>`;
+    this.headInjections.push(inline);
+    return inline;
+  }
+
+  private collectHeadMarkup(userStyles?: string) {
+    if (userStyles) {
+      this.headInjections.push(`<style data-snapify-inline="user">\n${userStyles}\n</style>`);
+    }
+    return this.headInjections.join('\n');
+  }
+
+  private ensureHeadCarriesInlineCss(html: string, injection: string) {
+    if (!injection.trim()) {
+      return html;
+    }
+    if (/<head[^>]*>/i.test(html)) {
+      return html.replace(/<head([^>]*)>/i, `<head$1>\n${injection}\n`);
+    }
+
+    return `${injection}\n${html}`;
+  }
+
+  private decorateDeterministicHtml(body: string, extraStyles?: string) {
+    if (!extraStyles) {
+      return body;
+    }
+    return `<style data-snapify-inline="user">${extraStyles}</style>\n${body}`;
+  }
+
+  private async resolveTemplate(template: string) {
+    const sanitized = template.replace(/\.liquid$|\.json$/i, '');
+    const candidates = [
+      path.join('templates', `${sanitized}.liquid`),
+      path.join('templates', `${sanitized}.json`),
+      path.join('templates', template)
+    ];
+
+    for (const candidate of candidates) {
+      const abs = path.join(this.themeRoot, candidate);
+      if (await fileExists(abs)) {
+        return normalizeLiquidPath(candidate.endsWith('.liquid') || candidate.endsWith('.json') ? candidate : `${candidate}.liquid`);
+      }
+    }
+
+    throw new Error(`Could not resolve template '${template}' inside templates/`);
+  }
+
+  private async resolveLayout(layout: string) {
+    const sanitized = layout.replace(/\.liquid$/i, '');
+    const candidate = path.join('layout', `${sanitized}.liquid`);
+    const abs = path.join(this.themeRoot, candidate);
+    if (!(await fileExists(abs))) {
+      throw new Error(`Unknown layout '${layout}'`);
+    }
+    return normalizeLiquidPath(candidate);
+  }
+
+  private resolveSectionLookup(sectionType: string) {
+    const sanitized = sectionType.replace(/\.liquid$/i, '');
+    return normalizeLiquidPath(path.join('sections', `${sanitized}.liquid`));
+  }
+
+  private async readJsonTemplate(relativePath: string): Promise<JsonTemplate> {
+    const abs = path.join(this.themeRoot, relativePath);
+    const file = await readFile(abs, 'utf8');
+    return JSON.parse(file) as JsonTemplate;
+  }
+}
+
+function normalizeLiquidPath(relativePath: string) {
+  return relativePath.replace(/\\/g, '/');
+}
+
+function ensureAsset(value: InlineAsset | string): InlineAsset {
+  if (typeof value === 'string') {
+    return {
+      kind: 'asset',
+      filename: 'inline.css',
+      content: value,
+      mimeType: 'text/plain'
+    };
+  }
+  return value;
+}
+
+function getMimeType(filename: string) {
+  if (filename.endsWith('.css')) return 'text/css';
+  if (filename.endsWith('.js')) return 'application/javascript';
+  if (filename.endsWith('.json')) return 'application/json';
+  return 'text/plain';
+}
