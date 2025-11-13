@@ -107,11 +107,14 @@ export class SnapshotRunner {
       readFile(candidatePath)
     ]);
 
-    const baselinePng = PNG.sync.read(baselineBuffer);
-    const latestPng = PNG.sync.read(latestBuffer);
+    let baselinePng = PNG.sync.read(baselineBuffer);
+    let latestPng = PNG.sync.read(latestBuffer);
 
     if (baselinePng.width !== latestPng.width || baselinePng.height !== latestPng.height) {
-      throw new Error('Baseline and latest screenshots have different dimensions. Ensure viewport settings are stable.');
+      const targetWidth = Math.max(baselinePng.width, latestPng.width);
+      const targetHeight = Math.max(baselinePng.height, latestPng.height);
+      baselinePng = padPng(baselinePng, targetWidth, targetHeight);
+      latestPng = padPng(latestPng, targetWidth, targetHeight);
     }
 
     const diff = new PNG({ width: baselinePng.width, height: baselinePng.height });
@@ -145,4 +148,22 @@ function getBrowserType(name: BrowserName | undefined): BrowserType {
     default:
       return chromium;
   }
+}
+
+function padPng(source: PNG, width: number, height: number) {
+  if (source.width === width && source.height === height) {
+    return source;
+  }
+  const target = new PNG({ width, height });
+  const sourceStride = source.width * 4;
+  const targetStride = width * 4;
+  for (let y = 0; y < source.height; y += 1) {
+    source.data.copy(
+      target.data,
+      y * targetStride,
+      y * sourceStride,
+      y * sourceStride + sourceStride
+    );
+  }
+  return target;
 }
