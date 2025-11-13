@@ -1,0 +1,77 @@
+name: Prepare Release
+
+on:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine bump type
+        id: bump
+        run: |
+          type=$(npx conventional-recommended-bump -p angular -t snapify-v 2>/dev/null || echo patch)
+          type=$(echo "$type" | tr -d '\n\r[:space:]')
+          if [ -z "$type" ]; then
+            type=patch
+          fi
+          echo "type=$type" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version
+        run: npm version ${{ steps.bump.outputs.type }} --no-git-tag-version
+
+      - name: Capture new version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Update changelog
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: --tag snapify-v${{ steps.version.outputs.version }} --output CHANGELOG.md
+
+      - name: Generate release notes
+        id: notes
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: --tag snapify-v${{ steps.version.outputs.version }} --unreleased --strip=all
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: release/snapify-v${{ steps.version.outputs.version }}
+          delete-branch: true
+          commit-message: "chore(release): snapify v${{ steps.version.outputs.version }}"
+          title: "chore(release): snapify v${{ steps.version.outputs.version }}"
+          body: |
+            ## snapify v${{ steps.version.outputs.version }}
+
+            ${{ steps.notes.outputs.content }}
+          add-paths: |
+            package.json
+            package-lock.json
+            CHANGELOG.md
