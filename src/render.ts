@@ -2,7 +2,7 @@ import path from 'node:path';
 import { TemplateAssembler } from './core/templateAssembler.js';
 import { SnapshotRunner } from './core/snapshotRunner.js';
 import { slugifySnapshotName } from './utils/naming.js';
-import type { RenderOptions, RenderResult } from './types.js';
+import type { BrowserName, RenderOptions, RenderResult } from './types.js';
 
 export async function render(options: RenderOptions): Promise<RenderResult> {
   if (!options.template) {
@@ -16,6 +16,7 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
   const name = slugifySnapshotName(options.snapshot?.name ?? options.template);
   const baselineDir = path.resolve(themeRoot, options.snapshot?.baselineDir ?? path.join('.snapify', 'baseline'));
   const outputDir = path.resolve(themeRoot, options.snapshot?.outputDir ?? path.join('.snapify', 'artifacts'));
+  const browser = resolveBrowser(options.browser);
 
   const runner = new SnapshotRunner();
 
@@ -28,6 +29,18 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
     diffPath: path.join(outputDir, `${name}.diff.png`),
     viewport: options.viewport,
     beforeSnapshot: options.beforeSnapshot,
-    updateBaseline: options.snapshot?.update
+    updateBaseline: options.snapshot?.update,
+    browser
   });
+}
+
+function resolveBrowser(explicit?: BrowserName) {
+  const envValue = process.env.SNAPIFY_BROWSER as BrowserName | undefined;
+  if (explicit) return explicit;
+  if (isBrowserName(envValue)) return envValue;
+  return 'chromium';
+}
+
+function isBrowserName(value: string | undefined): value is BrowserName {
+  return value === 'chromium' || value === 'firefox' || value === 'webkit';
 }

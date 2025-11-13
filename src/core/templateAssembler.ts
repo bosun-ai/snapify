@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { Liquid } from 'liquidjs';
+import type { TagImplOptions } from 'liquidjs';
 import type { RenderOptions } from '../types.js';
 import { fileExists } from '../utils/fs.js';
 
@@ -163,11 +164,120 @@ ${renderedSections.join('\n')}
   }
 
   private registerShopifyPrimitives() {
+    const assembler = this;
     const assetFilter = this.assetUrlFilter.bind(this);
     this.engine.registerFilter('asset_url', assetFilter);
     this.engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => this.stylesheetTagFilter(asset));
     this.engine.registerFilter('script_tag', (asset: InlineAsset | string) => this.scriptTagFilter(asset));
 
+    const schemaTag: TagImplOptions = {
+      parse(tagToken, remainTokens) {
+        const stream = this.liquid.parser.parseStream(remainTokens);
+        stream
+          .on('tag:endschema', () => {
+            stream.stop();
+          })
+          .on('end', () => {
+            throw new Error(`tag ${tagToken.name} not closed`);
+          });
+        stream.start();
+      },
+      render() {
+        return '';
+      }
+    };
+
+    const styleTag = this.createInlineBlockTag('style', (content) => `<style data-snapify-inline="style">${content}</style>`);
+    const scriptTag = this.createInlineBlockTag('javascript', (content) => `<script data-snapify-inline="javascript">${content}</script>`);
+    const formTag = this.createFormTag();
+
+    const sectionTag: TagImplOptions = {
+      parse(tagToken) {
+        const state = this as unknown as { sectionHandle?: string };
+        state.sectionHandle = tagToken.args?.trim();
+      },
+      async render(ctx) {
+        const state = this as unknown as { sectionHandle?: string };
+        const handle = normalizeSectionHandle(state.sectionHandle ?? '');
+        if (!handle) {
+          return '';
+        }
+        const baseContext = ctx.getAll();
+        return assembler.renderStandaloneSection(handle, baseContext);
+      }
+    };
+
+    this.engine.registerTag('schema', schemaTag);
+    this.engine.registerTag('style', styleTag);
+    this.engine.registerTag('javascript', scriptTag);
+    this.engine.registerTag('form', formTag);
+    this.engine.registerTag('section', sectionTag);
+  }
+
+  private createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
+    return {
+      parse(tagToken, remainTokens) {
+        const state = this as unknown as { templates: any[]; liquid: Liquid };
+        state.templates = [];
+        const parser = state.liquid.parser;
+        const stream = parser.parseStream(remainTokens)
+          .on(`tag:end${tagName}`, () => {
+            stream.stop();
+          })
+          .on('template', (tpl) => {
+            state.templates.push(tpl);
+          })
+          .on('end', () => {
+            throw new Error(`tag ${tagToken.name} not closed`);
+          });
+        stream.start();
+      },
+      async render(ctx) {
+        const state = this as unknown as { templates: any[]; liquid: Liquid };
+        const rendered = await state.liquid.renderer.renderTemplates(state.templates, ctx);
+        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
+        return renderWrapper(content);
+      }
+    } satisfies TagImplOptions;
+  }
+
+  private createFormTag(): TagImplOptions {
+    return {
+      parse(tagToken, remainTokens) {
+        const state = this as unknown as { templates: any[]; liquid: Liquid; args?: string };
+        state.templates = [];
+        state.args = tagToken.args ?? '';
+        const parser = state.liquid.parser;
+        const stream = parser.parseStream(remainTokens)
+          .on('tag:endform', () => {
+            stream.stop();
+          })
+          .on('template', (tpl) => {
+            state.templates.push(tpl);
+          })
+          .on('end', () => {
+            throw new Error('tag form not closed');
+          });
+        stream.start();
+      },
+      async render(ctx, _emitter, hash) {
+        const state = this as unknown as { templates: any[]; liquid: Liquid; args?: string };
+        const rendered = await state.liquid.renderer.renderTemplates(state.templates, ctx);
+        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
+        const handle = extractHandleFromArgs(state.args ?? '');
+        const attributes: Record<string, unknown> = {
+          method: 'post',
+          action: '/',
+          'data-snapify-form': handle || 'generic'
+        };
+        Object.assign(attributes, hash ?? {});
+        if (!attributes['data-snapify-form']) {
+          attributes['data-snapify-form'] = handle || 'generic';
+        }
+        const attrs = serializeAttributes(attributes);
+        return `<form ${attrs}>${content}</form>`;
+      }
+    } satisfies TagImplOptions;
   }
 
   private async assetUrlFilter(filename: string): Promise<InlineAsset> {
@@ -260,6 +370,22 @@ ${renderedSections.join('\n')}
     const file = await readFile(abs, 'utf8');
     return JSON.parse(file) as JsonTemplate;
   }
+
+  private async renderStandaloneSection(sectionType: string, baseContext: Record<string, unknown>) {
+    const scope = {
+      ...baseContext,
+      section: {
+        id: `${sectionType}-static`,
+        type: sectionType,
+        settings: {},
+        block_order: [],
+        blocks: []
+      }
+    } satisfies Record<string, unknown>;
+
+    const templatePath = this.resolveSectionLookup(sectionType);
+    return this.engine.renderFile(templatePath, scope);
+  }
 }
 
 function normalizeLiquidPath(relativePath: string) {
@@ -276,6 +402,47 @@ function ensureAsset(value: InlineAsset | string): InlineAsset {
     };
   }
   return value;
+}
+
+function normalizeSectionHandle(raw: string) {
+  return raw.replace(/^['"`]|['"`]$/g, '').trim();
+}
+
+function extractHandleFromArgs(args: string) {
+  const [first] = args.split(',');
+  if (!first) return '';
+  return normalizeSectionHandle(first);
+}
+
+function serializeAttributes(attrs: Record<string, unknown>) {
+  return Object.entries(attrs)
+    .filter(([, value]) => value !== undefined && value !== null && value !== false)
+    .map(([key, value]) => {
+      if (value === true) {
+        return key;
+      }
+      return `${key}="${escapeHtml(String(value))}"`;
+    })
+    .join(' ');
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '"':
+        return '&quot;';
+      case "'":
+        return '&#39;';
+      default:
+        return char;
+    }
+  });
 }
 
 function getMimeType(filename: string) {

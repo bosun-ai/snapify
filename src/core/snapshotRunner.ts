@@ -1,10 +1,10 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { chromium, type BrowserContextOptions, type Page } from 'playwright';
+import { chromium, firefox, webkit, type BrowserContextOptions, type BrowserType, type Page } from 'playwright';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { ensureDir, fileExists, writeFileRecursive } from '../utils/fs.js';
-import type { RenderOptions, RenderResult } from '../types.js';
+import type { BrowserName, RenderOptions, RenderResult } from '../types.js';
 
 interface SnapshotRuntimeOptions {
   name: string;
@@ -16,6 +16,7 @@ interface SnapshotRuntimeOptions {
   viewport?: BrowserContextOptions['viewport'];
   beforeSnapshot?: RenderOptions['beforeSnapshot'];
   updateBaseline?: boolean;
+  browser?: BrowserName;
 }
 
 export class SnapshotRunner {
@@ -23,7 +24,8 @@ export class SnapshotRunner {
     await ensureDir(options.outputDir);
     await writeFileRecursive(options.htmlPath, html);
 
-    const browser = await chromium.launch({ headless: true });
+    const browserType = getBrowserType(options.browser);
+    const browser = await browserType.launch({ headless: true });
     try {
       const context = await browser.newContext({ viewport: options.viewport ?? { width: 1280, height: 720 } });
       const page = await context.newPage();
@@ -96,5 +98,16 @@ export class SnapshotRunner {
 
     await writeFileRecursive(diffPath, PNG.sync.write(diff));
     return diffPath;
+  }
+}
+
+function getBrowserType(name: BrowserName | undefined): BrowserType {
+  switch (name) {
+    case 'firefox':
+      return firefox;
+    case 'webkit':
+      return webkit;
+    default:
+      return chromium;
   }
 }

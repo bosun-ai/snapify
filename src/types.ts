@@ -1,5 +1,7 @@
 import type { BrowserContextOptions, Page } from 'playwright';
 
+export type BrowserName = 'chromium' | 'firefox' | 'webkit';
+
 export interface SnapshotOptions {
   /**
    * Unique name for the snapshot. If omitted we derive it from the template path.
@@ -26,6 +28,8 @@ export interface RenderOptions {
   styles?: string;
   /** Custom viewport configuration for Playwright. */
   viewport?: BrowserContextOptions['viewport'];
+  /** Which Playwright browser to launch (defaults to chromium). */
+  browser?: BrowserName;
   /**
    * Optional callback to mutate the Playwright page prior to grabbing the screenshot.
    */

@@ -6,7 +6,7 @@ import pc from 'picocolors';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { render } from './render.js';
-import type { RenderResult } from './types.js';
+import type { BrowserName, RenderResult } from './types.js';
 import { fileExists } from './utils/fs.js';
 
 interface CliArgs {
@@ -21,6 +21,7 @@ interface CliArgs {
   baselineDir?: string;
   outputDir?: string;
   update?: boolean;
+  browser?: BrowserName;
 }
 
 const renderBuilder: BuilderCallback<{}, CliArgs> = (cmd) =>
@@ -52,6 +53,11 @@ const renderBuilder: BuilderCallback<{}, CliArgs> = (cmd) =>
         .option('viewport', {
           type: 'string',
           describe: 'Viewport in the form WIDTHxHEIGHT (e.g. 1280x720).'
+        })
+        .option('browser', {
+          type: 'string',
+          choices: ['chromium', 'firefox', 'webkit'] as const,
+          describe: 'Playwright browser to launch (defaults to chromium).'
         })
         .option('name', {
           type: 'string',
@@ -91,6 +97,7 @@ yargs(hideBin(process.argv))
           data,
           styles,
           viewport,
+          browser: argv.browser,
           snapshot: {
             name: argv.name,
             baselineDir: argv.baselineDir,
