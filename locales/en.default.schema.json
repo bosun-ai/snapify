@@ -3311,6 +3311,14 @@
             "name": "Questionnaire ForSURE"
         }
     },
+    "testimonial": {
+        "name": "Testimonial ForSURE",
+        "settings": {
+        },
+        "presets": {
+            "name": "Testimonial ForSURE"
+        }
+    },
     "forsure_categorylist": {
       "name": "ForSURE Categorylist",
       "settings": {

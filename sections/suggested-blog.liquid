@@ -20,6 +20,56 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+    
+  .left-top-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) calc(100vw/6.5) 0 0;
+    border-color: #2255ff transparent transparent transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .right-top-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+   border-width: 0 calc(100vw/6.5) calc(100vw/8) 0;
+    border-color: transparent #2255ff transparent transparent;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .left-bottom-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: calc(100vw/8) 0 0 calc(100vw/6.5);
+    border-color: transparent transparent transparent #2255ff;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
+  .right-bottom-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 calc(100vw/8) calc(100vw/6.5);
+    border-color: transparent transparent #2255ff transparent;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1; /* Ensure the triangle appears above other content if needed */
+    display: block !important;
+  }
 {%- endstyle -%}
 {%- liquid
   assign posts_displayed = section.settings.blog.articles_count
@@ -29,7 +79,19 @@
   endif -%}
   {% assign color_pattern = "0,1,2" | split: "," %}
 <div class="background-triangle blog color-{{ section.settings.color_scheme }} gradient{% if section.settings.heading == blank %} no-heading{% endif %}">
-  <div class="top-right-triangle"></div>
+  
+  {% if section.settings.bluecorner_upper_left %}
+    <div class="left-top-triangle"></div>
+  {% endif %}
+  {% if section.settings.bluecorner_upper_right %}
+    <div class="right-top-triangle"></div>
+  {% endif %}
+  {% if section.settings.bluecorner_lower_left %}
+    <div class="left-bottom-triangle"></div>
+  {% endif %}
+  {% if section.settings.bluecorner_lower_right %}
+    <div class="right-bottom-triangle"></div>
+  {% endif %}
   <div id="newshub" class="page-width-desktop {% if posts_displayed < 3 %} page-width-tablet{% endif %} section-{{ section.id }}-padding">
     {%- unless section.settings.heading == blank -%}
       <div class="title-wrapper-with-link{% if posts_displayed > 2 %} title-wrapper--self-padded-tablet-down{% else %} title-wrapper--self-padded-mobile{% endif %}">
@@ -121,6 +183,30 @@
       "id": "heading",
       "default": "Blogs posts",
       "label": "t:sections.suggested-blog-homepage.settings.heading.label"
+    },
+    {
+        "type": "checkbox",
+        "id": "bluecorner_upper_left",
+        "label": "Blue Corner Upper Left",
+        "default": false
+    },
+    {
+        "type": "checkbox",
+        "id": "bluecorner_upper_right",
+        "label": "Blue Corner Upper Right",
+        "default": false
+    },
+    {
+        "type": "checkbox",
+        "id": "bluecorner_lower_left",
+        "label": "Blue Corner Lower Left",
+        "default": false
+    },
+    {
+        "type": "checkbox",
+        "id": "bluecorner_lower_right",
+        "label": "Blue Corner Lower Right",
+        "default": false
     },
     {
       "type": "select",
