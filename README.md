@@ -17,7 +17,7 @@ This enables drastic refactoring without the fear of breaking existing themes, a
 ## Installation
 
 ```bash
-npm save --dev snapify playwright
+npm save --dev @bosun-ai/snapify playwright
 npx playwright install --with-deps chromium
 ```
 
