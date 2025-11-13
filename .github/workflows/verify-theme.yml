@@ -1,22 +1,22 @@
-# Workflow for running Shopify theme checks
-name: Verify Theme
+# Continuous integration run for pull requests and pushes.
+name: Verify
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
-  verify-theme:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: '20'
       - name: Install dependencies
-        run: bun install
-      - name: Run Shopify theme check
-        run: bun run verify-theme
+        run: npm ci
+      - name: Run tests
+        run: npm test

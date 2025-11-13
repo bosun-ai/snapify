@@ -114,8 +114,20 @@ export class TemplateAssembler {
   private imageCache = new Map<string, ShopifyImage>();
   private translations = new Map<string, Record<string, string>>();
   private activeLocale = 'en.default';
+  private readonly assetsDir: string;
+  private readonly templatesDir: string;
+  private readonly sectionsDir: string;
+  private readonly layoutDir: string;
+  private readonly configDir: string;
+  private readonly localesDir: string;
 
   constructor(private readonly themeRoot: string) {
+    this.assetsDir = path.join(this.themeRoot, 'assets');
+    this.templatesDir = path.join(this.themeRoot, 'templates');
+    this.sectionsDir = path.join(this.themeRoot, 'sections');
+    this.layoutDir = path.join(this.themeRoot, 'layout');
+    this.configDir = path.join(this.themeRoot, 'config');
+    this.localesDir = path.join(this.themeRoot, 'locales');
     this.engine = new Liquid({
       root: this.themeRoot,
       partials: [
@@ -370,8 +382,6 @@ ${markup}
     const translateFilter = (value: unknown, ...args: unknown[]) => this.translationFilter(value, args);
     this.engine.registerFilter('t', translateFilter);
     this.engine.registerFilter('translate', translateFilter);
-    this.engine.registerFilter('image_url', (asset: unknown) => this.imageUrlFilter(asset));
-    this.engine.registerFilter('image_tag', (asset: unknown, attrs?: Record<string, unknown>) => this.imageTagFilter(asset, attrs));
 
     const schemaTag: TagImplOptions = {
       parse(tagToken, remainTokens) {
@@ -484,13 +494,18 @@ ${markup}
   }
 
   private async assetUrlFilter(filename: string): Promise<InlineAsset> {
-    const normalized = filename.trim().replace(/^['"`]|['"`]$/g, '');
-    const abs = path.join(this.themeRoot, 'assets', normalized);
+    const normalized = stripWrappingQuotes(filename.trim());
+    if (!normalized) {
+      throw new Error('asset_url requires a filename.');
+    }
+    const relativePath = removeLeadingSeparators(normalized);
+    const abs = ensurePathInside(this.assetsDir, path.resolve(this.assetsDir, relativePath), 'asset');
     const buffer = await readFile(abs);
-    const mime = getMimeType(normalized);
+    const assetRelativePath = normalizeLiquidPath(path.relative(this.assetsDir, abs));
+    const mime = getMimeType(assetRelativePath);
     const textContent = isTextMime(mime) ? buffer.toString('utf8') : '';
     const base64 = buffer.toString('base64');
-    const assetUrl = this.buildAssetUrl(normalized, buffer);
+    const assetUrl = this.buildAssetUrl(assetRelativePath, buffer);
     this.assetManifest.set(assetUrl, {
       url: assetUrl,
       filePath: abs,
@@ -501,7 +516,7 @@ ${markup}
 
     const asset = {
       kind: 'asset',
-      filename: normalized,
+      filename: assetRelativePath,
       content: textContent,
       mimeType: mime,
       url: assetUrl,
@@ -702,7 +717,7 @@ ${markup}
 
     await this.ensureNavigation();
 
-    const settingsPath = path.join(this.themeRoot, 'config', 'settings_data.json');
+    const settingsPath = path.join(this.configDir, 'settings_data.json');
     if (!(await fileExists(settingsPath))) {
       this.settingsLoaded = true;
       return;
@@ -735,7 +750,7 @@ ${markup}
       return;
     }
 
-    const navPath = path.join(this.themeRoot, 'config', 'navigation.json');
+    const navPath = path.join(this.configDir, 'navigation.json');
     if (await fileExists(navPath)) {
       try {
         const raw = await readFile(navPath, 'utf8');
@@ -775,7 +790,7 @@ ${markup}
   private async loadLocaleFile(locale: string) {
     const candidates = buildLocaleCandidates(locale);
     for (const candidate of candidates) {
-      const abs = path.join(this.themeRoot, 'locales', candidate);
+      const abs = ensurePathInside(this.localesDir, path.resolve(this.localesDir, candidate), 'locale');
       if (!(await fileExists(abs))) {
         continue;
       }
@@ -818,17 +833,20 @@ ${markup}
   }
 
   private async resolveTemplate(template: string) {
-    const sanitized = template.replace(/\.liquid$|\.json$/i, '');
-    const candidates = [
-      path.join('templates', `${sanitized}.liquid`),
-      path.join('templates', `${sanitized}.json`),
-      path.join('templates', template)
-    ];
+    const withoutPrefix = sanitizeLookupInput(template, 'templates');
+    const base = withoutPrefix.replace(/\.liquid$|\.json$/i, '');
+    const candidates = [`${base}.liquid`, `${base}.json`, withoutPrefix];
+    const seen = new Set<string>();
 
     for (const candidate of candidates) {
-      const abs = path.join(this.themeRoot, candidate);
+      const normalizedCandidate = removeLeadingSeparators(candidate);
+      if (!normalizedCandidate || seen.has(normalizedCandidate)) {
+        continue;
+      }
+      seen.add(normalizedCandidate);
+      const abs = ensurePathInside(this.templatesDir, path.resolve(this.templatesDir, normalizedCandidate), 'template');
       if (await fileExists(abs)) {
-        return normalizeLiquidPath(candidate.endsWith('.liquid') || candidate.endsWith('.json') ? candidate : `${candidate}.liquid`);
+        return normalizeLiquidPath(path.relative(this.themeRoot, abs));
       }
     }
 
@@ -836,22 +854,31 @@ ${markup}
   }
 
   private async resolveLayout(layout: string) {
-    const sanitized = layout.replace(/\.liquid$/i, '');
-    const candidate = path.join('layout', `${sanitized}.liquid`);
-    const abs = path.join(this.themeRoot, candidate);
+    const withoutPrefix = sanitizeLookupInput(layout, 'layout');
+    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
+    const candidate = `${sanitized}.liquid`;
+    const abs = ensurePathInside(this.layoutDir, path.resolve(this.layoutDir, candidate), 'layout');
     if (!(await fileExists(abs))) {
       throw new Error(`Unknown layout '${layout}'`);
     }
-    return normalizeLiquidPath(candidate);
+    return normalizeLiquidPath(path.relative(this.themeRoot, abs));
   }
 
   private resolveSectionLookup(sectionType: string) {
-    const sanitized = sectionType.replace(/\.liquid$/i, '');
-    return normalizeLiquidPath(path.join('sections', `${sanitized}.liquid`));
+    const withoutPrefix = sanitizeLookupInput(sectionType, 'sections');
+    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
+    const candidate = `${sanitized}.liquid`;
+    const abs = ensurePathInside(this.sectionsDir, path.resolve(this.sectionsDir, candidate), 'section');
+    return normalizeLiquidPath(path.relative(this.themeRoot, abs));
   }
 
   private async readJsonTemplate(relativePath: string): Promise<JsonTemplate> {
-    const abs = path.join(this.themeRoot, relativePath);
+    const normalized = normalizeLiquidPath(relativePath).replace(/^\/+/, '');
+    if (!normalized.startsWith('templates/')) {
+      throw new Error(`JSON templates must live under templates/: ${relativePath}`);
+    }
+    const templateRelative = normalized.replace(/^templates\//, '');
+    const abs = ensurePathInside(this.templatesDir, path.resolve(this.templatesDir, templateRelative), 'template');
     const file = await readFile(abs, 'utf8');
     return JSON.parse(file) as JsonTemplate;
   }
@@ -876,6 +903,30 @@ ${markup}
     const templatePath = this.resolveSectionLookup(sectionContext.type ?? sectionType);
     return this.engine.renderFile(templatePath, scope);
   }
+}
+
+function stripWrappingQuotes(value: string) {
+  return value.replace(/^['"`]/, '').replace(/['"`]$/, '');
+}
+
+function removeLeadingSeparators(value: string) {
+  return value.replace(/^([./\\])+/, '');
+}
+
+function sanitizeLookupInput(value: string, subdir: string) {
+  const normalized = normalizeLiquidPath(value).replace(/^\/+/, '');
+  if (normalized.toLowerCase().startsWith(`${subdir.toLowerCase()}/`)) {
+    return normalized.slice(subdir.length + 1);
+  }
+  return normalized;
+}
+
+function ensurePathInside(baseDir: string, targetPath: string, kind: string) {
+  const relative = path.relative(baseDir, targetPath);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(`Refusing to read ${kind} outside of ${baseDir}`);
+  }
+  return targetPath;
 }
 
 function normalizeLinkListDefinition(handle: string, definition: Partial<LinkList>): LinkList {
