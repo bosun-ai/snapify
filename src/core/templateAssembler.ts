@@ -993,6 +993,10 @@ function extractNamedArgs(args: unknown[]) {
   for (const arg of args) {
     if (Array.isArray(arg) && typeof arg[0] === 'string') {
       named[arg[0]] = arg[1];
+      continue;
+    }
+    if (isPlainObject(arg)) {
+      Object.assign(named, arg as Record<string, unknown>);
     }
   }
   return named;
