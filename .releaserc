@@ -1,0 +1,40 @@
+{
+  "branches": [
+    "main"
+  ],
+  "tagFormat": "snapify-v${version}",
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer"
+    ],
+    [
+      "@semantic-release/release-notes-generator"
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "git cliff -c cliff.toml --tag snapify-v${nextRelease.version} --output CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/npm",
+      {
+        "pkgRoot": "."
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md",
+          "package.json",
+          "package-lock.json"
+        ],
+        "message": "chore(release): snapify ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    [
+      "@semantic-release/github"
+    ]
+  ]
+}
