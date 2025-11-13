@@ -1,0 +1,8 @@
+<nav>
+  {% for link in linklists['main-menu'].links %}
+    <span class="link">{{ link.title }}</span>
+    {% if link.links and link.links.size > 0 %}
+      <span class="child">{{ link.links[0].title }}</span>
+    {% endif %}
+  {% endfor %}
+</nav>

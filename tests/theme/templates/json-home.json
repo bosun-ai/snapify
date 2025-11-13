@@ -1,0 +1,20 @@
+{
+  "wrapper": "main",
+  "sections": {
+    "json-links": {
+      "type": "json-links",
+      "settings": {
+        "menu": "main-menu",
+        "cta_targets": [
+          "shopify://collections/sale",
+          "shopify://blogs/news",
+          "shopify://products/demo"
+        ]
+      },
+      "custom_css": [
+        ".json-links { color: teal; }"
+      ]
+    }
+  },
+  "order": ["json-links"]
+}

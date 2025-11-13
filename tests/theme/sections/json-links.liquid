@@ -1,0 +1,9 @@
+<section class="json-links">
+  {% assign nav = section.settings.menu %}
+  <ul class="menu">
+    {% for link in nav.links %}
+      <li>{{ link.title }}</li>
+    {% endfor %}
+  </ul>
+  <p class="targets">{{ section.settings.cta_targets | join: ';' }}</p>
+</section>

@@ -1,0 +1,35 @@
+{
+  "current": {
+    "cta_link": "shopify://pages/demo",
+    "primary_menu": "main-menu",
+    "image_drop": {
+      "src": "shopify://shop_images/unit-test.png",
+      "width": 45,
+      "height": 30,
+      "alt": "Inline drop"
+    },
+    "image_handle_drop": {
+      "__snapifyHandle": "shopify://shop_images/unit-test.png"
+    },
+    "sections": {
+      "hero": {
+        "type": "hero",
+        "settings": {
+          "heading": "Configured Hero Headline",
+          "cta_label": "Configured CTA",
+          "hero_image": "shopify://shop_images/unit-test.png",
+          "menu": "main-menu"
+        },
+        "blocks": {
+          "headline": {
+            "type": "text",
+            "settings": {
+              "value": "Block value"
+            }
+          }
+        },
+        "block_order": ["headline"]
+      }
+    }
+  }
+}

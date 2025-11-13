@@ -27,8 +27,7 @@ export class SnapshotRunner {
     await ensureDir(options.outputDir);
     await writeFileRecursive(options.htmlPath, html);
 
-    const browserType = getBrowserType(options.browser);
-    const browser = await browserType.launch({ headless: true });
+    const browser = await this.launchBrowser(options.browser);
     try {
       const context = await browser.newContext({ viewport: options.viewport ?? { width: 1280, height: 720 } });
       const cleanupRouting = await this.setupAssetRouting(context, options.assetManifest);
@@ -63,6 +62,11 @@ export class SnapshotRunner {
       diffPath,
       updatedBaseline: false
     };
+  }
+
+  protected async launchBrowser(name?: BrowserName) {
+    const browserType = getBrowserType(name);
+    return browserType.launch({ headless: true });
   }
 
   private async renderHtml(page: Page, html: string, beforeSnapshot?: RenderOptions['beforeSnapshot']) {

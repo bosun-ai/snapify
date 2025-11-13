@@ -1,0 +1,7 @@
+<div class="image-drop">
+  {% assign json_drop = '{"src":"shopify://shop_images/unit-test.png","width":45,"height":30,"alt":"Inline drop"}' | parse_json %}
+  {% assign handle_drop = '{"__snapifyHandle":"shopify://shop_images/unit-test.png"}' | parse_json %}
+  {{ json_drop | image_tag }}
+  {{ handle_drop | image_tag: width: 200 }}
+  {{ blank | image_tag }}
+</div>

@@ -1,0 +1,18 @@
+{
+  "main-menu": {
+    "title": "Main Menu",
+    "links": [
+      {
+        "title": "Docs",
+        "url": "/pages/docs",
+        "links": [
+          { "title": "Sub Article", "url": "/pages/docs/article" }
+        ]
+      },
+      {
+        "title": "About",
+        "url": "/pages/about"
+      }
+    ]
+  }
+}
