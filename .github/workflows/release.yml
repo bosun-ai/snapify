@@ -17,12 +17,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install git-cliff
-        uses: dtolnay/rust-toolchain@stable
+      - name: Generate changelog with git-cliff
+        uses: orhun/git-cliff-action@v3
         with:
-          profile: minimal
-      - name: Build git-cliff
-        run: cargo install git-cliff
+          config: cliff.toml
+          args: --output CHANGELOG.md
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
