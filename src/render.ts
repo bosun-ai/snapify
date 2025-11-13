@@ -12,6 +12,7 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
   const themeRoot = path.resolve(options.themeRoot ?? process.cwd());
   const assembler = new TemplateAssembler(themeRoot);
   const html = await assembler.compose(options);
+  const assetManifest = assembler.getAssetManifest();
 
   const name = slugifySnapshotName(options.snapshot?.name ?? options.template);
   const baselineDir = path.resolve(themeRoot, options.snapshot?.baselineDir ?? path.join('.snapify', 'baseline'));
@@ -30,7 +31,9 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
     viewport: options.viewport,
     beforeSnapshot: options.beforeSnapshot,
     updateBaseline: options.snapshot?.update,
-    browser
+    browser,
+    assetManifest,
+    fullPage: options.snapshot?.fullPage
   });
 }
 

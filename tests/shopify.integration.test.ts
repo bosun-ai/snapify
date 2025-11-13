@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TemplateAssembler } from '../src/core/templateAssembler.js';
 import { render } from '../src/render.js';
+import { SNAPIFY_ASSET_HOST } from '../src/core/constants.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_THEME = path.join(here, 'theme');
@@ -24,8 +25,10 @@ test('renders OS 2.0 JSON template with custom Shopify constructs', async () => 
   assert.match(html, /data-snapify-inline="javascript"/, '{% javascript %} blocks should inline in head');
   assert.match(html, /data-snapify-form="contact"/, '{% form %} tag should emit inert form markup');
   assert.match(html, /data-section="hero"/, 'custom_css should attach section-specific inline style');
+  const escapedHost = escapeRegExp(SNAPIFY_ASSET_HOST);
   assert.match(html, /id="shopify-section-hero" class="shopify-section"/, 'sections should be wrapped with Shopify container divs');
-  assert.match(html, /href="data:text\/css;base64/, 'asset_url used in href should degrade to data URLs');
+  assert.match(html, new RegExp(`href="${escapedHost}\/assets\/main\.css`), 'asset_url used in href should degrade to served asset URLs');
+  assert.match(html, new RegExp(`src="${escapedHost}\/assets\/app\.js`), 'asset_url used in script src should degrade to served asset URLs');
 });
 
 test('captures a snapshot for the fixture theme', { concurrency: false }, async (t) => {
@@ -69,4 +72,8 @@ async function pathExists(target: string) {
 function isPlaywrightLaunchError(error: unknown) {
   const message = error instanceof Error ? error.message : '';
   return message.includes('bootstrap_check_in') || message.includes('Abort trap');
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

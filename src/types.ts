@@ -13,6 +13,8 @@ export interface SnapshotOptions {
   outputDir?: string;
   /** Skip diffing and always write a fresh baseline. */
   update?: boolean;
+  /** Capture the full scroll height (default true). */
+  fullPage?: boolean;
 }
 
 export interface RenderOptions {
@@ -45,3 +47,10 @@ export interface RenderResult {
 }
 
 export interface SnapifyConfig extends RenderOptions {}
+
+export interface RegisteredAsset {
+  url: string;
+  filePath: string;
+  mimeType: string;
+  body: Buffer;
+}

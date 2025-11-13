@@ -1,9 +1,11 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { Liquid } from 'liquidjs';
 import type { TagImplOptions } from 'liquidjs';
-import type { RenderOptions } from '../types.js';
+import type { RegisteredAsset, RenderOptions } from '../types.js';
 import { fileExists } from '../utils/fs.js';
+import { SNAPIFY_ASSET_HOST } from './constants.js';
 
 const DEFAULT_LAYOUT = 'theme';
 
@@ -12,6 +14,7 @@ interface InlineAsset {
   filename: string;
   content: string;
   mimeType: string;
+  url?: string;
 }
 
 interface JsonTemplate {
@@ -45,6 +48,7 @@ interface SectionContext {
 export class TemplateAssembler {
   private engine: Liquid;
   private headInjections: string[] = [];
+  private assetManifest = new Map<string, RegisteredAsset>();
 
   constructor(private readonly themeRoot: string) {
     this.engine = new Liquid({
@@ -69,6 +73,7 @@ export class TemplateAssembler {
 
   async compose(options: RenderOptions) {
     this.headInjections.length = 0;
+    this.assetManifest.clear();
     const templateLookup = await this.resolveTemplate(options.template);
     const context = options.data ?? {};
     let bodyHtml = '';
@@ -97,6 +102,10 @@ export class TemplateAssembler {
     }
 
     return html;
+  }
+
+  getAssetManifest() {
+    return new Map(this.assetManifest);
   }
 
   private async renderJsonTemplate(relativePath: string, baseContext: Record<string, unknown>) {
@@ -296,19 +305,28 @@ ${markup}
   private async assetUrlFilter(filename: string): Promise<InlineAsset> {
     const normalized = filename.trim().replace(/^['"`]|['"`]$/g, '');
     const abs = path.join(this.themeRoot, 'assets', normalized);
-    const buffer = await readFile(abs, 'utf8');
+    const buffer = await readFile(abs);
     const mime = getMimeType(normalized);
-    const dataUrl = encodeDataUrl(buffer, mime);
+    const content = isTextMime(mime) ? buffer.toString('utf8') : buffer.toString('base64');
+    const assetUrl = this.buildAssetUrl(normalized, buffer);
+    this.assetManifest.set(assetUrl, {
+      url: assetUrl,
+      filePath: abs,
+      mimeType: mime,
+      body: buffer
+    });
+
     const asset = {
       kind: 'asset',
       filename: normalized,
-      content: buffer,
+      content,
       mimeType: mime,
+      url: assetUrl,
       toString() {
-        return dataUrl;
+        return assetUrl;
       },
       [Symbol.toPrimitive]() {
-        return dataUrl;
+        return assetUrl;
       }
     } satisfies InlineAsset & { toString(): string; [Symbol.toPrimitive](): string };
 
@@ -327,6 +345,12 @@ ${markup}
     const inline = `<script data-snapify-asset="${handle.filename}">\n${handle.content}\n</script>`;
     this.headInjections.push(inline);
     return inline;
+  }
+
+  private buildAssetUrl(filename: string, body: Buffer) {
+    const hash = createHash('md5').update(body).digest('hex').slice(0, 10);
+    const encoded = encodeURIComponent(filename);
+    return `${SNAPIFY_ASSET_HOST}/assets/${encoded}?v=${hash}`;
   }
 
   private collectHeadMarkup(userStyles?: string) {
@@ -426,11 +450,6 @@ function ensureAsset(value: InlineAsset | string): InlineAsset {
   return value;
 }
 
-function encodeDataUrl(content: string, mimeType: string) {
-  const base64 = Buffer.from(content, 'utf8').toString('base64');
-  return `data:${mimeType};base64,${base64}`;
-}
-
 function normalizeSectionHandle(raw: string) {
   return raw.replace(/^['"`]|['"`]$/g, '').trim();
 }
@@ -477,4 +496,8 @@ function getMimeType(filename: string) {
   if (filename.endsWith('.js')) return 'application/javascript';
   if (filename.endsWith('.json')) return 'application/json';
   return 'text/plain';
+}
+
+function isTextMime(mime: string) {
+  return /^(text\/|application\/(javascript|json|xml))/i.test(mime);
 }

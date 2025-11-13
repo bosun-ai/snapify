@@ -1,10 +1,11 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { chromium, firefox, webkit, type BrowserContextOptions, type BrowserType, type Page } from 'playwright';
+import { chromium, firefox, webkit, type BrowserContext, type BrowserContextOptions, type BrowserType, type Page } from 'playwright';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { ensureDir, fileExists, writeFileRecursive } from '../utils/fs.js';
-import type { BrowserName, RenderOptions, RenderResult } from '../types.js';
+import type { BrowserName, RegisteredAsset, RenderOptions, RenderResult } from '../types.js';
+import { SNAPIFY_ASSET_HOST } from './constants.js';
 
 interface SnapshotRuntimeOptions {
   name: string;
@@ -17,6 +18,8 @@ interface SnapshotRuntimeOptions {
   beforeSnapshot?: RenderOptions['beforeSnapshot'];
   updateBaseline?: boolean;
   browser?: BrowserName;
+  assetManifest?: Map<string, RegisteredAsset>;
+  fullPage?: boolean;
 }
 
 export class SnapshotRunner {
@@ -28,9 +31,13 @@ export class SnapshotRunner {
     const browser = await browserType.launch({ headless: true });
     try {
       const context = await browser.newContext({ viewport: options.viewport ?? { width: 1280, height: 720 } });
+      const cleanupRouting = await this.setupAssetRouting(context, options.assetManifest);
       const page = await context.newPage();
       await this.renderHtml(page, html, options.beforeSnapshot);
-      await page.screenshot({ path: options.screenshotPath, fullPage: true });
+      await page.screenshot({ path: options.screenshotPath, fullPage: options.fullPage ?? true });
+      if (cleanupRouting) {
+        await cleanupRouting();
+      }
       await context.close();
     } finally {
       await browser.close();
@@ -64,6 +71,34 @@ export class SnapshotRunner {
       await beforeSnapshot(page);
     }
     await page.waitForLoadState('networkidle');
+  }
+
+  private async setupAssetRouting(context: BrowserContext, manifest?: Map<string, RegisteredAsset>) {
+    if (!manifest || manifest.size === 0) {
+      return undefined;
+    }
+
+    const pattern = `${SNAPIFY_ASSET_HOST}/assets/*`;
+    const handler = async (route: Parameters<BrowserContext['route']>[1]) => {
+      const url = route.request().url();
+      const asset = manifest.get(url);
+      if (!asset) {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        body: asset.body,
+        headers: {
+          'content-type': asset.mimeType,
+          'cache-control': 'public, max-age=31536000'
+        }
+      });
+    };
+
+    await context.route(pattern, handler);
+    return async () => {
+      await context.unroute(pattern, handler);
+    };
   }
 
   private async diffWithBaseline(baselinePath: string, candidatePath: string, diffPath: string) {
