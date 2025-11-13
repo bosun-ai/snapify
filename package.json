@@ -17,9 +17,9 @@
 		"clean": "rimraf dist",
 		"render": "node dist/cli.js render",
 		"test": "c8 --reporter=text --reporter=lcov npm run test:all",
-		"test:all": "tsx --test \"tests/**/*.test.ts\"",
-		"test:integration": "tsx --test tests/shopify.integration.test.ts",
-		"test:unit": "tsx --test tests/templateAssembler.test.ts",
+		"test:all": "node --test --import tsx \"tests/**/*.test.ts\"",
+		"test:integration": "node --test --import tsx tests/shopify.integration.test.ts",
+		"test:unit": "node --test --import tsx tests/templateAssembler.test.ts",
 		"security": "npm audit --omit=dev --audit-level=high",
 		"lint:knip": "knip --strict"
 	},
