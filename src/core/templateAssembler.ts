@@ -8,6 +8,29 @@ import { fileExists } from '../utils/fs.js';
 import { SNAPIFY_ASSET_HOST } from './constants.js';
 
 const DEFAULT_LAYOUT = 'theme';
+const DEFAULT_ROUTES = {
+  root_url: '/',
+  account_login_url: '/account/login',
+  account_logout_url: '/account/logout',
+  account_register_url: '/account/register',
+  account_register: '/account/register',
+  account_url: '/account',
+  account_addresses_url: '/account/addresses',
+  cart_url: '/cart',
+  cart_add_url: '/cart/add',
+  cart_change_url: '/cart/change',
+  cart_update_url: '/cart/update',
+  search_url: '/search',
+  predictive_search_url: '/search/suggest',
+  collections_url: '/collections',
+  all_products_collection_url: '/collections/all',
+  product_recommendations_url: '/recommendations/products'
+} as const;
+const DEFAULT_PLACEHOLDER_WIDTH = 1200;
+const DEFAULT_PLACEHOLDER_HEIGHT = 800;
+const DEFAULT_PLACEHOLDER_LABEL = 'Image';
+const PLACEHOLDER_BG = '#DFE3EB';
+const PLACEHOLDER_TEXT = '#5C6478';
 
 interface InlineAsset {
   kind: 'asset';
@@ -42,8 +65,40 @@ interface SectionContext {
   id: string;
   type: string;
   settings: Record<string, unknown>;
-  blocks: Array<{ id: string; type: string; settings: Record<string, unknown> }>; 
+  blocks: Array<{ id: string; type: string; settings: Record<string, unknown> }>;
   block_order: string[];
+}
+
+interface NavigationLink {
+  title: string;
+  url?: string;
+  handle?: string;
+  type?: string;
+  links?: NavigationLink[];
+}
+
+interface LinkList {
+  handle: string;
+  title?: string;
+  links: NavigationLink[];
+}
+
+interface ShopifyImage {
+  src: string;
+  url?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  aspect_ratio?: number;
+  original_width?: number;
+  original_height?: number;
+  id?: string;
+  __snapifyHandle?: string;
+}
+
+interface PlaceholderDimensions {
+  width?: number;
+  height?: number;
 }
 
 export class TemplateAssembler {
@@ -54,6 +109,9 @@ export class TemplateAssembler {
   private themeSettings: Record<string, unknown> = {};
   private configuredSections = new Map<string, JsonSection>();
   private settingsLoaded = false;
+  private linklists = new Map<string, LinkList>();
+  private navigationLoaded = false;
+  private imageCache = new Map<string, ShopifyImage>();
 
   constructor(private readonly themeRoot: string) {
     this.engine = new Liquid({
@@ -85,6 +143,8 @@ export class TemplateAssembler {
     const userData = options.data ?? {};
     const context = {
       settings: this.themeSettings,
+      linklists: this.getLinklistsContext(),
+      routes: { ...DEFAULT_ROUTES },
       ...userData
     };
     let bodyHtml = '';
@@ -119,8 +179,17 @@ export class TemplateAssembler {
     return new Map(this.assetManifest);
   }
 
+  private getLinklistsContext() {
+    const context: Record<string, LinkList> = {};
+    for (const [handle, list] of this.linklists.entries()) {
+      context[handle] = cloneLinkList(list);
+    }
+    return context;
+  }
+
   private async renderJsonTemplate(relativePath: string, baseContext: Record<string, unknown>) {
     const template = await this.readJsonTemplate(relativePath);
+    await this.hydrateJsonTemplate(template);
     if (!template.sections) {
       return '';
     }
@@ -138,6 +207,57 @@ export class TemplateAssembler {
     return `<${container} data-snapify-template="${relativePath}">
 ${renderedSections.join('\n')}
 </${container}>`;
+  }
+
+  private async hydrateJsonTemplate(template: JsonTemplate) {
+    if (!template.sections) {
+      return;
+    }
+    for (const section of Object.values(template.sections)) {
+      if (!section) continue;
+      await this.hydrateJsonSection(section);
+    }
+  }
+
+  private async hydrateJsonSection(section: JsonSection) {
+    if (section.settings) {
+      await this.hydrateValues(section.settings);
+    }
+    if (section.blocks) {
+      for (const block of Object.values(section.blocks)) {
+        if (block?.settings) {
+          await this.hydrateValues(block.settings);
+        }
+      }
+    }
+  }
+
+  private async hydrateValues(value: unknown, key?: string): Promise<unknown> {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) {
+        value[index] = await this.hydrateValues(value[index], key);
+      }
+      return value;
+    }
+    if (isPlainObject(value)) {
+      const record = value as Record<string, unknown>;
+      for (const [childKey, childValue] of Object.entries(record)) {
+        record[childKey] = await this.hydrateValues(childValue, childKey);
+      }
+      return record;
+    }
+    if (typeof value === 'string') {
+      if (key && looksLikeMenuKey(key) && this.linklists.has(value)) {
+        return cloneLinkList(this.linklists.get(value)!);
+      }
+      if (value.startsWith('shopify://shop_images/')) {
+        return (await this.buildImageDrop(value)) ?? value;
+      }
+      if (value.startsWith('shopify://')) {
+        return normalizeShopifyUrl(value);
+      }
+    }
+    return value;
   }
 
   private async renderSection(sectionId: string, definition: JsonSection, baseContext: Record<string, unknown>) {
@@ -219,6 +339,14 @@ ${markup}
     this.engine.registerFilter('asset_url', assetFilter);
     this.engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => this.stylesheetTagFilter(asset));
     this.engine.registerFilter('script_tag', (asset: InlineAsset | string) => this.scriptTagFilter(asset));
+    const imageUrlFilter = this.imageUrlFilter.bind(this);
+    const imageTagFilter = this.imageTagFilter.bind(this);
+    this.engine.registerFilter('image_url', (asset: unknown, ...args: unknown[]) => imageUrlFilter(asset, ...args));
+    this.engine.registerFilter('img_url', (asset: unknown, ...args: unknown[]) => imageUrlFilter(asset, ...args));
+    this.engine.registerFilter('image_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
+    this.engine.registerFilter('img_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
+    this.engine.registerFilter('image_url', (asset: unknown) => this.imageUrlFilter(asset));
+    this.engine.registerFilter('image_tag', (asset: unknown, attrs?: Record<string, unknown>) => this.imageTagFilter(asset, attrs));
 
     const schemaTag: TagImplOptions = {
       parse(tagToken, remainTokens) {
@@ -377,6 +505,126 @@ ${markup}
     return inline;
   }
 
+  private async imageUrlFilter(source: unknown, ...args: unknown[]) {
+    const named = extractNamedArgs(args);
+    const dimensions = resolveDimensionOverrides(named);
+    const image = await this.ensureImageObject(source, dimensions);
+    if (!image) {
+      return '';
+    }
+    return image.url ?? image.src ?? '';
+  }
+
+  private async imageTagFilter(source: unknown, ...args: unknown[]) {
+    const named = extractNamedArgs(args);
+    const dimensions = resolveDimensionOverrides(named);
+    const image = await this.ensureImageObject(source, dimensions);
+    if (!image) {
+      return '';
+    }
+    const src = image.url ?? image.src;
+    if (!src) {
+      return '';
+    }
+    const attributes: Record<string, unknown> = {
+      loading: named.loading ?? 'lazy',
+      ...named,
+      src
+    };
+    if (!attributes.alt) {
+      attributes.alt = image.alt ?? '';
+    }
+    const derivedWidth = dimensions.width ?? image.width;
+    const derivedHeight = dimensions.height ?? image.height;
+    if (derivedWidth) {
+      attributes.width = derivedWidth;
+    }
+    if (derivedHeight) {
+      attributes.height = derivedHeight;
+    }
+    return `<img ${serializeAttributes(attributes)}>`;
+  }
+
+  private async ensureImageObject(source: unknown, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
+    if (!source) {
+      return undefined;
+    }
+    if (typeof source === 'string') {
+      if (source.startsWith('shopify://shop_images/')) {
+        return this.buildImageDrop(source, overrides);
+      }
+      const normalized = normalizeExternalUrl(source);
+      const drop: ShopifyImage = {
+        src: normalized,
+        url: normalized
+      };
+      if (overrides?.width) {
+        drop.width = overrides.width;
+      }
+      if (overrides?.height) {
+        drop.height = overrides.height;
+      }
+      return drop;
+    }
+    if (typeof source === 'object') {
+      const image = { ...(source as ShopifyImage) } satisfies ShopifyImage;
+      if (image.__snapifyHandle) {
+        if (overrides?.width || overrides?.height) {
+          return this.buildImageDrop(image.__snapifyHandle, overrides);
+        }
+        return image;
+      }
+      if (image.src?.startsWith('shopify://shop_images/')) {
+        return this.buildImageDrop(image.src, {
+          width: image.width ?? overrides?.width,
+          height: image.height ?? overrides?.height
+        });
+      }
+      if (!image.url && image.src) {
+        image.url = image.src;
+      }
+      if (overrides?.width && !image.width) {
+        image.width = overrides.width;
+      }
+      if (overrides?.height && !image.height) {
+        image.height = overrides.height;
+      }
+      if (!image.alt && image.id) {
+        image.alt = humanizeFilename(image.id);
+      }
+      return image;
+    }
+    return undefined;
+  }
+
+  private async buildImageDrop(original: string, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
+    const filename = original.replace('shopify://shop_images/', '').trim();
+    if (!filename) {
+      return undefined;
+    }
+    const dimensions = resolvePlaceholderDimensions(overrides);
+    const cacheKey = `${original}|${dimensions.width}|${dimensions.height}`;
+    if (this.imageCache.has(cacheKey)) {
+      return this.imageCache.get(cacheKey);
+    }
+    const label = humanizeFilename(filename) || filename;
+    const url = createPlaceholderDataUrl(dimensions.width, dimensions.height, label || filename);
+    const drop: ShopifyImage = {
+      src: url,
+      url,
+      alt: label,
+      width: dimensions.width,
+      height: dimensions.height,
+      original_width: dimensions.width,
+      original_height: dimensions.height,
+      aspect_ratio: dimensions.width && dimensions.height ? dimensions.width / dimensions.height : undefined,
+      id: filename,
+      __snapifyHandle: original
+    };
+    this.imageCache.set(cacheKey, drop);
+    return drop;
+  }
+
   private injectAssetFallbackScript() {
     if (this.assetFallbackInjected || !this.assetManifest.size) {
       return;
@@ -427,6 +675,8 @@ ${markup}
       return;
     }
 
+    await this.ensureNavigation();
+
     const settingsPath = path.join(this.themeRoot, 'config', 'settings_data.json');
     if (!(await fileExists(settingsPath))) {
       this.settingsLoaded = true;
@@ -439,10 +689,13 @@ ${markup}
       const current = parsed.current ?? parsed;
       const { sections, ...globals } = current;
       this.themeSettings = globals ?? {};
+      await this.hydrateValues(this.themeSettings);
 
       if (sections && typeof sections === 'object') {
         for (const [id, definition] of Object.entries(sections as Record<string, JsonSection>)) {
-          this.configuredSections.set(id, this.normalizeConfiguredSection(id, definition as JsonSection));
+          const normalized = this.normalizeConfiguredSection(id, definition as JsonSection);
+          await this.hydrateJsonSection(normalized);
+          this.configuredSections.set(id, normalized);
         }
       }
     } catch {
@@ -450,6 +703,27 @@ ${markup}
     } finally {
       this.settingsLoaded = true;
     }
+  }
+
+  private async ensureNavigation() {
+    if (this.navigationLoaded) {
+      return;
+    }
+
+    const navPath = path.join(this.themeRoot, 'config', 'navigation.json');
+    if (await fileExists(navPath)) {
+      try {
+        const raw = await readFile(navPath, 'utf8');
+        const parsed = JSON.parse(raw) as Record<string, LinkList>;
+        for (const [handle, definition] of Object.entries(parsed)) {
+          this.linklists.set(handle, normalizeLinkListDefinition(handle, definition));
+        }
+      } catch {
+        // ignore malformed navigation data
+      }
+    }
+
+    this.navigationLoaded = true;
   }
 
   private normalizeConfiguredSection(sectionId: string, definition: JsonSection): JsonSection {
@@ -538,6 +812,141 @@ ${markup}
     const templatePath = this.resolveSectionLookup(sectionContext.type ?? sectionType);
     return this.engine.renderFile(templatePath, scope);
   }
+}
+
+function normalizeLinkListDefinition(handle: string, definition: Partial<LinkList>): LinkList {
+  const normalizedLinks = (definition.links ?? []).map((link, index) => normalizeNavigationLink(link, `${handle}-${index + 1}`));
+  return {
+    handle,
+    title: definition.title ?? handle,
+    links: normalizedLinks
+  };
+}
+
+function normalizeNavigationLink(link: NavigationLink, fallbackHandle: string): NavigationLink {
+  const handle = link.handle ?? slugifyHandle(link.title ?? fallbackHandle);
+  const children = (link.links ?? []).map((child, index) => normalizeNavigationLink(child, `${handle}-${index + 1}`));
+  return {
+    title: link.title,
+    url: link.url,
+    type: link.type,
+    handle,
+    links: children
+  };
+}
+
+function cloneLinkList(list: LinkList): LinkList {
+  return JSON.parse(JSON.stringify(list)) as LinkList;
+}
+
+function looksLikeMenuKey(key?: string) {
+  if (!key) {
+    return false;
+  }
+  return /(menu|navigation|link_list)/i.test(key);
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Object.prototype.toString.call(value) === '[object Object]';
+}
+
+function normalizeShopifyUrl(value: string) {
+  const normalized = value.replace(/^shopify:\/\//, '');
+  if (normalized.startsWith('pages/')) {
+    return `/${normalized}`;
+  }
+  if (normalized.startsWith('blogs/')) {
+    return `/${normalized}`;
+  }
+  if (normalized.startsWith('collections/')) {
+    return `/${normalized}`;
+  }
+  if (normalized.startsWith('products/')) {
+    return `/${normalized}`;
+  }
+  return value;
+}
+
+function slugifyHandle(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    || 'link';
+}
+
+function extractNamedArgs(args: unknown[]) {
+  const named: Record<string, unknown> = {};
+  for (const arg of args) {
+    if (Array.isArray(arg) && typeof arg[0] === 'string') {
+      named[arg[0]] = arg[1];
+    }
+  }
+  return named;
+}
+
+function resolveDimensionOverrides(named: Record<string, unknown>): PlaceholderDimensions {
+  return {
+    width: normalizeDimension(named.width),
+    height: normalizeDimension(named.height)
+  };
+}
+
+function normalizeDimension(value: unknown): number | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return undefined;
+  }
+  return Math.round(numeric);
+}
+
+function resolvePlaceholderDimensions(overrides?: PlaceholderDimensions) {
+  let width = normalizeDimension(overrides?.width);
+  let height = normalizeDimension(overrides?.height);
+  if (!width && !height) {
+    width = DEFAULT_PLACEHOLDER_WIDTH;
+    height = DEFAULT_PLACEHOLDER_HEIGHT;
+  } else if (width && !height) {
+    height = Math.max(1, Math.round(width * (DEFAULT_PLACEHOLDER_HEIGHT / DEFAULT_PLACEHOLDER_WIDTH)));
+  } else if (!width && height) {
+    width = Math.max(1, Math.round(height * (DEFAULT_PLACEHOLDER_WIDTH / DEFAULT_PLACEHOLDER_HEIGHT)));
+  }
+  return {
+    width: width ?? DEFAULT_PLACEHOLDER_WIDTH,
+    height: height ?? DEFAULT_PLACEHOLDER_HEIGHT
+  } satisfies PlaceholderDimensions;
+}
+
+function createPlaceholderDataUrl(width: number, height: number, label: string) {
+  const safeLabel = truncateLabel(label || DEFAULT_PLACEHOLDER_LABEL, 28);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="${PLACEHOLDER_BG}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="${PLACEHOLDER_TEXT}" font-family="sans-serif" font-size="${Math.max(12, Math.round(Math.min(width, height) / 8))}">${escapeHtml(safeLabel)}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function truncateLabel(label: string, maxLength: number) {
+  const trimmed = label.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, maxLength - 1)}…`;
+}
+
+function humanizeFilename(filename: string) {
+  return filename
+    .replace(/\.[^.]+$/, '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeExternalUrl(url: string) {
+  if (url.startsWith('//')) {
+    return `https:${url}`;
+  }
+  return url;
 }
 
 function normalizeLiquidPath(relativePath: string) {

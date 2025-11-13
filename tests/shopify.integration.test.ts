@@ -29,6 +29,8 @@ test('renders OS 2.0 JSON template with custom Shopify constructs', async () => 
   assert.match(html, /id="shopify-section-hero" class="shopify-section"/, 'sections should be wrapped with Shopify container divs');
   assert.match(html, new RegExp(`href="${escapedHost}\/assets\/main\.css`), 'asset_url used in href should degrade to served asset URLs');
   assert.match(html, new RegExp(`src="${escapedHost}\/assets\/app\.js`), 'asset_url used in script src should degrade to served asset URLs');
+  assert.match(html, /hero-media__img/, 'image_tag should output img markup');
+  assert.match(html, /data-src="data:image\/svg\+xml/, 'shopify images should fall back to inline SVG placeholders');
 });
 
 test('captures a snapshot for the fixture theme', { concurrency: false }, async (t) => {

@@ -4,11 +4,19 @@
 <section class="hero-section" data-test="hero">
   <h1>{{ section.settings.heading }}</h1>
   {% render './partials/button', label: section.settings.cta_label %}
+  {% if section.settings.hero_image %}
+    {% assign hero_placeholder = section.settings.hero_image | image_url: width: 320, height: 180 %}
+    <div class="hero-media">
+      <div class="hero-media__url" data-src="{{ hero_placeholder }}"></div>
+      {{ section.settings.hero_image | image_tag: class: 'hero-media__img', width: 320, height: 180, alt: 'Fixture hero' }}
+    </div>
+  {% endif %}
 </section>
 {% schema %}{
   "name": "Hero",
   "settings": [
     {"type": "text", "id": "heading", "default": "Welcome"},
-    {"type": "text", "id": "cta_label", "default": "Contact us"}
+    {"type": "text", "id": "cta_label", "default": "Contact us"},
+    {"type": "image_picker", "id": "hero_image", "label": "Hero image"}
   ]
 }{% endschema %}

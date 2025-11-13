@@ -4,7 +4,8 @@
 			"type": "hero",
 			"settings": {
 				"heading": "OS 2.0 Snapshot",
-				"cta_label": "Book a demo"
+				"cta_label": "Book a demo",
+				"hero_image": "shopify://shop_images/fixture-hero.png"
 			},
 			"custom_css": [".hero-section[data-test=hero]{border:2px solid salmon;}"]
 		},

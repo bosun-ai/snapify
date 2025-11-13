@@ -7,6 +7,7 @@ Visual regression snapshots for Shopify themes using Playwright — no running d
 - ✨ Render OS 2.0 JSON or Liquid templates entirely in-memory with LiquidJS and custom Shopify helpers.
 - 🧱 Resolves sections, snippets, and local-path includes just like a deployed theme.
 - 🎨 Inlines CSS/JS assets (including `{{ 'theme.css' | asset_url | stylesheet_tag }}`) so snapshots reflect final storefront styling.
+- 🖼️ Replaces `shopify://shop_images/...` references with deterministic SVG placeholders (respecting requested width/height) so tests never need the real CDN assets.
 - 📸 Uses Playwright to capture screenshots and `pixelmatch` to diff against baselines.
 - 🧪 Ships both a programmatic API (`render`) and a CLI (`snapify render`).
 
