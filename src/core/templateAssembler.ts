@@ -2,7 +2,12 @@ import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { Liquid } from 'liquidjs';
-import type { TagImplOptions } from 'liquidjs';
+import type { TagImplOptions } from 'liquidjs/dist/template/tag-options-adapter.js';
+import type { Tag } from 'liquidjs/dist/template/tag.js';
+import type { TagToken, TopLevelToken } from 'liquidjs/dist/tokens/index.js';
+import type { Context } from 'liquidjs/dist/context/context.js';
+import type { Emitter } from 'liquidjs/dist/emitters/emitter.js';
+import type { Template } from 'liquidjs/dist/template/template.js';
 import type { RegisteredAsset, RenderOptions } from '../types.js';
 import { fileExists } from '../utils/fs.js';
 import { SNAPIFY_ASSET_HOST } from './constants.js';
@@ -31,6 +36,19 @@ const DEFAULT_PLACEHOLDER_HEIGHT = 800;
 const DEFAULT_PLACEHOLDER_LABEL = 'Image';
 const PLACEHOLDER_BG = '#DFE3EB';
 const PLACEHOLDER_TEXT = '#5C6478';
+
+interface InlineTagState extends Tag {
+  templates?: Template[];
+}
+
+interface FormTagState extends Tag {
+  templates?: Template[];
+  args?: string;
+}
+
+interface SectionTagState extends Tag {
+  sectionHandle?: string;
+}
 
 interface InlineAsset {
   kind: 'asset';
@@ -394,7 +412,7 @@ ${markup}
     this.engine.registerFilter('translate', translateFilter);
 
     const schemaTag: TagImplOptions = {
-      parse(tagToken, remainTokens) {
+      parse(tagToken: TagToken, remainTokens: TopLevelToken[]) {
         const stream = this.liquid.parser.parseStream(remainTokens);
         stream
           .on('tag:endschema', () => {
@@ -405,7 +423,7 @@ ${markup}
           });
         stream.start();
       },
-      render() {
+      render(_ctx: Context, _emitter: Emitter) {
         return '';
       }
     };
@@ -415,18 +433,16 @@ ${markup}
     const formTag = this.createFormTag();
 
     const sectionTag: TagImplOptions = {
-      parse(tagToken) {
-        const state = this as unknown as { sectionHandle?: string };
-        state.sectionHandle = tagToken.args?.trim();
+      parse(this: SectionTagState, tagToken: TagToken) {
+        this.sectionHandle = tagToken.args?.trim();
       },
-      async render(ctx) {
-        const state = this as unknown as { sectionHandle?: string };
-        const handle = normalizeSectionHandle(state.sectionHandle ?? '');
+      async render(this: SectionTagState, ctx: Context, _emitter: Emitter, _hash: Record<string, unknown>) {
+        const handle = normalizeSectionHandle(this.sectionHandle ?? '');
         if (!handle) {
           return '';
         }
         const baseContext = ctx.getAll();
-        return assembler.renderStandaloneSection(handle, baseContext);
+        return assembler.renderStandaloneSection(handle, ctx);
       }
     };
 
@@ -439,68 +455,66 @@ ${markup}
 
   private createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
     return {
-      parse(tagToken, remainTokens) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid };
-        state.templates = [];
-        const parser = state.liquid.parser;
+      parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+        this.templates = [];
+        const parser = this.liquid.parser;
         const stream = parser.parseStream(remainTokens)
           .on(`tag:end${tagName}`, () => {
             stream.stop();
           })
           .on('template', (tpl) => {
-            state.templates.push(tpl);
+            this.templates!.push(tpl as Template);
           })
           .on('end', () => {
             throw new Error(`tag ${tagToken.name} not closed`);
           });
         stream.start();
       },
-      async render(ctx) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid };
-        const rendered = await renderChildTemplates(state.liquid, state.templates, ctx);
+      async render(this: InlineTagState, ctx: Context, _emitter: Emitter, _hash: Record<string, unknown>) {
+        const templates = this.templates ?? [];
+        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
         const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
         return renderWrapper(content);
       }
-    } satisfies TagImplOptions;
+    };
   }
 
   private createFormTag(): TagImplOptions {
     return {
-      parse(tagToken, remainTokens) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid; args?: string };
-        state.templates = [];
-        state.args = tagToken.args ?? '';
-        const parser = state.liquid.parser;
+      parse(this: FormTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+        this.templates = [];
+        this.args = tagToken.args ?? '';
+        const parser = this.liquid.parser;
         const stream = parser.parseStream(remainTokens)
           .on('tag:endform', () => {
             stream.stop();
           })
           .on('template', (tpl) => {
-            state.templates.push(tpl);
+            this.templates!.push(tpl as Template);
           })
           .on('end', () => {
             throw new Error('tag form not closed');
           });
         stream.start();
       },
-      async render(ctx, _emitter, hash) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid; args?: string };
-        const rendered = await renderChildTemplates(state.liquid, state.templates, ctx);
+      async render(this: FormTagState, ctx: Context, _emitter: Emitter, hash: Record<string, unknown>) {
+        const templates = this.templates ?? [];
+        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
         const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
-        const handle = extractHandleFromArgs(state.args ?? '');
+        const handle = extractHandleFromArgs(this.args ?? '');
         const attributes: Record<string, unknown> = {
           method: 'post',
           action: '/',
           'data-snapify-form': handle || 'generic'
         };
-        Object.assign(attributes, hash ?? {});
+        Object.assign(attributes, hash);
         if (!attributes['data-snapify-form']) {
           attributes['data-snapify-form'] = handle || 'generic';
         }
         const attrs = serializeAttributes(attributes);
         return `<form ${attrs}>${content}</form>`;
       }
-    } satisfies TagImplOptions;
+    };
   }
 
   private async assetUrlFilter(filename: string): Promise<InlineAsset> {
@@ -893,7 +907,7 @@ ${markup}
     return JSON.parse(file) as JsonTemplate;
   }
 
-  private async renderStandaloneSection(sectionType: string, baseContext: Record<string, unknown>) {
+  private async renderStandaloneSection(sectionType: string, ctx: Context) {
     const configured = this.configuredSections.get(sectionType);
     const sectionContext = configured
       ? this.buildSectionContextFromDefinition(sectionType, configured)
@@ -905,10 +919,9 @@ ${markup}
           blocks: []
         };
 
-    const scope = {
-      ...baseContext,
-      section: sectionContext
-    } satisfies Record<string, unknown>;
+    const scope: Record<string, unknown> = {};
+    Object.assign(scope, ctx.getAll());
+    scope.section = sectionContext;
 
     const templatePath = this.resolveSectionLookup(sectionContext.type ?? sectionType);
     return this.engine.renderFile(templatePath, scope);
@@ -1195,19 +1208,19 @@ function isTextMime(mime: string) {
   return /^(text\/|application\/(javascript|json|xml))/i.test(mime);
 }
 
-async function renderChildTemplates(liquid: Liquid, templates: any[], ctx: any) {
+async function renderChildTemplates(liquid: Liquid, templates: Template[], ctx: Context) {
   const iterator = liquid.renderer.renderTemplates(templates, ctx);
   return resolveGenerator(iterator);
 }
 
-async function resolveGenerator(iterable: any): Promise<any> {
+async function resolveGenerator(iterable: unknown): Promise<unknown> {
   if (!iterable) {
     return '';
   }
-  if (typeof iterable.then === 'function') {
+  if (isPromiseLike(iterable)) {
     return iterable;
   }
-  if (typeof iterable.next !== 'function') {
+  if (!isIterator(iterable)) {
     return iterable;
   }
   let result = iterable.next();
@@ -1216,4 +1229,12 @@ async function resolveGenerator(iterable: any): Promise<any> {
     result = iterable.next(awaited);
   }
   return result.value ?? '';
+}
+
+function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+  return typeof value === 'object' && value !== null && typeof (value as PromiseLike<unknown>).then === 'function';
+}
+
+function isIterator(value: unknown): value is Iterator<unknown> {
+  return typeof value === 'object' && value !== null && typeof (value as Iterator<unknown>).next === 'function';
 }

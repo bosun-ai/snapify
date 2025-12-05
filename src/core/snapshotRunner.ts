@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { chromium, firefox, webkit, type BrowserContext, type BrowserContextOptions, type BrowserType, type Page } from 'playwright';
+import { chromium, firefox, webkit, type BrowserContext, type BrowserContextOptions, type BrowserType, type Page, type Route, type Request } from 'playwright';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { ensureDir, fileExists, writeFileRecursive } from '../utils/fs.js';
@@ -90,8 +90,8 @@ export class SnapshotRunner {
     }
 
     const pattern = `${SNAPIFY_ASSET_HOST}/assets/*`;
-    const handler = async (route: Parameters<BrowserContext['route']>[1]) => {
-      const url = route.request().url();
+    const handler = async (route: Route, request: Request) => {
+      const url = request.url();
       const asset = manifest.get(url);
       if (!asset) {
         await route.continue();
@@ -118,8 +118,8 @@ export class SnapshotRunner {
       readFile(candidatePath)
     ]);
 
-    let baselinePng = PNG.sync.read(baselineBuffer);
-    let latestPng = PNG.sync.read(latestBuffer);
+    let baselinePng: PNG = PNG.sync.read(baselineBuffer);
+    let latestPng: PNG = PNG.sync.read(latestBuffer);
 
     if (baselinePng.width !== latestPng.width || baselinePng.height !== latestPng.height) {
       const targetWidth = Math.max(baselinePng.width, latestPng.width);

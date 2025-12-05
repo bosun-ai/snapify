@@ -74,6 +74,102 @@ The resolved object includes:
 - `diffPath` – optional PNG diff if the baseline mismatches.
 - `updatedBaseline` – `true` if the baseline image was re-written this run.
 
+## Using Snapify in automated tests
+
+Snapify slots into Node's built-in test runner (or Jest/Vitest) so you can assert against baselines inside regular CI suites:
+
+```ts
+// tests/homepage.test.ts
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import path from 'node:path';
+import { render } from 'snapify';
+
+const THEME_ROOT = path.resolve('tests/theme');
+const BASELINE_DIR = path.join(THEME_ROOT, '.snapify', 'baseline');
+const ARTIFACT_DIR = path.join(THEME_ROOT, '.snapify', 'artifacts');
+const UPDATE = Boolean(process.env.SNAPIFY_UPDATE_BASELINES);
+
+test('index template matches stored baseline', async () => {
+  const snapshot = await render({
+    themeRoot: THEME_ROOT,
+    template: 'index',
+    data: { hero: { headline: 'Golden hour' } },
+    viewport: { width: 1280, height: 720 },
+    snapshot: {
+      name: 'index',
+      baselineDir: BASELINE_DIR,
+      outputDir: ARTIFACT_DIR,
+      update: UPDATE
+    }
+  });
+
+  if (UPDATE) {
+    // Baselines refreshed locally; fail fast if this ever happens on CI.
+    assert.equal(snapshot.updatedBaseline, true);
+    return;
+  }
+
+  assert.equal(
+    snapshot.diffPath,
+    undefined,
+    `Snapshot drift detected. Inspect ${snapshot.diffPath} for details.`
+  );
+});
+```
+
+Tips:
+
+- `SNAPIFY_UPDATE_BASELINES=1 npm test` refreshes every snapshot in bulk.
+- Keep `.snapify/**` artifacts in source control so reviewers can see diffs.
+- Push diff artifacts to CI logs (or GitHub Actions annotations) for quick triage.
+
+### Jest example
+
+Using Snapify inside Jest with TypeScript just requires enabling ESM support and invoking `render` within a test:
+
+```ts
+/**
+ * @jest-environment node
+ */
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { render } from 'snapify';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const THEME_ROOT = path.resolve(__dirname, '../theme');
+
+describe('product template', () => {
+  const baselineDir = path.join(THEME_ROOT, '.snapify', 'baseline');
+  const artifactsDir = path.join(THEME_ROOT, '.snapify', 'artifacts');
+  const update = process.env.SNAPIFY_UPDATE_BASELINES === '1';
+
+  it('matches the stored baseline', async () => {
+    const snapshot = await render({
+      themeRoot: THEME_ROOT,
+      template: 'product',
+      snapshot: {
+        name: 'product',
+        baselineDir,
+        outputDir: artifactsDir,
+        update
+      }
+    });
+
+    if (update) {
+      expect(snapshot.updatedBaseline).toBe(true);
+      return;
+    }
+
+    expect(snapshot.diffPath).toBeUndefined();
+  });
+});
+
+// See examples/jest/homepage.test.ts in this repository for a complete, runnable example.
+```
+
+Set up Jest with `"type": "module"` (or `transform` rules for CommonJS), run `SNAPIFY_UPDATE_BASELINES=1 npx jest` locally to refresh baselines, and `npx jest` in CI to verify snapshots.
+
 ## How rendering works
 
 1. **Liquid + sections.** `TemplateAssembler` configures LiquidJS with Shopify-like defaults, resolves JSON templates (sections, block order, `custom_css`) and plain `.liquid` templates.
@@ -96,17 +192,14 @@ Place `sections/__snapify__/partials/cta.liquid` next to it and the renderer wil
 
 ## Testing multiple templates
 
-Repository-level tests live in `tests/` (outside this package) and import the compiled Snapify build. From the repo root:
+This repository uses the Node test runner plus the `SNAPIFY_UPDATE_BASELINES` flag shown above. Run the following from the repo root:
 
 ```bash
-# build snapify first
-npm run snapify:build
+# Refresh baselines locally
+SNAPIFY_UPDATE_BASELINES=1 npm test
 
-# refresh baselines across index/product/cart
-SNAPIFY_UPDATE_BASELINES=1 npm run snapify:test:templates
-
-# validate against existing baselines
-npm run snapify:test:templates
+# Validate without touching stored baselines
+npm test
 ```
 
-Artifacts land under `.snapify/templates/{baseline,artifacts}` at the repo root so they can be reviewed or committed.
+Artifacts land under `.snapify/**` inside your theme root so they can be reviewed or committed.
