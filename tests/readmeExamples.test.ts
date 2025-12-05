@@ -28,6 +28,7 @@ function isPlaywrightLaunchError(error: unknown) {
 test('README example render matches baseline (HTML + PNG)', { concurrency: false }, async (t) => {
   const name = 'readme-example';
   const baselineExists = await fileExists(path.join(BASELINE_DIR, `${name}.png`));
+  const update = !baselineExists && process.env.CI !== 'true';
   try {
     const result = await render({
       themeRoot: THEME_ROOT,
@@ -37,11 +38,11 @@ test('README example render matches baseline (HTML + PNG)', { concurrency: false
         name,
         baselineDir: BASELINE_DIR,
         outputDir: ARTIFACT_DIR,
-        update: !baselineExists
+        update
       }
     });
 
-    if (!baselineExists) {
+    if (update) {
       assert.equal(result.updatedBaseline, true);
       return;
     }
@@ -66,6 +67,7 @@ test('README example render matches baseline (HTML + PNG)', { concurrency: false
 test('examples/jest homepage example remains valid', { concurrency: false }, async (t) => {
   const name = 'index-jest';
   const baselineExists = await fileExists(path.join(BASELINE_DIR, `${name}.png`));
+  const update = !baselineExists && process.env.CI !== 'true';
   try {
     const result = await render({
       themeRoot: THEME_ROOT,
@@ -74,11 +76,11 @@ test('examples/jest homepage example remains valid', { concurrency: false }, asy
         name,
         baselineDir: BASELINE_DIR,
         outputDir: ARTIFACT_DIR,
-        update: !baselineExists
+        update
       }
     });
 
-    if (!baselineExists) {
+    if (update) {
       assert.equal(result.updatedBaseline, true);
       return;
     }

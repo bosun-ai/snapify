@@ -1638,7 +1638,9 @@ function resolvePlaceholderDimensions(overrides?: PlaceholderDimensions) {
 
 function createPlaceholderDataUrl(width: number, height: number, label: string) {
   const safeLabel = truncateLabel(label || DEFAULT_PLACEHOLDER_LABEL, 28);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="${PLACEHOLDER_BG}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="${PLACEHOLDER_TEXT}" font-family="sans-serif" font-size="${Math.max(12, Math.round(Math.min(width, height) / 8))}">${escapeHtml(safeLabel)}</text></svg>`;
+  // Draw label using path-insensitive styling to reduce platform-specific font differences.
+  const fontSize = Math.max(12, Math.round(Math.min(width, height) / 8));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="${PLACEHOLDER_BG}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="${PLACEHOLDER_TEXT}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="600" paint-order="stroke" stroke="${PLACEHOLDER_BG}" stroke-width="0.5">${escapeHtml(safeLabel)}</text></svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
