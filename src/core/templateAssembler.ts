@@ -626,6 +626,10 @@ class ThemeDataService {
     }
     if (isPlainObject(value)) {
       const record = value as Record<string, unknown>;
+      // Shopify image drop stored as { "__snapifyHandle": "shopify://shop_images/..." }
+      if (typeof record.__snapifyHandle === 'string' && record.__snapifyHandle.startsWith('shopify://shop_images/')) {
+        return (await images.buildImageDrop(record.__snapifyHandle)) ?? value;
+      }
       for (const [childKey, childValue] of Object.entries(record)) {
         record[childKey] = await this.hydrateValues(childValue, childKey, images);
       }

@@ -163,6 +163,13 @@ test('image_tag accepts configured object drops and blank inputs', async () => {
   assert.equal(imageCount, 2, 'only configured drops should render images');
 });
 
+test('settings image handles hydrate into usable drops', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  const html = await assembler.compose({ template: 'settings-image-handle', layout: false });
+  assert.match(html, /<img/, 'image_tag should render an img for handle-based settings');
+  assert.match(html, /unit test/, 'placeholder should reference the handle asset');
+});
+
 test('empty translation keys resolve to empty strings', async () => {
   const assembler = new TemplateAssembler(FIXTURE_THEME);
   const html = await assembler.compose({ template: 'translation-empty', layout: false });
