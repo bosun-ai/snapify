@@ -28,6 +28,7 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
   return runner.capture(html, {
     name,
     baselinePath: path.join(baselineDir, `${name}.png`),
+    baselineHtmlPath: path.join(baselineDir, `${name}.html`),
     outputDir,
     htmlPath: path.join(outputDir, `${name}.html`),
     screenshotPath: path.join(outputDir, `${name}.png`),

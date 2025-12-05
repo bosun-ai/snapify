@@ -10,6 +10,7 @@ import { SNAPIFY_ASSET_HOST } from './constants.js';
 interface SnapshotRuntimeOptions {
   name: string;
   baselinePath: string;
+  baselineHtmlPath: string;
   outputDir: string;
   htmlPath: string;
   screenshotPath: string;
@@ -33,6 +34,7 @@ export class SnapshotRunner {
   async capture(html: string, options: SnapshotRuntimeOptions): Promise<RenderResult> {
     await ensureDir(options.outputDir);
     await writeFileRecursive(options.htmlPath, html);
+    await ensureDir(path.dirname(options.baselineHtmlPath));
 
     const browser = await this.launchBrowser(options.browser);
     try {
@@ -53,18 +55,24 @@ export class SnapshotRunner {
       await ensureDir(path.dirname(options.baselinePath));
       const latestBuffer = await readFile(options.screenshotPath);
       await writeFileRecursive(options.baselinePath, latestBuffer);
+      await writeFileRecursive(options.baselineHtmlPath, html);
       return {
         htmlPath: options.htmlPath,
+        htmlBaselinePath: options.baselineHtmlPath,
+        htmlChanged: false,
         screenshotPath: options.screenshotPath,
         diffPath: undefined,
         updatedBaseline: true
       };
     }
 
+    const htmlChanged = await this.diffHtml(html, options.baselineHtmlPath);
     const diffPath = await this.diffWithBaseline(options.baselinePath, options.screenshotPath, options.diffPath);
 
     return {
       htmlPath: options.htmlPath,
+      htmlBaselinePath: options.baselineHtmlPath,
+      htmlChanged,
       screenshotPath: options.screenshotPath,
       diffPath,
       updatedBaseline: false
@@ -147,6 +155,15 @@ export class SnapshotRunner {
 
     await writeFileRecursive(diffPath, PNG.sync.write(diff));
     return diffPath;
+  }
+
+  private async diffHtml(currentHtml: string, baselinePath: string) {
+    if (!(await fileExists(baselinePath))) {
+      await writeFileRecursive(baselinePath, currentHtml);
+      return false;
+    }
+    const baseline = await readFile(baselinePath, 'utf8');
+    return baseline !== currentHtml;
   }
 }
 

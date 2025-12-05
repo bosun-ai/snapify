@@ -52,6 +52,8 @@ export interface RenderOptions {
  */
 export interface RenderResult {
   htmlPath: string;
+  htmlBaselinePath?: string;
+  htmlChanged?: boolean;
   screenshotPath: string;
   diffPath?: string;
   updatedBaseline?: boolean;
