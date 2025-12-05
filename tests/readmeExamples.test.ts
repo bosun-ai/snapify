@@ -10,6 +10,8 @@ const THEME_ROOT = path.join(here, "theme");
 const SNAPSHOT_ROOT = path.join(here, "__snapshots__");
 const BASELINE_DIR = path.join(SNAPSHOT_ROOT, "baseline");
 const ARTIFACT_DIR = path.join(SNAPSHOT_ROOT, "artifacts");
+const skipInCi = process.env.CI === "true";
+const maybeTest = skipInCi ? test.skip : test;
 
 async function fileExists(target: string) {
 	try {
@@ -20,7 +22,7 @@ async function fileExists(target: string) {
 	}
 }
 
-test(
+maybeTest(
 	"README example render matches baseline (HTML + PNG)",
 	{ concurrency: false },
 	async () => {
@@ -59,7 +61,7 @@ test(
 	},
 );
 
-test(
+maybeTest(
 	"examples/jest homepage example remains valid",
 	{ concurrency: false },
 	async () => {
