@@ -93,6 +93,16 @@ test('head markup is injected when a layout omits content_for_header', async () 
   assert.match(headSegment, /data-snapify-inline="asset-fallback"/, 'asset fallback script should inject');
 });
 
+test('layout tag can swap layouts or disable them', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  const withAlt = await assembler.compose({ template: 'layout-override' });
+  assert.match(withAlt, /Alternate Layout/, 'alternate layout should render');
+  assert.match(withAlt, /class="content"/, 'content should pass through layout');
+
+  const none = await assembler.compose({ template: 'layout-none' });
+  assert.equal(none.trim(), '<div class="nolayout">Bare Output</div>', 'layout none should bypass wrapping layout');
+});
+
 test('paginate slices collections and exposes pagination metadata', async () => {
   const assembler = new TemplateAssembler(FIXTURE_THEME);
   const products = Array.from({ length: 5 }, (_, index) => ({ title: `Product ${index + 1}` }));
@@ -107,6 +117,22 @@ test('paginate slices collections and exposes pagination metadata', async () => 
   assert.ok(!normalized.includes('Product 3;'), 'later items should be excluded from first page');
   assert.match(normalized, /"title":2/, 'parts should include numeric page links');
   assert.match(normalized, /"title":"Next"/, 'parts should expose navigation links');
+});
+
+test('tag link helpers build deterministic URLs', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  const html = await assembler.compose({
+    template: 'tag-links',
+    layout: false,
+    data: { collection: { handle: 'summer' }, current_tags: ['sale'] }
+  });
+  const normalized = stripWhitespace(html);
+  assert.match(normalized, /href="\/collections\/summer\?q=sale"/, 'link_to_tag should target collection tags');
+  assert.match(normalized, /Add<\/a>/, 'link_to_add_tag should render provided title');
+  assert.match(normalized, /q=new%2Bsale/, 'link_to_add_tag should include additional tags when added');
+  assert.match(normalized, /q=/, 'link_to_remove_tag should render href');
+  assert.match(normalized, /<strong>sale<\/strong>/, 'highlight_active_tag should wrap active tag');
+  assert.match(normalized, /\/collections\/summer\/products\/widget/, 'within should prefix with collection handle');
 });
 
 test('asset_url filter stringifies inline when used directly', async () => {
@@ -160,7 +186,7 @@ test('missing Shopify constructs surface diagnostics and placeholders', async ()
   const assembler = new TemplateAssembler(FIXTURE_THEME);
   const html = await assembler.compose({ template: 'missing-constructs', layout: false });
   assert.match(html, /data-snapify-diagnostics/, 'diagnostics payload should be injected');
-  assert.match(html, /money_with_currency/, 'missing filter should be recorded in diagnostics payload');
+  assert.match(html, /not_implemented_filter/, 'missing filter should be recorded in diagnostics payload');
 });
 
 test('users can extend Liquid with custom tags and filters', async () => {

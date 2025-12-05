@@ -37,6 +37,7 @@ const DEFAULT_PLACEHOLDER_HEIGHT = 800;
 const DEFAULT_PLACEHOLDER_LABEL = 'Image';
 const PLACEHOLDER_BG = '#DFE3EB';
 const PLACEHOLDER_TEXT = '#5C6478';
+const LAYOUT_MARKER_PREFIX = '<!--SNAPIFY_LAYOUT:';
 
 interface InlineTagState extends Tag {
   templates?: Template[];
@@ -207,12 +208,22 @@ export class TemplateAssembler {
       bodyHtml = await this.engine.renderFile(templateLookup, context);
     }
 
+    const override = extractLayoutOverride(bodyHtml);
+    bodyHtml = override.html;
+    const layoutOverride = override.layout;
+
     if (options.layout === false) {
       const decorated = this.decorateDeterministicHtml(bodyHtml, options.styles);
       return this.injectDiagnostics(decorated);
     }
 
-    const layoutLookup = await this.resolveLayout(options.layout ?? DEFAULT_LAYOUT);
+    const layoutChoice = layoutOverride === 'none' ? false : (layoutOverride ?? options.layout ?? DEFAULT_LAYOUT);
+    if (layoutChoice === false) {
+      const decorated = this.decorateDeterministicHtml(bodyHtml, options.styles);
+      return this.injectDiagnostics(decorated);
+    }
+
+    const layoutLookup = await this.resolveLayout(layoutChoice);
     const inlineHeader = this.assets.collectHeadMarkup(options.styles, this.assetFallbackInjected);
     const layoutScope = {
       ...context,
@@ -895,6 +906,10 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
   engine.registerFilter('asset_url', assetFilter);
   engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => services.assets.stylesheetTag(asset));
   engine.registerFilter('script_tag', (asset: InlineAsset | string) => services.assets.scriptTag(asset));
+  engine.registerFilter('global_asset_url', async (asset: unknown) => (await assetFilter(String(asset ?? ''))).url ?? '');
+  engine.registerFilter('shopify_asset_url', async (asset: unknown) => (await assetFilter(String(asset ?? ''))).url ?? '');
+  engine.registerFilter('asset_img_url', async (asset: unknown, size?: unknown) => addSizeParam((await assetFilter(String(asset ?? ''))).url ?? '', size));
+  engine.registerFilter('preload_tag', async (asset: unknown, asType?: unknown) => preloadTag((await assetFilter(String(asset ?? ''))).url ?? '', asType));
   const resolveImage = async (asset: unknown, args: unknown[]) => services.images.ensureImageObject(asset, resolveDimensionOverrides(extractNamedArgs(args)));
   engine.registerFilter('image_url', async (asset: unknown, ...args: unknown[]) => {
     const image = await resolveImage(asset, args);
@@ -911,17 +926,41 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
   engine.registerFilter('t', translateFilter);
   engine.registerFilter('translate', translateFilter);
 
-  // Stub common Shopify filters we haven't implemented yet; mark diagnostics and pass-through.
-  const missingFilters = [
-    'money', 'money_with_currency', 'money_without_currency', 'money_without_trailing_zeros',
-    'weight_with_unit', 'time_tag', 'url_for_vendor', 'link_to_tag'
-  ];
-  for (const name of missingFilters) {
-    engine.registerFilter(name, (value: unknown) => {
-      services.diagnostics?.recordFilter(name);
-      return value;
-    });
-  }
+  engine.registerFilter('money', (value: unknown) => formatMoney(value, { showCurrency: false, trimZeros: false }));
+  engine.registerFilter('money_with_currency', (value: unknown) => formatMoney(value, { showCurrency: true, trimZeros: false }));
+  engine.registerFilter('money_without_currency', (value: unknown) => formatMoney(value, { showCurrency: false, trimZeros: false }));
+  engine.registerFilter('money_without_trailing_zeros', (value: unknown) => formatMoney(value, { showCurrency: false, trimZeros: true }));
+
+  engine.registerFilter('weight_with_unit', (value: unknown, unit?: unknown) => formatWeight(value, unit));
+  engine.registerFilter('weight', (value: unknown, unit?: unknown) => formatWeight(value, unit));
+  engine.registerFilter('time_tag', (value: unknown, format?: unknown) => formatTimeTag(value, format));
+
+  engine.registerFilter('url_for_vendor', (vendor: unknown) => `/collections/vendors?q=${encodeURIComponent(String(vendor ?? ''))}`);
+  engine.registerFilter('url_for_type', (type: unknown) => `/collections/types?q=${encodeURIComponent(String(type ?? ''))}`);
+  engine.registerFilter('link_to_vendor', (vendor: unknown, title?: unknown) => linkTo(`/collections/vendors?q=${encodeURIComponent(String(vendor ?? ''))}`, title ?? vendor));
+  engine.registerFilter('link_to_type', (type: unknown, title?: unknown) => linkTo(`/collections/types?q=${encodeURIComponent(String(type ?? ''))}`, title ?? type));
+
+  engine.registerFilter('link_to_tag', linkToTagFilter);
+  engine.registerFilter('link_to_add_tag', linkToAddTagFilter);
+  engine.registerFilter('link_to_remove_tag', linkToRemoveTagFilter);
+  engine.registerFilter('highlight_active_tag', highlightActiveTagFilter);
+  engine.registerFilter('within', withinFilter);
+
+  engine.registerFilter('placeholder_svg_tag', placeholderSvgTag);
+  engine.registerFilter('payment_type_svg_tag', (handle: unknown) => paymentIcon(handle, 'svg'));
+  engine.registerFilter('payment_type_img_url', (handle: unknown) => paymentIconUrl(handle, 'svg'));
+  engine.registerFilter('payment_icon_png_url', (handle: unknown) => paymentIconUrl(handle, 'png'));
+
+  engine.registerFilter('product_img_url', (src: unknown, size?: unknown) => addSizeParam(String((src as any)?.src ?? src ?? ''), size));
+  engine.registerFilter('file_img_url', (src: unknown, size?: unknown) => addSizeParam(String((src as any)?.src ?? src ?? ''), size));
+
+  engine.registerFilter('color_modify', (color: unknown, modifier: unknown) => colorModify(color, modifier));
+  engine.registerFilter('color_mix', (color: unknown, other: unknown, weight?: unknown) => colorMix(color, other, weight));
+
+  engine.registerFilter('not_implemented_filter', (value: unknown) => {
+    services.diagnostics?.recordFilter('not_implemented_filter');
+    return value;
+  });
 
   const schemaTag: TagImplOptions = {
     parse(tagToken: TagToken, remainTokens: TopLevelToken[]) {
@@ -985,6 +1024,15 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
   engine.registerTag('section', sectionTag);
   engine.registerTag('sections', sectionsTag);
   engine.registerTag('content_for', contentForTag);
+  engine.registerTag('layout', {
+    parse(this: InlineTagState, tagToken: TagToken) {
+      this.args = tagToken.args ?? '';
+    },
+    async render(this: InlineTagState) {
+      const layoutArg = (this.args ?? '').trim().replace(/^['"]|['"]$/g, '') || 'none';
+      return createLayoutMarker(layoutArg);
+    }
+  });
 
   const paginateTag: TagImplOptions = {
     parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
@@ -1185,6 +1233,182 @@ function patchNestedValue(target: unknown, path: string[], value: unknown): unkn
   const existing = (target as any)?.[head];
   clone[head] = patchNestedValue(existing, rest, value);
   return clone;
+}
+
+function createLayoutMarker(layoutName: string) {
+  return `${LAYOUT_MARKER_PREFIX}${layoutName}-->`;
+}
+
+function extractLayoutOverride(html: string): { html: string; layout: string | null } {
+  const markerStart = html.indexOf(LAYOUT_MARKER_PREFIX);
+  if (markerStart === -1) return { html, layout: null };
+  const markerEnd = html.indexOf('-->', markerStart);
+  if (markerEnd === -1) return { html, layout: null };
+  const layout = html.slice(markerStart + LAYOUT_MARKER_PREFIX.length, markerEnd).trim();
+  const cleaned = html.slice(0, markerStart) + html.slice(markerEnd + 3);
+  return { html: cleaned, layout }; // layout may be 'none'
+}
+
+function addSizeParam(url: string, size: unknown) {
+  if (!url) return '';
+  const normalized = String(url);
+  const sizeValue = size == null ? null : String(size);
+  if (!sizeValue) return normalized;
+  const separator = normalized.includes('?') ? '&' : '?';
+  return `${normalized}${separator}size=${encodeURIComponent(sizeValue)}`;
+}
+
+function preloadTag(url: string, asType?: unknown) {
+  if (!url) return '';
+  const asAttr = String(asType ?? 'auto');
+  return `<link rel="preload" href="${url}" as="${asAttr}">`;
+}
+
+function formatMoney(value: unknown, options: { showCurrency: boolean; trimZeros: boolean }) {
+  const amount = Number.parseFloat(String(value ?? ''));
+  if (!Number.isFinite(amount)) return '';
+  let formatted = amount.toFixed(2);
+  if (options.trimZeros) {
+    // Drop trailing zeros but keep non-zero fractional cents (e.g., 12.34 -> 12.34, 12.30 -> 12.3, 12.00 -> 12)
+    formatted = formatted.replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+  }
+  const currency = options.showCurrency ? ' USD' : '';
+  return `$${formatted}${currency}`;
+}
+
+function formatWeight(value: unknown, unit?: unknown) {
+  const amount = Number.parseFloat(String(value ?? ''));
+  if (!Number.isFinite(amount)) return '';
+  const normalizedUnit = unit ? String(unit) : 'kg';
+  return `${amount} ${normalizedUnit}`;
+}
+
+function formatTimeTag(value: unknown, _format?: unknown) {
+  if (value == null) return '';
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return '';
+  const iso = date.toISOString();
+  return `<time datetime="${iso}">${iso}</time>`;
+}
+
+function linkTo(href: string, title: unknown) {
+  const label = String(title ?? href ?? '');
+  return `<a href="${href}">${label}</a>`;
+}
+
+function linkToTagFilter(this: any, tag: unknown, title?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const collectionHandle = (ctx?.get(['collection', 'handle']) as string) ?? 'all';
+  const href = buildTagHref(collectionHandle, currentTags, tagValue, 'none');
+  return linkTo(href, title ?? tagValue);
+}
+
+function linkToAddTagFilter(this: any, tag: unknown, title?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const collectionHandle = (ctx?.get(['collection', 'handle']) as string) ?? 'all';
+  const href = buildTagHref(collectionHandle, currentTags, tagValue, 'add');
+  return linkTo(href, title ?? tagValue);
+}
+
+function linkToRemoveTagFilter(this: any, tag: unknown, title?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const collectionHandle = (ctx?.get(['collection', 'handle']) as string) ?? 'all';
+  const href = buildTagHref(collectionHandle, currentTags, tagValue, 'remove');
+  return linkTo(href, title ?? tagValue);
+}
+
+function highlightActiveTagFilter(this: any, tag: unknown, wrapper?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const wrapperTag = String(wrapper ?? 'strong');
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const isActive = currentTags.map((t) => String(t)).includes(tagValue);
+  if (!isActive) return tagValue;
+  return `<${wrapperTag}>${tagValue}</${wrapperTag}>`;
+}
+
+function withinFilter(this: any, url: unknown, collection: unknown) {
+  const urlStr = String(url ?? '');
+  const ctx: Context | undefined = this?.context;
+  const collectionHandle = typeof collection === 'string'
+    ? collection
+    : (collection as any)?.handle ?? ctx?.get(['collection', 'handle']) ?? 'all';
+  return `/collections/${collectionHandle}/${urlStr.replace(/^\//, '')}`;
+}
+
+function buildTagHref(collectionHandle: string, currentTags: unknown[], tag: string, action: 'add' | 'remove' | 'none') {
+  const set = new Set((currentTags ?? []).map((t) => String(t)));
+  if (action === 'remove') {
+    set.delete(tag);
+  } else {
+    set.add(tag); // include requested tag for both link_to_tag and link_to_add_tag
+  }
+  const tags = Array.from(set).sort();
+  const tagsParam = tags.map(encodeURIComponent).join('%2B');
+  return `/collections/${collectionHandle}?q=${tagsParam}`;
+}
+
+function placeholderSvgTag(name: unknown, className?: unknown) {
+  const id = String(name ?? 'placeholder');
+  const cls = className ? ` class="${String(className)}"` : '';
+  return `<svg${cls} data-snapify-placeholder="${id}" role="img"></svg>`;
+}
+
+function paymentIcon(handle: unknown, kind: 'svg' | 'png') {
+  const name = String(handle ?? '').toLowerCase() || 'generic';
+  return `<svg data-snapify-payment="${name}" data-kind="${kind}"></svg>`;
+}
+
+function paymentIconUrl(handle: unknown, kind: 'svg' | 'png') {
+  const name = String(handle ?? '').toLowerCase() || 'generic';
+  return `https://snapify.local/payment/${name}.${kind}`;
+}
+
+function colorModify(color: unknown, modifier: unknown) {
+  const base = parseHexColor(String(color ?? ''));
+  if (!base) return String(color ?? '');
+  const mod = String(modifier ?? '');
+  const match = mod.match(/(lighten|darken):(\d+)/i);
+  if (match) {
+    const amount = Number.parseInt(match[2], 10);
+    const delta = match[1].toLowerCase() === 'lighten' ? amount : -amount;
+    const adjusted = base.map((c) => clampChannel(c + delta)) as [number, number, number];
+    return toHex(adjusted);
+  }
+  return toHex(base);
+}
+
+function colorMix(color: unknown, other: unknown, weight?: unknown) {
+  const a = parseHexColor(String(color ?? ''));
+  const b = parseHexColor(String(other ?? ''));
+  if (!a || !b) return String(color ?? '') || String(other ?? '');
+  const w = Number.parseFloat(String(weight ?? '50'));
+  const ratio = Number.isFinite(w) ? Math.max(0, Math.min(100, w)) / 100 : 0.5;
+  const mixed = a.map((c, i) => Math.round(c * (1 - ratio) + b[i] * ratio)) as [number, number, number];
+  return toHex(mixed);
+}
+
+function parseHexColor(value: string): [number, number, number] | null {
+  const hex = value.replace('#', '').trim();
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+  return [r, g, b];
+}
+
+function toHex([r, g, b]: [number, number, number]) {
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function clampChannel(value: number) {
+  return Math.max(0, Math.min(255, value));
 }
 
 function imageTagFilter(image: ShopifyImage | undefined, named: Record<string, unknown>) {
