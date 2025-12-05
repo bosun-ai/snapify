@@ -159,12 +159,14 @@ export class SnapshotRunner {
       baselinePng.width,
       baselinePng.height,
       {
-        threshold: 0.1,
-        alpha: 0.4
+        threshold: 0.12,
+        alpha: 0.4,
+        includeAA: true
       }
     );
 
-    if (mismatch === 0) {
+    const maxAllowedMismatch = Math.floor(baselinePng.width * baselinePng.height * 0.0001);
+    if (mismatch === 0 || mismatch <= maxAllowedMismatch) {
       return undefined;
     }
 
