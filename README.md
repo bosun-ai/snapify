@@ -69,10 +69,12 @@ await render({
 
 The resolved object includes:
 
-- `htmlPath` – rendered document saved to disk for inspection. Recommended to add these to your .gitignore.
+- `htmlPath` – rendered document saved to disk for inspection (kept alongside artifacts).
+- `htmlBaselinePath` – stored baseline HTML for regression comparison.
+- `htmlChanged` – `true` when rendered HTML differs from the baseline.
 - `screenshotPath` – Playwright capture for the latest run.
-- `diffPath` – optional PNG diff if the baseline mismatches.
-- `updatedBaseline` – `true` if the baseline image was re-written this run.
+- `diffPath` – optional PNG diff if the screenshot mismatches the baseline.
+- `updatedBaseline` – `true` if the baseline image (and HTML) were re-written this run.
 
 ## Using Snapify in automated tests
 
@@ -110,11 +112,8 @@ test('index template matches stored baseline', async () => {
     return;
   }
 
-  assert.equal(
-    snapshot.diffPath,
-    undefined,
-    `Snapshot drift detected. Inspect ${snapshot.diffPath} for details.`
-  );
+  assert.equal(snapshot.diffPath, undefined, `Snapshot drift detected. Inspect ${snapshot.diffPath} for details.`);
+  assert.equal(snapshot.htmlChanged, false, 'Rendered HTML should match the stored baseline');
 });
 ```
 
