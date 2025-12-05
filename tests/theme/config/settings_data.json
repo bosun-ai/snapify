@@ -28,7 +28,26 @@
             }
           }
         },
-        "block_order": ["headline"]
+      "block_order": ["headline"]
+      },
+      "blocky": {
+        "type": "blocky",
+        "settings": {},
+        "blocks": {
+          "themed": {
+            "type": "announcement",
+            "settings": { "message": "From settings" }
+          },
+          "external": {
+            "type": "@app",
+            "settings": {}
+          },
+          "orphan": {
+            "type": "orphan",
+            "settings": {}
+          }
+        },
+        "block_order": ["themed", "external", "orphan"]
       }
     }
   }

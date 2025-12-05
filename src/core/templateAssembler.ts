@@ -39,6 +39,7 @@ const PLACEHOLDER_TEXT = '#5C6478';
 
 interface InlineTagState extends Tag {
   templates?: Template[];
+  args?: string;
 }
 
 interface FormTagState extends Tag {
@@ -128,17 +129,15 @@ export class TemplateAssembler {
   private headInjections: string[] = [];
   private assetManifest = new Map<string, RegisteredAsset>();
   private assetFallbackInjected = false;
-  private themeSettings: Record<string, unknown> = {};
-  private configuredSections = new Map<string, JsonSection>();
-  private settingsLoaded = false;
-  private linklists = new Map<string, LinkList>();
-  private navigationLoaded = false;
-  private imageCache = new Map<string, ShopifyImage>();
-  private translations = new Map<string, Record<string, string>>();
   private activeLocale = 'en.default';
+  private assets: AssetService;
+  private images: ImageService;
+  private themeData: ThemeDataService;
+  private sections: SectionRenderer;
   private readonly assetsDir: string;
   private readonly templatesDir: string;
   private readonly sectionsDir: string;
+  private readonly blocksDir: string;
   private readonly layoutDir: string;
   private readonly configDir: string;
   private readonly localesDir: string;
@@ -147,6 +146,7 @@ export class TemplateAssembler {
     this.assetsDir = path.join(this.themeRoot, 'assets');
     this.templatesDir = path.join(this.themeRoot, 'templates');
     this.sectionsDir = path.join(this.themeRoot, 'sections');
+    this.blocksDir = path.join(this.themeRoot, 'blocks');
     this.layoutDir = path.join(this.themeRoot, 'layout');
     this.configDir = path.join(this.themeRoot, 'config');
     this.localesDir = path.join(this.themeRoot, 'locales');
@@ -166,24 +166,31 @@ export class TemplateAssembler {
       strictFilters: false,
       strictVariables: false
     });
-
-    this.registerShopifyPrimitives();
+    this.assets = new AssetService(this.assetsDir, this.headInjections, this.assetManifest, () => this.assetFallbackInjected = true, () => this.assetFallbackInjected = false);
+    this.images = new ImageService();
+    this.themeData = new ThemeDataService({ configDir: this.configDir, localesDir: this.localesDir });
+    this.sections = new SectionRenderer({ engine: this.engine, themeRoot: this.themeRoot, sectionsDir: this.sectionsDir, blocksDir: this.blocksDir, themeData: this.themeData });
+    registerShopifyPrimitives(this.engine, {
+      assets: this.assets,
+      images: this.images,
+      translations: (key, replacements) => this.themeData.translate(this.activeLocale, key, replacements),
+      sections: this.sections,
+      headInjections: this.headInjections
+    });
   }
 
   /**
    * Renders a template (Liquid or JSON) inside the configured theme root, applying Shopify conventions such as linklists, locales, and asset inlining.
    */
   async compose(options: RenderOptions) {
-    await this.setActiveLocale(options.locale);
-    await this.ensureThemeSettings();
+    this.activeLocale = await this.themeData.ensureReady(options.locale);
     this.headInjections.length = 0;
-    this.assetManifest.clear();
-    this.assetFallbackInjected = false;
+    this.assets.reset();
     const templateLookup = await this.resolveTemplate(options.template);
     const userData = options.data ?? {};
     const context = {
-      settings: this.themeSettings,
-      linklists: this.getLinklistsContext(),
+      settings: this.themeData.getSettings(),
+      linklists: this.themeData.getLinklistsContext(),
       routes: { ...DEFAULT_ROUTES },
       ...userData
     };
@@ -200,7 +207,7 @@ export class TemplateAssembler {
     }
 
     const layoutLookup = await this.resolveLayout(options.layout ?? DEFAULT_LAYOUT);
-    const inlineHeader = this.collectHeadMarkup(options.styles);
+    const inlineHeader = this.assets.collectHeadMarkup(options.styles, this.assetFallbackInjected);
     const layoutScope = {
       ...context,
       content_for_layout: bodyHtml,
@@ -222,17 +229,9 @@ export class TemplateAssembler {
     return new Map(this.assetManifest);
   }
 
-  private getLinklistsContext() {
-    const context: Record<string, LinkList> = {};
-    for (const [handle, list] of this.linklists.entries()) {
-      context[handle] = cloneLinkList(list);
-    }
-    return context;
-  }
-
   private async renderJsonTemplate(relativePath: string, baseContext: Record<string, unknown>) {
     const template = await this.readJsonTemplate(relativePath);
-    await this.hydrateJsonTemplate(template);
+    await this.themeData.hydrateJsonTemplate(template, this.images);
     if (!template.sections) {
       return '';
     }
@@ -242,7 +241,7 @@ export class TemplateAssembler {
     for (const sectionId of order) {
       const definition = template.sections[sectionId];
       if (!definition || definition.disabled) continue;
-      const markup = await this.renderSection(sectionId, definition, baseContext);
+      const markup = await this.sections.renderSectionFromDefinition(sectionId, definition, baseContext);
       renderedSections.push(markup);
     }
 
@@ -252,476 +251,6 @@ ${renderedSections.join('\n')}
 </${container}>`;
   }
 
-  private async hydrateJsonTemplate(template: JsonTemplate) {
-    if (!template.sections) {
-      return;
-    }
-    for (const section of Object.values(template.sections)) {
-      if (!section) continue;
-      await this.hydrateJsonSection(section);
-    }
-  }
-
-  private async hydrateJsonSection(section: JsonSection) {
-    if (section.settings) {
-      await this.hydrateValues(section.settings);
-    }
-    if (section.blocks) {
-      for (const block of Object.values(section.blocks)) {
-        if (block?.settings) {
-          await this.hydrateValues(block.settings);
-        }
-      }
-    }
-  }
-
-  private async hydrateValues(value: unknown, key?: string): Promise<unknown> {
-    if (Array.isArray(value)) {
-      for (let index = 0; index < value.length; index += 1) {
-        value[index] = await this.hydrateValues(value[index], key);
-      }
-      return value;
-    }
-    if (isPlainObject(value)) {
-      const record = value as Record<string, unknown>;
-      for (const [childKey, childValue] of Object.entries(record)) {
-        record[childKey] = await this.hydrateValues(childValue, childKey);
-      }
-      return record;
-    }
-    if (typeof value === 'string') {
-      if (key && looksLikeMenuKey(key) && this.linklists.has(value)) {
-        return cloneLinkList(this.linklists.get(value)!);
-      }
-      if (value.startsWith('shopify://shop_images/')) {
-        return (await this.buildImageDrop(value)) ?? value;
-      }
-      if (value.startsWith('shopify://')) {
-        return normalizeShopifyUrl(value);
-      }
-    }
-    return value;
-  }
-
-  private translationFilter(value: unknown, args: unknown[]) {
-    const named = extractNamedArgs(args);
-    return this.translate(value, named);
-  }
-
-  private translate(value: unknown, options?: Record<string, unknown>) {
-    const key = typeof value === 'string' ? value : String(value ?? '').trim();
-    if (!key) {
-      return '';
-    }
-    const locale = this.activeLocale;
-    const dictionary = this.translations.get(locale) ?? {};
-    const fallback = typeof options?.default === 'string' ? options.default : key;
-    const template = dictionary[key] ?? fallback ?? key;
-    const replacements: Record<string, unknown> = { ...(options ?? {}) };
-    delete replacements.default;
-    return interpolateTranslation(String(template), replacements);
-  }
-
-  private async renderSection(sectionId: string, definition: JsonSection, baseContext: Record<string, unknown>) {
-    const sectionContext: SectionContext = {
-      id: sectionId,
-      type: definition.type,
-      settings: definition.settings ?? {},
-      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {}),
-      blocks: this.materializeBlocks(definition)
-    };
-
-    const scope = {
-      ...baseContext,
-      section: sectionContext
-    };
-
-    const templatePath = this.resolveSectionLookup(definition.type);
-    const markup = await this.engine.renderFile(templatePath, scope);
-    const css = Array.isArray(definition.custom_css) && definition.custom_css.length
-      ? `\n<style data-section="${sectionId}">\n${definition.custom_css.join('\n')}\n</style>`
-      : '';
-
-    const wrapper = this.wrapSectionMarkup(sectionId, definition.type, markup);
-    return `${wrapper}${css}`;
-  }
-
-  private wrapSectionMarkup(sectionId: string, sectionType: string, markup: string) {
-    const attributes = [
-      `id="shopify-section-${sectionId}"`,
-      'class="shopify-section"',
-      `data-section-id="${sectionId}"`,
-      `data-section-type="${sectionType}"`
-    ].join(' ');
-    return `<div ${attributes}>
-${markup}
-</div>`;
-  }
-
-  private buildSectionContextFromDefinition(sectionId: string, definition: JsonSection): SectionContext {
-    const normalized: JsonSection = {
-      type: definition.type ?? sectionId,
-      settings: definition.settings ?? {},
-      blocks: definition.blocks ?? {},
-      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {})
-    };
-
-    return {
-      id: sectionId,
-      type: normalized.type,
-      settings: normalized.settings ?? {},
-      block_order: normalized.block_order ?? Object.keys(normalized.blocks ?? {}),
-      blocks: this.materializeBlocks(normalized)
-    };
-  }
-
-  private materializeBlocks(definition: JsonSection) {
-    const resolved: SectionContext['blocks'] = [];
-    if (!definition.blocks) {
-      return resolved;
-    }
-
-    const order = definition.block_order ?? Object.keys(definition.blocks);
-    for (const blockId of order) {
-      const block = definition.blocks[blockId];
-      if (!block || block.disabled) continue;
-      resolved.push({
-        id: blockId,
-        type: block.type,
-        settings: block.settings ?? {}
-      });
-    }
-
-    return resolved;
-  }
-
-  private registerShopifyPrimitives() {
-    const assembler = this;
-    const assetFilter = this.assetUrlFilter.bind(this);
-    this.engine.registerFilter('asset_url', assetFilter);
-    this.engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => this.stylesheetTagFilter(asset));
-    this.engine.registerFilter('script_tag', (asset: InlineAsset | string) => this.scriptTagFilter(asset));
-    const imageUrlFilter = this.imageUrlFilter.bind(this);
-    const imageTagFilter = this.imageTagFilter.bind(this);
-    this.engine.registerFilter('image_url', (asset: unknown, ...args: unknown[]) => imageUrlFilter(asset, ...args));
-    this.engine.registerFilter('img_url', (asset: unknown, ...args: unknown[]) => imageUrlFilter(asset, ...args));
-    this.engine.registerFilter('image_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
-    this.engine.registerFilter('img_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
-    const translateFilter = (value: unknown, ...args: unknown[]) => this.translationFilter(value, args);
-    this.engine.registerFilter('t', translateFilter);
-    this.engine.registerFilter('translate', translateFilter);
-
-    const schemaTag: TagImplOptions = {
-      parse(tagToken: TagToken, remainTokens: TopLevelToken[]) {
-        const stream = this.liquid.parser.parseStream(remainTokens);
-        stream
-          .on('tag:endschema', () => {
-            stream.stop();
-          })
-          .on('end', () => {
-            throw new Error(`tag ${tagToken.name} not closed`);
-          });
-        stream.start();
-      },
-      render(_ctx: Context, _emitter: Emitter) {
-        return '';
-      }
-    };
-
-    const styleTag = this.createInlineBlockTag('style', (content) => `<style data-snapify-inline="style">${content}</style>`);
-    const scriptTag = this.createInlineBlockTag('javascript', (content) => `<script data-snapify-inline="javascript">${content}</script>`);
-    const formTag = this.createFormTag();
-
-    const sectionTag: TagImplOptions = {
-      parse(this: SectionTagState, tagToken: TagToken) {
-        this.sectionHandle = tagToken.args?.trim();
-      },
-      async render(this: SectionTagState, ctx: Context, _emitter: Emitter, _hash: Record<string, unknown>) {
-        const handle = normalizeSectionHandle(this.sectionHandle ?? '');
-        if (!handle) {
-          return '';
-        }
-        const baseContext = ctx.getAll();
-        return assembler.renderStandaloneSection(handle, ctx);
-      }
-    };
-
-    this.engine.registerTag('schema', schemaTag);
-    this.engine.registerTag('style', styleTag);
-    this.engine.registerTag('javascript', scriptTag);
-    this.engine.registerTag('form', formTag);
-    this.engine.registerTag('section', sectionTag);
-  }
-
-  private createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
-    return {
-      parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
-        this.templates = [];
-        const parser = this.liquid.parser;
-        const stream = parser.parseStream(remainTokens)
-          .on(`tag:end${tagName}`, () => {
-            stream.stop();
-          })
-          .on('template', (tpl) => {
-            this.templates!.push(tpl as Template);
-          })
-          .on('end', () => {
-            throw new Error(`tag ${tagToken.name} not closed`);
-          });
-        stream.start();
-      },
-      async render(this: InlineTagState, ctx: Context, _emitter: Emitter, _hash: Record<string, unknown>) {
-        const templates = this.templates ?? [];
-        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
-        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
-        return renderWrapper(content);
-      }
-    };
-  }
-
-  private createFormTag(): TagImplOptions {
-    return {
-      parse(this: FormTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
-        this.templates = [];
-        this.args = tagToken.args ?? '';
-        const parser = this.liquid.parser;
-        const stream = parser.parseStream(remainTokens)
-          .on('tag:endform', () => {
-            stream.stop();
-          })
-          .on('template', (tpl) => {
-            this.templates!.push(tpl as Template);
-          })
-          .on('end', () => {
-            throw new Error('tag form not closed');
-          });
-        stream.start();
-      },
-      async render(this: FormTagState, ctx: Context, _emitter: Emitter, hash: Record<string, unknown>) {
-        const templates = this.templates ?? [];
-        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
-        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
-        const handle = extractHandleFromArgs(this.args ?? '');
-        const attributes: Record<string, unknown> = {
-          method: 'post',
-          action: '/',
-          'data-snapify-form': handle || 'generic'
-        };
-        Object.assign(attributes, hash);
-        if (!attributes['data-snapify-form']) {
-          attributes['data-snapify-form'] = handle || 'generic';
-        }
-        const attrs = serializeAttributes(attributes);
-        return `<form ${attrs}>${content}</form>`;
-      }
-    };
-  }
-
-  private async assetUrlFilter(filename: string): Promise<InlineAsset> {
-    const normalized = stripWrappingQuotes(filename.trim());
-    if (!normalized) {
-      throw new Error('asset_url requires a filename.');
-    }
-    const relativePath = removeLeadingSeparators(normalized);
-    const abs = ensurePathInside(this.assetsDir, path.resolve(this.assetsDir, relativePath), 'asset');
-    const buffer = await readFile(abs);
-    const assetRelativePath = normalizeLiquidPath(path.relative(this.assetsDir, abs));
-    const mime = getMimeType(assetRelativePath);
-    const textContent = isTextMime(mime) ? buffer.toString('utf8') : '';
-    const base64 = buffer.toString('base64');
-    const assetUrl = this.buildAssetUrl(assetRelativePath, buffer);
-    this.assetManifest.set(assetUrl, {
-      url: assetUrl,
-      filePath: abs,
-      mimeType: mime,
-      body: buffer,
-      base64
-    });
-
-    const asset = {
-      kind: 'asset',
-      filename: assetRelativePath,
-      content: textContent,
-      mimeType: mime,
-      url: assetUrl,
-      toString() {
-        return assetUrl;
-      },
-      [Symbol.toPrimitive]() {
-        return assetUrl;
-      }
-    } satisfies InlineAsset & { toString(): string; [Symbol.toPrimitive](): string };
-
-    return asset;
-  }
-
-  private stylesheetTagFilter(asset: InlineAsset | string) {
-    const handle = ensureAsset(asset);
-    const inline = `<style data-snapify-asset="${handle.filename}">\n${handle.content}\n</style>`;
-    this.headInjections.push(inline);
-    return inline;
-  }
-
-  private scriptTagFilter(asset: InlineAsset | string) {
-    const handle = ensureAsset(asset);
-    const inline = `<script data-snapify-asset="${handle.filename}">\n${handle.content}\n</script>`;
-    this.headInjections.push(inline);
-    return inline;
-  }
-
-  private async imageUrlFilter(source: unknown, ...args: unknown[]) {
-    const named = extractNamedArgs(args);
-    const dimensions = resolveDimensionOverrides(named);
-    const image = await this.ensureImageObject(source, dimensions);
-    if (!image) {
-      return '';
-    }
-    return image.url ?? image.src ?? '';
-  }
-
-  private async imageTagFilter(source: unknown, ...args: unknown[]) {
-    const named = extractNamedArgs(args);
-    const dimensions = resolveDimensionOverrides(named);
-    const image = await this.ensureImageObject(source, dimensions);
-    if (!image) {
-      return '';
-    }
-    const src = image.url ?? image.src;
-    if (!src) {
-      return '';
-    }
-    const attributes: Record<string, unknown> = {
-      loading: named.loading ?? 'lazy',
-      ...named,
-      src
-    };
-    if (!attributes.alt) {
-      attributes.alt = image.alt ?? '';
-    }
-    const derivedWidth = dimensions.width ?? image.width;
-    const derivedHeight = dimensions.height ?? image.height;
-    if (derivedWidth) {
-      attributes.width = derivedWidth;
-    }
-    if (derivedHeight) {
-      attributes.height = derivedHeight;
-    }
-    return `<img ${serializeAttributes(attributes)}>`;
-  }
-
-  private async ensureImageObject(source: unknown, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
-    if (!source) {
-      return undefined;
-    }
-    if (typeof source === 'string') {
-      if (source.startsWith('shopify://shop_images/')) {
-        return this.buildImageDrop(source, overrides);
-      }
-      const normalized = normalizeExternalUrl(source);
-      const drop: ShopifyImage = {
-        src: normalized,
-        url: normalized
-      };
-      if (overrides?.width) {
-        drop.width = overrides.width;
-      }
-      if (overrides?.height) {
-        drop.height = overrides.height;
-      }
-      return drop;
-    }
-    if (typeof source === 'object') {
-      const image = { ...(source as ShopifyImage) } satisfies ShopifyImage;
-      if (image.__snapifyHandle) {
-        if (overrides?.width || overrides?.height) {
-          return this.buildImageDrop(image.__snapifyHandle, overrides);
-        }
-        return image;
-      }
-      if (image.src?.startsWith('shopify://shop_images/')) {
-        return this.buildImageDrop(image.src, {
-          width: image.width ?? overrides?.width,
-          height: image.height ?? overrides?.height
-        });
-      }
-      if (!image.url && image.src) {
-        image.url = image.src;
-      }
-      if (overrides?.width && !image.width) {
-        image.width = overrides.width;
-      }
-      if (overrides?.height && !image.height) {
-        image.height = overrides.height;
-      }
-      if (!image.alt && image.id) {
-        image.alt = humanizeFilename(image.id);
-      }
-      return image;
-    }
-    return undefined;
-  }
-
-  private async buildImageDrop(original: string, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
-    const filename = original.replace('shopify://shop_images/', '').trim();
-    if (!filename) {
-      return undefined;
-    }
-    const dimensions = resolvePlaceholderDimensions(overrides);
-    const cacheKey = `${original}|${dimensions.width}|${dimensions.height}`;
-    if (this.imageCache.has(cacheKey)) {
-      return this.imageCache.get(cacheKey);
-    }
-    const label = humanizeFilename(filename) || filename;
-    const url = createPlaceholderDataUrl(dimensions.width, dimensions.height, label || filename);
-    const drop: ShopifyImage = {
-      src: url,
-      url,
-      alt: label,
-      width: dimensions.width,
-      height: dimensions.height,
-      original_width: dimensions.width,
-      original_height: dimensions.height,
-      aspect_ratio: dimensions.width && dimensions.height ? dimensions.width / dimensions.height : undefined,
-      id: filename,
-      __snapifyHandle: original
-    };
-    this.imageCache.set(cacheKey, drop);
-    return drop;
-  }
-
-  private injectAssetFallbackScript() {
-    if (this.assetFallbackInjected || !this.assetManifest.size) {
-      return;
-    }
-
-    const manifestMap: Record<string, { mimeType: string; data: string }> = {};
-    for (const [url, asset] of this.assetManifest.entries()) {
-      manifestMap[url] = {
-        mimeType: asset.mimeType,
-        data: asset.base64
-      };
-    }
-
-    const payload = JSON.stringify(manifestMap);
-    const script = `(()=>{const host='${SNAPIFY_ASSET_HOST}';const manifest=${payload};const decoder=(entry)=>entry?atob(entry.data):null;const isSnapifyUrl=(url)=>typeof url==='string'&&url.startsWith(host);const inlineStyle=(node)=>{const entry=manifest[node.href];if(!entry)return;const css=decoder(entry);if(css==null)return;const style=document.createElement('style');style.setAttribute('data-snapify-fallback','style');style.textContent=css;node.replaceWith(style);};const inlineScript=(node)=>{const entry=manifest[node.src];if(!entry)return;const js=decoder(entry);if(js==null)return;const script=document.createElement('script');script.setAttribute('data-snapify-fallback','script');script.textContent=js;node.replaceWith(script);};const hydrate=()=>{document.querySelectorAll('link[rel="stylesheet"]').forEach((link)=>{if(isSnapifyUrl(link.href)){inlineStyle(link);}});document.querySelectorAll('script[src]').forEach((script)=>{if(isSnapifyUrl(script.src)){inlineScript(script);}});};document.addEventListener('error',(event)=>{const target=event.target;if(!(target instanceof Element))return;if(target.tagName==='LINK'&&isSnapifyUrl((target as HTMLLinkElement).href)){inlineStyle(target as HTMLLinkElement);}if(target.tagName==='SCRIPT'&&isSnapifyUrl((target as HTMLScriptElement).src)){inlineScript(target as HTMLScriptElement);}},true);if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hydrate,{once:true});}else{hydrate();}})();`;
-    const sanitized = script.replace(/<\/script/gi, '<\\/script');
-    this.headInjections.push(`<script data-snapify-inline="asset-fallback">${sanitized}</script>`);
-    this.assetFallbackInjected = true;
-  }
-
-  private buildAssetUrl(filename: string, body: Buffer) {
-    const hash = createHash('md5').update(body).digest('hex').slice(0, 10);
-    const encoded = encodeURIComponent(filename);
-    return `${SNAPIFY_ASSET_HOST}/assets/${encoded}?v=${hash}`;
-  }
-
-  private collectHeadMarkup(userStyles?: string) {
-    if (userStyles) {
-      this.headInjections.push(`<style data-snapify-inline="user">\n${userStyles}\n</style>`);
-    }
-    this.injectAssetFallbackScript();
-    return this.headInjections.join('\n');
-  }
 
   private ensureHeadCarriesInlineCss(html: string, injection: string) {
     if (!injection.trim()) {
@@ -732,121 +261,6 @@ ${markup}
     }
 
     return `${injection}\n${html}`;
-  }
-
-  private async ensureThemeSettings() {
-    if (this.settingsLoaded) {
-      return;
-    }
-
-    await this.ensureNavigation();
-
-    const settingsPath = path.join(this.configDir, 'settings_data.json');
-    if (!(await fileExists(settingsPath))) {
-      this.settingsLoaded = true;
-      return;
-    }
-
-    try {
-      const raw = await readFile(settingsPath, 'utf8');
-      const parsed = JSON.parse(raw);
-      const current = parsed.current ?? parsed;
-      const { sections, ...globals } = current;
-      this.themeSettings = globals ?? {};
-      await this.hydrateValues(this.themeSettings);
-
-      if (sections && typeof sections === 'object') {
-        for (const [id, definition] of Object.entries(sections as Record<string, JsonSection>)) {
-          const normalized = this.normalizeConfiguredSection(id, definition as JsonSection);
-          await this.hydrateJsonSection(normalized);
-          this.configuredSections.set(id, normalized);
-        }
-      }
-    } catch {
-      // ignore parse errors; fallback to defaults
-    } finally {
-      this.settingsLoaded = true;
-    }
-  }
-
-  private async ensureNavigation() {
-    if (this.navigationLoaded) {
-      return;
-    }
-
-    const navPath = path.join(this.configDir, 'navigation.json');
-    if (await fileExists(navPath)) {
-      try {
-        const raw = await readFile(navPath, 'utf8');
-        const parsed = JSON.parse(raw) as Record<string, LinkList>;
-        for (const [handle, definition] of Object.entries(parsed)) {
-          this.linklists.set(handle, normalizeLinkListDefinition(handle, definition));
-        }
-      } catch {
-        // ignore malformed navigation data
-      }
-    }
-
-    this.navigationLoaded = true;
-  }
-
-  private async setActiveLocale(locale?: string) {
-    const fallback = 'en.default';
-    const requested = sanitizeLocale(locale ?? process.env.SNAPIFY_LOCALE ?? this.activeLocale ?? fallback);
-    const resolved = await this.ensureLocaleTranslations(requested)
-      ? requested
-      : (await this.ensureLocaleTranslations(fallback) ? fallback : requested);
-    this.activeLocale = resolved;
-  }
-
-  private async ensureLocaleTranslations(locale: string) {
-    if (this.translations.has(locale)) {
-      return true;
-    }
-    const payload = await this.loadLocaleFile(locale);
-    if (!payload) {
-      return false;
-    }
-    this.translations.set(locale, payload);
-    return true;
-  }
-
-  private async loadLocaleFile(locale: string) {
-    const candidates = buildLocaleCandidates(locale);
-    for (const candidate of candidates) {
-      const abs = ensurePathInside(this.localesDir, path.resolve(this.localesDir, candidate), 'locale');
-      if (!(await fileExists(abs))) {
-        continue;
-      }
-      try {
-        const raw = await readFile(abs, 'utf8');
-        const parsed = JSON.parse(raw);
-        return flattenTranslations(parsed);
-      } catch {
-        // ignore malformed locale file
-      }
-    }
-    return undefined;
-  }
-
-  private normalizeConfiguredSection(sectionId: string, definition: JsonSection): JsonSection {
-    const normalizedBlocks: Record<string, JsonSectionBlock> = {};
-    if (definition.blocks) {
-      for (const [blockId, block] of Object.entries(definition.blocks)) {
-        normalizedBlocks[blockId] = {
-          type: block.type,
-          settings: block.settings ?? {},
-          disabled: block.disabled
-        };
-      }
-    }
-
-    return {
-      type: definition.type ?? sectionId,
-      settings: definition.settings ?? {},
-      blocks: normalizedBlocks,
-      block_order: definition.block_order ?? Object.keys(normalizedBlocks)
-    };
   }
 
   private decorateDeterministicHtml(body: string, extraStyles?: string) {
@@ -888,14 +302,6 @@ ${markup}
     return normalizeLiquidPath(path.relative(this.themeRoot, abs));
   }
 
-  private resolveSectionLookup(sectionType: string) {
-    const withoutPrefix = sanitizeLookupInput(sectionType, 'sections');
-    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
-    const candidate = `${sanitized}.liquid`;
-    const abs = ensurePathInside(this.sectionsDir, path.resolve(this.sectionsDir, candidate), 'section');
-    return normalizeLiquidPath(path.relative(this.themeRoot, abs));
-  }
-
   private async readJsonTemplate(relativePath: string): Promise<JsonTemplate> {
     const normalized = normalizeLiquidPath(relativePath).replace(/^\/+/, '');
     if (!normalized.startsWith('templates/')) {
@@ -906,11 +312,422 @@ ${markup}
     const file = await readFile(abs, 'utf8');
     return JSON.parse(file) as JsonTemplate;
   }
+}
 
-  private async renderStandaloneSection(sectionType: string, ctx: Context) {
-    const configured = this.configuredSections.get(sectionType);
+interface AssetServiceContract {
+  assetUrl(filename: string): Promise<InlineAsset>;
+  stylesheetTag(asset: InlineAsset | string): string;
+  scriptTag(asset: InlineAsset | string): string;
+  collectHeadMarkup(userStyles?: string, fallbackInjected?: boolean): string;
+  reset(): void;
+}
+
+class AssetService implements AssetServiceContract {
+  constructor(
+    private readonly assetsDir: string,
+    private readonly headInjections: string[],
+    private readonly assetManifest: Map<string, RegisteredAsset>,
+    private readonly markFallbackInjected: () => void,
+    private readonly resetFallback: () => void
+  ) {}
+
+  reset() {
+    this.headInjections.length = 0;
+    this.assetManifest.clear();
+    this.resetFallback();
+  }
+
+  async assetUrl(filename: string): Promise<InlineAsset> {
+    const normalized = stripWrappingQuotes(filename.trim());
+    if (!normalized) {
+      throw new Error('asset_url requires a filename.');
+    }
+    const relativePath = removeLeadingSeparators(normalized);
+    const abs = ensurePathInside(this.assetsDir, path.resolve(this.assetsDir, relativePath), 'asset');
+    const buffer = await readFile(abs);
+    const assetRelativePath = normalizeLiquidPath(path.relative(this.assetsDir, abs));
+    const mime = getMimeType(assetRelativePath);
+    const textContent = isTextMime(mime) ? buffer.toString('utf8') : '';
+    const base64 = buffer.toString('base64');
+    const assetUrl = this.buildAssetUrl(assetRelativePath, buffer);
+    this.assetManifest.set(assetUrl, {
+      url: assetUrl,
+      filePath: abs,
+      mimeType: mime,
+      body: buffer,
+      base64
+    });
+
+    const asset = {
+      kind: 'asset',
+      filename: assetRelativePath,
+      content: textContent,
+      mimeType: mime,
+      url: assetUrl,
+      toString() {
+        return assetUrl;
+      },
+      [Symbol.toPrimitive]() {
+        return assetUrl;
+      }
+    } satisfies InlineAsset & { toString(): string; [Symbol.toPrimitive](): string };
+
+    return asset;
+  }
+
+  stylesheetTag(asset: InlineAsset | string) {
+    const handle = ensureAsset(asset);
+    const inline = `<style data-snapify-asset="${handle.filename}">\n${handle.content}\n</style>`;
+    this.headInjections.push(inline);
+    return inline;
+  }
+
+  scriptTag(asset: InlineAsset | string) {
+    const handle = ensureAsset(asset);
+    const inline = `<script data-snapify-asset="${handle.filename}">\n${handle.content}\n</script>`;
+    this.headInjections.push(inline);
+    return inline;
+  }
+
+  collectHeadMarkup(userStyles?: string, fallbackInjected?: boolean) {
+    if (userStyles) {
+      this.headInjections.push(`<style data-snapify-inline="user">\n${userStyles}\n</style>`);
+    }
+    this.injectAssetFallbackScript(fallbackInjected ?? false);
+    return this.headInjections.join('\n');
+  }
+
+  private injectAssetFallbackScript(alreadyInjected: boolean) {
+    if (alreadyInjected || !this.assetManifest.size) {
+      return;
+    }
+
+    const manifestMap: Record<string, { mimeType: string; data: string }> = {};
+    for (const [url, asset] of this.assetManifest.entries()) {
+      manifestMap[url] = {
+        mimeType: asset.mimeType,
+        data: asset.base64
+      };
+    }
+
+    const payload = JSON.stringify(manifestMap);
+    const script = `(()=>{const host='${SNAPIFY_ASSET_HOST}';const manifest=${payload};const decoder=(entry)=>entry?atob(entry.data):null;const isSnapifyUrl=(url)=>typeof url==='string'&&url.startsWith(host);const inlineStyle=(node)=>{const entry=manifest[node.href];if(!entry)return;const css=decoder(entry);if(css==null)return;const style=document.createElement('style');style.setAttribute('data-snapify-fallback','style');style.textContent=css;node.replaceWith(style);};const inlineScript=(node)=>{const entry=manifest[node.src];if(!entry)return;const js=decoder(entry);if(js==null)return;const script=document.createElement('script');script.setAttribute('data-snapify-fallback','script');script.textContent=js;node.replaceWith(script);};const hydrate=()=>{document.querySelectorAll('link[rel="stylesheet"]').forEach((link)=>{if(isSnapifyUrl(link.href)){inlineStyle(link);}});document.querySelectorAll('script[src]').forEach((script)=>{if(isSnapifyUrl(script.src)){inlineScript(script);}});};document.addEventListener('error',(event)=>{const target=event.target;if(!(target instanceof Element))return;if(target.tagName==='LINK'&&isSnapifyUrl((target as HTMLLinkElement).href)){inlineStyle(target as HTMLLinkElement);}if(target.tagName==='SCRIPT'&&isSnapifyUrl((target as HTMLScriptElement).src)){inlineScript(target as HTMLScriptElement);}},true);if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hydrate,{once:true});}else{hydrate();}})();`;
+    const sanitized = script.replace(/<\/script/gi, '<\\/script');
+    this.headInjections.push(`<script data-snapify-inline="asset-fallback">${sanitized}</script>`);
+    this.markFallbackInjected();
+  }
+
+  private buildAssetUrl(filename: string, body: Buffer) {
+    const hash = createHash('md5').update(body).digest('hex').slice(0, 10);
+    const encoded = encodeURIComponent(filename);
+    return `${SNAPIFY_ASSET_HOST}/assets/${encoded}?v=${hash}`;
+  }
+}
+
+class ImageService {
+  private imageCache = new Map<string, ShopifyImage>();
+
+  async ensureImageObject(source: unknown, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
+    if (!source) {
+      return undefined;
+    }
+    if (typeof source === 'string') {
+      if (source.startsWith('shopify://shop_images/')) {
+        return this.buildImageDrop(source, overrides);
+      }
+      const normalized = normalizeExternalUrl(source);
+      const drop: ShopifyImage = {
+        src: normalized,
+        url: normalized
+      };
+      if (overrides?.width) drop.width = overrides.width;
+      if (overrides?.height) drop.height = overrides.height;
+      return drop;
+    }
+    if (typeof source === 'object') {
+      const image = { ...(source as ShopifyImage) } satisfies ShopifyImage;
+      if (image.__snapifyHandle) {
+        if (overrides?.width || overrides?.height) {
+          return this.buildImageDrop(image.__snapifyHandle, overrides);
+        }
+        return image;
+      }
+      if (image.src?.startsWith('shopify://shop_images/')) {
+        return this.buildImageDrop(image.src, {
+          width: image.width ?? overrides?.width,
+          height: image.height ?? overrides?.height
+        });
+      }
+      if (!image.url && image.src) {
+        image.url = image.src;
+      }
+      if (overrides?.width && !image.width) {
+        image.width = overrides.width;
+      }
+      if (overrides?.height && !image.height) {
+        image.height = overrides.height;
+      }
+      if (!image.alt && image.id) {
+        image.alt = humanizeFilename(image.id);
+      }
+      return image;
+    }
+    return undefined;
+  }
+
+  async buildImageDrop(original: string, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
+    const filename = original.replace('shopify://shop_images/', '').trim();
+    if (!filename) {
+      return undefined;
+    }
+    const dimensions = resolvePlaceholderDimensions(overrides);
+    const cacheKey = `${original}|${dimensions.width}|${dimensions.height}`;
+    if (this.imageCache.has(cacheKey)) {
+      return this.imageCache.get(cacheKey);
+    }
+    const label = humanizeFilename(filename) || filename;
+    const url = createPlaceholderDataUrl(dimensions.width, dimensions.height, label || filename);
+    const drop: ShopifyImage = {
+      src: url,
+      url,
+      alt: label,
+      width: dimensions.width,
+      height: dimensions.height,
+      original_width: dimensions.width,
+      original_height: dimensions.height,
+      aspect_ratio: dimensions.width && dimensions.height ? dimensions.width / dimensions.height : undefined,
+      id: filename,
+      __snapifyHandle: original
+    };
+    this.imageCache.set(cacheKey, drop);
+    return drop;
+  }
+}
+
+class ThemeDataService {
+  private themeSettings: Record<string, unknown> = {};
+  private configuredSections = new Map<string, JsonSection>();
+  private linklists = new Map<string, LinkList>();
+  private navigationLoaded = false;
+  private translations = new Map<string, Record<string, string>>();
+  private settingsLoaded = false;
+  private activeLocale = 'en.default';
+
+  constructor(private readonly opts: { configDir: string; localesDir: string }) {}
+
+  async ensureReady(locale?: string) {
+    await this.ensureNavigation();
+    await this.ensureThemeSettings();
+    this.activeLocale = await this.setActiveLocale(locale);
+    return this.activeLocale;
+  }
+
+  getSettings() {
+    return this.themeSettings;
+  }
+
+  getLinklistsContext() {
+    const context: Record<string, LinkList> = {};
+    for (const [handle, list] of this.linklists.entries()) {
+      context[handle] = cloneLinkList(list);
+    }
+    return context;
+  }
+
+  getConfiguredSection(id: string) {
+    return this.configuredSections.get(id);
+  }
+
+  translate(locale: string, key: string, replacements: Record<string, unknown>) {
+    const bundle = this.translations.get(locale) ?? {};
+    const translation = bundle[key];
+    if (!translation) return '';
+    return interpolateTranslation(translation, replacements ?? {});
+  }
+
+  async hydrateJsonTemplate(template: JsonTemplate, images: ImageService = new ImageService()) {
+    if (!template.sections) return;
+    for (const section of Object.values(template.sections)) {
+      if (!section) continue;
+      await this.hydrateJsonSection(section, images);
+    }
+  }
+
+  private async hydrateJsonSection(section: JsonSection, images: ImageService) {
+    if (section.settings) {
+      await this.hydrateValues(section.settings, undefined, images);
+    }
+    if (section.blocks) {
+      for (const block of Object.values(section.blocks)) {
+        if (block?.settings) {
+          await this.hydrateValues(block.settings, undefined, images);
+        }
+      }
+    }
+  }
+
+  private async hydrateValues(value: unknown, key: string | undefined, images: ImageService): Promise<unknown> {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) {
+        value[index] = await this.hydrateValues(value[index], key, images);
+      }
+      return value;
+    }
+    if (isPlainObject(value)) {
+      const record = value as Record<string, unknown>;
+      for (const [childKey, childValue] of Object.entries(record)) {
+        record[childKey] = await this.hydrateValues(childValue, childKey, images);
+      }
+      return record;
+    }
+    if (typeof value === 'string') {
+      if (key && looksLikeMenuKey(key) && this.linklists.has(value)) {
+        return cloneLinkList(this.linklists.get(value)!);
+      }
+      if (value.startsWith('shopify://shop_images/')) {
+        return (await images.buildImageDrop(value)) ?? value;
+      }
+      if (value.startsWith('shopify://')) {
+        return normalizeShopifyUrl(value);
+      }
+    }
+    return value;
+  }
+
+  private async ensureThemeSettings() {
+    if (this.settingsLoaded) return;
+    const settingsPath = path.join(this.opts.configDir, 'settings_data.json');
+    if (!(await fileExists(settingsPath))) {
+      this.settingsLoaded = true;
+      return;
+    }
+    try {
+      const raw = await readFile(settingsPath, 'utf8');
+      const parsed = JSON.parse(raw);
+      const current = parsed.current ?? parsed;
+      const { sections, ...globals } = current;
+      this.themeSettings = globals ?? {};
+      await this.hydrateValues(this.themeSettings, undefined, new ImageService());
+
+      if (sections && typeof sections === 'object') {
+        for (const [id, definition] of Object.entries(sections as Record<string, JsonSection>)) {
+          const normalized = this.normalizeConfiguredSection(id, definition as JsonSection);
+          this.configuredSections.set(id, normalized);
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      this.settingsLoaded = true;
+    }
+  }
+
+  private async ensureNavigation() {
+    if (this.navigationLoaded) return;
+    const navPath = path.join(this.opts.configDir, 'navigation.json');
+    if (await fileExists(navPath)) {
+      try {
+        const raw = await readFile(navPath, 'utf8');
+        const parsed = JSON.parse(raw) as Record<string, LinkList>;
+        for (const [handle, definition] of Object.entries(parsed)) {
+          this.linklists.set(handle, normalizeLinkListDefinition(handle, definition));
+        }
+      } catch {
+        // ignore malformed navigation data
+      }
+    }
+    this.navigationLoaded = true;
+  }
+
+  private async setActiveLocale(locale?: string) {
+    const fallback = 'en.default';
+    const requested = sanitizeLocale(locale ?? this.activeLocale ?? fallback);
+    const resolved = (await this.ensureLocaleTranslations(requested))
+      ? requested
+      : (await this.ensureLocaleTranslations(fallback) ? fallback : requested);
+    this.activeLocale = resolved;
+    return resolved;
+  }
+
+  private async ensureLocaleTranslations(locale: string) {
+    if (this.translations.has(locale)) {
+      return true;
+    }
+    const payload = await this.loadLocaleFile(locale);
+    if (!payload) {
+      return false;
+    }
+    this.translations.set(locale, payload);
+    return true;
+  }
+
+  private async loadLocaleFile(locale: string) {
+    const candidates = buildLocaleCandidates(locale);
+    for (const candidate of candidates) {
+      const abs = ensurePathInside(this.opts.localesDir, path.resolve(this.opts.localesDir, candidate), 'locale');
+      if (!(await fileExists(abs))) continue;
+      try {
+        const raw = await readFile(abs, 'utf8');
+        const parsed = JSON.parse(raw);
+        return flattenTranslations(parsed);
+      } catch {
+        // ignore malformed locale file
+      }
+    }
+    return undefined;
+  }
+
+  private normalizeConfiguredSection(sectionId: string, definition: JsonSection): JsonSection {
+    const normalizedBlocks: Record<string, JsonSectionBlock> = {};
+    if (definition.blocks) {
+      for (const [blockId, block] of Object.entries(definition.blocks)) {
+        normalizedBlocks[blockId] = {
+          type: block.type,
+          settings: block.settings ?? {},
+          disabled: block.disabled
+        };
+      }
+    }
+
+    return {
+      type: definition.type ?? sectionId,
+      settings: definition.settings ?? {},
+      blocks: normalizedBlocks,
+      block_order: definition.block_order ?? Object.keys(normalizedBlocks)
+    };
+  }
+}
+
+class SectionRenderer {
+  private readonly sectionsDir: string;
+  private readonly blocksDir: string;
+  constructor(private readonly opts: { engine: Liquid; themeRoot: string; sectionsDir: string; blocksDir: string; themeData: ThemeDataService }) {
+    this.sectionsDir = opts.sectionsDir;
+    this.blocksDir = opts.blocksDir;
+  }
+
+  buildSectionContext(sectionId: string, definition: JsonSection): SectionContext {
+    const normalized: JsonSection = {
+      type: definition.type ?? sectionId,
+      settings: definition.settings ?? {},
+      blocks: definition.blocks ?? {},
+      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {})
+    };
+
+    return {
+      id: sectionId,
+      type: normalized.type,
+      settings: normalized.settings ?? {},
+      block_order: normalized.block_order ?? Object.keys(normalized.blocks ?? {}),
+      blocks: this.materializeBlocks(normalized)
+    };
+  }
+
+  async renderSection(sectionType: string, ctx: unknown) {
+    const base = this.normalizeCtx(ctx);
+    const configured = this.opts.themeData.getConfiguredSection(sectionType);
     const sectionContext = configured
-      ? this.buildSectionContextFromDefinition(sectionType, configured)
+      ? this.buildSectionContext(sectionType, configured)
       : {
           id: `${sectionType}-static`,
           type: sectionType,
@@ -918,14 +735,297 @@ ${markup}
           block_order: [],
           blocks: []
         };
-
-    const scope: Record<string, unknown> = {};
-    Object.assign(scope, ctx.getAll());
-    scope.section = sectionContext;
-
-    const templatePath = this.resolveSectionLookup(sectionContext.type ?? sectionType);
-    return this.engine.renderFile(templatePath, scope);
+    return this.renderSectionFromContext(sectionContext, { ...base, section: sectionContext });
   }
+
+  async renderSectionFromDefinition(sectionId: string, definition: JsonSection, baseContext: Record<string, unknown>) {
+    const sectionContext = this.buildSectionContext(sectionId, definition);
+    const scope = { ...baseContext, section: sectionContext };
+    return this.renderSectionFromContext(sectionContext, scope, definition.custom_css);
+  }
+
+  async renderSectionFromContext(sectionContext: SectionContext, scope: Record<string, unknown>, customCss?: string[]) {
+    const templatePath = this.resolveSectionLookup(sectionContext.type);
+    const markup = await this.opts.engine.renderFile(templatePath, scope);
+    const css = Array.isArray(customCss) && customCss.length
+      ? `\n<style data-section="${sectionContext.id}">\n${customCss.join('\n')}\n</style>`
+      : '';
+    const wrapper = [
+      `id="shopify-section-${sectionContext.id}"`,
+      'class="shopify-section"',
+      `data-section="${sectionContext.id}"`,
+      `data-section-type="${sectionContext.type}"`
+    ].join(' ');
+    return `<div ${wrapper}>\n${markup}\n</div>${css}`;
+  }
+
+  async renderSectionGroup(handle: string, ctx: unknown) {
+    const groupPath = path.join(this.sectionsDir, `${sanitizeLookupInput(handle, 'sections').replace(/\.liquid$/i, '')}.json`);
+    if (!(await fileExists(groupPath))) return '';
+    const raw = await readFile(groupPath, 'utf8');
+    let parsed: JsonTemplate;
+    try {
+      parsed = JSON.parse(raw) as JsonTemplate;
+    } catch {
+      return '';
+    }
+    await this.opts.themeData.hydrateJsonTemplate(parsed);
+    const order = parsed.order ?? Object.keys(parsed.sections ?? {});
+    const base = this.normalizeCtx(ctx);
+    const rendered: string[] = [];
+    for (const sectionId of order) {
+      const definition = parsed.sections?.[sectionId];
+      if (!definition || definition.disabled) continue;
+      rendered.push(await this.renderSectionFromDefinition(sectionId, definition, base));
+    }
+    return rendered.join('\n');
+  }
+
+  async renderBlocks(ctx: unknown) {
+    const base = this.normalizeCtx(ctx);
+    const section = (base as Record<string, unknown>).section as SectionContext | undefined;
+    if (!section || !section.blocks?.length) return '';
+    const rendered: string[] = [];
+    for (const blockId of section.block_order ?? []) {
+      const block = section.blocks.find((b) => b.id === blockId);
+      if (!block) continue;
+      rendered.push(await this.renderBlock(block, section, base));
+    }
+    return rendered.join('\n');
+  }
+
+  private async renderBlock(block: SectionContext['blocks'][number], section: SectionContext, parentCtx: Record<string, unknown>) {
+    if (block.type === '@app') {
+      return `<div data-snapify-app-block="${section.id}-${block.id}">App block</div>`;
+    }
+    const blockTemplate = path.join(this.blocksDir, `${sanitizeLookupInput(block.type, 'blocks').replace(/\.liquid$/i, '')}.liquid`);
+    if (await fileExists(blockTemplate)) {
+      const scope = { ...parentCtx, section, block };
+      return this.opts.engine.renderFile(normalizeLiquidPath(path.relative(this.opts.themeRoot, blockTemplate)), scope);
+    }
+    return `<div data-snapify-block="${block.id}"></div>`;
+  }
+
+  private materializeBlocks(definition: JsonSection) {
+    const resolved: SectionContext['blocks'] = [];
+    if (!definition.blocks) return resolved;
+    const order = definition.block_order ?? Object.keys(definition.blocks);
+    for (const blockId of order) {
+      const block = definition.blocks[blockId];
+      if (!block || block.disabled) continue;
+      resolved.push({
+        id: blockId,
+        type: block.type,
+        settings: block.settings ?? {}
+      });
+    }
+    return resolved;
+  }
+
+  private resolveSectionLookup(sectionType: string) {
+    const withoutPrefix = sanitizeLookupInput(sectionType, 'sections');
+    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
+    const candidate = `${sanitized}.liquid`;
+    const abs = ensurePathInside(this.sectionsDir, path.resolve(this.sectionsDir, candidate), 'section');
+    return normalizeLiquidPath(path.relative(this.opts.themeRoot, abs));
+  }
+
+  private normalizeCtx(ctx: unknown): Record<string, unknown> {
+    if (ctx && typeof ctx === 'object' && 'getAll' in (ctx as Record<string, unknown>)) {
+      const getter = (ctx as { getAll?: () => Record<string, unknown> }).getAll;
+      if (typeof getter === 'function') {
+        return getter.call(ctx) ?? {};
+      }
+    }
+    return (ctx as Record<string, unknown>) ?? {};
+  }
+}
+
+interface ShopifyPrimitiveServices {
+  assets: AssetServiceContract;
+  images: ImageService;
+  translations: (key: string, replacements: Record<string, unknown>) => string;
+  sections: SectionRenderer;
+  headInjections: string[];
+}
+
+function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveServices) {
+  const assetFilter = services.assets.assetUrl.bind(services.assets);
+  engine.registerFilter('asset_url', assetFilter);
+  engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => services.assets.stylesheetTag(asset));
+  engine.registerFilter('script_tag', (asset: InlineAsset | string) => services.assets.scriptTag(asset));
+  const resolveImage = async (asset: unknown, args: unknown[]) => services.images.ensureImageObject(asset, resolveDimensionOverrides(extractNamedArgs(args)));
+  engine.registerFilter('image_url', async (asset: unknown, ...args: unknown[]) => {
+    const image = await resolveImage(asset, args);
+    return image?.url ?? image?.src ?? '';
+  });
+  engine.registerFilter('img_url', async (asset: unknown, ...args: unknown[]) => {
+    const image = await resolveImage(asset, args);
+    return image?.url ?? image?.src ?? '';
+  });
+  engine.registerFilter('image_tag', async (asset: unknown, ...args: unknown[]) => imageTagFilter(await resolveImage(asset, args), extractNamedArgs(args)));
+  engine.registerFilter('img_tag', async (asset: unknown, ...args: unknown[]) => imageTagFilter(await resolveImage(asset, args), extractNamedArgs(args)));
+
+  const translateFilter = (value: unknown, ...args: unknown[]) => translationFilter(value, args, services.translations);
+  engine.registerFilter('t', translateFilter);
+  engine.registerFilter('translate', translateFilter);
+
+  const schemaTag: TagImplOptions = {
+    parse(tagToken: TagToken, remainTokens: TopLevelToken[]) {
+      const stream = this.liquid.parser.parseStream(remainTokens);
+      stream
+        .on('tag:endschema', () => {
+          stream.stop();
+        })
+        .on('end', () => {
+          throw new Error(`tag ${tagToken.name} not closed`);
+        });
+      stream.start();
+    },
+    render(_ctx: Context, _emitter: Emitter) {
+      return '';
+    }
+  };
+
+  const styleTag = createInlineBlockTag('style', (content) => `<style data-snapify-inline="style">${content}</style>`);
+  const scriptTag = createInlineBlockTag('javascript', (content) => `<script data-snapify-inline="javascript">${content}</script>`);
+  const formTag = createFormTag();
+
+  const sectionTag: TagImplOptions = {
+    parse(this: SectionTagState, tagToken: TagToken) {
+      this.sectionHandle = tagToken.args?.trim();
+    },
+    async render(this: SectionTagState, ctx: Context) {
+      const handle = normalizeSectionHandle(this.sectionHandle ?? '');
+      if (!handle) return '';
+      return services.sections.renderSection(handle, ctx.getAll());
+    }
+  };
+
+  const sectionsTag: TagImplOptions = {
+    parse(this: SectionTagState, tagToken: TagToken) {
+      this.sectionHandle = tagToken.args?.trim();
+    },
+    async render(this: SectionTagState, ctx: Context) {
+      const handle = normalizeSectionHandle(this.sectionHandle ?? '');
+      if (!handle) return '';
+      return services.sections.renderSectionGroup(handle, ctx.getAll());
+    }
+  };
+
+  const contentForTag: TagImplOptions = {
+    parse(this: InlineTagState, tagToken: TagToken) {
+      this.templates = [];
+      this.args = tagToken.args ?? '';
+    },
+    async render(this: InlineTagState, ctx: Context) {
+      const slot = normalizeSectionHandle(this.args ?? '');
+      if (slot !== 'blocks') return '';
+      return services.sections.renderBlocks(ctx.getAll());
+    }
+  } as TagImplOptions;
+
+  engine.registerTag('schema', schemaTag);
+  engine.registerTag('style', styleTag);
+  engine.registerTag('javascript', scriptTag);
+  engine.registerTag('form', formTag);
+  engine.registerTag('section', sectionTag);
+  engine.registerTag('sections', sectionsTag);
+  engine.registerTag('content_for', contentForTag);
+
+  function createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
+    return {
+      parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+        this.templates = [];
+        const parser = this.liquid.parser;
+        const stream = parser.parseStream(remainTokens)
+          .on(`tag:end${tagName}`, () => {
+            stream.stop();
+          })
+          .on('template', (tpl) => {
+            this.templates!.push(tpl as Template);
+          })
+          .on('end', () => {
+            throw new Error(`tag ${tagToken.name} not closed`);
+          });
+        stream.start();
+      },
+      async render(this: InlineTagState, ctx: Context) {
+        const templates = this.templates ?? [];
+        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
+        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
+        return renderWrapper(content);
+      }
+    };
+  }
+
+  function createFormTag(): TagImplOptions {
+    return {
+      parse(this: FormTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+        this.templates = [];
+        this.args = tagToken.args ?? '';
+        const parser = this.liquid.parser;
+        const stream = parser.parseStream(remainTokens)
+          .on('tag:endform', () => {
+            stream.stop();
+          })
+          .on('template', (tpl) => {
+            this.templates!.push(tpl as Template);
+          })
+          .on('end', () => {
+            throw new Error('tag form not closed');
+          });
+        stream.start();
+      },
+      async render(this: FormTagState, ctx: Context, _emitter: Emitter, hash: Record<string, unknown>) {
+        const templates = this.templates ?? [];
+        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
+        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
+        const handle = extractHandleFromArgs(this.args ?? '');
+        const attributes: Record<string, unknown> = {
+          method: 'post',
+          action: '/',
+          'data-snapify-form': handle || 'generic'
+        };
+        Object.assign(attributes, hash);
+        if (!attributes['data-snapify-form']) {
+          attributes['data-snapify-form'] = handle || 'generic';
+        }
+        const attrs = serializeAttributes(attributes);
+        return `<form ${attrs}>${content}</form>`;
+      }
+    };
+  }
+}
+
+function imageTagFilter(image: ShopifyImage | undefined, named: Record<string, unknown>) {
+  if (!image) return '';
+  const src = image.url ?? image.src;
+  if (!src) return '';
+  const attributes: Record<string, unknown> = {
+    loading: named.loading ?? 'lazy',
+    ...named,
+    src
+  };
+  if (!attributes.alt) {
+    attributes.alt = image.alt ?? '';
+  }
+  const derivedWidth = normalizeDimension(named.width) ?? image.width;
+  const derivedHeight = normalizeDimension(named.height) ?? image.height;
+  if (derivedWidth) attributes.width = derivedWidth;
+  if (derivedHeight) attributes.height = derivedHeight;
+  return `<img ${serializeAttributes(attributes)}>`;
+}
+
+function translationFilter(value: unknown, args: unknown[], translateFn: (key: string, replacements: Record<string, unknown>) => string) {
+  const named = extractNamedArgs(args);
+  const key = typeof value === 'string' ? value : String(value ?? '').trim();
+  if (!key) return '';
+  const replacements: Record<string, unknown> = { ...(named ?? {}) };
+  const fallback = typeof replacements.default === 'string' ? replacements.default : key;
+  delete replacements.default;
+  const translated = translateFn(key, replacements);
+  return translated || fallback || '';
 }
 
 function stripWrappingQuotes(value: string) {

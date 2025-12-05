@@ -139,3 +139,20 @@ test('asset filters throw when closing tags are missing', async () => {
   await assert.rejects(() => assembler.compose({ template: 'invalid-form', layout: false }), /tag form not closed/);
   await assert.rejects(() => assembler.compose({ template: 'invalid-schema', layout: false }), /tag schema not closed/);
 });
+
+test('content_for blocks render theme and app blocks with placeholders', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  const html = await assembler.compose({ template: 'content-for-blocks', layout: false });
+  const normalized = stripWhitespace(html);
+  assert.match(normalized, /theme-block-message/, 'theme block should render its template');
+  assert.match(normalized, /data-snapify-app-block/, 'app block should fall back to placeholder');
+  assert.match(normalized, /data-snapify-block="orphan"/, 'unknown blocks should render deterministic placeholder');
+});
+
+test('{% sections %} renders section groups in order', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  const html = await assembler.compose({ template: 'with-group', layout: false });
+  const normalized = stripWhitespace(html);
+  assert.match(normalized, /data-section="header-hero".*Configured Hero Headline/, 'group should render hero section');
+  assert.ok(normalized.indexOf('Global assets head') < normalized.indexOf('Configured Hero Headline'), 'group order should be preserved');
+});

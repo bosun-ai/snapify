@@ -1,0 +1,16 @@
+{
+  "type": "header-group",
+  "sections": {
+    "global-assets": { "type": "global-assets" },
+    "header-hero": {
+      "type": "hero",
+      "settings": {
+        "heading": "Configured Hero Headline",
+        "cta_label": "Configured CTA",
+        "hero_image": "shopify://shop_images/unit-test.png",
+        "menu": "main-menu"
+      }
+    }
+  },
+  "order": ["global-assets", "header-hero"]
+}

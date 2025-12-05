@@ -1,0 +1,15 @@
+<section class="blocky" data-section="{{ section.id }}">
+  <h2>Blocks demo</h2>
+  {% content_for 'blocks' %}
+</section>
+
+{% schema %}
+{
+  "name": "Blocky",
+  "blocks": [
+    { "type": "announcement" },
+    { "type": "@app" },
+    { "type": "orphan" }
+  ]
+}
+{% endschema %}
