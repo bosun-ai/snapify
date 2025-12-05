@@ -1,5 +1,6 @@
 import type { BrowserContextOptions, Page } from 'playwright';
 
+/** Supported Playwright engines for snapshotting. */
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
 /**
@@ -22,6 +23,16 @@ export interface SnapshotOptions {
 
 /**
  * User-facing inputs accepted by {@link render}, mirroring the CLI flags with extra hooks for library consumers.
+ *
+ * @example
+ * ```ts
+ * const options: RenderOptions = {
+ *   themeRoot: '/theme',
+ *   template: 'product',
+ *   data: { product: { title: 'Example' } },
+ *   snapshot: { update: true }
+ * };
+ * ```
  */
 export interface RenderOptions {
   /** Absolute or relative path to the Shopify theme root. */
@@ -52,6 +63,8 @@ export interface RenderOptions {
  */
 export interface RenderResult {
   htmlPath: string;
+  htmlBaselinePath?: string;
+  htmlChanged?: boolean;
   screenshotPath: string;
   diffPath?: string;
   updatedBaseline?: boolean;

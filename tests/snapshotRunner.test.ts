@@ -67,6 +67,7 @@ function runnerOptions(root: string, name: string) {
   return {
     name,
     baselinePath,
+    baselineHtmlPath: path.join(root, `${name}.baseline.html`),
     outputDir,
     htmlPath: path.join(outputDir, `${name}.html`),
     screenshotPath: path.join(outputDir, `${name}.png`),
@@ -81,7 +82,9 @@ test('capture updates the baseline when requested', async () => {
   const result = await runner.capture('<p>baseline</p>', { ...options, updateBaseline: true });
   assert.equal(result.updatedBaseline, true);
   assert.equal(result.diffPath, undefined);
+  assert.equal(result.htmlChanged, false);
   assert.ok(existsSync(options.baselinePath), 'baseline should be written');
+  assert.ok(existsSync(options.baselineHtmlPath), 'html baseline should be written');
 });
 
 test('capture produces a diff when screenshots diverge in size', async () => {
@@ -94,6 +97,25 @@ test('capture produces a diff when screenshots diverge in size', async () => {
   const result = await runnerDiff.capture('<p>changed</p>', options);
   assert.equal(result.updatedBaseline, false);
   assert.ok(result.diffPath && existsSync(result.diffPath), 'diff image should be generated');
+  assert.equal(result.htmlChanged, true, 'html diff should be detected');
+});
+
+test('capture mismatch can be surfaced as a failing assertion for both HTML and PNG', async () => {
+  const dir = tmpDir('snapify-runner-');
+  const options = runnerOptions(dir, 'fail');
+  const runnerUpdate = new StubSnapshotRunner([{ width: 16, height: 16, color: 0 }]);
+  await runnerUpdate.capture('<p>baseline</p>', { ...options, updateBaseline: true });
+
+  const runnerMismatch = new StubSnapshotRunner([{ width: 16, height: 16, color: 255 }]);
+  const result = await runnerMismatch.capture('<p>changed html</p>', options);
+
+  function ensureMatch() {
+    if (result.htmlChanged || result.diffPath) {
+      throw new Error('Snapshot mismatch detected');
+    }
+  }
+
+  assert.throws(ensureMatch, /Snapshot mismatch/, 'consumer checks should fail when HTML or PNG diverge');
 });
 
 test('capture skips diff output when screenshots match existing baselines', async () => {
@@ -103,7 +125,8 @@ test('capture skips diff output when screenshots match existing baselines', asyn
   await runnerUpdate.capture('<p>baseline</p>', { ...options, updateBaseline: true });
 
   const runnerSame = new StubSnapshotRunner([{ width: 16, height: 16 }]);
-  const result = await runnerSame.capture('<p>same</p>', options);
+  const result = await runnerSame.capture('<p>baseline</p>', options);
   assert.equal(result.updatedBaseline, false);
   assert.equal(result.diffPath, undefined);
+  assert.equal(result.htmlChanged, false, 'html should match baseline');
 });

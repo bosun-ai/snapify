@@ -1,0 +1,5 @@
+{% paginate products by 2 %}
+PAGE:{{ paginate.current_page }}/{{ paginate.pages }}
+ITEMS:{% for product in products %}{{ product.title }};{% endfor %}
+PARTS:{{ paginate.parts | json }}
+{% endpaginate %}

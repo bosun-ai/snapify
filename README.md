@@ -45,12 +45,14 @@ Example:
 snapify render index --theme-root .. --viewport 1440x900 --data ./fixtures/home.json
 ```
 
-## Programmatic API
+## Programmatic API (with assertions)
+
+The `assertSnapshot` helper makes PNG the source of truth while still surfacing HTML drift for debugging.
 
 ```ts
-import { render } from 'snapify';
+import { render, assertSnapshot } from 'snapify';
 
-await render({
+const snapshot = await render({
   themeRoot: '/path/to/theme',
   template: 'product',
   locale: 'en.default',
@@ -60,19 +62,141 @@ await render({
   viewport: { width: 1440, height: 900 },
   snapshot: {
     name: 'product-page',
-    baselineDir: './.snapify/baseline',
-    outputDir: './.snapify/artifacts',
-    update: process.env.CI ? false : true
+    baselineDir: './__snapshots__/baseline',
+    outputDir: './__snapshots__/artifacts',
+    update: process.env.CI ? false : true,
+    htmlMode: 'warn' // primary focus on PNG; warn on HTML drift
   }
 });
+
+assertSnapshot(snapshot, { htmlMode: 'warn' });
 ```
 
 The resolved object includes:
 
-- `htmlPath` – rendered document saved to disk for inspection. Recommended to add these to your .gitignore.
+- `htmlPath` – rendered document saved to disk for inspection (kept alongside artifacts).
+- `htmlBaselinePath` – stored baseline HTML for regression comparison.
+- `htmlChanged` – `true` when rendered HTML differs from the baseline.
 - `screenshotPath` – Playwright capture for the latest run.
-- `diffPath` – optional PNG diff if the baseline mismatches.
-- `updatedBaseline` – `true` if the baseline image was re-written this run.
+- `diffPath` – optional PNG diff if the screenshot mismatches the baseline.
+- `updatedBaseline` – `true` if the baseline image (and HTML) were re-written this run.
+
+## Extending Liquid constructs
+
+Snapify exposes the underlying LiquidJS engine so you can add your own tags and filters, using the same API Liquid provides:
+
+```ts
+import { TemplateAssembler } from 'snapify/core/templateAssembler.js';
+
+const assembler = new TemplateAssembler('/path/to/theme');
+
+assembler.extend((engine) => {
+  engine.registerFilter('shout', (value) => String(value ?? '').toUpperCase());
+  engine.registerTag('hello', {
+    parse() {},
+    async render() {
+      return '<span data-custom="hello">hello</span>';
+    }
+  });
+});
+
+const html = await assembler.compose({ template: 'index', layout: false });
+```
+
+Custom constructs participate in the same render pipeline as built-ins, so they work with snapshots and diagnostics.
+
+## Using Snapify in automated tests
+
+Snapify slots into Node's built-in test runner (or Jest/Vitest) so you can assert against baselines inside regular CI suites:
+
+```ts
+// tests/homepage.test.ts
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import path from 'node:path';
+import { render } from 'snapify';
+
+const THEME_ROOT = path.resolve('tests/theme');
+const BASELINE_DIR = path.join(THEME_ROOT, '__snapshots__', 'baseline');
+const ARTIFACT_DIR = path.join(THEME_ROOT, '__snapshots__', 'artifacts');
+const UPDATE = Boolean(process.env.SNAPIFY_UPDATE_BASELINES);
+
+test('index template matches stored baseline', async () => {
+  const snapshot = await render({
+    themeRoot: THEME_ROOT,
+    template: 'index',
+    data: { hero: { headline: 'Golden hour' } },
+    viewport: { width: 1280, height: 720 },
+    snapshot: {
+      name: 'index',
+      baselineDir: BASELINE_DIR,
+      outputDir: ARTIFACT_DIR,
+      update: UPDATE
+    }
+  });
+
+  if (UPDATE) {
+    // Baselines refreshed locally; fail fast if this ever happens on CI.
+    assert.equal(snapshot.updatedBaseline, true);
+    return;
+  }
+
+  assert.equal(snapshot.diffPath, undefined, `Snapshot drift detected. Inspect ${snapshot.diffPath} for details.`);
+  assert.equal(snapshot.htmlChanged, false, 'Rendered HTML should match the stored baseline');
+});
+```
+
+Tips:
+
+- `SNAPIFY_UPDATE_BASELINES=1 npm test` refreshes every snapshot in bulk.
+- Keep `.snapify/**` artifacts in source control so reviewers can see diffs.
+- Push diff artifacts to CI logs (or GitHub Actions annotations) for quick triage.
+
+### Jest example
+
+Using Snapify inside Jest with TypeScript just requires enabling ESM support and invoking `render` + `assertSnapshot` within a test:
+
+```ts
+/**
+ * @jest-environment node
+ */
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { render, assertSnapshot } from 'snapify';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const THEME_ROOT = path.resolve(__dirname, '../theme');
+
+describe('product template', () => {
+  const baselineDir = path.join(THEME_ROOT, '.snapify', 'baseline');
+  const artifactsDir = path.join(THEME_ROOT, '.snapify', 'artifacts');
+  const update = process.env.SNAPIFY_UPDATE_BASELINES === '1';
+
+  it('matches the stored baseline', async () => {
+    const snapshot = await render({
+      themeRoot: THEME_ROOT,
+      template: 'product',
+      snapshot: {
+        name: 'product',
+        baselineDir,
+        outputDir: artifactsDir,
+        update
+      }
+    });
+
+    if (update) {
+      expect(snapshot.updatedBaseline).toBe(true);
+      return;
+    }
+
+    assertSnapshot(snapshot, { htmlMode: 'warn' });
+  });
+});
+
+// See examples/jest/homepage.test.ts in this repository for a complete, runnable example.
+```
+
+Set up Jest with `"type": "module"` (or `transform` rules for CommonJS), run `SNAPIFY_UPDATE_BASELINES=1 npx jest` locally to refresh baselines, and `npx jest` in CI to verify snapshots.
 
 ## How rendering works
 
@@ -96,17 +220,14 @@ Place `sections/__snapify__/partials/cta.liquid` next to it and the renderer wil
 
 ## Testing multiple templates
 
-Repository-level tests live in `tests/` (outside this package) and import the compiled Snapify build. From the repo root:
+This repository uses the Node test runner plus the `SNAPIFY_UPDATE_BASELINES` flag shown above. Run the following from the repo root:
 
 ```bash
-# build snapify first
-npm run snapify:build
+# Refresh baselines locally
+SNAPIFY_UPDATE_BASELINES=1 npm test
 
-# refresh baselines across index/product/cart
-SNAPIFY_UPDATE_BASELINES=1 npm run snapify:test:templates
-
-# validate against existing baselines
-npm run snapify:test:templates
+# Validate without touching stored baselines
+npm test
 ```
 
-Artifacts land under `.snapify/templates/{baseline,artifacts}` at the repo root so they can be reviewed or committed.
+Artifacts land under `.snapify/**` inside your theme root so they can be reviewed or committed.

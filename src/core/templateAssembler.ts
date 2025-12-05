@@ -2,10 +2,16 @@ import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { Liquid } from 'liquidjs';
-import type { TagImplOptions } from 'liquidjs';
+import type { TagImplOptions } from 'liquidjs/dist/template/tag-options-adapter.js';
+import type { Tag } from 'liquidjs/dist/template/tag.js';
+import type { TagToken, TopLevelToken } from 'liquidjs/dist/tokens/index.js';
+import type { Context } from 'liquidjs/dist/context/context.js';
+import type { Emitter } from 'liquidjs/dist/emitters/emitter.js';
+import type { Template } from 'liquidjs/dist/template/template.js';
 import type { RegisteredAsset, RenderOptions } from '../types.js';
 import { fileExists } from '../utils/fs.js';
 import { SNAPIFY_ASSET_HOST } from './constants.js';
+import { Diagnostics } from './diagnostics.js';
 
 const DEFAULT_LAYOUT = 'theme';
 const DEFAULT_ROUTES = {
@@ -31,6 +37,21 @@ const DEFAULT_PLACEHOLDER_HEIGHT = 800;
 const DEFAULT_PLACEHOLDER_LABEL = 'Image';
 const PLACEHOLDER_BG = '#DFE3EB';
 const PLACEHOLDER_TEXT = '#5C6478';
+const LAYOUT_MARKER_PREFIX = '<!--SNAPIFY_LAYOUT:';
+
+interface InlineTagState extends Tag {
+  templates?: Template[];
+  args?: string;
+}
+
+interface FormTagState extends Tag {
+  templates?: Template[];
+  args?: string;
+}
+
+interface SectionTagState extends Tag {
+  sectionHandle?: string;
+}
 
 interface InlineAsset {
   kind: 'asset';
@@ -103,24 +124,31 @@ interface PlaceholderDimensions {
 
 /**
  * Compiles Shopify themes into deterministic HTML by recreating Liquid primitives and Shopify helpers.
- * Callers provide a theme root and then repeatedly invoke {@link TemplateAssembler.compose} with templates to render.
+ * Callers provide a theme root and invoke {@link TemplateAssembler.compose} with templates to render.
+ *
+ * @example
+ * ```ts
+ * const assembler = new TemplateAssembler('/path/to/theme');
+ * const html = await assembler.compose({ template: 'index', data: { product } });
+ * const assets = assembler.getAssetManifest();
+ * // serve `assets` while snapshotting the `html`
+ * ```
  */
 export class TemplateAssembler {
   private engine: Liquid;
   private headInjections: string[] = [];
   private assetManifest = new Map<string, RegisteredAsset>();
   private assetFallbackInjected = false;
-  private themeSettings: Record<string, unknown> = {};
-  private configuredSections = new Map<string, JsonSection>();
-  private settingsLoaded = false;
-  private linklists = new Map<string, LinkList>();
-  private navigationLoaded = false;
-  private imageCache = new Map<string, ShopifyImage>();
-  private translations = new Map<string, Record<string, string>>();
   private activeLocale = 'en.default';
+  private assets: AssetService;
+  private images: ImageService;
+  private themeData: ThemeDataService;
+  private sections: SectionRenderer;
+  private diagnostics: Diagnostics;
   private readonly assetsDir: string;
   private readonly templatesDir: string;
   private readonly sectionsDir: string;
+  private readonly blocksDir: string;
   private readonly layoutDir: string;
   private readonly configDir: string;
   private readonly localesDir: string;
@@ -129,6 +157,7 @@ export class TemplateAssembler {
     this.assetsDir = path.join(this.themeRoot, 'assets');
     this.templatesDir = path.join(this.themeRoot, 'templates');
     this.sectionsDir = path.join(this.themeRoot, 'sections');
+    this.blocksDir = path.join(this.themeRoot, 'blocks');
     this.layoutDir = path.join(this.themeRoot, 'layout');
     this.configDir = path.join(this.themeRoot, 'config');
     this.localesDir = path.join(this.themeRoot, 'locales');
@@ -148,24 +177,34 @@ export class TemplateAssembler {
       strictFilters: false,
       strictVariables: false
     });
-
-    this.registerShopifyPrimitives();
+    this.assets = new AssetService(this.assetsDir, this.headInjections, this.assetManifest, () => this.assetFallbackInjected = true, () => this.assetFallbackInjected = false);
+    this.images = new ImageService();
+    this.themeData = new ThemeDataService({ configDir: this.configDir, localesDir: this.localesDir });
+    this.sections = new SectionRenderer({ engine: this.engine, themeRoot: this.themeRoot, sectionsDir: this.sectionsDir, blocksDir: this.blocksDir, themeData: this.themeData });
+    this.diagnostics = new Diagnostics();
+    registerShopifyPrimitives(this.engine, {
+      assets: this.assets,
+      images: this.images,
+      translations: (key, replacements) => this.themeData.translate(this.activeLocale, key, replacements),
+      sections: this.sections,
+      headInjections: this.headInjections,
+      diagnostics: this.diagnostics
+    });
   }
 
   /**
    * Renders a template (Liquid or JSON) inside the configured theme root, applying Shopify conventions such as linklists, locales, and asset inlining.
    */
   async compose(options: RenderOptions) {
-    await this.setActiveLocale(options.locale);
-    await this.ensureThemeSettings();
+    this.activeLocale = await this.themeData.ensureReady(options.locale);
     this.headInjections.length = 0;
-    this.assetManifest.clear();
-    this.assetFallbackInjected = false;
+    this.assets.reset();
+    this.diagnostics.reset();
     const templateLookup = await this.resolveTemplate(options.template);
     const userData = options.data ?? {};
     const context = {
-      settings: this.themeSettings,
-      linklists: this.getLinklistsContext(),
+      settings: this.themeData.getSettings(),
+      linklists: this.themeData.getLinklistsContext(),
       routes: { ...DEFAULT_ROUTES },
       ...userData
     };
@@ -177,12 +216,23 @@ export class TemplateAssembler {
       bodyHtml = await this.engine.renderFile(templateLookup, context);
     }
 
+    const override = extractLayoutOverride(bodyHtml);
+    bodyHtml = override.html;
+    const layoutOverride = override.layout;
+
     if (options.layout === false) {
-      return this.decorateDeterministicHtml(bodyHtml, options.styles);
+      const decorated = this.decorateDeterministicHtml(bodyHtml, options.styles);
+      return this.injectDiagnostics(decorated);
     }
 
-    const layoutLookup = await this.resolveLayout(options.layout ?? DEFAULT_LAYOUT);
-    const inlineHeader = this.collectHeadMarkup(options.styles);
+    const layoutChoice = layoutOverride === 'none' ? false : (layoutOverride ?? options.layout ?? DEFAULT_LAYOUT);
+    if (layoutChoice === false) {
+      const decorated = this.decorateDeterministicHtml(bodyHtml, options.styles);
+      return this.injectDiagnostics(decorated);
+    }
+
+    const layoutLookup = await this.resolveLayout(layoutChoice);
+    const inlineHeader = this.assets.collectHeadMarkup(options.styles, this.assetFallbackInjected);
     const layoutScope = {
       ...context,
       content_for_layout: bodyHtml,
@@ -190,11 +240,12 @@ export class TemplateAssembler {
     };
 
     const html = await this.engine.renderFile(layoutLookup, layoutScope);
+    let outputHtml = html;
     if (inlineHeader && !html.includes(inlineHeader)) {
-      return this.ensureHeadCarriesInlineCss(html, inlineHeader);
+      outputHtml = this.ensureHeadCarriesInlineCss(html, inlineHeader);
     }
 
-    return html;
+    return this.injectDiagnostics(outputHtml);
   }
 
   /**
@@ -204,17 +255,17 @@ export class TemplateAssembler {
     return new Map(this.assetManifest);
   }
 
-  private getLinklistsContext() {
-    const context: Record<string, LinkList> = {};
-    for (const [handle, list] of this.linklists.entries()) {
-      context[handle] = cloneLinkList(list);
-    }
-    return context;
+  /**
+   * Allow callers to register custom Liquid tags/filters using the underlying LiquidJS engine.
+   * The callback receives the same engine instance Snapify configures internally.
+   */
+  extend(registrar: (engine: Liquid) => void) {
+    registrar(this.engine);
   }
 
   private async renderJsonTemplate(relativePath: string, baseContext: Record<string, unknown>) {
     const template = await this.readJsonTemplate(relativePath);
-    await this.hydrateJsonTemplate(template);
+    await this.themeData.hydrateJsonTemplate(template, this.images);
     if (!template.sections) {
       return '';
     }
@@ -224,7 +275,7 @@ export class TemplateAssembler {
     for (const sectionId of order) {
       const definition = template.sections[sectionId];
       if (!definition || definition.disabled) continue;
-      const markup = await this.renderSection(sectionId, definition, baseContext);
+      const markup = await this.sections.renderSectionFromDefinition(sectionId, definition, baseContext);
       renderedSections.push(markup);
     }
 
@@ -234,276 +285,118 @@ ${renderedSections.join('\n')}
 </${container}>`;
   }
 
-  private async hydrateJsonTemplate(template: JsonTemplate) {
-    if (!template.sections) {
-      return;
+
+  private ensureHeadCarriesInlineCss(html: string, injection: string) {
+    if (!injection.trim()) {
+      return html;
     }
-    for (const section of Object.values(template.sections)) {
-      if (!section) continue;
-      await this.hydrateJsonSection(section);
+    if (/<head[^>]*>/i.test(html)) {
+      return html.replace(/<head([^>]*)>/i, `<head$1>\n${injection}\n`);
     }
+
+    return `${injection}\n${html}`;
   }
 
-  private async hydrateJsonSection(section: JsonSection) {
-    if (section.settings) {
-      await this.hydrateValues(section.settings);
+  private decorateDeterministicHtml(body: string, extraStyles?: string) {
+    if (!extraStyles) {
+      return body;
     }
-    if (section.blocks) {
-      for (const block of Object.values(section.blocks)) {
-        if (block?.settings) {
-          await this.hydrateValues(block.settings);
-        }
-      }
-    }
+    return `<style data-snapify-inline="user">${extraStyles}</style>\n${body}`;
   }
 
-  private async hydrateValues(value: unknown, key?: string): Promise<unknown> {
-    if (Array.isArray(value)) {
-      for (let index = 0; index < value.length; index += 1) {
-        value[index] = await this.hydrateValues(value[index], key);
-      }
-      return value;
-    }
-    if (isPlainObject(value)) {
-      const record = value as Record<string, unknown>;
-      for (const [childKey, childValue] of Object.entries(record)) {
-        record[childKey] = await this.hydrateValues(childValue, childKey);
-      }
-      return record;
-    }
-    if (typeof value === 'string') {
-      if (key && looksLikeMenuKey(key) && this.linklists.has(value)) {
-        return cloneLinkList(this.linklists.get(value)!);
-      }
-      if (value.startsWith('shopify://shop_images/')) {
-        return (await this.buildImageDrop(value)) ?? value;
-      }
-      if (value.startsWith('shopify://')) {
-        return normalizeShopifyUrl(value);
+  private injectDiagnostics(html: string) {
+    const snapshot = this.diagnostics.snapshot();
+    const derivedTags = new Set(snapshot.tags);
+    const tagMatches = html.match(/data-snapify-missing="([^"]+)"/g) || [];
+    for (const match of tagMatches) {
+      const captured = /data-snapify-missing="([^"]+)"/.exec(match);
+      if (captured?.[1]) {
+        derivedTags.add(captured[1]);
       }
     }
-    return value;
-  }
-
-  private translationFilter(value: unknown, args: unknown[]) {
-    const named = extractNamedArgs(args);
-    return this.translate(value, named);
-  }
-
-  private translate(value: unknown, options?: Record<string, unknown>) {
-    const key = typeof value === 'string' ? value : String(value ?? '').trim();
-    if (!key) {
-      return '';
-    }
-    const locale = this.activeLocale;
-    const dictionary = this.translations.get(locale) ?? {};
-    const fallback = typeof options?.default === 'string' ? options.default : key;
-    const template = dictionary[key] ?? fallback ?? key;
-    const replacements: Record<string, unknown> = { ...(options ?? {}) };
-    delete replacements.default;
-    return interpolateTranslation(String(template), replacements);
-  }
-
-  private async renderSection(sectionId: string, definition: JsonSection, baseContext: Record<string, unknown>) {
-    const sectionContext: SectionContext = {
-      id: sectionId,
-      type: definition.type,
-      settings: definition.settings ?? {},
-      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {}),
-      blocks: this.materializeBlocks(definition)
+    const payload = {
+      tags: Array.from(derivedTags).sort(),
+      filters: snapshot.filters
     };
-
-    const scope = {
-      ...baseContext,
-      section: sectionContext
-    };
-
-    const templatePath = this.resolveSectionLookup(definition.type);
-    const markup = await this.engine.renderFile(templatePath, scope);
-    const css = Array.isArray(definition.custom_css) && definition.custom_css.length
-      ? `\n<style data-section="${sectionId}">\n${definition.custom_css.join('\n')}\n</style>`
-      : '';
-
-    const wrapper = this.wrapSectionMarkup(sectionId, definition.type, markup);
-    return `${wrapper}${css}`;
+    const shouldInject = payload.tags.length > 0 || payload.filters.length > 0;
+    if (!shouldInject) {
+      return html;
+    }
+    const script = `<script type="application/json" data-snapify-diagnostics>${JSON.stringify(payload)}</script>`;
+    if (/<\/body>/i.test(html)) {
+      return html.replace(/<\/body>/i, `${script}\n</body>`);
+    }
+    return `${html}\n${script}`;
   }
 
-  private wrapSectionMarkup(sectionId: string, sectionType: string, markup: string) {
-    const attributes = [
-      `id="shopify-section-${sectionId}"`,
-      'class="shopify-section"',
-      `data-section-id="${sectionId}"`,
-      `data-section-type="${sectionType}"`
-    ].join(' ');
-    return `<div ${attributes}>
-${markup}
-</div>`;
-  }
+  private async resolveTemplate(template: string) {
+    const withoutPrefix = sanitizeLookupInput(template, 'templates');
+    const base = withoutPrefix.replace(/\.liquid$|\.json$/i, '');
+    const candidates = [`${base}.liquid`, `${base}.json`, withoutPrefix];
+    const seen = new Set<string>();
 
-  private buildSectionContextFromDefinition(sectionId: string, definition: JsonSection): SectionContext {
-    const normalized: JsonSection = {
-      type: definition.type ?? sectionId,
-      settings: definition.settings ?? {},
-      blocks: definition.blocks ?? {},
-      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {})
-    };
-
-    return {
-      id: sectionId,
-      type: normalized.type,
-      settings: normalized.settings ?? {},
-      block_order: normalized.block_order ?? Object.keys(normalized.blocks ?? {}),
-      blocks: this.materializeBlocks(normalized)
-    };
-  }
-
-  private materializeBlocks(definition: JsonSection) {
-    const resolved: SectionContext['blocks'] = [];
-    if (!definition.blocks) {
-      return resolved;
+    for (const candidate of candidates) {
+      const normalizedCandidate = removeLeadingSeparators(candidate);
+      if (!normalizedCandidate || seen.has(normalizedCandidate)) {
+        continue;
+      }
+      seen.add(normalizedCandidate);
+      const abs = ensurePathInside(this.templatesDir, path.resolve(this.templatesDir, normalizedCandidate), 'template');
+      if (await fileExists(abs)) {
+        return normalizeLiquidPath(path.relative(this.themeRoot, abs));
+      }
     }
 
-    const order = definition.block_order ?? Object.keys(definition.blocks);
-    for (const blockId of order) {
-      const block = definition.blocks[blockId];
-      if (!block || block.disabled) continue;
-      resolved.push({
-        id: blockId,
-        type: block.type,
-        settings: block.settings ?? {}
-      });
+    throw new Error(`Could not resolve template '${template}' inside templates/`);
+  }
+
+  private async resolveLayout(layout: string) {
+    const withoutPrefix = sanitizeLookupInput(layout, 'layout');
+    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
+    const candidate = `${sanitized}.liquid`;
+    const abs = ensurePathInside(this.layoutDir, path.resolve(this.layoutDir, candidate), 'layout');
+    if (!(await fileExists(abs))) {
+      throw new Error(`Unknown layout '${layout}'`);
     }
-
-    return resolved;
+    return normalizeLiquidPath(path.relative(this.themeRoot, abs));
   }
 
-  private registerShopifyPrimitives() {
-    const assembler = this;
-    const assetFilter = this.assetUrlFilter.bind(this);
-    this.engine.registerFilter('asset_url', assetFilter);
-    this.engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => this.stylesheetTagFilter(asset));
-    this.engine.registerFilter('script_tag', (asset: InlineAsset | string) => this.scriptTagFilter(asset));
-    const imageUrlFilter = this.imageUrlFilter.bind(this);
-    const imageTagFilter = this.imageTagFilter.bind(this);
-    this.engine.registerFilter('image_url', (asset: unknown, ...args: unknown[]) => imageUrlFilter(asset, ...args));
-    this.engine.registerFilter('img_url', (asset: unknown, ...args: unknown[]) => imageUrlFilter(asset, ...args));
-    this.engine.registerFilter('image_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
-    this.engine.registerFilter('img_tag', (asset: unknown, ...args: unknown[]) => imageTagFilter(asset, ...args));
-    const translateFilter = (value: unknown, ...args: unknown[]) => this.translationFilter(value, args);
-    this.engine.registerFilter('t', translateFilter);
-    this.engine.registerFilter('translate', translateFilter);
+  private async readJsonTemplate(relativePath: string): Promise<JsonTemplate> {
+    const normalized = normalizeLiquidPath(relativePath).replace(/^\/+/, '');
+    if (!normalized.startsWith('templates/')) {
+      throw new Error(`JSON templates must live under templates/: ${relativePath}`);
+    }
+    const templateRelative = normalized.replace(/^templates\//, '');
+    const abs = ensurePathInside(this.templatesDir, path.resolve(this.templatesDir, templateRelative), 'template');
+    const file = await readFile(abs, 'utf8');
+    return JSON.parse(file) as JsonTemplate;
+  }
+}
 
-    const schemaTag: TagImplOptions = {
-      parse(tagToken, remainTokens) {
-        const stream = this.liquid.parser.parseStream(remainTokens);
-        stream
-          .on('tag:endschema', () => {
-            stream.stop();
-          })
-          .on('end', () => {
-            throw new Error(`tag ${tagToken.name} not closed`);
-          });
-        stream.start();
-      },
-      render() {
-        return '';
-      }
-    };
+interface AssetServiceContract {
+  assetUrl(filename: string): Promise<InlineAsset>;
+  stylesheetTag(asset: InlineAsset | string): string;
+  scriptTag(asset: InlineAsset | string): string;
+  collectHeadMarkup(userStyles?: string, fallbackInjected?: boolean): string;
+  reset(): void;
+}
 
-    const styleTag = this.createInlineBlockTag('style', (content) => `<style data-snapify-inline="style">${content}</style>`);
-    const scriptTag = this.createInlineBlockTag('javascript', (content) => `<script data-snapify-inline="javascript">${content}</script>`);
-    const formTag = this.createFormTag();
+class AssetService implements AssetServiceContract {
+  constructor(
+    private readonly assetsDir: string,
+    private readonly headInjections: string[],
+    private readonly assetManifest: Map<string, RegisteredAsset>,
+    private readonly markFallbackInjected: () => void,
+    private readonly resetFallback: () => void
+  ) {}
 
-    const sectionTag: TagImplOptions = {
-      parse(tagToken) {
-        const state = this as unknown as { sectionHandle?: string };
-        state.sectionHandle = tagToken.args?.trim();
-      },
-      async render(ctx) {
-        const state = this as unknown as { sectionHandle?: string };
-        const handle = normalizeSectionHandle(state.sectionHandle ?? '');
-        if (!handle) {
-          return '';
-        }
-        const baseContext = ctx.getAll();
-        return assembler.renderStandaloneSection(handle, baseContext);
-      }
-    };
-
-    this.engine.registerTag('schema', schemaTag);
-    this.engine.registerTag('style', styleTag);
-    this.engine.registerTag('javascript', scriptTag);
-    this.engine.registerTag('form', formTag);
-    this.engine.registerTag('section', sectionTag);
+  reset() {
+    this.headInjections.length = 0;
+    this.assetManifest.clear();
+    this.resetFallback();
   }
 
-  private createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
-    return {
-      parse(tagToken, remainTokens) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid };
-        state.templates = [];
-        const parser = state.liquid.parser;
-        const stream = parser.parseStream(remainTokens)
-          .on(`tag:end${tagName}`, () => {
-            stream.stop();
-          })
-          .on('template', (tpl) => {
-            state.templates.push(tpl);
-          })
-          .on('end', () => {
-            throw new Error(`tag ${tagToken.name} not closed`);
-          });
-        stream.start();
-      },
-      async render(ctx) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid };
-        const rendered = await renderChildTemplates(state.liquid, state.templates, ctx);
-        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
-        return renderWrapper(content);
-      }
-    } satisfies TagImplOptions;
-  }
-
-  private createFormTag(): TagImplOptions {
-    return {
-      parse(tagToken, remainTokens) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid; args?: string };
-        state.templates = [];
-        state.args = tagToken.args ?? '';
-        const parser = state.liquid.parser;
-        const stream = parser.parseStream(remainTokens)
-          .on('tag:endform', () => {
-            stream.stop();
-          })
-          .on('template', (tpl) => {
-            state.templates.push(tpl);
-          })
-          .on('end', () => {
-            throw new Error('tag form not closed');
-          });
-        stream.start();
-      },
-      async render(ctx, _emitter, hash) {
-        const state = this as unknown as { templates: any[]; liquid: Liquid; args?: string };
-        const rendered = await renderChildTemplates(state.liquid, state.templates, ctx);
-        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
-        const handle = extractHandleFromArgs(state.args ?? '');
-        const attributes: Record<string, unknown> = {
-          method: 'post',
-          action: '/',
-          'data-snapify-form': handle || 'generic'
-        };
-        Object.assign(attributes, hash ?? {});
-        if (!attributes['data-snapify-form']) {
-          attributes['data-snapify-form'] = handle || 'generic';
-        }
-        const attrs = serializeAttributes(attributes);
-        return `<form ${attrs}>${content}</form>`;
-      }
-    } satisfies TagImplOptions;
-  }
-
-  private async assetUrlFilter(filename: string): Promise<InlineAsset> {
+  async assetUrl(filename: string): Promise<InlineAsset> {
     const normalized = stripWrappingQuotes(filename.trim());
     if (!normalized) {
       throw new Error('asset_url requires a filename.');
@@ -541,61 +434,59 @@ ${markup}
     return asset;
   }
 
-  private stylesheetTagFilter(asset: InlineAsset | string) {
+  stylesheetTag(asset: InlineAsset | string) {
     const handle = ensureAsset(asset);
     const inline = `<style data-snapify-asset="${handle.filename}">\n${handle.content}\n</style>`;
     this.headInjections.push(inline);
     return inline;
   }
 
-  private scriptTagFilter(asset: InlineAsset | string) {
+  scriptTag(asset: InlineAsset | string) {
     const handle = ensureAsset(asset);
     const inline = `<script data-snapify-asset="${handle.filename}">\n${handle.content}\n</script>`;
     this.headInjections.push(inline);
     return inline;
   }
 
-  private async imageUrlFilter(source: unknown, ...args: unknown[]) {
-    const named = extractNamedArgs(args);
-    const dimensions = resolveDimensionOverrides(named);
-    const image = await this.ensureImageObject(source, dimensions);
-    if (!image) {
-      return '';
+  collectHeadMarkup(userStyles?: string, fallbackInjected?: boolean) {
+    if (userStyles) {
+      this.headInjections.push(`<style data-snapify-inline="user">\n${userStyles}\n</style>`);
     }
-    return image.url ?? image.src ?? '';
+    this.injectAssetFallbackScript(fallbackInjected ?? false);
+    return this.headInjections.join('\n');
   }
 
-  private async imageTagFilter(source: unknown, ...args: unknown[]) {
-    const named = extractNamedArgs(args);
-    const dimensions = resolveDimensionOverrides(named);
-    const image = await this.ensureImageObject(source, dimensions);
-    if (!image) {
-      return '';
+  private injectAssetFallbackScript(alreadyInjected: boolean) {
+    if (alreadyInjected || !this.assetManifest.size) {
+      return;
     }
-    const src = image.url ?? image.src;
-    if (!src) {
-      return '';
+
+    const manifestMap: Record<string, { mimeType: string; data: string }> = {};
+    for (const [url, asset] of this.assetManifest.entries()) {
+      manifestMap[url] = {
+        mimeType: asset.mimeType,
+        data: asset.base64
+      };
     }
-    const attributes: Record<string, unknown> = {
-      loading: named.loading ?? 'lazy',
-      ...named,
-      src
-    };
-    if (!attributes.alt) {
-      attributes.alt = image.alt ?? '';
-    }
-    const derivedWidth = dimensions.width ?? image.width;
-    const derivedHeight = dimensions.height ?? image.height;
-    if (derivedWidth) {
-      attributes.width = derivedWidth;
-    }
-    if (derivedHeight) {
-      attributes.height = derivedHeight;
-    }
-    return `<img ${serializeAttributes(attributes)}>`;
+
+    const payload = JSON.stringify(manifestMap);
+    const script = `(()=>{const host='${SNAPIFY_ASSET_HOST}';const manifest=${payload};const decoder=(entry)=>entry?atob(entry.data):null;const isSnapifyUrl=(url)=>typeof url==='string'&&url.startsWith(host);const inlineStyle=(node)=>{const entry=manifest[node.href];if(!entry)return;const css=decoder(entry);if(css==null)return;const style=document.createElement('style');style.setAttribute('data-snapify-fallback','style');style.textContent=css;node.replaceWith(style);};const inlineScript=(node)=>{const entry=manifest[node.src];if(!entry)return;const js=decoder(entry);if(js==null)return;const script=document.createElement('script');script.setAttribute('data-snapify-fallback','script');script.textContent=js;node.replaceWith(script);};const hydrate=()=>{document.querySelectorAll('link[rel="stylesheet"]').forEach((link)=>{if(isSnapifyUrl(link.href)){inlineStyle(link);}});document.querySelectorAll('script[src]').forEach((script)=>{if(isSnapifyUrl(script.src)){inlineScript(script);}});};document.addEventListener('error',(event)=>{const target=event.target;if(!(target instanceof Element))return;if(target.tagName==='LINK'&&isSnapifyUrl((target as HTMLLinkElement).href)){inlineStyle(target as HTMLLinkElement);}if(target.tagName==='SCRIPT'&&isSnapifyUrl((target as HTMLScriptElement).src)){inlineScript(target as HTMLScriptElement);}},true);if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hydrate,{once:true});}else{hydrate();}})();`;
+    const sanitized = script.replace(/<\/script/gi, '<\\/script');
+    this.headInjections.push(`<script data-snapify-inline="asset-fallback">${sanitized}</script>`);
+    this.markFallbackInjected();
   }
 
-  private async ensureImageObject(source: unknown, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
+  private buildAssetUrl(filename: string, body: Buffer) {
+    const hash = createHash('md5').update(body).digest('hex').slice(0, 10);
+    const encoded = encodeURIComponent(filename);
+    return `${SNAPIFY_ASSET_HOST}/assets/${encoded}?v=${hash}`;
+  }
+}
+
+class ImageService {
+  private imageCache = new Map<string, ShopifyImage>();
+
+  async ensureImageObject(source: unknown, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
     if (!source) {
       return undefined;
     }
@@ -608,12 +499,8 @@ ${markup}
         src: normalized,
         url: normalized
       };
-      if (overrides?.width) {
-        drop.width = overrides.width;
-      }
-      if (overrides?.height) {
-        drop.height = overrides.height;
-      }
+      if (overrides?.width) drop.width = overrides.width;
+      if (overrides?.height) drop.height = overrides.height;
       return drop;
     }
     if (typeof source === 'object') {
@@ -647,7 +534,7 @@ ${markup}
     return undefined;
   }
 
-  private async buildImageDrop(original: string, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
+  async buildImageDrop(original: string, overrides?: PlaceholderDimensions): Promise<ShopifyImage | undefined> {
     const filename = original.replace('shopify://shop_images/', '').trim();
     if (!filename) {
       return undefined;
@@ -674,93 +561,133 @@ ${markup}
     this.imageCache.set(cacheKey, drop);
     return drop;
   }
+}
 
-  private injectAssetFallbackScript() {
-    if (this.assetFallbackInjected || !this.assetManifest.size) {
-      return;
-    }
+class ThemeDataService {
+  private themeSettings: Record<string, unknown> = {};
+  private configuredSections = new Map<string, JsonSection>();
+  private linklists = new Map<string, LinkList>();
+  private navigationLoaded = false;
+  private translations = new Map<string, Record<string, string>>();
+  private settingsLoaded = false;
+  private activeLocale = 'en.default';
 
-    const manifestMap: Record<string, { mimeType: string; data: string }> = {};
-    for (const [url, asset] of this.assetManifest.entries()) {
-      manifestMap[url] = {
-        mimeType: asset.mimeType,
-        data: asset.base64
-      };
-    }
+  constructor(private readonly opts: { configDir: string; localesDir: string }) {}
 
-    const payload = JSON.stringify(manifestMap);
-    const script = `(()=>{const host='${SNAPIFY_ASSET_HOST}';const manifest=${payload};const decoder=(entry)=>entry?atob(entry.data):null;const isSnapifyUrl=(url)=>typeof url==='string'&&url.startsWith(host);const inlineStyle=(node)=>{const entry=manifest[node.href];if(!entry)return;const css=decoder(entry);if(css==null)return;const style=document.createElement('style');style.setAttribute('data-snapify-fallback','style');style.textContent=css;node.replaceWith(style);};const inlineScript=(node)=>{const entry=manifest[node.src];if(!entry)return;const js=decoder(entry);if(js==null)return;const script=document.createElement('script');script.setAttribute('data-snapify-fallback','script');script.textContent=js;node.replaceWith(script);};const hydrate=()=>{document.querySelectorAll('link[rel="stylesheet"]').forEach((link)=>{if(isSnapifyUrl(link.href)){inlineStyle(link);}});document.querySelectorAll('script[src]').forEach((script)=>{if(isSnapifyUrl(script.src)){inlineScript(script);}});};document.addEventListener('error',(event)=>{const target=event.target;if(!(target instanceof Element))return;if(target.tagName==='LINK'&&isSnapifyUrl((target as HTMLLinkElement).href)){inlineStyle(target as HTMLLinkElement);}if(target.tagName==='SCRIPT'&&isSnapifyUrl((target as HTMLScriptElement).src)){inlineScript(target as HTMLScriptElement);}},true);if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hydrate,{once:true});}else{hydrate();}})();`;
-    const sanitized = script.replace(/<\/script/gi, '<\\/script');
-    this.headInjections.push(`<script data-snapify-inline="asset-fallback">${sanitized}</script>`);
-    this.assetFallbackInjected = true;
+  async ensureReady(locale?: string) {
+    await this.ensureNavigation();
+    await this.ensureThemeSettings();
+    this.activeLocale = await this.setActiveLocale(locale);
+    return this.activeLocale;
   }
 
-  private buildAssetUrl(filename: string, body: Buffer) {
-    const hash = createHash('md5').update(body).digest('hex').slice(0, 10);
-    const encoded = encodeURIComponent(filename);
-    return `${SNAPIFY_ASSET_HOST}/assets/${encoded}?v=${hash}`;
+  getSettings() {
+    return this.themeSettings;
   }
 
-  private collectHeadMarkup(userStyles?: string) {
-    if (userStyles) {
-      this.headInjections.push(`<style data-snapify-inline="user">\n${userStyles}\n</style>`);
+  getLinklistsContext() {
+    const context: Record<string, LinkList> = {};
+    for (const [handle, list] of this.linklists.entries()) {
+      context[handle] = cloneLinkList(list);
     }
-    this.injectAssetFallbackScript();
-    return this.headInjections.join('\n');
+    return context;
   }
 
-  private ensureHeadCarriesInlineCss(html: string, injection: string) {
-    if (!injection.trim()) {
-      return html;
-    }
-    if (/<head[^>]*>/i.test(html)) {
-      return html.replace(/<head([^>]*)>/i, `<head$1>\n${injection}\n`);
-    }
+  getConfiguredSection(id: string) {
+    return this.configuredSections.get(id);
+  }
 
-    return `${injection}\n${html}`;
+  translate(locale: string, key: string, replacements: Record<string, unknown>) {
+    const bundle = this.translations.get(locale) ?? {};
+    const translation = bundle[key];
+    if (!translation) return '';
+    return interpolateTranslation(translation, replacements ?? {});
+  }
+
+  async hydrateJsonTemplate(template: JsonTemplate, images: ImageService = new ImageService()) {
+    if (!template.sections) return;
+    for (const section of Object.values(template.sections)) {
+      if (!section) continue;
+      await this.hydrateJsonSection(section, images);
+    }
+  }
+
+  private async hydrateJsonSection(section: JsonSection, images: ImageService) {
+    if (section.settings) {
+      await this.hydrateValues(section.settings, undefined, images);
+    }
+    if (section.blocks) {
+      for (const block of Object.values(section.blocks)) {
+        if (block?.settings) {
+          await this.hydrateValues(block.settings, undefined, images);
+        }
+      }
+    }
+  }
+
+  private async hydrateValues(value: unknown, key: string | undefined, images: ImageService): Promise<unknown> {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) {
+        value[index] = await this.hydrateValues(value[index], key, images);
+      }
+      return value;
+    }
+    if (isPlainObject(value)) {
+      const record = value as Record<string, unknown>;
+      // Shopify image drop stored as { "__snapifyHandle": "shopify://shop_images/..." }
+      if (typeof record.__snapifyHandle === 'string' && record.__snapifyHandle.startsWith('shopify://shop_images/')) {
+        return (await images.buildImageDrop(record.__snapifyHandle)) ?? value;
+      }
+      for (const [childKey, childValue] of Object.entries(record)) {
+        record[childKey] = await this.hydrateValues(childValue, childKey, images);
+      }
+      return record;
+    }
+    if (typeof value === 'string') {
+      if (key && looksLikeMenuKey(key) && this.linklists.has(value)) {
+        return cloneLinkList(this.linklists.get(value)!);
+      }
+      if (value.startsWith('shopify://shop_images/')) {
+        return (await images.buildImageDrop(value)) ?? value;
+      }
+      if (value.startsWith('shopify://')) {
+        return normalizeShopifyUrl(value);
+      }
+    }
+    return value;
   }
 
   private async ensureThemeSettings() {
-    if (this.settingsLoaded) {
-      return;
-    }
-
-    await this.ensureNavigation();
-
-    const settingsPath = path.join(this.configDir, 'settings_data.json');
+    if (this.settingsLoaded) return;
+    const settingsPath = path.join(this.opts.configDir, 'settings_data.json');
     if (!(await fileExists(settingsPath))) {
       this.settingsLoaded = true;
       return;
     }
-
     try {
       const raw = await readFile(settingsPath, 'utf8');
       const parsed = JSON.parse(raw);
       const current = parsed.current ?? parsed;
       const { sections, ...globals } = current;
       this.themeSettings = globals ?? {};
-      await this.hydrateValues(this.themeSettings);
+      await this.hydrateValues(this.themeSettings, undefined, new ImageService());
 
       if (sections && typeof sections === 'object') {
         for (const [id, definition] of Object.entries(sections as Record<string, JsonSection>)) {
           const normalized = this.normalizeConfiguredSection(id, definition as JsonSection);
-          await this.hydrateJsonSection(normalized);
           this.configuredSections.set(id, normalized);
         }
       }
     } catch {
-      // ignore parse errors; fallback to defaults
+      // ignore
     } finally {
       this.settingsLoaded = true;
     }
   }
 
   private async ensureNavigation() {
-    if (this.navigationLoaded) {
-      return;
-    }
-
-    const navPath = path.join(this.configDir, 'navigation.json');
+    if (this.navigationLoaded) return;
+    const navPath = path.join(this.opts.configDir, 'navigation.json');
     if (await fileExists(navPath)) {
       try {
         const raw = await readFile(navPath, 'utf8');
@@ -772,17 +699,17 @@ ${markup}
         // ignore malformed navigation data
       }
     }
-
     this.navigationLoaded = true;
   }
 
   private async setActiveLocale(locale?: string) {
     const fallback = 'en.default';
-    const requested = sanitizeLocale(locale ?? process.env.SNAPIFY_LOCALE ?? this.activeLocale ?? fallback);
-    const resolved = await this.ensureLocaleTranslations(requested)
+    const requested = sanitizeLocale(locale ?? this.activeLocale ?? fallback);
+    const resolved = (await this.ensureLocaleTranslations(requested))
       ? requested
       : (await this.ensureLocaleTranslations(fallback) ? fallback : requested);
     this.activeLocale = resolved;
+    return resolved;
   }
 
   private async ensureLocaleTranslations(locale: string) {
@@ -800,10 +727,8 @@ ${markup}
   private async loadLocaleFile(locale: string) {
     const candidates = buildLocaleCandidates(locale);
     for (const candidate of candidates) {
-      const abs = ensurePathInside(this.localesDir, path.resolve(this.localesDir, candidate), 'locale');
-      if (!(await fileExists(abs))) {
-        continue;
-      }
+      const abs = ensurePathInside(this.opts.localesDir, path.resolve(this.opts.localesDir, candidate), 'locale');
+      if (!(await fileExists(abs))) continue;
       try {
         const raw = await readFile(abs, 'utf8');
         const parsed = JSON.parse(raw);
@@ -834,69 +759,38 @@ ${markup}
       block_order: definition.block_order ?? Object.keys(normalizedBlocks)
     };
   }
+}
 
-  private decorateDeterministicHtml(body: string, extraStyles?: string) {
-    if (!extraStyles) {
-      return body;
-    }
-    return `<style data-snapify-inline="user">${extraStyles}</style>\n${body}`;
+class SectionRenderer {
+  private readonly sectionsDir: string;
+  private readonly blocksDir: string;
+  constructor(private readonly opts: { engine: Liquid; themeRoot: string; sectionsDir: string; blocksDir: string; themeData: ThemeDataService }) {
+    this.sectionsDir = opts.sectionsDir;
+    this.blocksDir = opts.blocksDir;
   }
 
-  private async resolveTemplate(template: string) {
-    const withoutPrefix = sanitizeLookupInput(template, 'templates');
-    const base = withoutPrefix.replace(/\.liquid$|\.json$/i, '');
-    const candidates = [`${base}.liquid`, `${base}.json`, withoutPrefix];
-    const seen = new Set<string>();
+  buildSectionContext(sectionId: string, definition: JsonSection): SectionContext {
+    const normalized: JsonSection = {
+      type: definition.type ?? sectionId,
+      settings: definition.settings ?? {},
+      blocks: definition.blocks ?? {},
+      block_order: definition.block_order ?? Object.keys(definition.blocks ?? {})
+    };
 
-    for (const candidate of candidates) {
-      const normalizedCandidate = removeLeadingSeparators(candidate);
-      if (!normalizedCandidate || seen.has(normalizedCandidate)) {
-        continue;
-      }
-      seen.add(normalizedCandidate);
-      const abs = ensurePathInside(this.templatesDir, path.resolve(this.templatesDir, normalizedCandidate), 'template');
-      if (await fileExists(abs)) {
-        return normalizeLiquidPath(path.relative(this.themeRoot, abs));
-      }
-    }
-
-    throw new Error(`Could not resolve template '${template}' inside templates/`);
+    return {
+      id: sectionId,
+      type: normalized.type,
+      settings: normalized.settings ?? {},
+      block_order: normalized.block_order ?? Object.keys(normalized.blocks ?? {}),
+      blocks: this.materializeBlocks(normalized)
+    };
   }
 
-  private async resolveLayout(layout: string) {
-    const withoutPrefix = sanitizeLookupInput(layout, 'layout');
-    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
-    const candidate = `${sanitized}.liquid`;
-    const abs = ensurePathInside(this.layoutDir, path.resolve(this.layoutDir, candidate), 'layout');
-    if (!(await fileExists(abs))) {
-      throw new Error(`Unknown layout '${layout}'`);
-    }
-    return normalizeLiquidPath(path.relative(this.themeRoot, abs));
-  }
-
-  private resolveSectionLookup(sectionType: string) {
-    const withoutPrefix = sanitizeLookupInput(sectionType, 'sections');
-    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
-    const candidate = `${sanitized}.liquid`;
-    const abs = ensurePathInside(this.sectionsDir, path.resolve(this.sectionsDir, candidate), 'section');
-    return normalizeLiquidPath(path.relative(this.themeRoot, abs));
-  }
-
-  private async readJsonTemplate(relativePath: string): Promise<JsonTemplate> {
-    const normalized = normalizeLiquidPath(relativePath).replace(/^\/+/, '');
-    if (!normalized.startsWith('templates/')) {
-      throw new Error(`JSON templates must live under templates/: ${relativePath}`);
-    }
-    const templateRelative = normalized.replace(/^templates\//, '');
-    const abs = ensurePathInside(this.templatesDir, path.resolve(this.templatesDir, templateRelative), 'template');
-    const file = await readFile(abs, 'utf8');
-    return JSON.parse(file) as JsonTemplate;
-  }
-
-  private async renderStandaloneSection(sectionType: string, baseContext: Record<string, unknown>) {
-    const configured = this.configuredSections.get(sectionType);
+  async renderSection(sectionType: string, ctx: unknown) {
+    const base = this.normalizeCtx(ctx);
+    const configured = this.opts.themeData.getConfiguredSection(sectionType);
     const sectionContext = configured
-      ? this.buildSectionContextFromDefinition(sectionType, configured)
+      ? this.buildSectionContext(sectionType, configured)
       : {
           id: `${sectionType}-static`,
           type: sectionType,
@@ -904,15 +798,659 @@ ${markup}
           block_order: [],
           blocks: []
         };
-
-    const scope = {
-      ...baseContext,
-      section: sectionContext
-    } satisfies Record<string, unknown>;
-
-    const templatePath = this.resolveSectionLookup(sectionContext.type ?? sectionType);
-    return this.engine.renderFile(templatePath, scope);
+    return this.renderSectionFromContext(sectionContext, { ...base, section: sectionContext });
   }
+
+  async renderSectionFromDefinition(sectionId: string, definition: JsonSection, baseContext: Record<string, unknown>) {
+    const sectionContext = this.buildSectionContext(sectionId, definition);
+    const scope = { ...baseContext, section: sectionContext };
+    return this.renderSectionFromContext(sectionContext, scope, definition.custom_css);
+  }
+
+  async renderSectionFromContext(sectionContext: SectionContext, scope: Record<string, unknown>, customCss?: string[]) {
+    const templatePath = this.resolveSectionLookup(sectionContext.type);
+    const markup = await this.opts.engine.renderFile(templatePath, scope);
+    const css = Array.isArray(customCss) && customCss.length
+      ? `\n<style data-section="${sectionContext.id}">\n${customCss.join('\n')}\n</style>`
+      : '';
+    const wrapper = [
+      `id="shopify-section-${sectionContext.id}"`,
+      'class="shopify-section"',
+      `data-section="${sectionContext.id}"`,
+      `data-section-type="${sectionContext.type}"`
+    ].join(' ');
+    return `<div ${wrapper}>\n${markup}\n</div>${css}`;
+  }
+
+  async renderSectionGroup(handle: string, ctx: unknown) {
+    const groupPath = path.join(this.sectionsDir, `${sanitizeLookupInput(handle, 'sections').replace(/\.liquid$/i, '')}.json`);
+    if (!(await fileExists(groupPath))) return '';
+    const raw = await readFile(groupPath, 'utf8');
+    let parsed: JsonTemplate;
+    try {
+      parsed = JSON.parse(raw) as JsonTemplate;
+    } catch {
+      return '';
+    }
+    await this.opts.themeData.hydrateJsonTemplate(parsed);
+    const order = parsed.order ?? Object.keys(parsed.sections ?? {});
+    const base = this.normalizeCtx(ctx);
+    const rendered: string[] = [];
+    for (const sectionId of order) {
+      const definition = parsed.sections?.[sectionId];
+      if (!definition || definition.disabled) continue;
+      rendered.push(await this.renderSectionFromDefinition(sectionId, definition, base));
+    }
+    return rendered.join('\n');
+  }
+
+  async renderBlocks(ctx: unknown) {
+    const base = this.normalizeCtx(ctx);
+    const section = (base as Record<string, unknown>).section as SectionContext | undefined;
+    if (!section || !section.blocks?.length) return '';
+    const rendered: string[] = [];
+    for (const blockId of section.block_order ?? []) {
+      const block = section.blocks.find((b) => b.id === blockId);
+      if (!block) continue;
+      rendered.push(await this.renderBlock(block, section, base));
+    }
+    return rendered.join('\n');
+  }
+
+  private async renderBlock(block: SectionContext['blocks'][number], section: SectionContext, parentCtx: Record<string, unknown>) {
+    if (block.type === '@app') {
+      return `<div data-snapify-app-block="${section.id}-${block.id}">App block</div>`;
+    }
+    const blockTemplate = path.join(this.blocksDir, `${sanitizeLookupInput(block.type, 'blocks').replace(/\.liquid$/i, '')}.liquid`);
+    if (await fileExists(blockTemplate)) {
+      const scope = { ...parentCtx, section, block };
+      return this.opts.engine.renderFile(normalizeLiquidPath(path.relative(this.opts.themeRoot, blockTemplate)), scope);
+    }
+    return `<div data-snapify-block="${block.id}"></div>`;
+  }
+
+  private materializeBlocks(definition: JsonSection) {
+    const resolved: SectionContext['blocks'] = [];
+    if (!definition.blocks) return resolved;
+    const order = definition.block_order ?? Object.keys(definition.blocks);
+    for (const blockId of order) {
+      const block = definition.blocks[blockId];
+      if (!block || block.disabled) continue;
+      resolved.push({
+        id: blockId,
+        type: block.type,
+        settings: block.settings ?? {}
+      });
+    }
+    return resolved;
+  }
+
+  private resolveSectionLookup(sectionType: string) {
+    const withoutPrefix = sanitizeLookupInput(sectionType, 'sections');
+    const sanitized = withoutPrefix.replace(/\.liquid$/i, '');
+    const candidate = `${sanitized}.liquid`;
+    const abs = ensurePathInside(this.sectionsDir, path.resolve(this.sectionsDir, candidate), 'section');
+    return normalizeLiquidPath(path.relative(this.opts.themeRoot, abs));
+  }
+
+  private normalizeCtx(ctx: unknown): Record<string, unknown> {
+    if (ctx && typeof ctx === 'object' && 'getAll' in (ctx as Record<string, unknown>)) {
+      const getter = (ctx as { getAll?: () => Record<string, unknown> }).getAll;
+      if (typeof getter === 'function') {
+        return getter.call(ctx) ?? {};
+      }
+    }
+    return (ctx as Record<string, unknown>) ?? {};
+  }
+}
+
+interface ShopifyPrimitiveServices {
+  assets: AssetServiceContract;
+  images: ImageService;
+  translations: (key: string, replacements: Record<string, unknown>) => string;
+  sections: SectionRenderer;
+  headInjections: string[];
+  diagnostics?: Diagnostics;
+}
+
+function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveServices) {
+  const assetFilter = services.assets.assetUrl.bind(services.assets);
+  engine.registerFilter('asset_url', assetFilter);
+  engine.registerFilter('stylesheet_tag', (asset: InlineAsset | string) => services.assets.stylesheetTag(asset));
+  engine.registerFilter('script_tag', (asset: InlineAsset | string) => services.assets.scriptTag(asset));
+  engine.registerFilter('global_asset_url', async (asset: unknown) => (await assetFilter(String(asset ?? ''))).url ?? '');
+  engine.registerFilter('shopify_asset_url', async (asset: unknown) => (await assetFilter(String(asset ?? ''))).url ?? '');
+  engine.registerFilter('asset_img_url', async (asset: unknown, size?: unknown) => addSizeParam((await assetFilter(String(asset ?? ''))).url ?? '', size));
+  engine.registerFilter('preload_tag', async (asset: unknown, asType?: unknown) => preloadTag((await assetFilter(String(asset ?? ''))).url ?? '', asType));
+  const resolveImage = async (asset: unknown, args: unknown[]) => services.images.ensureImageObject(asset, resolveDimensionOverrides(extractNamedArgs(args)));
+  engine.registerFilter('image_url', async (asset: unknown, ...args: unknown[]) => {
+    const image = await resolveImage(asset, args);
+    return image?.url ?? image?.src ?? '';
+  });
+  engine.registerFilter('img_url', async (asset: unknown, ...args: unknown[]) => {
+    const image = await resolveImage(asset, args);
+    return image?.url ?? image?.src ?? '';
+  });
+  engine.registerFilter('image_tag', async (asset: unknown, ...args: unknown[]) => imageTagFilter(await resolveImage(asset, args), extractNamedArgs(args)));
+  engine.registerFilter('img_tag', async (asset: unknown, ...args: unknown[]) => imageTagFilter(await resolveImage(asset, args), extractNamedArgs(args)));
+
+  const translateFilter = (value: unknown, ...args: unknown[]) => translationFilter(value, args, services.translations);
+  engine.registerFilter('t', translateFilter);
+  engine.registerFilter('translate', translateFilter);
+
+  engine.registerFilter('money', (value: unknown) => formatMoney(value, { showCurrency: false, trimZeros: false }));
+  engine.registerFilter('money_with_currency', (value: unknown) => formatMoney(value, { showCurrency: true, trimZeros: false }));
+  engine.registerFilter('money_without_currency', (value: unknown) => formatMoney(value, { showCurrency: false, trimZeros: false }));
+  engine.registerFilter('money_without_trailing_zeros', (value: unknown) => formatMoney(value, { showCurrency: false, trimZeros: true }));
+
+  engine.registerFilter('weight_with_unit', (value: unknown, unit?: unknown) => formatWeight(value, unit));
+  engine.registerFilter('weight', (value: unknown, unit?: unknown) => formatWeight(value, unit));
+  engine.registerFilter('time_tag', (value: unknown, format?: unknown) => formatTimeTag(value, format));
+
+  engine.registerFilter('url_for_vendor', (vendor: unknown) => `/collections/vendors?q=${encodeURIComponent(String(vendor ?? ''))}`);
+  engine.registerFilter('url_for_type', (type: unknown) => `/collections/types?q=${encodeURIComponent(String(type ?? ''))}`);
+  engine.registerFilter('link_to_vendor', (vendor: unknown, title?: unknown) => linkTo(`/collections/vendors?q=${encodeURIComponent(String(vendor ?? ''))}`, title ?? vendor));
+  engine.registerFilter('link_to_type', (type: unknown, title?: unknown) => linkTo(`/collections/types?q=${encodeURIComponent(String(type ?? ''))}`, title ?? type));
+
+  engine.registerFilter('link_to_tag', linkToTagFilter);
+  engine.registerFilter('link_to_add_tag', linkToAddTagFilter);
+  engine.registerFilter('link_to_remove_tag', linkToRemoveTagFilter);
+  engine.registerFilter('highlight_active_tag', highlightActiveTagFilter);
+  engine.registerFilter('within', withinFilter);
+
+  engine.registerFilter('placeholder_svg_tag', placeholderSvgTag);
+  engine.registerFilter('payment_type_svg_tag', (handle: unknown) => paymentIcon(handle, 'svg'));
+  engine.registerFilter('payment_type_img_url', (handle: unknown) => paymentIconUrl(handle, 'svg'));
+  engine.registerFilter('payment_icon_png_url', (handle: unknown) => paymentIconUrl(handle, 'png'));
+
+  engine.registerFilter('product_img_url', (src: unknown, size?: unknown) => addSizeParam(String((src as any)?.src ?? src ?? ''), size));
+  engine.registerFilter('file_img_url', (src: unknown, size?: unknown) => addSizeParam(String((src as any)?.src ?? src ?? ''), size));
+
+  engine.registerFilter('color_modify', (color: unknown, modifier: unknown) => colorModify(color, modifier));
+  engine.registerFilter('color_mix', (color: unknown, other: unknown, weight?: unknown) => colorMix(color, other, weight));
+
+  engine.registerFilter('not_implemented_filter', (value: unknown) => {
+    services.diagnostics?.recordFilter('not_implemented_filter');
+    return value;
+  });
+
+  const schemaTag: TagImplOptions = {
+    parse(tagToken: TagToken, remainTokens: TopLevelToken[]) {
+      const stream = this.liquid.parser.parseStream(remainTokens);
+      stream
+        .on('tag:endschema', () => {
+          stream.stop();
+        })
+        .on('end', () => {
+          throw new Error(`tag ${tagToken.name} not closed`);
+        });
+      stream.start();
+    },
+    render(_ctx: Context, _emitter: Emitter) {
+      return '';
+    }
+  };
+
+  const styleTag = createInlineBlockTag('style', (content) => `<style data-snapify-inline="style">${content}</style>`);
+  const scriptTag = createInlineBlockTag('javascript', (content) => `<script data-snapify-inline="javascript">${content}</script>`);
+  const formTag = createFormTag();
+
+  const sectionTag: TagImplOptions = {
+    parse(this: SectionTagState, tagToken: TagToken) {
+      this.sectionHandle = tagToken.args?.trim();
+    },
+    async render(this: SectionTagState, ctx: Context) {
+      const handle = normalizeSectionHandle(this.sectionHandle ?? '');
+      if (!handle) return '';
+      return services.sections.renderSection(handle, ctx.getAll());
+    }
+  };
+
+  const sectionsTag: TagImplOptions = {
+    parse(this: SectionTagState, tagToken: TagToken) {
+      this.sectionHandle = tagToken.args?.trim();
+    },
+    async render(this: SectionTagState, ctx: Context) {
+      const handle = normalizeSectionHandle(this.sectionHandle ?? '');
+      if (!handle) return '';
+      return services.sections.renderSectionGroup(handle, ctx.getAll());
+    }
+  };
+
+  const contentForTag: TagImplOptions = {
+    parse(this: InlineTagState, tagToken: TagToken) {
+      this.templates = [];
+      this.args = tagToken.args ?? '';
+    },
+    async render(this: InlineTagState, ctx: Context) {
+      const slot = normalizeSectionHandle(this.args ?? '');
+      if (slot !== 'blocks') return '';
+      return services.sections.renderBlocks(ctx.getAll());
+    }
+  } as TagImplOptions;
+
+  engine.registerTag('schema', schemaTag);
+  engine.registerTag('style', styleTag);
+  engine.registerTag('javascript', scriptTag);
+  engine.registerTag('form', formTag);
+  engine.registerTag('section', sectionTag);
+  engine.registerTag('sections', sectionsTag);
+  engine.registerTag('content_for', contentForTag);
+  engine.registerTag('layout', {
+    parse(this: InlineTagState, tagToken: TagToken) {
+      this.args = tagToken.args ?? '';
+    },
+    async render(this: InlineTagState) {
+      const layoutArg = (this.args ?? '').trim().replace(/^['"]|['"]$/g, '') || 'none';
+      return createLayoutMarker(layoutArg);
+    }
+  });
+
+  const paginateTag: TagImplOptions = {
+    parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+      this.templates = [];
+      this.args = tagToken.args ?? '';
+      const parser = this.liquid.parser;
+      const stream = parser.parseStream(remainTokens)
+        .on('tag:endpaginate', () => stream.stop())
+        .on('template', (tpl) => this.templates!.push(tpl as Template))
+        .on('end', () => {
+          throw new Error(`tag ${tagToken.name} not closed`);
+        });
+      stream.start();
+    },
+    async render(this: InlineTagState, ctx: Context) {
+      const args = (this.args ?? '').trim();
+      const match = args.match(/^(.*)\s+by\s+(\d+)/i);
+      if (!match) {
+        services.diagnostics?.recordTag('paginate');
+        return '';
+      }
+
+      const collectionExpr = match[1].trim();
+      const pageSize = Math.max(1, Number.parseInt(match[2], 10) || 1);
+      const currentPage = normalizePageNumber(ctx.get(['page']) ?? ctx.get(['current_page'])); // Shopify typically exposes `page`
+      const source = await this.liquid.evalValue(collectionExpr, ctx);
+      const items = toArray(source);
+      const totalItems = items.length;
+      const pages = Math.max(1, Math.ceil(totalItems / pageSize));
+      const page = clamp(currentPage, 1, pages);
+      const offset = (page - 1) * pageSize;
+      const pageItems = items.slice(offset, offset + pageSize);
+
+      const parts = buildPaginationParts(page, pages);
+      const paginate = {
+        items: pageItems,
+        current_page: page,
+        current_offset: offset,
+        page_size: pageSize,
+        items_count: totalItems,
+        pages,
+        previous: page > 1 ? { title: 'Previous', url: buildPageUrl(page - 1), page: page - 1 } : null,
+        next: page < pages ? { title: 'Next', url: buildPageUrl(page + 1), page: page + 1 } : null,
+        parts
+      };
+
+      const scope: Record<string, unknown> = { paginate };
+      applyScopedSlice(scope, ctx, collectionExpr, pageItems);
+
+      ctx.push(scope);
+      const rendered = await renderChildTemplates(this.liquid, this.templates ?? [], ctx);
+      ctx.pop();
+      return rendered ?? '';
+    }
+  };
+
+  engine.registerTag('paginate', paginateTag);
+
+  engine.registerFilter('default_pagination', (paginate: unknown) => renderDefaultPagination(paginate));
+
+  function createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
+    return {
+      parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+        this.templates = [];
+        const parser = this.liquid.parser;
+        const stream = parser.parseStream(remainTokens)
+          .on(`tag:end${tagName}`, () => {
+            stream.stop();
+          })
+          .on('template', (tpl) => {
+            this.templates!.push(tpl as Template);
+          })
+          .on('end', () => {
+            throw new Error(`tag ${tagToken.name} not closed`);
+          });
+        stream.start();
+      },
+      async render(this: InlineTagState, ctx: Context) {
+        const templates = this.templates ?? [];
+        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
+        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
+        return renderWrapper(content);
+      }
+    };
+  }
+
+  function createFormTag(): TagImplOptions {
+    return {
+      parse(this: FormTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+        this.templates = [];
+        this.args = tagToken.args ?? '';
+        const parser = this.liquid.parser;
+        const stream = parser.parseStream(remainTokens)
+          .on('tag:endform', () => {
+            stream.stop();
+          })
+          .on('template', (tpl) => {
+            this.templates!.push(tpl as Template);
+          })
+          .on('end', () => {
+            throw new Error('tag form not closed');
+          });
+        stream.start();
+      },
+      async render(this: FormTagState, ctx: Context, _emitter: Emitter, hash: Record<string, unknown>) {
+        const templates = this.templates ?? [];
+        const rendered = await renderChildTemplates(this.liquid, templates, ctx);
+        const content = typeof rendered === 'string' ? rendered : String(rendered ?? '');
+        const handle = extractHandleFromArgs(this.args ?? '');
+        const attributes: Record<string, unknown> = {
+          method: 'post',
+          action: '/',
+          'data-snapify-form': handle || 'generic'
+        };
+        Object.assign(attributes, hash);
+        if (!attributes['data-snapify-form']) {
+          attributes['data-snapify-form'] = handle || 'generic';
+        }
+        const attrs = serializeAttributes(attributes);
+        return `<form ${attrs}>${content}</form>`;
+      }
+    };
+  }
+}
+
+function buildPaginationParts(current: number, pages: number) {
+  const parts: Array<{ title: string | number; url: string; is_link: boolean; is_active: boolean }> = [];
+  if (current > 1) {
+    parts.push({ title: 'Previous', url: buildPageUrl(current - 1), is_link: true, is_active: false });
+  }
+  for (let page = 1; page <= pages; page += 1) {
+    parts.push({
+      title: page,
+      url: buildPageUrl(page),
+      is_link: page !== current,
+      is_active: page === current
+    });
+  }
+  if (current < pages) {
+    parts.push({ title: 'Next', url: buildPageUrl(current + 1), is_link: true, is_active: false });
+  }
+  return parts;
+}
+
+function buildPageUrl(page: number) {
+  return `?page=${page}`;
+}
+
+function renderDefaultPagination(paginate: unknown): string {
+  if (!paginate || typeof paginate !== 'object' || !Array.isArray((paginate as any).parts)) return '';
+  const parts = (paginate as any).parts as Array<{ title: string | number; url: string; is_link: boolean; is_active: boolean }>;
+  const items = parts.map((part) => {
+    const label = String(part.title);
+    if (part.is_active) return `<span class="current" aria-current="page">${label}</span>`;
+    if (part.is_link) return `<a href="${part.url}">${label}</a>`;
+    return `<span>${label}</span>`;
+  });
+  return `<nav class="pagination" data-snapify-pagination>${items.join('')}</nav>`;
+}
+
+function toArray(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  if (value && typeof value === 'object') {
+    if (Array.isArray((value as any).items)) return (value as any).items as unknown[];
+    if (Array.isArray((value as any).products)) return (value as any).products as unknown[];
+    if (Array.isArray((value as any).results)) return (value as any).results as unknown[];
+  }
+  return [];
+}
+
+function normalizePageNumber(value: unknown) {
+  const num = Number.parseInt(String(value ?? ''), 10);
+  return Number.isFinite(num) && num > 0 ? num : 1;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function applyScopedSlice(scope: Record<string, unknown>, ctx: Context, expression: string, pageItems: unknown[]) {
+  const pathParts = expression.split('.').map((p) => p.trim()).filter(Boolean);
+  if (pathParts.length === 0) return;
+  if (pathParts.length === 1) {
+    scope[pathParts[0]] = pageItems;
+    return;
+  }
+  const rootName = pathParts[0];
+  const rootValue = ctx.get([rootName]);
+  const patchedRoot = patchNestedValue(rootValue, pathParts.slice(1), pageItems);
+  scope[rootName] = patchedRoot;
+}
+
+function patchNestedValue(target: unknown, path: string[], value: unknown): unknown {
+  if (!path.length) return value;
+  const [head, ...rest] = path;
+  const clone: Record<string, unknown> = Array.isArray(target) ? { ...target } as any : { ...(target as any) };
+  const existing = (target as any)?.[head];
+  clone[head] = patchNestedValue(existing, rest, value);
+  return clone;
+}
+
+function createLayoutMarker(layoutName: string) {
+  return `${LAYOUT_MARKER_PREFIX}${layoutName}-->`;
+}
+
+function extractLayoutOverride(html: string): { html: string; layout: string | null } {
+  const markerStart = html.indexOf(LAYOUT_MARKER_PREFIX);
+  if (markerStart === -1) return { html, layout: null };
+  const markerEnd = html.indexOf('-->', markerStart);
+  if (markerEnd === -1) return { html, layout: null };
+  const layout = html.slice(markerStart + LAYOUT_MARKER_PREFIX.length, markerEnd).trim();
+  const cleaned = html.slice(0, markerStart) + html.slice(markerEnd + 3);
+  return { html: cleaned, layout }; // layout may be 'none'
+}
+
+function addSizeParam(url: string, size: unknown) {
+  if (!url) return '';
+  const normalized = String(url);
+  const sizeValue = size == null ? null : String(size);
+  if (!sizeValue) return normalized;
+  const separator = normalized.includes('?') ? '&' : '?';
+  return `${normalized}${separator}size=${encodeURIComponent(sizeValue)}`;
+}
+
+function preloadTag(url: string, asType?: unknown) {
+  if (!url) return '';
+  const asAttr = String(asType ?? 'auto');
+  return `<link rel="preload" href="${url}" as="${asAttr}">`;
+}
+
+function formatMoney(value: unknown, options: { showCurrency: boolean; trimZeros: boolean }) {
+  const amount = Number.parseFloat(String(value ?? ''));
+  if (!Number.isFinite(amount)) return '';
+  let formatted = amount.toFixed(2);
+  if (options.trimZeros) {
+    // Drop trailing zeros but keep non-zero fractional cents (e.g., 12.34 -> 12.34, 12.30 -> 12.3, 12.00 -> 12)
+    formatted = formatted.replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+  }
+  const currency = options.showCurrency ? ' USD' : '';
+  return `$${formatted}${currency}`;
+}
+
+function formatWeight(value: unknown, unit?: unknown) {
+  const amount = Number.parseFloat(String(value ?? ''));
+  if (!Number.isFinite(amount)) return '';
+  const normalizedUnit = unit ? String(unit) : 'kg';
+  return `${amount} ${normalizedUnit}`;
+}
+
+function formatTimeTag(value: unknown, _format?: unknown) {
+  if (value == null) return '';
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return '';
+  const iso = date.toISOString();
+  return `<time datetime="${iso}">${iso}</time>`;
+}
+
+function linkTo(href: string, title: unknown) {
+  const label = String(title ?? href ?? '');
+  return `<a href="${href}">${label}</a>`;
+}
+
+function linkToTagFilter(this: any, tag: unknown, title?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const collectionHandle = (ctx?.get(['collection', 'handle']) as string) ?? 'all';
+  const href = buildTagHref(collectionHandle, currentTags, tagValue, 'none');
+  return linkTo(href, title ?? tagValue);
+}
+
+function linkToAddTagFilter(this: any, tag: unknown, title?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const collectionHandle = (ctx?.get(['collection', 'handle']) as string) ?? 'all';
+  const href = buildTagHref(collectionHandle, currentTags, tagValue, 'add');
+  return linkTo(href, title ?? tagValue);
+}
+
+function linkToRemoveTagFilter(this: any, tag: unknown, title?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const collectionHandle = (ctx?.get(['collection', 'handle']) as string) ?? 'all';
+  const href = buildTagHref(collectionHandle, currentTags, tagValue, 'remove');
+  return linkTo(href, title ?? tagValue);
+}
+
+function highlightActiveTagFilter(this: any, tag: unknown, wrapper?: unknown) {
+  const tagValue = String(tag ?? '').trim();
+  const wrapperTag = String(wrapper ?? 'strong');
+  const ctx: Context | undefined = this?.context;
+  const currentTags = (ctx?.get(['current_tags']) as unknown[]) ?? [];
+  const isActive = currentTags.map((t) => String(t)).includes(tagValue);
+  if (!isActive) return tagValue;
+  return `<${wrapperTag}>${tagValue}</${wrapperTag}>`;
+}
+
+function withinFilter(this: any, url: unknown, collection: unknown) {
+  const urlStr = String(url ?? '');
+  const ctx: Context | undefined = this?.context;
+  const collectionHandle = typeof collection === 'string'
+    ? collection
+    : (collection as any)?.handle ?? ctx?.get(['collection', 'handle']) ?? 'all';
+  return `/collections/${collectionHandle}/${urlStr.replace(/^\//, '')}`;
+}
+
+function buildTagHref(collectionHandle: string, currentTags: unknown[], tag: string, action: 'add' | 'remove' | 'none') {
+  const set = new Set((currentTags ?? []).map((t) => String(t)));
+  if (action === 'remove') {
+    set.delete(tag);
+  } else {
+    set.add(tag); // include requested tag for both link_to_tag and link_to_add_tag
+  }
+  const tags = Array.from(set).sort();
+  const tagsParam = tags.map(encodeURIComponent).join('%2B');
+  return `/collections/${collectionHandle}?q=${tagsParam}`;
+}
+
+function placeholderSvgTag(name: unknown, className?: unknown) {
+  const id = String(name ?? 'placeholder');
+  const cls = className ? ` class="${String(className)}"` : '';
+  return `<svg${cls} data-snapify-placeholder="${id}" role="img"></svg>`;
+}
+
+function paymentIcon(handle: unknown, kind: 'svg' | 'png') {
+  const name = String(handle ?? '').toLowerCase() || 'generic';
+  return `<svg data-snapify-payment="${name}" data-kind="${kind}"></svg>`;
+}
+
+function paymentIconUrl(handle: unknown, kind: 'svg' | 'png') {
+  const name = String(handle ?? '').toLowerCase() || 'generic';
+  return `https://snapify.local/payment/${name}.${kind}`;
+}
+
+function colorModify(color: unknown, modifier: unknown) {
+  const base = parseHexColor(String(color ?? ''));
+  if (!base) return String(color ?? '');
+  const mod = String(modifier ?? '');
+  const match = mod.match(/(lighten|darken):(\d+)/i);
+  if (match) {
+    const amount = Number.parseInt(match[2], 10);
+    const delta = match[1].toLowerCase() === 'lighten' ? amount : -amount;
+    const adjusted = base.map((c) => clampChannel(c + delta)) as [number, number, number];
+    return toHex(adjusted);
+  }
+  return toHex(base);
+}
+
+function colorMix(color: unknown, other: unknown, weight?: unknown) {
+  const a = parseHexColor(String(color ?? ''));
+  const b = parseHexColor(String(other ?? ''));
+  if (!a || !b) return String(color ?? '') || String(other ?? '');
+  const w = Number.parseFloat(String(weight ?? '50'));
+  const ratio = Number.isFinite(w) ? Math.max(0, Math.min(100, w)) / 100 : 0.5;
+  const mixed = a.map((c, i) => Math.round(c * (1 - ratio) + b[i] * ratio)) as [number, number, number];
+  return toHex(mixed);
+}
+
+function parseHexColor(value: string): [number, number, number] | null {
+  const hex = value.replace('#', '').trim();
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+  return [r, g, b];
+}
+
+function toHex([r, g, b]: [number, number, number]) {
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function clampChannel(value: number) {
+  return Math.max(0, Math.min(255, value));
+}
+
+function imageTagFilter(image: ShopifyImage | undefined, named: Record<string, unknown>) {
+  if (!image) return '';
+  const src = image.url ?? image.src;
+  if (!src) return '';
+  const attributes: Record<string, unknown> = {
+    loading: named.loading ?? 'lazy',
+    ...named,
+    src
+  };
+  if (!attributes.alt) {
+    attributes.alt = image.alt ?? '';
+  }
+  const derivedWidth = normalizeDimension(named.width) ?? image.width;
+  const derivedHeight = normalizeDimension(named.height) ?? image.height;
+  if (derivedWidth) attributes.width = derivedWidth;
+  if (derivedHeight) attributes.height = derivedHeight;
+  return `<img ${serializeAttributes(attributes)}>`;
+}
+
+function translationFilter(value: unknown, args: unknown[], translateFn: (key: string, replacements: Record<string, unknown>) => string) {
+  const named = extractNamedArgs(args);
+  const key = typeof value === 'string' ? value : String(value ?? '').trim();
+  if (!key) return '';
+  const replacements: Record<string, unknown> = { ...(named ?? {}) };
+  const fallback = typeof replacements.default === 'string' ? replacements.default : key;
+  delete replacements.default;
+  const translated = translateFn(key, replacements);
+  return translated || fallback || '';
 }
 
 function stripWrappingQuotes(value: string) {
@@ -1100,7 +1638,9 @@ function resolvePlaceholderDimensions(overrides?: PlaceholderDimensions) {
 
 function createPlaceholderDataUrl(width: number, height: number, label: string) {
   const safeLabel = truncateLabel(label || DEFAULT_PLACEHOLDER_LABEL, 28);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="${PLACEHOLDER_BG}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="${PLACEHOLDER_TEXT}" font-family="sans-serif" font-size="${Math.max(12, Math.round(Math.min(width, height) / 8))}">${escapeHtml(safeLabel)}</text></svg>`;
+  // Draw label using path-insensitive styling to reduce platform-specific font differences.
+  const fontSize = Math.max(12, Math.round(Math.min(width, height) / 8));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="${PLACEHOLDER_BG}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="${PLACEHOLDER_TEXT}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="600" paint-order="stroke" stroke="${PLACEHOLDER_BG}" stroke-width="0.5">${escapeHtml(safeLabel)}</text></svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
@@ -1195,19 +1735,19 @@ function isTextMime(mime: string) {
   return /^(text\/|application\/(javascript|json|xml))/i.test(mime);
 }
 
-async function renderChildTemplates(liquid: Liquid, templates: any[], ctx: any) {
+async function renderChildTemplates(liquid: Liquid, templates: Template[], ctx: Context) {
   const iterator = liquid.renderer.renderTemplates(templates, ctx);
   return resolveGenerator(iterator);
 }
 
-async function resolveGenerator(iterable: any): Promise<any> {
+async function resolveGenerator(iterable: unknown): Promise<unknown> {
   if (!iterable) {
     return '';
   }
-  if (typeof iterable.then === 'function') {
+  if (isPromiseLike(iterable)) {
     return iterable;
   }
-  if (typeof iterable.next !== 'function') {
+  if (!isIterator(iterable)) {
     return iterable;
   }
   let result = iterable.next();
@@ -1216,4 +1756,12 @@ async function resolveGenerator(iterable: any): Promise<any> {
     result = iterable.next(awaited);
   }
   return result.value ?? '';
+}
+
+function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+  return typeof value === 'object' && value !== null && typeof (value as PromiseLike<unknown>).then === 'function';
+}
+
+function isIterator(value: unknown): value is Iterator<unknown> {
+  return typeof value === 'object' && value !== null && typeof (value as Iterator<unknown>).next === 'function';
 }

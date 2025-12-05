@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { chromium, firefox, webkit, type BrowserContext, type BrowserContextOptions, type BrowserType, type Page } from 'playwright';
+import { chromium, firefox, webkit, type BrowserContext, type BrowserContextOptions, type BrowserType, type Page, type Route, type Request } from 'playwright';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { ensureDir, fileExists, writeFileRecursive } from '../utils/fs.js';
@@ -10,6 +10,7 @@ import { SNAPIFY_ASSET_HOST } from './constants.js';
 interface SnapshotRuntimeOptions {
   name: string;
   baselinePath: string;
+  baselineHtmlPath: string;
   outputDir: string;
   htmlPath: string;
   screenshotPath: string;
@@ -24,7 +25,22 @@ interface SnapshotRuntimeOptions {
 
 /**
  * Owns the Playwright lifecycle for snapshotting rendered HTML and diffing it against stored baselines.
- * The class is exported so higher-level tooling can subclass it (e.g., to stub browsers during tests).
+ * Exported so higher-level tooling can subclass it (e.g., to stub browsers during tests).
+ *
+ * @example
+ * ```ts
+ * const runner = new SnapshotRunner();
+ * const result = await runner.capture('<div>hi</div>', {
+ *   name: 'example',
+ *   baselinePath: '/tmp/baseline/example.png',
+ *   baselineHtmlPath: '/tmp/baseline/example.html',
+ *   outputDir: '/tmp/output',
+ *   htmlPath: '/tmp/output/example.html',
+ *   screenshotPath: '/tmp/output/example.png',
+ *   diffPath: '/tmp/output/example.diff.png'
+ * });
+ * console.log(result.screenshotPath);
+ * ```
  */
 export class SnapshotRunner {
   /**
@@ -33,6 +49,7 @@ export class SnapshotRunner {
   async capture(html: string, options: SnapshotRuntimeOptions): Promise<RenderResult> {
     await ensureDir(options.outputDir);
     await writeFileRecursive(options.htmlPath, html);
+    await ensureDir(path.dirname(options.baselineHtmlPath));
 
     const browser = await this.launchBrowser(options.browser);
     try {
@@ -53,18 +70,24 @@ export class SnapshotRunner {
       await ensureDir(path.dirname(options.baselinePath));
       const latestBuffer = await readFile(options.screenshotPath);
       await writeFileRecursive(options.baselinePath, latestBuffer);
+      await writeFileRecursive(options.baselineHtmlPath, html);
       return {
         htmlPath: options.htmlPath,
+        htmlBaselinePath: options.baselineHtmlPath,
+        htmlChanged: false,
         screenshotPath: options.screenshotPath,
         diffPath: undefined,
         updatedBaseline: true
       };
     }
 
+    const htmlChanged = await this.diffHtml(html, options.baselineHtmlPath);
     const diffPath = await this.diffWithBaseline(options.baselinePath, options.screenshotPath, options.diffPath);
 
     return {
       htmlPath: options.htmlPath,
+      htmlBaselinePath: options.baselineHtmlPath,
+      htmlChanged,
       screenshotPath: options.screenshotPath,
       diffPath,
       updatedBaseline: false
@@ -90,8 +113,8 @@ export class SnapshotRunner {
     }
 
     const pattern = `${SNAPIFY_ASSET_HOST}/assets/*`;
-    const handler = async (route: Parameters<BrowserContext['route']>[1]) => {
-      const url = route.request().url();
+    const handler = async (route: Route, request: Request) => {
+      const url = request.url();
       const asset = manifest.get(url);
       if (!asset) {
         await route.continue();
@@ -118,8 +141,8 @@ export class SnapshotRunner {
       readFile(candidatePath)
     ]);
 
-    let baselinePng = PNG.sync.read(baselineBuffer);
-    let latestPng = PNG.sync.read(latestBuffer);
+    let baselinePng: PNG = PNG.sync.read(baselineBuffer);
+    let latestPng: PNG = PNG.sync.read(latestBuffer);
 
     if (baselinePng.width !== latestPng.width || baselinePng.height !== latestPng.height) {
       const targetWidth = Math.max(baselinePng.width, latestPng.width);
@@ -136,17 +159,28 @@ export class SnapshotRunner {
       baselinePng.width,
       baselinePng.height,
       {
-        threshold: 0.1,
-        alpha: 0.4
+        threshold: 0.12,
+        alpha: 0.4,
+        includeAA: true
       }
     );
 
-    if (mismatch === 0) {
+    const maxAllowedMismatch = Math.floor(baselinePng.width * baselinePng.height * 0.0001);
+    if (mismatch === 0 || mismatch <= maxAllowedMismatch) {
       return undefined;
     }
 
     await writeFileRecursive(diffPath, PNG.sync.write(diff));
     return diffPath;
+  }
+
+  private async diffHtml(currentHtml: string, baselinePath: string) {
+    if (!(await fileExists(baselinePath))) {
+      await writeFileRecursive(baselinePath, currentHtml);
+      return false;
+    }
+    const baseline = await readFile(baselinePath, 'utf8');
+    return baseline !== currentHtml;
   }
 }
 
