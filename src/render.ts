@@ -5,8 +5,22 @@ import { slugifySnapshotName } from './utils/naming.js';
 import type { BrowserName, RenderOptions, RenderResult } from './types.js';
 
 /**
- * Renders a Shopify template into deterministic HTML and returns visual artifacts.
- * Accepts either CLI-provided or programmatic options and handles baseline bookkeeping.
+ * Renders a Shopify template into deterministic HTML, captures a screenshot, and diffs/refreshes baselines.
+ *
+ * @param options Render configuration (template name, data, theme root, snapshot paths, etc.).
+ * @returns Paths to the generated HTML, screenshot, and any diff/baseline updates.
+ *
+ * @example
+ * ```ts
+ * import { render } from '@bosun-ai/snapify';
+ *
+ * await render({
+ *   themeRoot: '/path/to/theme',
+ *   template: 'product',
+ *   data: { product: { title: 'Test' } },
+ *   snapshot: { update: true }
+ * });
+ * ```
  */
 export async function render(options: RenderOptions): Promise<RenderResult> {
   if (!options.template) {

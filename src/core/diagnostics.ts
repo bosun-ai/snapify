@@ -9,8 +9,16 @@ export interface DiagnosticsSnapshot {
 }
 
 /**
- * Tracks unsupported Liquid constructs encountered during rendering so callers (or HTML consumers)
- * can see what needs to be implemented. Keeps a deterministic payload for easy machine parsing.
+ * Tracks unsupported Liquid constructs during rendering so HTML consumers can discover gaps and fix them.
+ * Emits a deterministic payload for machine parsing (e.g., CI gating or editor hints).
+ *
+ * @example
+ * ```ts
+ * const diagnostics = new Diagnostics();
+ * diagnostics.recordFilter('money_with_currency');
+ * const script = diagnostics.renderScriptTag();
+ * // => <script type="application/json" data-snapify-diagnostics>{"tags":[],"filters":["money_with_currency"]}</script>
+ * ```
  */
 export class Diagnostics {
   private tags = new Set<string>();

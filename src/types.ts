@@ -23,6 +23,16 @@ export interface SnapshotOptions {
 
 /**
  * User-facing inputs accepted by {@link render}, mirroring the CLI flags with extra hooks for library consumers.
+ *
+ * @example
+ * ```ts
+ * const options: RenderOptions = {
+ *   themeRoot: '/theme',
+ *   template: 'product',
+ *   data: { product: { title: 'Example' } },
+ *   snapshot: { update: true }
+ * };
+ * ```
  */
 export interface RenderOptions {
   /** Absolute or relative path to the Shopify theme root. */

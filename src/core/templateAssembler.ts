@@ -124,7 +124,15 @@ interface PlaceholderDimensions {
 
 /**
  * Compiles Shopify themes into deterministic HTML by recreating Liquid primitives and Shopify helpers.
- * Callers provide a theme root and then repeatedly invoke {@link TemplateAssembler.compose} with templates to render.
+ * Callers provide a theme root and invoke {@link TemplateAssembler.compose} with templates to render.
+ *
+ * @example
+ * ```ts
+ * const assembler = new TemplateAssembler('/path/to/theme');
+ * const html = await assembler.compose({ template: 'index', data: { product } });
+ * const assets = assembler.getAssetManifest();
+ * // serve `assets` while snapshotting the `html`
+ * ```
  */
 export class TemplateAssembler {
   private engine: Liquid;

@@ -25,7 +25,22 @@ interface SnapshotRuntimeOptions {
 
 /**
  * Owns the Playwright lifecycle for snapshotting rendered HTML and diffing it against stored baselines.
- * The class is exported so higher-level tooling can subclass it (e.g., to stub browsers during tests).
+ * Exported so higher-level tooling can subclass it (e.g., to stub browsers during tests).
+ *
+ * @example
+ * ```ts
+ * const runner = new SnapshotRunner();
+ * const result = await runner.capture('<div>hi</div>', {
+ *   name: 'example',
+ *   baselinePath: '/tmp/baseline/example.png',
+ *   baselineHtmlPath: '/tmp/baseline/example.html',
+ *   outputDir: '/tmp/output',
+ *   htmlPath: '/tmp/output/example.html',
+ *   screenshotPath: '/tmp/output/example.png',
+ *   diffPath: '/tmp/output/example.diff.png'
+ * });
+ * console.log(result.screenshotPath);
+ * ```
  */
 export class SnapshotRunner {
   /**
