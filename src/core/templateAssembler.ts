@@ -11,6 +11,7 @@ import type { Template } from 'liquidjs/dist/template/template.js';
 import type { RegisteredAsset, RenderOptions } from '../types.js';
 import { fileExists } from '../utils/fs.js';
 import { SNAPIFY_ASSET_HOST } from './constants.js';
+import { Diagnostics } from './diagnostics.js';
 
 const DEFAULT_LAYOUT = 'theme';
 const DEFAULT_ROUTES = {
@@ -134,6 +135,7 @@ export class TemplateAssembler {
   private images: ImageService;
   private themeData: ThemeDataService;
   private sections: SectionRenderer;
+  private diagnostics: Diagnostics;
   private readonly assetsDir: string;
   private readonly templatesDir: string;
   private readonly sectionsDir: string;
@@ -170,12 +172,14 @@ export class TemplateAssembler {
     this.images = new ImageService();
     this.themeData = new ThemeDataService({ configDir: this.configDir, localesDir: this.localesDir });
     this.sections = new SectionRenderer({ engine: this.engine, themeRoot: this.themeRoot, sectionsDir: this.sectionsDir, blocksDir: this.blocksDir, themeData: this.themeData });
+    this.diagnostics = new Diagnostics();
     registerShopifyPrimitives(this.engine, {
       assets: this.assets,
       images: this.images,
       translations: (key, replacements) => this.themeData.translate(this.activeLocale, key, replacements),
       sections: this.sections,
-      headInjections: this.headInjections
+      headInjections: this.headInjections,
+      diagnostics: this.diagnostics
     });
   }
 
@@ -186,6 +190,7 @@ export class TemplateAssembler {
     this.activeLocale = await this.themeData.ensureReady(options.locale);
     this.headInjections.length = 0;
     this.assets.reset();
+    this.diagnostics.reset();
     const templateLookup = await this.resolveTemplate(options.template);
     const userData = options.data ?? {};
     const context = {
@@ -203,7 +208,8 @@ export class TemplateAssembler {
     }
 
     if (options.layout === false) {
-      return this.decorateDeterministicHtml(bodyHtml, options.styles);
+      const decorated = this.decorateDeterministicHtml(bodyHtml, options.styles);
+      return this.injectDiagnostics(decorated);
     }
 
     const layoutLookup = await this.resolveLayout(options.layout ?? DEFAULT_LAYOUT);
@@ -215,11 +221,12 @@ export class TemplateAssembler {
     };
 
     const html = await this.engine.renderFile(layoutLookup, layoutScope);
+    let outputHtml = html;
     if (inlineHeader && !html.includes(inlineHeader)) {
-      return this.ensureHeadCarriesInlineCss(html, inlineHeader);
+      outputHtml = this.ensureHeadCarriesInlineCss(html, inlineHeader);
     }
 
-    return html;
+    return this.injectDiagnostics(outputHtml);
   }
 
   /**
@@ -268,6 +275,31 @@ ${renderedSections.join('\n')}
       return body;
     }
     return `<style data-snapify-inline="user">${extraStyles}</style>\n${body}`;
+  }
+
+  private injectDiagnostics(html: string) {
+    const snapshot = this.diagnostics.snapshot();
+    const derivedTags = new Set(snapshot.tags);
+    const tagMatches = html.match(/data-snapify-missing="([^"]+)"/g) || [];
+    for (const match of tagMatches) {
+      const captured = /data-snapify-missing="([^"]+)"/.exec(match);
+      if (captured?.[1]) {
+        derivedTags.add(captured[1]);
+      }
+    }
+    const payload = {
+      tags: Array.from(derivedTags).sort(),
+      filters: snapshot.filters
+    };
+    const shouldInject = payload.tags.length > 0 || payload.filters.length > 0;
+    if (!shouldInject) {
+      return html;
+    }
+    const script = `<script type="application/json" data-snapify-diagnostics>${JSON.stringify(payload)}</script>`;
+    if (/<\/body>/i.test(html)) {
+      return html.replace(/<\/body>/i, `${script}\n</body>`);
+    }
+    return `${html}\n${script}`;
   }
 
   private async resolveTemplate(template: string) {
@@ -847,6 +879,7 @@ interface ShopifyPrimitiveServices {
   translations: (key: string, replacements: Record<string, unknown>) => string;
   sections: SectionRenderer;
   headInjections: string[];
+  diagnostics?: Diagnostics;
 }
 
 function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveServices) {
@@ -869,6 +902,18 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
   const translateFilter = (value: unknown, ...args: unknown[]) => translationFilter(value, args, services.translations);
   engine.registerFilter('t', translateFilter);
   engine.registerFilter('translate', translateFilter);
+
+  // Stub common Shopify filters we haven't implemented yet; mark diagnostics and pass-through.
+  const missingFilters = [
+    'money', 'money_with_currency', 'money_without_currency', 'money_without_trailing_zeros',
+    'weight_with_unit', 'time_tag', 'url_for_vendor', 'link_to_tag'
+  ];
+  for (const name of missingFilters) {
+    engine.registerFilter(name, (value: unknown) => {
+      services.diagnostics?.recordFilter(name);
+      return value;
+    });
+  }
 
   const schemaTag: TagImplOptions = {
     parse(tagToken: TagToken, remainTokens: TopLevelToken[]) {
@@ -932,6 +977,28 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
   engine.registerTag('section', sectionTag);
   engine.registerTag('sections', sectionsTag);
   engine.registerTag('content_for', contentForTag);
+
+  // Stub paginate to keep renders deterministic while flagging the gap.
+  const paginateTag: TagImplOptions = {
+    parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
+      this.templates = [];
+      this.args = tagToken.args ?? '';
+      const parser = this.liquid.parser;
+      const stream = parser.parseStream(remainTokens)
+        .on('tag:endpaginate', () => stream.stop())
+        .on('template', (tpl) => this.templates!.push(tpl as Template))
+        .on('end', () => {
+          throw new Error(`tag ${tagToken.name} not closed`);
+        });
+      stream.start();
+    },
+    async render(this: InlineTagState) {
+      services.diagnostics?.recordTag('paginate');
+      return `<div data-snapify-missing="paginate">paginate not implemented</div>`;
+    }
+  };
+
+  engine.registerTag('paginate', paginateTag);
 
   function createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
     return {

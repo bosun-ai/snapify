@@ -140,6 +140,14 @@ test('asset filters throw when closing tags are missing', async () => {
   await assert.rejects(() => assembler.compose({ template: 'invalid-schema', layout: false }), /tag schema not closed/);
 });
 
+test('missing Shopify constructs surface diagnostics and placeholders', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  const html = await assembler.compose({ template: 'missing-constructs', layout: false });
+  assert.match(html, /data-snapify-missing="paginate"/, 'paginate should stub with placeholder');
+  assert.match(html, /data-snapify-diagnostics/, 'diagnostics payload should be injected');
+  assert.match(html, /money_with_currency/, 'missing filter should be recorded in diagnostics payload');
+});
+
 test('content_for blocks render theme and app blocks with placeholders', async () => {
   const assembler = new TemplateAssembler(FIXTURE_THEME);
   const html = await assembler.compose({ template: 'content-for-blocks', layout: false });

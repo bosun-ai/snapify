@@ -1,0 +1,4 @@
+<div class="money">{{ 5 | money_with_currency }}</div>
+{% paginate collection.products by 5 %}
+  <div class="loop">{% section 'hero' %}</div>
+{% endpaginate %}
