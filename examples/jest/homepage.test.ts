@@ -3,7 +3,7 @@
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { render } from 'snapify';
+import { render, assertSnapshot } from 'snapify';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,6 +30,6 @@ describe('snapify jest example', () => {
       return;
     }
 
-    expect(snapshot.diffPath).toBeUndefined();
+    assertSnapshot(snapshot, { htmlMode: 'warn' });
   });
 });

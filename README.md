@@ -45,12 +45,14 @@ Example:
 snapify render index --theme-root .. --viewport 1440x900 --data ./fixtures/home.json
 ```
 
-## Programmatic API
+## Programmatic API (with assertions)
+
+The `assertSnapshot` helper makes PNG the source of truth while still surfacing HTML drift for debugging.
 
 ```ts
-import { render } from 'snapify';
+import { render, assertSnapshot } from 'snapify';
 
-await render({
+const snapshot = await render({
   themeRoot: '/path/to/theme',
   template: 'product',
   locale: 'en.default',
@@ -62,9 +64,12 @@ await render({
     name: 'product-page',
     baselineDir: './.snapify/baseline',
     outputDir: './.snapify/artifacts',
-    update: process.env.CI ? false : true
+    update: process.env.CI ? false : true,
+    htmlMode: 'warn' // primary focus on PNG; warn on HTML drift
   }
 });
+
+assertSnapshot(snapshot, { htmlMode: 'warn' });
 ```
 
 The resolved object includes:
@@ -149,7 +154,7 @@ Tips:
 
 ### Jest example
 
-Using Snapify inside Jest with TypeScript just requires enabling ESM support and invoking `render` within a test:
+Using Snapify inside Jest with TypeScript just requires enabling ESM support and invoking `render` + `assertSnapshot` within a test:
 
 ```ts
 /**
@@ -157,7 +162,7 @@ Using Snapify inside Jest with TypeScript just requires enabling ESM support and
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { render } from 'snapify';
+import { render, assertSnapshot } from 'snapify';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const THEME_ROOT = path.resolve(__dirname, '../theme');
@@ -184,7 +189,7 @@ describe('product template', () => {
       return;
     }
 
-    expect(snapshot.diffPath).toBeUndefined();
+    assertSnapshot(snapshot, { htmlMode: 'warn' });
   });
 });
 
