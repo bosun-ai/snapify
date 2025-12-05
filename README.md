@@ -62,8 +62,8 @@ const snapshot = await render({
   viewport: { width: 1440, height: 900 },
   snapshot: {
     name: 'product-page',
-    baselineDir: './.snapify/baseline',
-    outputDir: './.snapify/artifacts',
+    baselineDir: './__snapshots__/baseline',
+    outputDir: './__snapshots__/artifacts',
     update: process.env.CI ? false : true,
     htmlMode: 'warn' // primary focus on PNG; warn on HTML drift
   }
@@ -117,8 +117,8 @@ import path from 'node:path';
 import { render } from 'snapify';
 
 const THEME_ROOT = path.resolve('tests/theme');
-const BASELINE_DIR = path.join(THEME_ROOT, '.snapify', 'baseline');
-const ARTIFACT_DIR = path.join(THEME_ROOT, '.snapify', 'artifacts');
+const BASELINE_DIR = path.join(THEME_ROOT, '__snapshots__', 'baseline');
+const ARTIFACT_DIR = path.join(THEME_ROOT, '__snapshots__', 'artifacts');
 const UPDATE = Boolean(process.env.SNAPIFY_UPDATE_BASELINES);
 
 test('index template matches stored baseline', async () => {

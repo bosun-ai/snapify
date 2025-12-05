@@ -7,7 +7,7 @@ import { render } from '../src/render.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const THEME_ROOT = path.join(here, 'theme');
-const SNAPSHOT_ROOT = path.join(here, '.snapshots');
+const SNAPSHOT_ROOT = path.join(here, '__snapshots__');
 const BASELINE_DIR = path.join(SNAPSHOT_ROOT, 'baseline');
 const ARTIFACT_DIR = path.join(SNAPSHOT_ROOT, 'artifacts');
 
@@ -28,7 +28,8 @@ function isPlaywrightLaunchError(error: unknown) {
 test('README example render matches baseline (HTML + PNG)', { concurrency: false }, async (t) => {
   const name = 'readme-example';
   const baselineExists = await fileExists(path.join(BASELINE_DIR, `${name}.png`));
-  const update = !baselineExists && process.env.CI !== 'true';
+  const updateFlag = process.env.SNAPIFY_UPDATE_BASELINES === '1';
+  const update = updateFlag || (!baselineExists && process.env.CI !== 'true');
   try {
     const result = await render({
       themeRoot: THEME_ROOT,
@@ -67,7 +68,8 @@ test('README example render matches baseline (HTML + PNG)', { concurrency: false
 test('examples/jest homepage example remains valid', { concurrency: false }, async (t) => {
   const name = 'index-jest';
   const baselineExists = await fileExists(path.join(BASELINE_DIR, `${name}.png`));
-  const update = !baselineExists && process.env.CI !== 'true';
+  const updateFlag = process.env.SNAPIFY_UPDATE_BASELINES === '1';
+  const update = updateFlag || (!baselineExists && process.env.CI !== 'true');
   try {
     const result = await render({
       themeRoot: THEME_ROOT,
