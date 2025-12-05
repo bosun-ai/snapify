@@ -100,6 +100,24 @@ test('capture produces a diff when screenshots diverge in size', async () => {
   assert.equal(result.htmlChanged, true, 'html diff should be detected');
 });
 
+test('capture mismatch can be surfaced as a failing assertion for both HTML and PNG', async () => {
+  const dir = tmpDir('snapify-runner-');
+  const options = runnerOptions(dir, 'fail');
+  const runnerUpdate = new StubSnapshotRunner([{ width: 16, height: 16, color: 0 }]);
+  await runnerUpdate.capture('<p>baseline</p>', { ...options, updateBaseline: true });
+
+  const runnerMismatch = new StubSnapshotRunner([{ width: 16, height: 16, color: 255 }]);
+  const result = await runnerMismatch.capture('<p>changed html</p>', options);
+
+  function ensureMatch() {
+    if (result.htmlChanged || result.diffPath) {
+      throw new Error('Snapshot mismatch detected');
+    }
+  }
+
+  assert.throws(ensureMatch, /Snapshot mismatch/, 'consumer checks should fail when HTML or PNG diverge');
+});
+
 test('capture skips diff output when screenshots match existing baselines', async () => {
   const dir = tmpDir('snapify-runner-');
   const options = runnerOptions(dir, 'match');
