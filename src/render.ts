@@ -52,8 +52,7 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
     updateBaseline: options.snapshot?.update,
     browser,
     assetManifest,
-    fullPage: options.snapshot?.fullPage,
-    htmlMode: options.snapshot?.htmlMode
+    fullPage: options.snapshot?.fullPage
   });
 }
 

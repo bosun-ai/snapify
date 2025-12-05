@@ -1,5 +1,4 @@
 import type { BrowserContextOptions, Page } from 'playwright';
-import type { HtmlMode } from './assert.js';
 
 /** Supported Playwright engines for snapshotting. */
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
@@ -20,8 +19,6 @@ export interface SnapshotOptions {
   update?: boolean;
   /** Capture the full scroll height (default true). */
   fullPage?: boolean;
-  /** How strictly to treat HTML drift: 'ignore' | 'warn' | 'fail'. */
-  htmlMode?: HtmlMode;
 }
 
 /**

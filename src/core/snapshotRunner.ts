@@ -21,7 +21,6 @@ interface SnapshotRuntimeOptions {
   browser?: BrowserName;
   assetManifest?: Map<string, RegisteredAsset>;
   fullPage?: boolean;
-  htmlMode?: 'ignore' | 'warn' | 'fail';
 }
 
 /**
@@ -82,7 +81,7 @@ export class SnapshotRunner {
       };
     }
 
-    const htmlChanged = options.htmlMode === 'ignore' ? false : await this.diffHtml(html, options.baselineHtmlPath);
+    const htmlChanged = await this.diffHtml(html, options.baselineHtmlPath);
     const diffPath = await this.diffWithBaseline(options.baselinePath, options.screenshotPath, options.diffPath);
 
     return {
