@@ -3,11 +3,11 @@
 Use this checklist to track which Shopify Liquid primitives still need first‑class support in Snapify. Each item links to the official docs and summarizes the expected behavior.
 
 ## Tags
-- [ ] `paginate` — paginates a collection/array and exposes the `paginate` object while rendering its block. https://shopify.dev/docs/api/liquid/tags/theme-tags#paginate
+- [x] `paginate` — paginates a collection/array and exposes the `paginate` object while rendering its block. https://shopify.dev/docs/api/liquid/tags/theme-tags#paginate
 - [ ] `layout` — selects a specific layout or disables layouts with `layout none` from within a template. https://shopify.dev/docs/storefronts/themes/architecture/layouts
 
 ## Filters
-- [ ] `default_pagination` — renders pagination links for the current `paginate` object. https://shopify.dev/docs/api/liquid/filters/default_pagination
+- [x] `default_pagination` — renders pagination links for the current `paginate` object. https://shopify.dev/docs/api/liquid/filters/default_pagination
 - [ ] `link_to_tag` — builds an anchor that links to the given tag within the current collection/blog. https://shopify.dev/docs/api/liquid/filters/link_to_tag
 - [ ] `link_to_add_tag` — builds a link that adds the given tag to the current tag set. https://shopify.dev/docs/api/liquid/filters/link_to_add_tag
 - [ ] `link_to_remove_tag` — builds a link that removes the given tag from the current tag set. https://shopify.dev/docs/api/liquid/filters/link_to_remove_tag
@@ -32,4 +32,3 @@ Use this checklist to track which Shopify Liquid primitives still need first‑c
 - [ ] `money` and variants — format amounts in the shop currency (`money_with_currency`, `money_without_currency`, `money_without_trailing_zeros`). https://shopify.dev/docs/api/liquid/filters/money
 - [ ] `weight` and `weight_with_unit` — format weight values using shop settings. https://shopify.dev/docs/api/liquid/filters/weight
 - [ ] `time_tag` — renders a localized `<time>` element for a date/time. https://shopify.dev/docs/api/liquid/filters/time_tag
-

@@ -986,7 +986,6 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
   engine.registerTag('sections', sectionsTag);
   engine.registerTag('content_for', contentForTag);
 
-  // Stub paginate to keep renders deterministic while flagging the gap.
   const paginateTag: TagImplOptions = {
     parse(this: InlineTagState, tagToken: TagToken, remainTokens: TopLevelToken[]) {
       this.templates = [];
@@ -1000,13 +999,51 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
         });
       stream.start();
     },
-    async render(this: InlineTagState) {
-      services.diagnostics?.recordTag('paginate');
-      return `<div data-snapify-missing="paginate">paginate not implemented</div>`;
+    async render(this: InlineTagState, ctx: Context) {
+      const args = (this.args ?? '').trim();
+      const match = args.match(/^(.*)\s+by\s+(\d+)/i);
+      if (!match) {
+        services.diagnostics?.recordTag('paginate');
+        return '';
+      }
+
+      const collectionExpr = match[1].trim();
+      const pageSize = Math.max(1, Number.parseInt(match[2], 10) || 1);
+      const currentPage = normalizePageNumber(ctx.get(['page']) ?? ctx.get(['current_page'])); // Shopify typically exposes `page`
+      const source = await this.liquid.evalValue(collectionExpr, ctx);
+      const items = toArray(source);
+      const totalItems = items.length;
+      const pages = Math.max(1, Math.ceil(totalItems / pageSize));
+      const page = clamp(currentPage, 1, pages);
+      const offset = (page - 1) * pageSize;
+      const pageItems = items.slice(offset, offset + pageSize);
+
+      const parts = buildPaginationParts(page, pages);
+      const paginate = {
+        items: pageItems,
+        current_page: page,
+        current_offset: offset,
+        page_size: pageSize,
+        items_count: totalItems,
+        pages,
+        previous: page > 1 ? { title: 'Previous', url: buildPageUrl(page - 1), page: page - 1 } : null,
+        next: page < pages ? { title: 'Next', url: buildPageUrl(page + 1), page: page + 1 } : null,
+        parts
+      };
+
+      const scope: Record<string, unknown> = { paginate };
+      applyScopedSlice(scope, ctx, collectionExpr, pageItems);
+
+      ctx.push(scope);
+      const rendered = await renderChildTemplates(this.liquid, this.templates ?? [], ctx);
+      ctx.pop();
+      return rendered ?? '';
     }
   };
 
   engine.registerTag('paginate', paginateTag);
+
+  engine.registerFilter('default_pagination', (paginate: unknown) => renderDefaultPagination(paginate));
 
   function createInlineBlockTag(tagName: string, renderWrapper: (content: string) => string): TagImplOptions {
     return {
@@ -1071,6 +1108,83 @@ function registerShopifyPrimitives(engine: Liquid, services: ShopifyPrimitiveSer
       }
     };
   }
+}
+
+function buildPaginationParts(current: number, pages: number) {
+  const parts: Array<{ title: string | number; url: string; is_link: boolean; is_active: boolean }> = [];
+  if (current > 1) {
+    parts.push({ title: 'Previous', url: buildPageUrl(current - 1), is_link: true, is_active: false });
+  }
+  for (let page = 1; page <= pages; page += 1) {
+    parts.push({
+      title: page,
+      url: buildPageUrl(page),
+      is_link: page !== current,
+      is_active: page === current
+    });
+  }
+  if (current < pages) {
+    parts.push({ title: 'Next', url: buildPageUrl(current + 1), is_link: true, is_active: false });
+  }
+  return parts;
+}
+
+function buildPageUrl(page: number) {
+  return `?page=${page}`;
+}
+
+function renderDefaultPagination(paginate: unknown): string {
+  if (!paginate || typeof paginate !== 'object' || !Array.isArray((paginate as any).parts)) return '';
+  const parts = (paginate as any).parts as Array<{ title: string | number; url: string; is_link: boolean; is_active: boolean }>;
+  const items = parts.map((part) => {
+    const label = String(part.title);
+    if (part.is_active) return `<span class="current" aria-current="page">${label}</span>`;
+    if (part.is_link) return `<a href="${part.url}">${label}</a>`;
+    return `<span>${label}</span>`;
+  });
+  return `<nav class="pagination" data-snapify-pagination>${items.join('')}</nav>`;
+}
+
+function toArray(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  if (value && typeof value === 'object') {
+    if (Array.isArray((value as any).items)) return (value as any).items as unknown[];
+    if (Array.isArray((value as any).products)) return (value as any).products as unknown[];
+    if (Array.isArray((value as any).results)) return (value as any).results as unknown[];
+  }
+  return [];
+}
+
+function normalizePageNumber(value: unknown) {
+  const num = Number.parseInt(String(value ?? ''), 10);
+  return Number.isFinite(num) && num > 0 ? num : 1;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function applyScopedSlice(scope: Record<string, unknown>, ctx: Context, expression: string, pageItems: unknown[]) {
+  const pathParts = expression.split('.').map((p) => p.trim()).filter(Boolean);
+  if (pathParts.length === 0) return;
+  if (pathParts.length === 1) {
+    scope[pathParts[0]] = pageItems;
+    return;
+  }
+  const rootName = pathParts[0];
+  const rootValue = ctx.get([rootName]);
+  const patchedRoot = patchNestedValue(rootValue, pathParts.slice(1), pageItems);
+  scope[rootName] = patchedRoot;
+}
+
+function patchNestedValue(target: unknown, path: string[], value: unknown): unknown {
+  if (!path.length) return value;
+  const [head, ...rest] = path;
+  const clone: Record<string, unknown> = Array.isArray(target) ? { ...target } as any : { ...(target as any) };
+  const existing = (target as any)?.[head];
+  clone[head] = patchNestedValue(existing, rest, value);
+  return clone;
 }
 
 function imageTagFilter(image: ShopifyImage | undefined, named: Record<string, unknown>) {

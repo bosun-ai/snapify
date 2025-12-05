@@ -93,6 +93,22 @@ test('head markup is injected when a layout omits content_for_header', async () 
   assert.match(headSegment, /data-snapify-inline="asset-fallback"/, 'asset fallback script should inject');
 });
 
+test('paginate slices collections and exposes pagination metadata', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  const products = Array.from({ length: 5 }, (_, index) => ({ title: `Product ${index + 1}` }));
+  const html = await assembler.compose({
+    template: 'paginate',
+    layout: false,
+    data: { products }
+  });
+  const normalized = stripWhitespace(html);
+  assert.match(normalized, /PAGE:1\/3/, 'paginate should compute page counts');
+  assert.match(normalized, /ITEMS:Product 1;Product 2;/, 'first page should include only first two items');
+  assert.ok(!normalized.includes('Product 3;'), 'later items should be excluded from first page');
+  assert.match(normalized, /"title":2/, 'parts should include numeric page links');
+  assert.match(normalized, /"title":"Next"/, 'parts should expose navigation links');
+});
+
 test('asset_url filter stringifies inline when used directly', async () => {
   const assembler = new TemplateAssembler(FIXTURE_THEME);
   const html = await assembler.compose({ template: 'asset-url', layout: false });
@@ -143,7 +159,6 @@ test('asset filters throw when closing tags are missing', async () => {
 test('missing Shopify constructs surface diagnostics and placeholders', async () => {
   const assembler = new TemplateAssembler(FIXTURE_THEME);
   const html = await assembler.compose({ template: 'missing-constructs', layout: false });
-  assert.match(html, /data-snapify-missing="paginate"/, 'paginate should stub with placeholder');
   assert.match(html, /data-snapify-diagnostics/, 'diagnostics payload should be injected');
   assert.match(html, /money_with_currency/, 'missing filter should be recorded in diagnostics payload');
 });
