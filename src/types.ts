@@ -1,5 +1,6 @@
 import type { BrowserContextOptions, Page } from 'playwright';
 
+/** Supported Playwright engines for snapshotting. */
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
 /**

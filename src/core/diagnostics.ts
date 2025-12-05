@@ -1,5 +1,10 @@
+/**
+ * Deterministic payload describing unsupported Liquid constructs encountered during rendering.
+ */
 export interface DiagnosticsSnapshot {
+  /** Unknown or unimplemented tags seen while rendering. */
   tags: string[];
+  /** Unknown or unimplemented filters seen while rendering. */
   filters: string[];
 }
 

@@ -22,7 +22,9 @@
 		"test:integration": "node --test --import tsx tests/shopify.integration.test.ts",
 		"test:unit": "node --test --import tsx tests/templateAssembler.test.ts",
 		"security": "npm audit --omit=dev --audit-level=high",
-		"lint:knip": "knip --strict"
+		"lint:knip": "knip --strict",
+		"docs:build": "jsdoc -r src -d .tmp-jsdoc && rimraf .tmp-jsdoc",
+		"docs:json": "jsdoc -X src > .tmp-jsdoc.json"
 	},
 	"keywords": [
 		"shopify",
@@ -42,6 +44,7 @@
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
+		"jsdoc": "^4.0.3",
 		"@types/node": "^22.7.4",
 		"@types/pixelmatch": "^5.2.6",
 		"@types/pngjs": "^6.0.5",
