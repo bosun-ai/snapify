@@ -236,6 +236,14 @@ export class TemplateAssembler {
     return new Map(this.assetManifest);
   }
 
+  /**
+   * Allow callers to register custom Liquid tags/filters using the underlying LiquidJS engine.
+   * The callback receives the same engine instance Snapify configures internally.
+   */
+  extend(registrar: (engine: Liquid) => void) {
+    registrar(this.engine);
+  }
+
   private async renderJsonTemplate(relativePath: string, baseContext: Record<string, unknown>) {
     const template = await this.readJsonTemplate(relativePath);
     await this.themeData.hydrateJsonTemplate(template, this.images);

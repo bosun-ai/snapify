@@ -148,6 +148,22 @@ test('missing Shopify constructs surface diagnostics and placeholders', async ()
   assert.match(html, /money_with_currency/, 'missing filter should be recorded in diagnostics payload');
 });
 
+test('users can extend Liquid with custom tags and filters', async () => {
+  const assembler = new TemplateAssembler(FIXTURE_THEME);
+  assembler.extend((engine) => {
+    engine.registerFilter('shout', (value: unknown) => String(value ?? '').toUpperCase());
+    engine.registerTag('hello', {
+      parse() {},
+      async render() {
+        return '<span data-custom="hello">hello</span>';
+      }
+    });
+  });
+  const html = await assembler.compose({ template: 'custom-constructs', layout: false });
+  assert.match(html, /HI/, 'custom filter should apply');
+  assert.match(html, /data-custom="hello"/, 'custom tag should render');
+});
+
 test('content_for blocks render theme and app blocks with placeholders', async () => {
   const assembler = new TemplateAssembler(FIXTURE_THEME);
   const html = await assembler.compose({ template: 'content-for-blocks', layout: false });

@@ -76,6 +76,30 @@ The resolved object includes:
 - `diffPath` – optional PNG diff if the screenshot mismatches the baseline.
 - `updatedBaseline` – `true` if the baseline image (and HTML) were re-written this run.
 
+## Extending Liquid constructs
+
+Snapify exposes the underlying LiquidJS engine so you can add your own tags and filters, using the same API Liquid provides:
+
+```ts
+import { TemplateAssembler } from 'snapify/core/templateAssembler.js';
+
+const assembler = new TemplateAssembler('/path/to/theme');
+
+assembler.extend((engine) => {
+  engine.registerFilter('shout', (value) => String(value ?? '').toUpperCase());
+  engine.registerTag('hello', {
+    parse() {},
+    async render() {
+      return '<span data-custom="hello">hello</span>';
+    }
+  });
+});
+
+const html = await assembler.compose({ template: 'index', layout: false });
+```
+
+Custom constructs participate in the same render pipeline as built-ins, so they work with snapshots and diagnostics.
+
 ## Using Snapify in automated tests
 
 Snapify slots into Node's built-in test runner (or Jest/Vitest) so you can assert against baselines inside regular CI suites:
