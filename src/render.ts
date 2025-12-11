@@ -33,20 +33,18 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
   const assetManifest = assembler.getAssetManifest();
 
   const name = slugifySnapshotName(options.snapshot?.name ?? options.template);
-  const baselineDir = path.resolve(themeRoot, options.snapshot?.baselineDir ?? path.join('.snapify', 'baseline'));
-  const outputDir = path.resolve(themeRoot, options.snapshot?.outputDir ?? path.join('.snapify', 'artifacts'));
+  const snapshotDir = path.resolve(themeRoot, resolveSnapshotDir(options.snapshot));
   const browser = resolveBrowser(options.browser);
 
   const runner = new SnapshotRunner();
 
   return runner.capture(html, {
     name,
-    baselinePath: path.join(baselineDir, `${name}.png`),
-    baselineHtmlPath: path.join(baselineDir, `${name}.html`),
-    outputDir,
-    htmlPath: path.join(outputDir, `${name}.html`),
-    screenshotPath: path.join(outputDir, `${name}.png`),
-    diffPath: path.join(outputDir, `${name}.diff.png`),
+    snapshotDir,
+    snapshotPath: path.join(snapshotDir, `${name}.png`),
+    snapshotHtmlPath: path.join(snapshotDir, `${name}.html`),
+    newSnapshotPath: path.join(snapshotDir, `${name}.new.png`),
+    newSnapshotHtmlPath: path.join(snapshotDir, `${name}.new.html`),
     viewport: options.viewport,
     beforeSnapshot: options.beforeSnapshot,
     updateBaseline: options.snapshot?.update,
@@ -61,6 +59,13 @@ function resolveBrowser(explicit?: BrowserName) {
   if (explicit) return explicit;
   if (isBrowserName(envValue)) return envValue;
   return 'chromium';
+}
+
+function resolveSnapshotDir(snapshot?: RenderOptions['snapshot']) {
+  if (snapshot?.dir) return snapshot.dir;
+  if (snapshot?.baselineDir) return snapshot.baselineDir;
+  if (snapshot?.outputDir) return snapshot.outputDir;
+  return '__snapshots__';
 }
 
 function isBrowserName(value: string | undefined): value is BrowserName {

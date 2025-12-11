@@ -12,28 +12,46 @@ export interface AssertSnapshotOptions {
 }
 
 export class SnapshotMismatchError extends Error {
-  constructor(message: string, public readonly diffPath?: string, public readonly htmlChanged?: boolean, public readonly htmlBaselinePath?: string, public readonly htmlPath?: string) {
+  constructor(
+    message: string,
+    public readonly newScreenshotPath?: string,
+    public readonly htmlChanged?: boolean,
+    public readonly htmlBaselinePath?: string,
+    public readonly htmlPath?: string
+  ) {
     super(message);
     this.name = 'SnapshotMismatchError';
   }
 }
 
 /**
- * Convenience assertion for snapshot outputs. Throws when the PNG diff is present;
+ * Convenience assertion for snapshot outputs. Throws when the PNG changed;
  * handles HTML drift according to `htmlMode` (ignore | warn | fail).
  */
 export function assertSnapshot(result: RenderResult, options: AssertSnapshotOptions = {}) {
   const { htmlMode = 'warn', warn = console.warn } = options;
 
-  if (result.diffPath) {
-    throw new SnapshotMismatchError(`Snapshot mismatch: see diff at ${result.diffPath}`, result.diffPath, result.htmlChanged, result.htmlBaselinePath, result.htmlPath);
+  if (result.imageChanged) {
+    throw new SnapshotMismatchError(
+      `Snapshot mismatch: inspect ${result.newScreenshotPath ?? 'updated screenshot not written'}`,
+      result.newScreenshotPath,
+      result.htmlChanged,
+      result.htmlPath,
+      result.newHtmlPath ?? result.htmlPath
+    );
   }
 
   if (htmlMode === 'fail' && result.htmlChanged) {
-    throw new SnapshotMismatchError(`HTML mismatch: baseline=${result.htmlBaselinePath ?? 'n/a'} current=${result.htmlPath}`, result.diffPath, result.htmlChanged, result.htmlBaselinePath, result.htmlPath);
+    throw new SnapshotMismatchError(
+      `HTML mismatch: baseline=${result.htmlPath} current=${result.newHtmlPath ?? 'n/a'}`,
+      result.newScreenshotPath,
+      result.htmlChanged,
+      result.htmlPath,
+      result.newHtmlPath ?? result.htmlPath
+    );
   }
 
   if (htmlMode === 'warn' && result.htmlChanged) {
-    warn(`HTML changed: baseline=${result.htmlBaselinePath ?? 'n/a'} current=${result.htmlPath}`);
+    warn(`HTML changed: baseline=${result.htmlPath} current=${result.newHtmlPath ?? 'n/a'}`);
   }
 }

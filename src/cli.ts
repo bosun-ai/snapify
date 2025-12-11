@@ -18,6 +18,7 @@ interface CliArgs {
   stylesFile?: string;
   viewport?: string;
   name?: string;
+  snapshotDir?: string;
   baselineDir?: string;
   outputDir?: string;
   update?: boolean;
@@ -63,13 +64,17 @@ const renderBuilder: BuilderCallback<{}, CliArgs> = (cmd) =>
           type: 'string',
           describe: 'Custom snapshot name.'
         })
+        .option('snapshot-dir', {
+          type: 'string',
+          describe: 'Directory for snapshots (defaults to __snapshots__).'
+        })
         .option('baseline-dir', {
           type: 'string',
-          describe: 'Directory for baseline screenshots (defaults to .snapify/baseline).'
+          describe: '[deprecated] Use --snapshot-dir instead.'
         })
         .option('output-dir', {
           type: 'string',
-          describe: 'Directory for artifacts (defaults to .snapify/artifacts).'
+          describe: '[deprecated] Use --snapshot-dir instead.'
         })
         .option('update', {
           type: 'boolean',
@@ -100,8 +105,9 @@ yargs(hideBin(process.argv))
           browser: argv.browser,
           snapshot: {
             name: argv.name,
-            baselineDir: argv.baselineDir,
-            outputDir: argv.outputDir,
+            dir: argv.snapshotDir,
+            baselineDir: argv.snapshotDir ?? argv.baselineDir,
+            outputDir: argv.snapshotDir ?? argv.outputDir,
             update: argv.update
           }
         });
@@ -153,13 +159,21 @@ function logSuccess(result: RenderResult) {
   console.log(pc.green('✔ Snapshot captured'));
   console.log(` html: ${result.htmlPath}`);
   console.log(` shot: ${result.screenshotPath}`);
-  if (result.diffPath) {
-    console.log(pc.yellow(` diff: ${result.diffPath}`));
-  } else if (result.updatedBaseline) {
-    console.log(pc.cyan(' baseline updated'));
-  } else {
-    console.log(pc.green(' baseline unchanged'));
+  if (result.status === 'matched') {
+    console.log(pc.green(' snapshot unchanged'));
+    return;
   }
+  if (result.status === 'updated') {
+    console.log(pc.cyan(' snapshot updated'));
+    return;
+  }
+  if (result.newScreenshotPath) {
+    console.log(pc.yellow(` new:  ${result.newScreenshotPath}`));
+  }
+  if (result.newHtmlPath) {
+    console.log(pc.yellow(` new html: ${result.newHtmlPath}`));
+  }
+  console.log(pc.yellow(' snapshot changed'));
 }
 
 // fileExists imported from utils
