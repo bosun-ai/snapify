@@ -19,8 +19,7 @@ interface CliArgs {
   viewport?: string;
   name?: string;
   snapshotDir?: string;
-  baselineDir?: string;
-  outputDir?: string;
+  accept?: boolean;
   update?: boolean;
   browser?: BrowserName;
 }
@@ -68,18 +67,14 @@ const renderBuilder: BuilderCallback<{}, CliArgs> = (cmd) =>
           type: 'string',
           describe: 'Directory for snapshots (defaults to __snapshots__).'
         })
-        .option('baseline-dir', {
-          type: 'string',
-          describe: '[deprecated] Use --snapshot-dir instead.'
-        })
-        .option('output-dir', {
-          type: 'string',
-          describe: '[deprecated] Use --snapshot-dir instead.'
+        .option('accept', {
+          type: 'boolean',
+          alias: 'u',
+          describe: 'Accept new snapshot as baseline.'
         })
         .option('update', {
           type: 'boolean',
-          default: false,
-          describe: 'Rewrite the baseline snapshot.'
+          describe: '[deprecated] Use --accept instead.'
         });
 
 yargs(hideBin(process.argv))
@@ -106,9 +101,7 @@ yargs(hideBin(process.argv))
           snapshot: {
             name: argv.name,
             dir: argv.snapshotDir,
-            baselineDir: argv.snapshotDir ?? argv.baselineDir,
-            outputDir: argv.snapshotDir ?? argv.outputDir,
-            update: argv.update
+            accept: argv.accept ?? argv.update
           }
         });
 

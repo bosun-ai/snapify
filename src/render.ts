@@ -38,6 +38,8 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
 
   const runner = new SnapshotRunner();
 
+  const accept = options.snapshot?.accept ?? options.snapshot?.update ?? false;
+
   return runner.capture(html, {
     name,
     snapshotDir,
@@ -47,7 +49,7 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
     newSnapshotHtmlPath: path.join(snapshotDir, `${name}.new.html`),
     viewport: options.viewport,
     beforeSnapshot: options.beforeSnapshot,
-    updateBaseline: options.snapshot?.update,
+    updateBaseline: accept,
     browser,
     assetManifest,
     fullPage: options.snapshot?.fullPage
@@ -63,8 +65,8 @@ function resolveBrowser(explicit?: BrowserName) {
 
 function resolveSnapshotDir(snapshot?: RenderOptions['snapshot']) {
   if (snapshot?.dir) return snapshot.dir;
-  if (snapshot?.baselineDir) return snapshot.baselineDir;
-  if (snapshot?.outputDir) return snapshot.outputDir;
+  const envValue = process.env.SNAPIFY_SNAPSHOT_DIR;
+  if (envValue) return envValue;
   return '__snapshots__';
 }
 

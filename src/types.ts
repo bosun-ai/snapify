@@ -13,12 +13,10 @@ export interface SnapshotOptions {
   name?: string;
   /** Directory to store snapshots (defaults to __snapshots__). */
   dir?: string;
-  /** @deprecated Use dir instead. */
-  baselineDir?: string;
-  /** @deprecated Use dir instead. */
-  outputDir?: string;
   /** Skip diffing and always write a fresh baseline. */
   update?: boolean;
+  /** Accept new snapshots (alias for update). */
+  accept?: boolean;
   /** Capture the full scroll height (default true). */
   fullPage?: boolean;
 }
