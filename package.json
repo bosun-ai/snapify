@@ -1,6 +1,6 @@
 {
 	"name": "@bosun-ai/snapify",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Visual regression snapshot runner for Shopify Liquid themes using Playwright.",
 	"type": "module",
 	"main": "dist/index.js",

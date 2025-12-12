@@ -1,9 +1,13 @@
+## [0.3.0] - 2025-12-12
+
+### 🚀 Features
+
+- More ideomatic and simplified api (#2)
 ## [0.2.0] - 2025-12-05
 
 ### 🚀 Features
 
 - Support most shopify constructs (#1)
-## [0.1.0] - 2025-11-13
 
 ### 🐛 Bug Fixes
 
@@ -23,3 +27,4 @@
 - JSDoc
 - Rework release
 - Fix author
+- Release v0.2.0
