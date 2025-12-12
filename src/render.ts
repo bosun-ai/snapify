@@ -3,6 +3,7 @@ import { TemplateAssembler } from './core/templateAssembler.js';
 import { SnapshotRunner } from './core/snapshotRunner.js';
 import { slugifySnapshotName } from './utils/naming.js';
 import type { BrowserName, RenderOptions, RenderResult } from './types.js';
+import { loadConfig, mergeRenderOptions } from './config.js';
 
 /**
  * Renders a Shopify template into deterministic HTML, captures a screenshot, and diffs/refreshes baselines.
@@ -27,18 +28,21 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
     throw new Error('render() requires a template name.');
   }
 
-  const themeRoot = path.resolve(options.themeRoot ?? process.cwd());
+  const config = await loadConfig(path.resolve(options.themeRoot ?? process.cwd()));
+  const merged = mergeRenderOptions(config, options);
+
+  const themeRoot = path.resolve(merged.themeRoot ?? process.cwd());
   const assembler = new TemplateAssembler(themeRoot);
-  const html = await assembler.compose(options);
+  const html = await assembler.compose(merged);
   const assetManifest = assembler.getAssetManifest();
 
-  const name = slugifySnapshotName(options.snapshot?.name ?? options.template);
-  const snapshotDir = path.resolve(themeRoot, resolveSnapshotDir(options.snapshot));
-  const browser = resolveBrowser(options.browser);
+  const name = slugifySnapshotName(merged.snapshot?.name ?? merged.template);
+  const snapshotDir = path.resolve(themeRoot, resolveSnapshotDir(merged.snapshot));
+  const browser = resolveBrowser(merged.browser);
 
   const runner = new SnapshotRunner();
 
-  const accept = options.snapshot?.accept ?? options.snapshot?.update ?? false;
+  const accept = merged.snapshot?.accept ?? merged.snapshot?.update ?? false;
 
   return runner.capture(html, {
     name,
@@ -47,12 +51,12 @@ export async function render(options: RenderOptions): Promise<RenderResult> {
     snapshotHtmlPath: path.join(snapshotDir, `${name}.html`),
     newSnapshotPath: path.join(snapshotDir, `${name}.new.png`),
     newSnapshotHtmlPath: path.join(snapshotDir, `${name}.new.html`),
-    viewport: options.viewport,
-    beforeSnapshot: options.beforeSnapshot,
+    viewport: merged.viewport,
+    beforeSnapshot: merged.beforeSnapshot,
     updateBaseline: accept,
     browser,
     assetManifest,
-    fullPage: options.snapshot?.fullPage
+    fullPage: merged.snapshot?.fullPage
   });
 }
 

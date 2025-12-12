@@ -185,6 +185,8 @@ describe('product template', () => {
   });
 });
 
+// snapify.config.js is picked up automatically if present:
+// export default { snapshot: { dir: '__snapshots__' }, browser: 'chromium' };
 // See examples/jest/homepage.test.ts in this repository for a complete, runnable example.
 ```
 

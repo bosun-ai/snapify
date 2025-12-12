@@ -8,6 +8,7 @@ import { readFile } from 'node:fs/promises';
 import { render } from './render.js';
 import type { BrowserName, RenderResult } from './types.js';
 import { fileExists } from './utils/fs.js';
+import { loadConfig, mergeSnapshotOptions } from './config.js';
 
 interface CliArgs {
   template: string;
@@ -85,24 +86,32 @@ yargs(hideBin(process.argv))
     renderBuilder,
     async (argv: ArgumentsCamelCase<CliArgs>) => {
       try {
-        const themeRoot = argv.themeRoot ? path.resolve(argv.themeRoot) : process.cwd();
+        const config = await loadConfig(argv.themeRoot ? path.resolve(argv.themeRoot) : process.cwd());
+        const themeRoot = argv.themeRoot
+          ? path.resolve(argv.themeRoot)
+          : config?.themeRoot
+            ? path.resolve(config.themeRoot)
+            : process.cwd();
         const data = await loadJson(argv.data);
         const styles = await loadStyles(argv.styles, argv.stylesFile);
         const viewport = parseViewport(argv.viewport);
 
+        const mergedSnapshot = mergeSnapshotOptions(config?.snapshot, {
+          name: argv.name,
+          dir: argv.snapshotDir,
+          accept: argv.accept ?? argv.update
+        });
+
         const result = await render({
+          ...config,
           template: argv.template,
           themeRoot,
-          layout: argv.layout,
-          data,
-          styles,
-          viewport,
-          browser: argv.browser,
-          snapshot: {
-            name: argv.name,
-            dir: argv.snapshotDir,
-            accept: argv.accept ?? argv.update
-          }
+          layout: argv.layout ?? config?.layout,
+          data: data ?? config?.data,
+          styles: styles ?? config?.styles,
+          viewport: viewport ?? config?.viewport,
+          browser: argv.browser ?? config?.browser,
+          snapshot: mergedSnapshot
         });
 
         logSuccess(result);
