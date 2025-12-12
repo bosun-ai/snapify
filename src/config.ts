@@ -12,6 +12,10 @@ const CONFIG_CANDIDATES = [
   'snapify.config.cjs'
 ];
 
+/**
+ * Load snapify.config.* from the given working directory (defaults to cwd).
+ * Result is cached per cwd to avoid repeated disk I/O during a test run.
+ */
 export async function loadConfig(cwd: string = process.cwd()): Promise<SnapifyConfig | undefined> {
   if (!cachedConfig || cachedCwd !== cwd) {
     cachedCwd = cwd;
@@ -31,6 +35,10 @@ async function readConfig(cwd: string): Promise<SnapifyConfig | undefined> {
   return undefined;
 }
 
+/**
+ * Combine snapshot options coming from config and user-specified overrides.
+ * Accept/update flags are normalized and dir prefers the override when present.
+ */
 export function mergeSnapshotOptions(base: SnapshotOptions | undefined, override: SnapshotOptions | undefined): SnapshotOptions | undefined {
   if (!base && !override) return undefined;
   return {
@@ -41,6 +49,10 @@ export function mergeSnapshotOptions(base: SnapshotOptions | undefined, override
   };
 }
 
+/**
+ * Merge global config defaults with per-invocation render options.
+ * Snapshot options are merged via {@link mergeSnapshotOptions}.
+ */
 export function mergeRenderOptions(config: SnapifyConfig | undefined, override: RenderOptions): RenderOptions {
   const mergedSnapshot = mergeSnapshotOptions(config?.snapshot, override.snapshot);
   return {

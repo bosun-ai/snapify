@@ -8,6 +8,8 @@ import { loadConfig, mergeRenderOptions } from './config.js';
 /**
  * Renders a Shopify template into deterministic HTML, captures a screenshot, and diffs/refreshes baselines.
  *
+ * If a `snapify.config.*` file exists in the theme root, its values are merged as defaults.
+ *
  * @param options Render configuration (template name, data, theme root, snapshot paths, etc.).
  * @returns Paths to the generated HTML, screenshot, and any diff/baseline updates.
  *
