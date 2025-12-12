@@ -29,15 +29,15 @@ You can then write your tests, or run the CLI against the current repository roo
 snapify render <template> [options]
 ```
 
-Common flags:
+Common flags (values from `snapify.config.js` are used as defaults when present):
 
 - `--theme-root` – root of the Shopify theme (defaults to `process.cwd()`).
 - `--layout` – override layout file (without `.liquid`).
 - `--data` – inline JSON or a path to a JSON file providing Liquid data.
 - `--styles`/`--styles-file` – inject additional CSS.
 - `--viewport 1440x900` – customize Playwright viewport.
-- `--baseline-dir` and `--output-dir` – control artifact locations (`.snapify/baseline` and `.snapify/artifacts` by default).
-- `--update` – rebuild the baseline snapshot.
+- `--snapshot-dir` – where snapshots live (defaults to `__snapshots__` in the theme root).
+- `--accept` / `-u` – replace the stored snapshot with the newly captured one.
 
 Example:
 
@@ -143,8 +143,8 @@ test('index template matches stored baseline', async () => {
 Tips:
 
 - `SNAPIFY_UPDATE_BASELINES=1 npm test` refreshes every snapshot in bulk.
-- Keep `.snapify/**` artifacts in source control so reviewers can see diffs.
-- Push diff artifacts to CI logs (or GitHub Actions annotations) for quick triage.
+- Keep `__snapshots__/*.png`/`.html` under version control; ignore `*.new.*`.
+- The README code samples and the Jest example are exercised by the automated test suite, so they stay in sync.
 
 ### Jest example
 
@@ -224,4 +224,4 @@ SNAPIFY_UPDATE_BASELINES=1 npm test
 npm test
 ```
 
-Artifacts land under `.snapify/**` inside your theme root so they can be reviewed or committed.
+Artifacts land under `__snapshots__/` inside your theme root so they can be reviewed or committed; `.new.*` files are transient and should stay untracked.
