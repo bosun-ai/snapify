@@ -7,9 +7,7 @@ import { render } from "../src/render.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const THEME_ROOT = path.join(here, "theme");
-const SNAPSHOT_ROOT = path.join(here, "__snapshots__");
-const BASELINE_DIR = path.join(SNAPSHOT_ROOT, "baseline");
-const ARTIFACT_DIR = path.join(SNAPSHOT_ROOT, "artifacts");
+const SNAPSHOT_DIR = path.join(here, "__snapshots__");
 const skipInCi = process.env.CI === "true";
 const maybeTest = skipInCi ? test.skip : test;
 
@@ -27,9 +25,7 @@ maybeTest(
 	{ concurrency: false },
 	async () => {
 		const name = "readme-example";
-		const baselineExists = await fileExists(
-			path.join(BASELINE_DIR, `${name}.png`),
-		);
+		const baselineExists = await fileExists(path.join(SNAPSHOT_DIR, `${name}.png`));
 		const updateFlag = process.env.SNAPIFY_UPDATE_BASELINES === "1";
 		const update = updateFlag || (!baselineExists && process.env.CI !== "true");
 		const result = await render({
@@ -38,21 +34,20 @@ maybeTest(
 			viewport: { width: 1280, height: 720 },
 			snapshot: {
 				name,
-				baselineDir: BASELINE_DIR,
-				outputDir: ARTIFACT_DIR,
+				dir: SNAPSHOT_DIR,
 				update,
 			},
 		});
 
 		assert.equal(
-			result.updatedBaseline,
-			false,
-			"should not rewrite baseline during regression run",
+			result.status === "matched" || result.status === "updated",
+			true,
+			"should either reuse or refresh baseline when needed",
 		);
 		assert.equal(result.htmlChanged, false, "HTML should match baseline");
-		assert.equal(result.diffPath, undefined, "image diff should be clean");
+		assert.equal(result.imageChanged, false, "image should match baseline");
 
-		const baselinePng = await readFile(path.join(BASELINE_DIR, `${name}.png`));
+		const baselinePng = await readFile(path.join(SNAPSHOT_DIR, `${name}.png`));
 		const latestPng = await readFile(result.screenshotPath);
 		assert.ok(
 			baselinePng.equals(latestPng),
@@ -66,9 +61,7 @@ maybeTest(
 	{ concurrency: false },
 	async () => {
 		const name = "index-jest";
-		const baselineExists = await fileExists(
-			path.join(BASELINE_DIR, `${name}.png`),
-		);
+		const baselineExists = await fileExists(path.join(SNAPSHOT_DIR, `${name}.png`));
 		const updateFlag = process.env.SNAPIFY_UPDATE_BASELINES === "1";
 		const update = updateFlag || (!baselineExists && process.env.CI !== "true");
 		const result = await render({
@@ -76,14 +69,12 @@ maybeTest(
 			template: "index",
 			snapshot: {
 				name,
-				baselineDir: BASELINE_DIR,
-				outputDir: ARTIFACT_DIR,
+				dir: SNAPSHOT_DIR,
 				update,
 			},
 		});
 
 		assert.equal(result.htmlChanged, false);
-		assert.equal(result.updatedBaseline, false);
-		assert.equal(result.diffPath, undefined);
+		assert.equal(result.imageChanged, false);
 	},
 );

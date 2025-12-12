@@ -11,12 +11,12 @@ export interface SnapshotOptions {
    * Unique name for the snapshot. If omitted we derive it from the template path.
    */
   name?: string;
-  /** Directory to store baseline snapshots. */
-  baselineDir?: string;
-  /** Directory to store the latest run artifacts (diffs, html, screenshots). */
-  outputDir?: string;
+  /** Directory to store snapshots (defaults to __snapshots__). */
+  dir?: string;
   /** Skip diffing and always write a fresh baseline. */
   update?: boolean;
+  /** Accept new snapshots (alias for update). */
+  accept?: boolean;
   /** Capture the full scroll height (default true). */
   fullPage?: boolean;
 }
@@ -62,12 +62,19 @@ export interface RenderOptions {
  * Artifacts produced by {@link render}, allowing callers to inspect HTML, screenshots, and diffs.
  */
 export interface RenderResult {
+  /** Canonical snapshot HTML path (baseline). */
   htmlPath: string;
-  htmlBaselinePath?: string;
-  htmlChanged?: boolean;
+  /** Canonical snapshot PNG path (baseline). */
   screenshotPath: string;
-  diffPath?: string;
-  updatedBaseline?: boolean;
+  /** Whether HTML differed from the baseline. */
+  htmlChanged: boolean;
+  /** Whether the image differed from the baseline. */
+  imageChanged: boolean;
+  /** Snapshot status for the current run. */
+  status: 'matched' | 'updated' | 'changed';
+  /** Paths written when the snapshot changed ('.new' files). */
+  newHtmlPath?: string;
+  newScreenshotPath?: string;
 }
 
 /** Public configuration shape for future snapify.config.ts files; currently mirrors {@link RenderOptions}. */

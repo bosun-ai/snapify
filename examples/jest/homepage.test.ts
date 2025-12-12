@@ -9,8 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe('snapify jest example', () => {
   const themeRoot = path.resolve(__dirname, '../../tests/theme');
-  const baselineDir = path.join(themeRoot, '.snapify', 'baseline');
-  const artifactsDir = path.join(themeRoot, '.snapify', 'artifacts');
+  const snapshotDir = path.join(themeRoot, '__snapshots__');
   const update = process.env.SNAPIFY_UPDATE_BASELINES === '1';
 
   it('matches existing baseline for index template', async () => {
@@ -19,14 +18,13 @@ describe('snapify jest example', () => {
       template: 'index',
       snapshot: {
         name: 'index-jest',
-        baselineDir,
-        outputDir: artifactsDir,
-        update
+        dir: snapshotDir,
+        accept: update
       }
     });
 
     if (update) {
-      expect(snapshot.updatedBaseline).toBe(true);
+      expect(snapshot.status).toBe('updated');
       return;
     }
 

@@ -29,15 +29,15 @@ You can then write your tests, or run the CLI against the current repository roo
 snapify render <template> [options]
 ```
 
-Common flags:
+Common flags (values from `snapify.config.js` are used as defaults when present):
 
 - `--theme-root` – root of the Shopify theme (defaults to `process.cwd()`).
 - `--layout` – override layout file (without `.liquid`).
 - `--data` – inline JSON or a path to a JSON file providing Liquid data.
 - `--styles`/`--styles-file` – inject additional CSS.
 - `--viewport 1440x900` – customize Playwright viewport.
-- `--baseline-dir` and `--output-dir` – control artifact locations (`.snapify/baseline` and `.snapify/artifacts` by default).
-- `--update` – rebuild the baseline snapshot.
+- `--snapshot-dir` – where snapshots live (defaults to `__snapshots__` in the theme root).
+- `--accept` / `-u` – replace the stored snapshot with the newly captured one.
 
 Example:
 
@@ -62,10 +62,8 @@ const snapshot = await render({
   viewport: { width: 1440, height: 900 },
   snapshot: {
     name: 'product-page',
-    baselineDir: './__snapshots__/baseline',
-    outputDir: './__snapshots__/artifacts',
-    update: process.env.CI ? false : true,
-    htmlMode: 'warn' // primary focus on PNG; warn on HTML drift
+    dir: './__snapshots__',
+    accept: process.env.CI ? false : true
   }
 });
 
@@ -74,12 +72,10 @@ assertSnapshot(snapshot, { htmlMode: 'warn' });
 
 The resolved object includes:
 
-- `htmlPath` – rendered document saved to disk for inspection (kept alongside artifacts).
-- `htmlBaselinePath` – stored baseline HTML for regression comparison.
-- `htmlChanged` – `true` when rendered HTML differs from the baseline.
-- `screenshotPath` – Playwright capture for the latest run.
-- `diffPath` – optional PNG diff if the screenshot mismatches the baseline.
-- `updatedBaseline` – `true` if the baseline image (and HTML) were re-written this run.
+- `htmlPath` / `screenshotPath` – stored baseline snapshot files.
+- `newHtmlPath` / `newScreenshotPath` – `.new` files written only when output differs.
+- `htmlChanged` / `imageChanged` – booleans for diff detection.
+- `status` – `'matched' | 'updated' | 'changed'`.
 
 ## Extending Liquid constructs
 
@@ -117,9 +113,8 @@ import path from 'node:path';
 import { render } from 'snapify';
 
 const THEME_ROOT = path.resolve('tests/theme');
-const BASELINE_DIR = path.join(THEME_ROOT, '__snapshots__', 'baseline');
-const ARTIFACT_DIR = path.join(THEME_ROOT, '__snapshots__', 'artifacts');
-const UPDATE = Boolean(process.env.SNAPIFY_UPDATE_BASELINES);
+const SNAPSHOT_DIR = path.join(THEME_ROOT, '__snapshots__');
+const ACCEPT = Boolean(process.env.SNAPIFY_UPDATE_BASELINES);
 
 test('index template matches stored baseline', async () => {
   const snapshot = await render({
@@ -129,19 +124,18 @@ test('index template matches stored baseline', async () => {
     viewport: { width: 1280, height: 720 },
     snapshot: {
       name: 'index',
-      baselineDir: BASELINE_DIR,
-      outputDir: ARTIFACT_DIR,
-      update: UPDATE
+      dir: SNAPSHOT_DIR,
+      accept: ACCEPT
     }
   });
 
-  if (UPDATE) {
+  if (ACCEPT) {
     // Baselines refreshed locally; fail fast if this ever happens on CI.
-    assert.equal(snapshot.updatedBaseline, true);
+    assert.equal(snapshot.status, 'updated');
     return;
   }
 
-  assert.equal(snapshot.diffPath, undefined, `Snapshot drift detected. Inspect ${snapshot.diffPath} for details.`);
+  assert.equal(snapshot.imageChanged, false, `Snapshot drift detected. Inspect ${snapshot.newScreenshotPath ?? 'n/a'} for details.`);
   assert.equal(snapshot.htmlChanged, false, 'Rendered HTML should match the stored baseline');
 });
 ```
@@ -149,8 +143,8 @@ test('index template matches stored baseline', async () => {
 Tips:
 
 - `SNAPIFY_UPDATE_BASELINES=1 npm test` refreshes every snapshot in bulk.
-- Keep `.snapify/**` artifacts in source control so reviewers can see diffs.
-- Push diff artifacts to CI logs (or GitHub Actions annotations) for quick triage.
+- Keep `__snapshots__/*.png`/`.html` under version control; ignore `*.new.*`.
+- The README code samples and the Jest example are exercised by the automated test suite, so they stay in sync.
 
 ### Jest example
 
@@ -168,9 +162,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const THEME_ROOT = path.resolve(__dirname, '../theme');
 
 describe('product template', () => {
-  const baselineDir = path.join(THEME_ROOT, '.snapify', 'baseline');
-  const artifactsDir = path.join(THEME_ROOT, '.snapify', 'artifacts');
-  const update = process.env.SNAPIFY_UPDATE_BASELINES === '1';
+  const snapshotDir = path.join(THEME_ROOT, '__snapshots__');
+  const accept = process.env.SNAPIFY_UPDATE_BASELINES === '1';
 
   it('matches the stored baseline', async () => {
     const snapshot = await render({
@@ -178,14 +171,13 @@ describe('product template', () => {
       template: 'product',
       snapshot: {
         name: 'product',
-        baselineDir,
-        outputDir: artifactsDir,
-        update
+        dir: snapshotDir,
+        accept
       }
     });
 
-    if (update) {
-      expect(snapshot.updatedBaseline).toBe(true);
+    if (accept) {
+      expect(snapshot.status).toBe('updated');
       return;
     }
 
@@ -193,6 +185,8 @@ describe('product template', () => {
   });
 });
 
+// snapify.config.js is picked up automatically if present:
+// export default { snapshot: { dir: '__snapshots__' }, browser: 'chromium' };
 // See examples/jest/homepage.test.ts in this repository for a complete, runnable example.
 ```
 
@@ -230,4 +224,4 @@ SNAPIFY_UPDATE_BASELINES=1 npm test
 npm test
 ```
 
-Artifacts land under `.snapify/**` inside your theme root so they can be reviewed or committed.
+Artifacts land under `__snapshots__/` inside your theme root so they can be reviewed or committed; `.new.*` files are transient and should stay untracked.

@@ -8,6 +8,7 @@ import { readFile } from 'node:fs/promises';
 import { render } from './render.js';
 import type { BrowserName, RenderResult } from './types.js';
 import { fileExists } from './utils/fs.js';
+import { loadConfig, mergeSnapshotOptions } from './config.js';
 
 interface CliArgs {
   template: string;
@@ -18,8 +19,8 @@ interface CliArgs {
   stylesFile?: string;
   viewport?: string;
   name?: string;
-  baselineDir?: string;
-  outputDir?: string;
+  snapshotDir?: string;
+  accept?: boolean;
   update?: boolean;
   browser?: BrowserName;
 }
@@ -63,18 +64,18 @@ const renderBuilder: BuilderCallback<{}, CliArgs> = (cmd) =>
           type: 'string',
           describe: 'Custom snapshot name.'
         })
-        .option('baseline-dir', {
+        .option('snapshot-dir', {
           type: 'string',
-          describe: 'Directory for baseline screenshots (defaults to .snapify/baseline).'
+          describe: 'Directory for snapshots (defaults to __snapshots__).'
         })
-        .option('output-dir', {
-          type: 'string',
-          describe: 'Directory for artifacts (defaults to .snapify/artifacts).'
+        .option('accept', {
+          type: 'boolean',
+          alias: 'u',
+          describe: 'Accept new snapshot as baseline.'
         })
         .option('update', {
           type: 'boolean',
-          default: false,
-          describe: 'Rewrite the baseline snapshot.'
+          describe: '[deprecated] Use --accept instead.'
         });
 
 yargs(hideBin(process.argv))
@@ -85,25 +86,32 @@ yargs(hideBin(process.argv))
     renderBuilder,
     async (argv: ArgumentsCamelCase<CliArgs>) => {
       try {
-        const themeRoot = argv.themeRoot ? path.resolve(argv.themeRoot) : process.cwd();
+        const config = await loadConfig(argv.themeRoot ? path.resolve(argv.themeRoot) : process.cwd());
+        const themeRoot = argv.themeRoot
+          ? path.resolve(argv.themeRoot)
+          : config?.themeRoot
+            ? path.resolve(config.themeRoot)
+            : process.cwd();
         const data = await loadJson(argv.data);
         const styles = await loadStyles(argv.styles, argv.stylesFile);
         const viewport = parseViewport(argv.viewport);
 
+        const mergedSnapshot = mergeSnapshotOptions(config?.snapshot, {
+          name: argv.name,
+          dir: argv.snapshotDir,
+          accept: argv.accept ?? argv.update
+        });
+
         const result = await render({
+          ...config,
           template: argv.template,
           themeRoot,
-          layout: argv.layout,
-          data,
-          styles,
-          viewport,
-          browser: argv.browser,
-          snapshot: {
-            name: argv.name,
-            baselineDir: argv.baselineDir,
-            outputDir: argv.outputDir,
-            update: argv.update
-          }
+          layout: argv.layout ?? config?.layout,
+          data: data ?? config?.data,
+          styles: styles ?? config?.styles,
+          viewport: viewport ?? config?.viewport,
+          browser: argv.browser ?? config?.browser,
+          snapshot: mergedSnapshot
         });
 
         logSuccess(result);
@@ -153,13 +161,21 @@ function logSuccess(result: RenderResult) {
   console.log(pc.green('✔ Snapshot captured'));
   console.log(` html: ${result.htmlPath}`);
   console.log(` shot: ${result.screenshotPath}`);
-  if (result.diffPath) {
-    console.log(pc.yellow(` diff: ${result.diffPath}`));
-  } else if (result.updatedBaseline) {
-    console.log(pc.cyan(' baseline updated'));
-  } else {
-    console.log(pc.green(' baseline unchanged'));
+  if (result.status === 'matched') {
+    console.log(pc.green(' snapshot unchanged'));
+    return;
   }
+  if (result.status === 'updated') {
+    console.log(pc.cyan(' snapshot updated'));
+    return;
+  }
+  if (result.newScreenshotPath) {
+    console.log(pc.yellow(` new:  ${result.newScreenshotPath}`));
+  }
+  if (result.newHtmlPath) {
+    console.log(pc.yellow(` new html: ${result.newHtmlPath}`));
+  }
+  console.log(pc.yellow(' snapshot changed'));
 }
 
 // fileExists imported from utils

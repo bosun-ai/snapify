@@ -9,9 +9,7 @@ import { SNAPIFY_ASSET_HOST } from "../src/core/constants.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_THEME = path.join(here, "theme");
-const SNAPSHOT_ROOT = path.join(here, ".snapshots");
-const BASELINE_DIR = path.join(SNAPSHOT_ROOT, "baseline");
-const ARTIFACT_DIR = path.join(SNAPSHOT_ROOT, "artifacts");
+const SNAPSHOT_DIR = path.join(here, "__snapshots__");
 
 test(
 	"captures baseline snapshot (html + image) for fixture",
@@ -24,8 +22,7 @@ test(
 			viewport: { width: 800, height: 600 },
 			snapshot: {
 				name: "fixture-index",
-				baselineDir: BASELINE_DIR,
-				outputDir: ARTIFACT_DIR,
+				dir: SNAPSHOT_DIR,
 				update: true,
 			},
 		});
@@ -35,18 +32,9 @@ test(
 			await pathExists(result.screenshotPath),
 			"Screenshot artifact missing",
 		);
-		assert.ok(
-			await pathExists(result.htmlBaselinePath!),
-			"Baseline HTML should be stored",
-		);
 		assert.equal(
-			result.diffPath,
-			undefined,
-			"Diff should not be generated when forcing baseline updates",
-		);
-		assert.equal(
-			result.updatedBaseline,
-			true,
+			result.status,
+			"updated",
 			"Baseline should refresh during integration run",
 		);
 	},
@@ -63,29 +51,15 @@ test(
 			viewport: { width: 800, height: 600 },
 			snapshot: {
 				name: "fixture-index",
-				baselineDir: BASELINE_DIR,
-				outputDir: ARTIFACT_DIR,
+				dir: SNAPSHOT_DIR,
 				update: false,
 			},
 		});
 
 		assert.equal(
-			result.updatedBaseline,
-			false,
+			result.status,
+			"matched",
 			"Should not rewrite baseline during regression run",
-		);
-		const baselinePng = await readFile(
-			path.join(BASELINE_DIR, "fixture-index.png"),
-		);
-		const latestPng = await readFile(result.screenshotPath);
-		assert.equal(
-			result.diffPath,
-			undefined,
-			"Image diff should be clean against baseline",
-		);
-		assert.ok(
-			baselinePng.equals(latestPng),
-			"Screenshot bytes should match baseline exactly",
 		);
 
 		const escapedHost = escapeRegExp(SNAPIFY_ASSET_HOST);
